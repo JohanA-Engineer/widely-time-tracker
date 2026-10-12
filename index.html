@@ -4,306 +4,328 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Widely Tracker & Financial Dashboard</title>
-  
-  <!-- Tailwind CSS CDN -->
+
+  <!-- Google Fonts: Geist & Geist Mono (Vercel Design System) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Tailwind CSS CDN con configuración personalizada estilo Emil Kowalski -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
-          colors: {
-            brand: {
-              50: '#eff6ff',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-            },
-            darkBg: '#0b0f19',
-            darkCard: '#111827',
-            darkBorder: '#1f2937',
-            darkInput: '#1a2234'
-          },
           fontFamily: {
-            mono: ['"JetBrains Mono"', 'monospace', 'ui-monospace'],
-            sans: ['Inter', 'system-ui', 'sans-serif']
+            sans: ['Geist', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"Geist Mono"', '"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            subtle: {
+              light: '#f4f4f5',
+              dark: '#121215'
+            }
+          },
+          boxShadow: {
+            'glow-emerald': '0 0 50px -10px rgba(16, 185, 129, 0.35)',
+            'glow-blue': '0 0 60px -10px rgba(59, 130, 246, 0.35)',
+            'subtle-light': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+            'subtle-dark': '0 0 0 1px rgba(255, 255, 255, 0.07), 0 8px 24px -4px rgba(0, 0, 0, 0.5)'
           }
         }
       }
     }
   </script>
 
-  <!-- Google Fonts & FontAwesome -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-  <!-- Estilos personalizados -->
+  <!-- Estilos y Animaciones de Alta Fidelidad -->
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-[#090d16] text-slate-100 font-sans min-h-screen selection:bg-blue-500 selection:text-white">
+<body class="bg-zinc-100 dark:bg-[#070709] text-zinc-900 dark:text-zinc-100 font-sans min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black antialiased transition-colors duration-300 relative overflow-x-hidden">
 
-  <!-- Top Alert / Config Warning (Si falta la config de Firebase) -->
-  <div id="firebaseWarning" class="hidden bg-amber-500/10 border-b border-amber-500/30 text-amber-300 text-sm py-2.5 px-4 text-center">
+  <!-- Ambient Backdrop Gradient (Linear / Vercel style) -->
+  <div class="fixed inset-0 pointer-events-none -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_-15%,rgba(59,130,246,0.08),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_60%_at_50%_-15%,rgba(59,130,246,0.12),rgba(0,0,0,0))]"></div>
+
+  <!-- Banner de Advertencia si falta la API Key -->
+  <div id="firebaseWarning" class="hidden bg-amber-500/10 border-b border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs py-2 px-4 text-center">
     <div class="max-w-7xl mx-auto flex items-center justify-center gap-2">
       <i class="fa-solid fa-triangle-exclamation"></i>
-      <span><strong>Atención:</strong> Recuerda configurar tus credenciales de Firebase en <code class="bg-amber-950/50 px-2 py-0.5 rounded text-amber-200">app.js</code> para activar la sincronización en tiempo real.</span>
+      <span><strong>Configuración requerida:</strong> Agrega tus credenciales en <code class="font-mono bg-amber-500/10 px-1.5 py-0.5 rounded">app.js</code> para sincronizar con Firestore.</span>
     </div>
   </div>
 
-  <!-- Navbar Superior -->
-  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
+  <!-- Navbar Superior (Ultra-clean Floating Glass) -->
+  <header class="border-b border-zinc-200/80 dark:border-white/[0.08] bg-white/75 dark:bg-[#070709]/75 backdrop-blur-xl sticky top-0 z-40 transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Title -->
       <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/20">
-          <i class="fa-solid fa-stopwatch text-white text-lg"></i>
+        <div class="h-9 w-9 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-black flex items-center justify-center shadow-sm transition-transform active:scale-95 duration-150">
+          <i class="fa-solid fa-bolt text-sm"></i>
         </div>
         <div>
-          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
-            Widely Tracker <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">Pro</span>
+          <h1 class="text-sm sm:text-base font-semibold tracking-tight text-zinc-900 dark:text-white flex items-center gap-2">
+            Widely Tracker
+            <span class="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-zinc-200/80 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-300/60 dark:border-white/10">v2.0</span>
           </h1>
-          <p class="text-xs text-slate-400">Control de Horas & Dashboard Financiero</p>
+          <p class="text-[11px] text-zinc-500 dark:text-zinc-400">Crafted Time & Financial Engine</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-3 sm:gap-4">
+      <!-- Right Controls: Status + Time + Theme Switcher -->
+      <div class="flex items-center gap-2 sm:gap-3">
         <!-- Indicador de conexión Firebase -->
-        <div id="dbStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/60 text-xs">
+        <div id="dbStatus" class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-zinc-200/60 dark:bg-white/[0.06] border border-zinc-300/60 dark:border-white/[0.08] text-xs">
           <span class="relative flex h-2 w-2">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
-          <span class="text-slate-300 font-medium">Firestore Conectado</span>
+          <span class="text-zinc-700 dark:text-zinc-300 font-medium text-[11px]">Firestore Conectado</span>
         </div>
 
-        <div id="currentTime" class="hidden sm:block text-xs font-mono text-slate-400 border-l border-slate-800 pl-4">
+        <!-- Reloj Digital Header -->
+        <div id="currentTime" class="hidden sm:block text-xs font-mono text-zinc-500 dark:text-zinc-400 tabular-nums border-l border-zinc-200 dark:border-white/[0.08] pl-3">
           --:--:--
         </div>
+
+        <!-- Emil Kowalski Theme Toggle (Sun / Moon) -->
+        <button id="themeToggle" type="button" aria-label="Cambiar tema" class="theme-toggle-btn h-9 w-9 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-100 dark:bg-white/[0.05] hover:bg-zinc-200/80 dark:hover:bg-white/[0.1] text-zinc-700 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 active:scale-90">
+          <i id="themeIcon" class="fa-regular fa-sun text-sm transition-transform duration-200"></i>
+        </button>
       </div>
+
     </div>
   </header>
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-    <!-- KPI Summary Cards (Métricas Generales) -->
+    <!-- KPI Summary Cards (Vercel Style Metric Cards) -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
       <!-- Total Horas -->
-      <div class="stat-card group">
+      <div class="card stat-card group">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Horas Trabajadas</span>
-          <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-sm border border-blue-500/20">
+          <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Horas Trabajadas</span>
+          <div class="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 flex items-center justify-center text-xs border border-zinc-200 dark:border-white/[0.08]">
             <i class="fa-regular fa-clock"></i>
           </div>
         </div>
         <div class="mt-3 flex items-baseline gap-2">
-          <span id="kpiTotalHoras" class="text-2xl font-bold font-mono text-white">0.00</span>
-          <span class="text-xs text-slate-400">hrs</span>
+          <span id="kpiTotalHoras" class="text-2xl font-bold font-mono tracking-tight text-zinc-900 dark:text-white tabular-nums">0.00</span>
+          <span class="text-xs text-zinc-500 dark:text-zinc-400">hrs</span>
         </div>
-        <div class="mt-1 text-xs text-slate-500" id="kpiTotalHorasFormatted">0h 0m 0s en total</div>
+        <div class="mt-1 text-[11px] text-zinc-500 dark:text-zinc-500 tabular-nums" id="kpiTotalHorasFormatted">0h 0m 0s en total</div>
       </div>
 
       <!-- Total Generado -->
-      <div class="stat-card group">
+      <div class="card stat-card group">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Generado</span>
-          <div class="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-sm border border-cyan-500/20">
-            <i class="fa-solid fa-file-invoice-dollar"></i>
+          <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Total Generado</span>
+          <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs border border-blue-500/20">
+            <i class="fa-solid fa-receipt"></i>
           </div>
         </div>
         <div class="mt-3 flex items-baseline gap-2">
-          <span id="kpiTotalGenerado" class="text-2xl font-bold font-mono text-cyan-400">$0.00</span>
+          <span id="kpiTotalGenerado" class="text-2xl font-bold font-mono tracking-tight text-blue-600 dark:text-blue-400 tabular-nums">$0.00</span>
         </div>
-        <div class="mt-1 text-xs text-slate-500">Costo total de tareas registradas</div>
+        <div class="mt-1 text-[11px] text-zinc-500 dark:text-zinc-500">Costo acumulado de tareas</div>
       </div>
 
       <!-- Total Pagado -->
-      <div class="stat-card group">
+      <div class="card stat-card group">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Pagado</span>
-          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/20">
-            <i class="fa-solid fa-hand-holding-dollar"></i>
+          <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Total Pagado</span>
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs border border-emerald-500/20">
+            <i class="fa-solid fa-circle-check"></i>
           </div>
         </div>
         <div class="mt-3 flex items-baseline gap-2">
-          <span id="kpiTotalPagado" class="text-2xl font-bold font-mono text-emerald-400">$0.00</span>
+          <span id="kpiTotalPagado" class="text-2xl font-bold font-mono tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">$0.00</span>
         </div>
-        <div class="mt-1 text-xs text-slate-500">Adelantos y pagos liquidados</div>
+        <div class="mt-1 text-[11px] text-zinc-500 dark:text-zinc-500">Adelantos y liquidaciones</div>
       </div>
 
       <!-- Saldo Pendiente -->
-      <div class="stat-card group border-rose-500/30 bg-gradient-to-b from-rose-950/20 to-transparent">
+      <div class="card stat-card group border-rose-500/20 dark:border-rose-500/30">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-rose-300 uppercase tracking-wider">Saldo Pendiente Global</span>
-          <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center text-sm border border-rose-500/20">
+          <span class="text-xs font-medium text-rose-600 dark:text-rose-400">Saldo Pendiente Global</span>
+          <div class="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xs border border-rose-500/20">
             <i class="fa-solid fa-scale-unbalanced"></i>
           </div>
         </div>
         <div class="mt-3 flex items-baseline gap-2">
-          <span id="kpiSaldoPendiente" class="text-2xl font-bold font-mono text-rose-400">$0.00</span>
+          <span id="kpiSaldoPendiente" class="text-2xl font-bold font-mono tracking-tight text-rose-600 dark:text-rose-400 tabular-nums">$0.00</span>
         </div>
-        <div class="mt-1 text-xs text-rose-300/70" id="kpiSaldoDesc">Deuda total por liquidar</div>
+        <div class="mt-1 text-[11px] text-zinc-500 dark:text-zinc-500" id="kpiSaldoDesc">Deuda total por liquidar</div>
       </div>
     </section>
 
     <!-- Sección Principal: Cronómetro + Formularios de Gestión -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-      <!-- COLUMNA IZQUIERDA: Tracker en Vivo (Cronómetro) + Formularios -->
+      <!-- COLUMNA IZQUIERDA: Tracker en Vivo (Centerpiece) + Formularios -->
       <div class="lg:col-span-5 space-y-8">
 
-        <!-- CARD 1: Cronómetro en Vivo -->
-        <div class="glass-card p-6 relative overflow-hidden">
-          <div class="absolute -right-12 -top-12 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <!-- CARD 1: Cronómetro en Vivo (The Kowalski Centerpiece) -->
+        <div class="card p-6 sm:p-7 relative overflow-hidden group">
+          <!-- Ambient Pulsing Glow Aura behind timer -->
+          <div class="timer-glow"></div>
 
-          <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+          <!-- Header Card -->
+          <div class="flex items-center justify-between pb-4 border-b border-zinc-200/80 dark:border-white/[0.08]">
             <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-              <h2 class="text-base font-bold text-white tracking-wide">Tracker de Tareas</h2>
+              <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+              <h2 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">Tracker de Tareas</h2>
             </div>
-            <span id="timerStatusBadge" class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+            <span id="timerStatusBadge" class="text-[11px] font-mono font-medium px-2.5 py-0.5 rounded-full bg-zinc-200/80 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 border border-zinc-300/60 dark:border-white/[0.08]">
               Detenido
             </span>
           </div>
 
-          <!-- Selector de Trabajador para el Cronómetro -->
           <div class="mt-5 space-y-4">
+            <!-- Selector de Trabajador -->
             <div>
-              <label for="timerWorkerSelect" class="block text-xs font-medium text-slate-300 mb-1.5">
-                <i class="fa-regular fa-user mr-1 text-blue-400"></i> Seleccionar Trabajador
+              <label for="timerWorkerSelect" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">
+                Trabajador
               </label>
-              <select id="timerWorkerSelect" class="custom-select w-full">
+              <select id="timerWorkerSelect" class="input-base select-base w-full">
                 <option value="">-- Selecciona un trabajador --</option>
               </select>
             </div>
 
             <!-- Tarea / Proyecto -->
             <div>
-              <label for="timerTaskDescription" class="block text-xs font-medium text-slate-300 mb-1.5">
-                <i class="fa-solid fa-list-check mr-1 text-blue-400"></i> ¿En qué estás trabajando?
+              <label for="timerTaskDescription" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">
+                Descripción de la Tarea
               </label>
-              <input type="text" id="timerTaskDescription" placeholder="Ej. Rediseño de landing, Gestión de campañas..." class="custom-input w-full">
+              <input type="text" id="timerTaskDescription" placeholder="Ej. Rediseño de componentes, Auditoría UX..." class="input-base w-full">
             </div>
 
-            <!-- Display Digital del Reloj -->
-            <div class="my-6 p-6 rounded-2xl bg-[#070b13] border border-slate-800/80 text-center relative shadow-inner">
-              <div class="text-xs font-mono uppercase tracking-widest text-slate-500 mb-1">Tiempo Transcurrido</div>
-              <div id="timerDisplay" class="font-mono text-5xl sm:text-6xl font-extrabold tracking-wider text-white timer-digits py-1">
+            <!-- Display Digital del Reloj (Centro visual) -->
+            <div class="timer-chamber my-5 p-6 sm:p-8 rounded-2xl text-center relative overflow-hidden transition-all duration-300">
+              <div class="text-[10px] font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-1">Tiempo Transcurrido</div>
+              
+              <!-- Dígitos del Cronómetro con tabular-nums -->
+              <div id="timerDisplay" class="font-mono text-5xl sm:text-6xl font-bold tracking-tight text-zinc-900 dark:text-white tabular-nums py-2 select-none">
                 00:00:00
               </div>
               
               <!-- Costo Acumulado en Vivo -->
-              <div class="mt-3 pt-3 border-t border-slate-800/60 flex items-center justify-center gap-2">
-                <span class="text-xs text-slate-400">Costo acumulado en vivo:</span>
-                <span id="liveCostBadge" class="text-sm font-bold font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+              <div class="mt-3 pt-3 border-t border-zinc-200/60 dark:border-white/[0.06] flex items-center justify-center gap-2">
+                <span class="text-xs text-zinc-500 dark:text-zinc-400">Costo acumulado:</span>
+                <span id="liveCostBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 tabular-nums">
                   $0.00
                 </span>
               </div>
             </div>
 
-            <!-- Botones de Control del Cronómetro -->
+            <!-- Controles Táctiles (Micro-interacción spring / active:scale-97) -->
             <div class="grid grid-cols-3 gap-2">
-              <button id="btnStart" class="btn btn-primary flex items-center justify-center gap-2">
-                <i class="fa-solid fa-play text-xs"></i>
+              <button id="btnStart" class="btn btn-primary flex items-center justify-center gap-2 text-xs py-2.5">
+                <i class="fa-solid fa-play text-[11px]"></i>
                 <span>Iniciar</span>
               </button>
-              <button id="btnPause" class="btn btn-secondary flex items-center justify-center gap-2" disabled>
-                <i class="fa-solid fa-pause text-xs"></i>
+              <button id="btnPause" class="btn btn-secondary flex items-center justify-center gap-2 text-xs py-2.5" disabled>
+                <i class="fa-solid fa-pause text-[11px]"></i>
                 <span>Pausar</span>
               </button>
-              <button id="btnReset" class="btn btn-danger-subtle flex items-center justify-center gap-2" disabled>
-                <i class="fa-solid fa-rotate-left text-xs"></i>
+              <button id="btnReset" class="btn btn-ghost flex items-center justify-center gap-2 text-xs py-2.5" disabled>
+                <i class="fa-solid fa-rotate-left text-[11px]"></i>
                 <span>Reiniciar</span>
               </button>
             </div>
 
-            <!-- Botón Principal: Registrar Tarea en Firebase -->
-            <button id="btnRegisterTask" class="w-full mt-2 btn btn-success flex items-center justify-center gap-2 py-3 font-semibold shadow-lg shadow-emerald-500/10">
+            <!-- Guardar Tarea en Firebase -->
+            <button id="btnRegisterTask" class="w-full mt-2 btn btn-emerald flex items-center justify-center gap-2 py-3 text-xs font-semibold">
               <i class="fa-solid fa-cloud-arrow-up"></i>
               <span>Registrar Tarea y Guardar Costo</span>
             </button>
           </div>
         </div>
 
-        <!-- CARD 2: Gestión de Trabajadores (Agregar) -->
-        <div class="glass-card p-6">
-          <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <!-- CARD 2: Gestión de Trabajadores -->
+        <div class="card p-6 sm:p-7">
+          <div class="flex items-center justify-between pb-4 border-b border-zinc-200/80 dark:border-white/[0.08]">
             <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
-              <h2 class="text-base font-bold text-white tracking-wide">Gestión de Trabajadores</h2>
+              <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+              <h2 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">Gestión de Trabajadores</h2>
             </div>
-            <i class="fa-solid fa-user-plus text-slate-500"></i>
+            <i class="fa-solid fa-user-plus text-xs text-zinc-400"></i>
           </div>
 
           <form id="formWorker" class="mt-5 space-y-4">
             <div>
-              <label for="workerName" class="block text-xs font-medium text-slate-300 mb-1.5">Nombre Completo</label>
-              <input type="text" id="workerName" placeholder="Ej. Camila González" required class="custom-input w-full">
+              <label for="workerName" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Nombre Completo</label>
+              <input type="text" id="workerName" placeholder="Ej. Camila González" required class="input-base w-full">
             </div>
 
             <div>
-              <label for="workerRate" class="block text-xs font-medium text-slate-300 mb-1.5">Tarifa por Hora ($)</label>
+              <label for="workerRate" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Tarifa por Hora ($)</label>
               <div class="relative">
-                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
-                <input type="number" id="workerRate" step="0.01" min="0" placeholder="15.00" required class="custom-input w-full pl-8 font-mono">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-mono text-xs">$</span>
+                <input type="number" id="workerRate" step="0.01" min="0" placeholder="25.00" required class="input-base w-full pl-7 font-mono text-xs">
               </div>
             </div>
 
-            <button type="submit" id="btnSaveWorker" class="w-full btn btn-cyan flex items-center justify-center gap-2">
-              <i class="fa-solid fa-floppy-disk"></i>
+            <button type="submit" id="btnSaveWorker" class="w-full btn btn-secondary flex items-center justify-center gap-2 text-xs py-2.5 font-medium">
+              <i class="fa-solid fa-plus text-[11px]"></i>
               <span>Guardar Trabajador</span>
             </button>
           </form>
 
-          <!-- Lista Rápida de Trabajadores Registrados -->
-          <div class="mt-6 pt-4 border-t border-slate-800">
-            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Trabajadores Activos (<span id="workerCount">0</span>)</h3>
-            <div id="workersList" class="space-y-2 max-h-44 overflow-y-auto pr-1">
-              <div class="text-xs text-slate-500 text-center py-4">No hay trabajadores registrados aún.</div>
+          <!-- Lista de Trabajadores Activos -->
+          <div class="mt-6 pt-4 border-t border-zinc-200/80 dark:border-white/[0.08]">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Trabajadores Activos</h3>
+              <span id="workerCount" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-zinc-200/70 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400">0</span>
+            </div>
+            <div id="workersList" class="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+              <div class="text-xs text-zinc-400 text-center py-4">No hay trabajadores registrados.</div>
             </div>
           </div>
         </div>
 
         <!-- CARD 3: Registro de Pagos -->
-        <div class="glass-card p-6">
-          <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="card p-6 sm:p-7">
+          <div class="flex items-center justify-between pb-4 border-b border-zinc-200/80 dark:border-white/[0.08]">
             <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-              <h2 class="text-base font-bold text-white tracking-wide">Registro de Pagos y Adelantos</h2>
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <h2 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">Registro de Pagos y Adelantos</h2>
             </div>
-            <i class="fa-solid fa-money-bill-transfer text-slate-500"></i>
+            <i class="fa-solid fa-money-bill-transfer text-xs text-zinc-400"></i>
           </div>
 
           <form id="formPayment" class="mt-5 space-y-4">
             <div>
-              <label for="paymentWorkerSelect" class="block text-xs font-medium text-slate-300 mb-1.5">Trabajador</label>
-              <select id="paymentWorkerSelect" required class="custom-select w-full">
+              <label for="paymentWorkerSelect" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Trabajador</label>
+              <select id="paymentWorkerSelect" required class="input-base select-base w-full">
                 <option value="">-- Selecciona un trabajador --</option>
               </select>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label for="paymentAmount" class="block text-xs font-medium text-slate-300 mb-1.5">Monto del Pago ($)</label>
+                <label for="paymentAmount" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Monto ($)</label>
                 <div class="relative">
-                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
-                  <input type="number" id="paymentAmount" step="0.01" min="0.01" placeholder="100.00" required class="custom-input w-full pl-8 font-mono">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-mono text-xs">$</span>
+                  <input type="number" id="paymentAmount" step="0.01" min="0.01" placeholder="100.00" required class="input-base w-full pl-7 font-mono text-xs">
                 </div>
               </div>
 
               <div>
-                <label for="paymentDate" class="block text-xs font-medium text-slate-300 mb-1.5">Fecha</label>
-                <input type="date" id="paymentDate" required class="custom-input w-full font-mono text-xs">
+                <label for="paymentDate" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Fecha</label>
+                <input type="date" id="paymentDate" required class="input-base w-full font-mono text-xs">
               </div>
             </div>
 
             <div>
-              <label for="paymentReference" class="block text-xs font-medium text-slate-300 mb-1.5">Referencia o Concepto</label>
-              <input type="text" id="paymentReference" placeholder="Ej. Adelanto quincena, Transferencia #892" class="custom-input w-full">
+              <label for="paymentReference" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Concepto o Referencia</label>
+              <input type="text" id="paymentReference" placeholder="Ej. Quincena #1, Transferencia #892" class="input-base w-full">
             </div>
 
-            <button type="submit" id="btnSavePayment" class="w-full btn btn-emerald flex items-center justify-center gap-2">
-              <i class="fa-solid fa-check-circle"></i>
+            <button type="submit" id="btnSavePayment" class="w-full btn btn-primary flex items-center justify-center gap-2 text-xs py-2.5 font-medium">
+              <i class="fa-solid fa-check text-[11px]"></i>
               <span>Registrar Pago</span>
             </button>
           </form>
@@ -311,43 +333,40 @@
 
       </div>
 
-      <!-- COLUMNA DERECHA: Dashboard Financiero + Historial de Registros -->
+      <!-- COLUMNA DERECHA: Dashboard Financiero + Historial -->
       <div class="lg:col-span-7 space-y-8">
 
-        <!-- TABLA PRINCIPAL: Dashboard Financiero en Tiempo Real -->
-        <div class="glass-card p-6">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-2">
+        <!-- TABLA PRINCIPAL: Dashboard Financiero por Trabajador -->
+        <div class="card p-6 sm:p-7">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-200/80 dark:border-white/[0.08] gap-2">
             <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span>
+              <span class="w-2 h-2 rounded-full bg-violet-500"></span>
               <div>
-                <h2 class="text-base font-bold text-white tracking-wide">Dashboard Financiero por Trabajador</h2>
-                <p class="text-xs text-slate-400">Cálculo dinámico en tiempo real sincronizado con Firestore</p>
+                <h2 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">Dashboard Financiero</h2>
+                <p class="text-[11px] text-zinc-500 dark:text-zinc-400">Balance acumulado y saldo por liquidar</p>
               </div>
             </div>
-            <div class="text-xs text-slate-400 flex items-center gap-1.5">
-              <i class="fa-solid fa-arrows-rotate text-blue-400 animate-spin-slow"></i>
+            <div class="text-[11px] text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5 font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>En vivo</span>
             </div>
           </div>
 
-          <!-- Tabla Resumen -->
           <div class="mt-4 overflow-x-auto">
-            <table class="w-full text-left text-sm">
-              <thead class="text-xs uppercase tracking-wider text-slate-400 bg-slate-900/50 border-b border-slate-800">
+            <table class="w-full text-left text-xs">
+              <thead class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-white/[0.08]">
                 <tr>
-                  <th scope="col" class="py-3 px-4 font-semibold">Trabajador</th>
-                  <th scope="col" class="py-3 px-3 font-semibold text-right">Tarifa/h</th>
-                  <th scope="col" class="py-3 px-3 font-semibold text-right">Horas</th>
-                  <th scope="col" class="py-3 px-3 font-semibold text-right">Generado</th>
-                  <th scope="col" class="py-3 px-3 font-semibold text-right">Pagado</th>
-                  <th scope="col" class="py-3 px-4 font-semibold text-right">Saldo Pendiente</th>
+                  <th scope="col" class="py-3 px-3 font-semibold">Trabajador</th>
+                  <th scope="col" class="py-3 px-2 font-semibold text-right">Tarifa</th>
+                  <th scope="col" class="py-3 px-2 font-semibold text-right">Horas</th>
+                  <th scope="col" class="py-3 px-2 font-semibold text-right">Generado</th>
+                  <th scope="col" class="py-3 px-2 font-semibold text-right">Pagado</th>
+                  <th scope="col" class="py-3 px-3 font-semibold text-right">Saldo Pendiente</th>
                 </tr>
               </thead>
-              <tbody id="financialTableBody" class="divide-y divide-slate-800/60 font-sans">
-                <!-- Se llena dinámicamente con JavaScript -->
+              <tbody id="financialTableBody" class="divide-y divide-zinc-200/60 dark:divide-white/[0.06]">
                 <tr>
-                  <td colspan="6" class="py-8 text-center text-slate-500 text-xs">
-                    <i class="fa-solid fa-spinner fa-spin text-base mb-2"></i><br>
+                  <td colspan="6" class="py-8 text-center text-zinc-400 text-xs">
                     Cargando información financiera...
                   </td>
                 </tr>
@@ -356,61 +375,61 @@
           </div>
         </div>
 
-        <!-- CARD DE ACTIVIDAD / HISTORIAL -->
-        <div class="glass-card p-6">
-          <!-- Pestañas de Historial -->
-          <div class="flex items-center justify-between pb-4 border-b border-slate-800">
-            <div class="flex items-center gap-3">
-              <button id="tabTasks" class="tab-btn active text-sm font-semibold flex items-center gap-2">
-                <i class="fa-solid fa-list-check"></i>
-                <span>Tareas Registradas (<span id="taskCount">0</span>)</span>
+        <!-- CARD DE HISTORIAL: Tareas y Pagos con Pestañas Pill -->
+        <div class="card p-6 sm:p-7">
+          <div class="flex items-center justify-between pb-4 border-b border-zinc-200/80 dark:border-white/[0.08]">
+            <!-- Segmented Control Tabs (Emil Kowalski Pill Switch) -->
+            <div class="inline-flex p-1 rounded-xl bg-zinc-200/60 dark:bg-white/[0.05] border border-zinc-300/60 dark:border-white/[0.08] gap-1">
+              <button id="tabTasks" class="tab-pill active text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all">
+                <i class="fa-solid fa-list-check text-[11px]"></i>
+                <span>Tareas (<span id="taskCount">0</span>)</span>
               </button>
-              <button id="tabPayments" class="tab-btn text-sm font-semibold flex items-center gap-2 text-slate-400 hover:text-slate-200">
-                <i class="fa-solid fa-receipt"></i>
-                <span>Historial de Pagos (<span id="paymentCount">0</span>)</span>
+              <button id="tabPayments" class="tab-pill text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all">
+                <i class="fa-solid fa-receipt text-[11px]"></i>
+                <span>Pagos (<span id="paymentCount">0</span>)</span>
               </button>
             </div>
           </div>
 
-          <!-- Vista 1: Lista de Tareas -->
+          <!-- Pestaña 1: Tareas Registradas -->
           <div id="tasksView" class="mt-4">
             <div class="overflow-x-auto max-h-96 overflow-y-auto">
               <table class="w-full text-left text-xs">
-                <thead class="text-[11px] uppercase tracking-wider text-slate-400 bg-slate-900/60 border-b border-slate-800 sticky top-0">
+                <thead class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-white/[0.08] sticky top-0 bg-white/95 dark:bg-[#0c0c10]/95 backdrop-blur-md">
                   <tr>
                     <th class="py-2.5 px-3">Fecha</th>
                     <th class="py-2.5 px-3">Trabajador</th>
                     <th class="py-2.5 px-3">Tarea / Detalle</th>
-                    <th class="py-2.5 px-3 text-right">Tiempo</th>
-                    <th class="py-2.5 px-3 text-right">Costo</th>
+                    <th class="py-2.5 px-2 text-right">Tiempo</th>
+                    <th class="py-2.5 px-2 text-right">Costo</th>
                     <th class="py-2.5 px-2 text-center">Acción</th>
                   </tr>
                 </thead>
-                <tbody id="tasksTableBody" class="divide-y divide-slate-800/60">
+                <tbody id="tasksTableBody" class="divide-y divide-zinc-200/60 dark:divide-white/[0.06]">
                   <tr>
-                    <td colspan="6" class="py-6 text-center text-slate-500">No hay tareas registradas.</td>
+                    <td colspan="6" class="py-6 text-center text-zinc-400 text-xs">No hay tareas registradas.</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <!-- Vista 2: Lista de Pagos -->
+          <!-- Pestaña 2: Historial de Pagos -->
           <div id="paymentsView" class="mt-4 hidden">
             <div class="overflow-x-auto max-h-96 overflow-y-auto">
               <table class="w-full text-left text-xs">
-                <thead class="text-[11px] uppercase tracking-wider text-slate-400 bg-slate-900/60 border-b border-slate-800 sticky top-0">
+                <thead class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-white/[0.08] sticky top-0 bg-white/95 dark:bg-[#0c0c10]/95 backdrop-blur-md">
                   <tr>
                     <th class="py-2.5 px-3">Fecha</th>
                     <th class="py-2.5 px-3">Trabajador</th>
                     <th class="py-2.5 px-3">Referencia</th>
-                    <th class="py-2.5 px-3 text-right">Monto</th>
+                    <th class="py-2.5 px-2 text-right">Monto</th>
                     <th class="py-2.5 px-2 text-center">Acción</th>
                   </tr>
                 </thead>
-                <tbody id="paymentsTableBody" class="divide-y divide-slate-800/60">
+                <tbody id="paymentsTableBody" class="divide-y divide-zinc-200/60 dark:divide-white/[0.06]">
                   <tr>
-                    <td colspan="5" class="py-6 text-center text-slate-500">No hay pagos registrados.</td>
+                    <td colspan="5" class="py-6 text-center text-zinc-400 text-xs">No hay pagos registrados.</td>
                   </tr>
                 </tbody>
               </table>
@@ -425,27 +444,27 @@
 
   </main>
 
-  <!-- Toast Notification Container -->
-  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+  <!-- Sonner-style Toast Container (Bottom-Right Floating) -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Modal de Confirmación de Borrado -->
-  <div id="deleteModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
-      <div class="w-12 h-12 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center text-xl mx-auto">
-        <i class="fa-solid fa-triangle-exclamation"></i>
+  <!-- Modal de Confirmación de Borrado (Centrado con escala y desenfoque) -->
+  <div id="deleteModal" class="fixed inset-0 bg-black/50 dark:bg-black/75 backdrop-blur-md hidden items-center justify-center z-50 p-4 transition-opacity duration-200">
+    <div class="modal-dialog card max-w-sm w-full p-6 space-y-4 shadow-2xl border border-zinc-200 dark:border-white/[0.12] transition-transform duration-200">
+      <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center text-base mx-auto border border-rose-500/20">
+        <i class="fa-solid fa-trash-can"></i>
       </div>
       <div class="text-center">
-        <h3 class="text-lg font-bold text-white">¿Confirmar eliminación?</h3>
-        <p id="deleteModalText" class="text-xs text-slate-400 mt-1">Esta acción borrará este registro de Firebase y recalculará los balances.</p>
+        <h3 class="text-sm font-semibold text-zinc-900 dark:text-white">¿Confirmar eliminación?</h3>
+        <p id="deleteModalText" class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Esta acción borrará el registro de Firebase y recalculará los balances.</p>
       </div>
       <div class="flex gap-2 pt-2">
-        <button id="btnCancelDelete" class="w-1/2 btn btn-secondary text-xs py-2.5">Cancelar</button>
-        <button id="btnConfirmDelete" class="w-1/2 btn btn-danger text-xs py-2.5">Sí, Eliminar</button>
+        <button id="btnCancelDelete" class="w-1/2 btn btn-secondary text-xs py-2">Cancelar</button>
+        <button id="btnConfirmDelete" class="w-1/2 btn btn-danger text-xs py-2">Eliminar</button>
       </div>
     </div>
   </div>
 
-  <!-- Script Principal de la Aplicación -->
+  <!-- Lógica Principal de la Aplicación -->
   <script type="module" src="app.js"></script>
 </body>
 </html>

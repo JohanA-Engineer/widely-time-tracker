@@ -2,6 +2,7 @@
  * ============================================================================
  * WIDELY TIME TRACKER & FINANCIAL DASHBOARD
  * Lógica Frontend y Conexión en Tiempo Real con Firebase Firestore (SDK v10 ESM)
+ * Refactorizado bajo principios de Emil Kowalski / Vercel Design Engineering
  * ============================================================================
  */
 
@@ -19,9 +20,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ============================================================================
-   1. CONFIGURACIÓN DE FIREBASE
-   ¡REEMPLAZA ESTOS VALORES CON LOS DE TU CONSOLA DE FIREBASE!
-   (En la sección de configuración de tu proyecto web en Firebase Console)
+   1. CONFIGURACIÓN DE FIREBASE (Credenciales Activas)
    ============================================================================ */
 const firebaseConfig = {
   apiKey: "AIzaSyCrAmepLxl7Tmtq7GNsjMmishqGYtQWXbY",
@@ -32,7 +31,6 @@ const firebaseConfig = {
   appId: "1:919060175591:web:5e7a812f362e3b1bd8a042"
 };
 
-// Verificación de configuración inicial
 const isConfigured = firebaseConfig.apiKey !== "TU_API_KEY_AQUI" && !firebaseConfig.apiKey.includes("TU_API_KEY");
 
 let db = null;
@@ -40,14 +38,14 @@ if (isConfigured) {
   try {
     const app = initializeApp(firebaseConfig);
     db = getFirestore(app);
-    console.log("Firebase inicializado correctamente.");
+    console.log("[Firebase] Inicializado correctamente en modo producción/tiempo real.");
     document.getElementById("firebaseWarning")?.classList.add("hidden");
   } catch (err) {
-    console.error("Error al conectar con Firebase:", err);
+    console.error("[Firebase] Error de conexión:", err);
     updateDbStatus(false, "Error de Conexión");
   }
 } else {
-  console.warn("Firebase no configurado. Usando modo de demostración local.");
+  console.warn("[Firebase] Modo local activado temporalmente.");
   document.getElementById("firebaseWarning")?.classList.remove("hidden");
   updateDbStatus(false, "Credenciales Pendientes");
 }
@@ -56,18 +54,16 @@ if (isConfigured) {
    2. ESTADO GLOBAL DE LA APLICACIÓN
    ============================================================================ */
 let state = {
-  workers: [],      // Lista de trabajadores
-  tasks: [],        // Lista de tareas
-  payments: [],     // Lista de pagos
-  // Cronómetro
+  workers: [],      // Colección 'trabajadores'
+  tasks: [],        // Colección 'tareas'
+  payments: [],     // Colección 'pagos'
   timer: {
     isRunning: false,
     startTime: 0,
     elapsedSeconds: 0,
     intervalId: null
   },
-  // Modal de borrado
-  deleteTarget: null // { collection: 'trabajadores'|'tareas'|'pagos', id: string, name: string }
+  deleteTarget: null
 };
 
 /* ============================================================================
@@ -106,13 +102,13 @@ const elements = {
   taskCount: document.getElementById("taskCount"),
   paymentCount: document.getElementById("paymentCount"),
 
-  // Pestañas
+  // Pestañas Segmented Control
   tabTasks: document.getElementById("tabTasks"),
   tabPayments: document.getElementById("tabPayments"),
   tasksView: document.getElementById("tasksView"),
   paymentsView: document.getElementById("paymentsView"),
 
-  // KPIs
+  // Métricas / KPIs
   kpiTotalHoras: document.getElementById("kpiTotalHoras"),
   kpiTotalHorasFormatted: document.getElementById("kpiTotalHorasFormatted"),
   kpiTotalGenerado: document.getElementById("kpiTotalGenerado"),
@@ -126,16 +122,19 @@ const elements = {
   btnCancelDelete: document.getElementById("btnCancelDelete"),
   btnConfirmDelete: document.getElementById("btnConfirmDelete"),
 
-  // Status & Reloj
+  // Tema, Status & Reloj
   currentTime: document.getElementById("currentTime"),
   dbStatus: document.getElementById("dbStatus"),
-  toastContainer: document.getElementById("toastContainer")
+  toastContainer: document.getElementById("toastContainer"),
+  themeToggle: document.getElementById("themeToggle"),
+  themeIcon: document.getElementById("themeIcon")
 };
 
 /* ============================================================================
    4. INICIALIZACIÓN
    ============================================================================ */
 document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
   initClock();
   initDefaultDate();
   setupEventListeners();
@@ -143,13 +142,43 @@ document.addEventListener("DOMContentLoaded", () => {
   if (db) {
     listenToFirestore();
   } else {
-    // Si aún no han colocado las llaves, proveer datos mock para poder explorar la UI
     loadLocalFallbackData();
   }
 });
 
 /* ============================================================================
-   5. LISTENERS EN TIEMPO REAL CON FIRESTORE (onSnapshot)
+   5. GESTIÓN DE TEMA CLARO / OSCURO (Emil Kowalski Taste)
+   ============================================================================ */
+function initTheme() {
+  const savedTheme = localStorage.getItem("widely_theme");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = savedTheme ? savedTheme === "dark" : prefersDark;
+
+  applyTheme(isDark);
+}
+
+function applyTheme(isDark) {
+  if (isDark) {
+    document.documentElement.classList.add("dark");
+    if (elements.themeIcon) {
+      elements.themeIcon.className = "fa-regular fa-sun text-sm transition-transform duration-200 rotate-0";
+    }
+  } else {
+    document.documentElement.classList.remove("dark");
+    if (elements.themeIcon) {
+      elements.themeIcon.className = "fa-regular fa-moon text-sm transition-transform duration-200 -rotate-12";
+    }
+  }
+  localStorage.setItem("widely_theme", isDark ? "dark" : "light");
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.classList.contains("dark");
+  applyTheme(!isDark);
+}
+
+/* ============================================================================
+   6. LISTENERS EN TIEMPO REAL CON FIRESTORE (onSnapshot)
    ============================================================================ */
 function listenToFirestore() {
   // A. Colección: trabajadores
@@ -158,12 +187,12 @@ function listenToFirestore() {
     state.workers = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    })).sort((a, b) => a.nombre.localeCompare(b.nombre));
+    })).sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
 
     updateWorkersUI();
     updateFinancialDashboard();
   }, (error) => {
-    console.error("Error en listener trabajadores:", error);
+    console.error("Error en trabajadores:", error);
     showToast("Error al sincronizar trabajadores: " + error.message, "error");
   });
 
@@ -178,7 +207,7 @@ function listenToFirestore() {
     updateTasksUI();
     updateFinancialDashboard();
   }, (error) => {
-    console.error("Error en listener tareas:", error);
+    console.error("Error en tareas:", error);
     showToast("Error al sincronizar tareas: " + error.message, "error");
   });
 
@@ -193,18 +222,18 @@ function listenToFirestore() {
     updatePaymentsUI();
     updateFinancialDashboard();
   }, (error) => {
-    console.error("Error en listener pagos:", error);
+    console.error("Error en pagos:", error);
     showToast("Error al sincronizar pagos: " + error.message, "error");
   });
 }
 
 /* ============================================================================
-   6. LÓGICA DEL CRONÓMETRO DE TAREAS
+   7. LÓGICA DEL CRONÓMETRO DE TAREAS (Hero Visual)
    ============================================================================ */
 function startTimer() {
   const workerId = elements.timerWorkerSelect.value;
   if (!workerId) {
-    showToast("Por favor, selecciona un trabajador primero.", "warning");
+    showToast("Selecciona un trabajador antes de iniciar.", "warning");
     elements.timerWorkerSelect.focus();
     return;
   }
@@ -220,14 +249,14 @@ function startTimer() {
     updateLiveCost();
   }, 1000);
 
-  // Actualizar UI
+  // Estados visuales y micro-interacciones
   elements.btnStart.disabled = true;
   elements.btnPause.disabled = false;
   elements.btnReset.disabled = false;
   elements.timerDisplay.classList.add("timer-active");
 
-  elements.timerStatusBadge.className = "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5";
-  elements.timerStatusBadge.innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span> Activo`;
+  elements.timerStatusBadge.className = "text-[11px] font-mono font-medium px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5";
+  elements.timerStatusBadge.innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Activo`;
 }
 
 function pauseTimer() {
@@ -240,7 +269,7 @@ function pauseTimer() {
   elements.btnPause.disabled = true;
   elements.timerDisplay.classList.remove("timer-active");
 
-  elements.timerStatusBadge.className = "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30";
+  elements.timerStatusBadge.className = "text-[11px] font-mono font-medium px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20";
   elements.timerStatusBadge.textContent = "Pausado";
 }
 
@@ -256,7 +285,7 @@ function resetTimer() {
   elements.btnPause.disabled = true;
   elements.btnReset.disabled = true;
 
-  elements.timerStatusBadge.className = "text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700";
+  elements.timerStatusBadge.className = "text-[11px] font-mono font-medium px-2.5 py-0.5 rounded-full bg-zinc-200/80 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 border border-zinc-300/60 dark:border-white/[0.08]";
   elements.timerStatusBadge.textContent = "Detenido";
 }
 
@@ -281,13 +310,13 @@ async function handleRegisterTask() {
   const seconds = state.timer.elapsedSeconds;
 
   if (!workerId) {
-    showToast("Selecciona el trabajador para registrar la tarea.", "warning");
+    showToast("Selecciona un trabajador para registrar la tarea.", "warning");
     elements.timerWorkerSelect.focus();
     return;
   }
 
   if (seconds < 1) {
-    showToast("El cronómetro debe haber corrido al menos 1 segundo para registrar.", "warning");
+    showToast("El cronómetro debe correr al menos 1 segundo.", "warning");
     return;
   }
 
@@ -314,24 +343,20 @@ async function handleRegisterTask() {
     createdAt: db ? serverTimestamp() : new Date().toISOString()
   };
 
-  // Deshabilitar botón durante el guardado
   elements.btnRegisterTask.disabled = true;
-  elements.btnRegisterTask.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando...`;
+  elements.btnRegisterTask.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xs"></i><span>Guardando...</span>`;
 
   try {
     if (db) {
       await addDoc(collection(db, "tareas"), taskData);
     } else {
-      // Modo local fallback
       taskData.id = "local_task_" + Date.now();
       state.tasks.unshift(taskData);
       updateTasksUI();
       updateFinancialDashboard();
     }
 
-    showToast(`¡Tarea registrada con éxito! Costo: $${totalCost.toFixed(2)}`, "success");
-
-    // Limpiar formulario y reiniciar cronómetro
+    showToast(`Tarea registrada ($${totalCost.toFixed(2)})`, "success");
     elements.timerTaskDescription.value = "";
     resetTimer();
   } catch (error) {
@@ -347,7 +372,7 @@ async function handleRegisterTask() {
 }
 
 /* ============================================================================
-   7. GESTIÓN DE TRABAJADORES
+   8. GESTIÓN DE TRABAJADORES
    ============================================================================ */
 async function handleSaveWorker(e) {
   e.preventDefault();
@@ -356,7 +381,7 @@ async function handleSaveWorker(e) {
   const rate = parseFloat(elements.workerRate.value);
 
   if (!name || isNaN(rate) || rate < 0) {
-    showToast("Ingresa un nombre válido y una tarifa mayor o igual a 0.", "warning");
+    showToast("Ingresa un nombre válido y una tarifa igual o mayor a 0.", "warning");
     return;
   }
 
@@ -376,16 +401,16 @@ async function handleSaveWorker(e) {
       updateFinancialDashboard();
     }
 
-    showToast(`Trabajador "${name}" agregado exitosamente.`, "success");
+    showToast(`Trabajador "${name}" agregado.`, "success");
     elements.formWorker.reset();
   } catch (error) {
     console.error("Error al guardar trabajador:", error);
-    showToast("Error al guardar trabajador: " + error.message, "error");
+    showToast("Error al guardar: " + error.message, "error");
   }
 }
 
 /* ============================================================================
-   8. REGISTRO DE PAGOS
+   9. REGISTRO DE PAGOS
    ============================================================================ */
 async function handleSavePayment(e) {
   e.preventDefault();
@@ -396,12 +421,12 @@ async function handleSavePayment(e) {
   const reference = elements.paymentReference.value.trim();
 
   if (!workerId) {
-    showToast("Selecciona un trabajador para el pago.", "warning");
+    showToast("Selecciona el trabajador para registrar el pago.", "warning");
     return;
   }
 
   if (isNaN(amount) || amount <= 0) {
-    showToast("Ingresa un monto de pago válido.", "warning");
+    showToast("Ingresa un monto válido mayor a 0.", "warning");
     return;
   }
 
@@ -440,15 +465,13 @@ async function handleSavePayment(e) {
 }
 
 /* ============================================================================
-   9. ACTUALIZACIÓN DE INTERFAZ (UI) Y RENDERIZADO
+   10. ACTUALIZACIÓN VISUAL (UI) Y COMPONENTES REFACTORIZADOS
    ============================================================================ */
 
-// A. Actualizar Desplegables y Lista de Trabajadores
 function updateWorkersUI() {
   const currentTimerVal = elements.timerWorkerSelect.value;
   const currentPayVal = elements.paymentWorkerSelect.value;
 
-  // Actualizar selector de Cronómetro
   elements.timerWorkerSelect.innerHTML = `<option value="">-- Selecciona un trabajador --</option>` +
     state.workers.map(w => `
       <option value="${w.id}" data-rate="${w.tarifaHora}">
@@ -456,7 +479,6 @@ function updateWorkersUI() {
       </option>
     `).join("");
 
-  // Actualizar selector de Pagos
   elements.paymentWorkerSelect.innerHTML = `<option value="">-- Selecciona un trabajador --</option>` +
     state.workers.map(w => `
       <option value="${w.id}">
@@ -471,24 +493,23 @@ function updateWorkersUI() {
     elements.paymentWorkerSelect.value = currentPayVal;
   }
 
-  // Contador
   elements.workerCount.textContent = state.workers.length;
 
-  // Lista lateral de trabajadores con botón para eliminar
+  // Lista minimalista de trabajadores con micro-interacciones
   if (state.workers.length === 0) {
-    elements.workersList.innerHTML = `<div class="text-xs text-slate-500 text-center py-4">No hay trabajadores registrados aún.</div>`;
+    elements.workersList.innerHTML = `<div class="text-xs text-zinc-400 dark:text-zinc-500 text-center py-4">No hay trabajadores registrados.</div>`;
   } else {
     elements.workersList.innerHTML = state.workers.map(w => `
-      <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:border-slate-700/80 transition-all text-xs">
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-zinc-200/50 dark:bg-white/[0.03] border border-zinc-300/50 dark:border-white/[0.06] hover:border-zinc-400/50 dark:hover:border-white/[0.12] transition-colors text-xs group">
         <div>
-          <div class="font-medium text-slate-200">${escapeHtml(w.nombre)}</div>
-          <div class="text-[11px] text-cyan-400 font-mono font-medium">$${Number(w.tarifaHora).toFixed(2)} / hora</div>
+          <div class="font-medium text-zinc-900 dark:text-zinc-200">${escapeHtml(w.nombre)}</div>
+          <div class="text-[11px] text-zinc-500 dark:text-zinc-400 font-mono tabular-nums">$${Number(w.tarifaHora).toFixed(2)} / hora</div>
         </div>
         <button 
           onclick="window.requestDelete('trabajadores', '${w.id}', '${escapeHtml(w.nombre)}')"
           title="Eliminar trabajador" 
-          class="text-slate-500 hover:text-rose-400 p-1.5 rounded-md hover:bg-rose-500/10 transition-colors">
-          <i class="fa-regular fa-trash-can"></i>
+          class="text-zinc-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors active:scale-95">
+          <i class="fa-regular fa-trash-can text-xs"></i>
         </button>
       </div>
     `).join("");
@@ -497,14 +518,13 @@ function updateWorkersUI() {
   updateLiveCost();
 }
 
-// B. Actualizar Tabla de Tareas
 function updateTasksUI() {
   elements.taskCount.textContent = state.tasks.length;
 
   if (state.tasks.length === 0) {
     elements.tasksTableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="py-6 text-center text-slate-500 text-xs">No hay tareas registradas todavía.</td>
+        <td colspan="6" class="py-6 text-center text-zinc-400 dark:text-zinc-500 text-xs">No hay tareas registradas.</td>
       </tr>
     `;
     return;
@@ -513,22 +533,22 @@ function updateTasksUI() {
   elements.tasksTableBody.innerHTML = state.tasks.map(t => {
     const formattedTime = formatSecondsToTime(t.segundos || 0);
     return `
-      <tr class="hover:bg-slate-800/30 transition-colors">
-        <td class="py-2.5 px-3 text-slate-400 font-mono whitespace-nowrap">${t.fecha || '-'}</td>
-        <td class="py-2.5 px-3 font-medium text-slate-200 whitespace-nowrap">${escapeHtml(t.trabajadorNombre || 'Anónimo')}</td>
-        <td class="py-2.5 px-3 text-slate-300 max-w-xs truncate" title="${escapeHtml(t.descripcion || '')}">
+      <tr class="hover:bg-zinc-200/30 dark:hover:bg-white/[0.02] transition-colors">
+        <td class="py-2.5 px-3 text-zinc-500 dark:text-zinc-400 font-mono whitespace-nowrap tabular-nums">${t.fecha || '-'}</td>
+        <td class="py-2.5 px-3 font-medium text-zinc-900 dark:text-zinc-200 whitespace-nowrap">${escapeHtml(t.trabajadorNombre || 'Anónimo')}</td>
+        <td class="py-2.5 px-3 text-zinc-600 dark:text-zinc-300 max-w-xs truncate" title="${escapeHtml(t.descripcion || '')}">
           ${escapeHtml(t.descripcion || 'Sin descripción')}
         </td>
-        <td class="py-2.5 px-3 text-right font-mono text-slate-400 whitespace-nowrap">
-          ${formattedTime} <span class="text-[10px] text-slate-500">(${Number(t.horas || 0).toFixed(2)}h)</span>
+        <td class="py-2.5 px-2 text-right font-mono text-zinc-500 dark:text-zinc-400 whitespace-nowrap tabular-nums">
+          ${formattedTime} <span class="text-[10px] text-zinc-400 dark:text-zinc-500">(${Number(t.horas || 0).toFixed(2)}h)</span>
         </td>
-        <td class="py-2.5 px-3 text-right font-mono font-bold text-cyan-400 whitespace-nowrap">
+        <td class="py-2.5 px-2 text-right font-mono font-semibold text-zinc-900 dark:text-white whitespace-nowrap tabular-nums">
           $${Number(t.costoTotal || 0).toFixed(2)}
         </td>
         <td class="py-2.5 px-2 text-center whitespace-nowrap">
           <button 
             onclick="window.requestDelete('tareas', '${t.id}', 'Tarea: ${escapeHtml(t.descripcion || '')}')"
-            class="text-slate-500 hover:text-rose-400 p-1 rounded hover:bg-rose-500/10 transition-colors"
+            class="text-zinc-400 hover:text-rose-500 p-1 rounded-md hover:bg-rose-500/10 transition-colors active:scale-95"
             title="Eliminar tarea">
             <i class="fa-regular fa-trash-can text-xs"></i>
           </button>
@@ -538,33 +558,32 @@ function updateTasksUI() {
   }).join("");
 }
 
-// C. Actualizar Tabla de Pagos
 function updatePaymentsUI() {
   elements.paymentCount.textContent = state.payments.length;
 
   if (state.payments.length === 0) {
     elements.paymentsTableBody.innerHTML = `
       <tr>
-        <td colspan="5" class="py-6 text-center text-slate-500 text-xs">No hay pagos registrados.</td>
+        <td colspan="5" class="py-6 text-center text-zinc-400 dark:text-zinc-500 text-xs">No hay pagos registrados.</td>
       </tr>
     `;
     return;
   }
 
   elements.paymentsTableBody.innerHTML = state.payments.map(p => `
-    <tr class="hover:bg-slate-800/30 transition-colors">
-      <td class="py-2.5 px-3 text-slate-400 font-mono whitespace-nowrap">${p.fecha || '-'}</td>
-      <td class="py-2.5 px-3 font-medium text-slate-200 whitespace-nowrap">${escapeHtml(p.trabajadorNombre || '')}</td>
-      <td class="py-2.5 px-3 text-slate-300 max-w-xs truncate" title="${escapeHtml(p.referencia || '')}">
+    <tr class="hover:bg-zinc-200/30 dark:hover:bg-white/[0.02] transition-colors">
+      <td class="py-2.5 px-3 text-zinc-500 dark:text-zinc-400 font-mono whitespace-nowrap tabular-nums">${p.fecha || '-'}</td>
+      <td class="py-2.5 px-3 font-medium text-zinc-900 dark:text-zinc-200 whitespace-nowrap">${escapeHtml(p.trabajadorNombre || '')}</td>
+      <td class="py-2.5 px-3 text-zinc-600 dark:text-zinc-300 max-w-xs truncate" title="${escapeHtml(p.referencia || '')}">
         ${escapeHtml(p.referencia || 'Pago')}
       </td>
-      <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-400 whitespace-nowrap">
+      <td class="py-2.5 px-2 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums">
         $${Number(p.monto || 0).toFixed(2)}
       </td>
       <td class="py-2.5 px-2 text-center whitespace-nowrap">
         <button 
           onclick="window.requestDelete('pagos', '${p.id}', 'Pago de $${Number(p.monto || 0).toFixed(2)} a ${escapeHtml(p.trabajadorNombre || '')}')"
-          class="text-slate-500 hover:text-rose-400 p-1 rounded hover:bg-rose-500/10 transition-colors"
+          class="text-zinc-400 hover:text-rose-500 p-1 rounded-md hover:bg-rose-500/10 transition-colors active:scale-95"
           title="Eliminar pago">
           <i class="fa-regular fa-trash-can text-xs"></i>
         </button>
@@ -574,13 +593,13 @@ function updatePaymentsUI() {
 }
 
 /* ============================================================================
-   10. CÁLCULO DINÁMICO: DASHBOARD FINANCIERO Y KPIS
+   11. CÁLCULO DINÁMICO: DASHBOARD FINANCIERO Y KPIS
    ============================================================================ */
 function updateFinancialDashboard() {
   if (state.workers.length === 0) {
     elements.financialTableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="py-8 text-center text-slate-500 text-xs">
+        <td colspan="6" class="py-8 text-center text-zinc-400 dark:text-zinc-500 text-xs">
           Agrega trabajadores para visualizar el balance financiero en tiempo real.
         </td>
       </tr>
@@ -595,77 +614,73 @@ function updateFinancialDashboard() {
   let totalPagadoGlobal = 0;
 
   const rowsHtml = state.workers.map(worker => {
-    // 1. Filtrar tareas del trabajador
     const workerTasks = state.tasks.filter(t => t.trabajadorId === worker.id);
     const workerSeconds = workerTasks.reduce((acc, t) => acc + (Number(t.segundos) || 0), 0);
     const workerHours = workerTasks.reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
     const workerEarned = workerTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
 
-    // 2. Filtrar pagos del trabajador
     const workerPayments = state.payments.filter(p => p.trabajadorId === worker.id);
     const workerPaid = workerPayments.reduce((acc, p) => acc + (Number(p.monto) || 0), 0);
 
-    // 3. Saldo Pendiente: (Generado - Pagado)
     const pendingBalance = Number((workerEarned - workerPaid).toFixed(2));
 
-    // Acumuladores globales
     totalSegundosGlobal += workerSeconds;
     totalHorasGlobal += workerHours;
     totalGeneradoGlobal += workerEarned;
     totalPagadoGlobal += workerPaid;
 
-    // Badge y estilo de saldo pendiente
+    // Badges limpios con diseño Vercel
     let balanceBadge = "";
     if (pendingBalance > 0.005) {
-      // Se le debe dinero (ROJO DESTACADO según el requerimiento)
+      // Deuda activa: Rojo con micro-pulso
       balanceBadge = `
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono bg-rose-500/15 text-rose-400 border border-rose-500/30 animate-pulse">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold font-mono bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 tabular-nums animate-pulse">
           <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
           +$${pendingBalance.toFixed(2)}
         </span>
       `;
     } else if (pendingBalance === 0) {
-      // Al día
+      // Al día: Esmeralda suave
       balanceBadge = `
-        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 tabular-nums">
           <i class="fa-solid fa-check text-[10px]"></i>
           $0.00
         </span>
       `;
     } else {
-      // Saldo negativo: Pagado más de lo generado (A favor de la empresa)
+      // A favor de la empresa: Azul tenue
       balanceBadge = `
-        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium font-mono bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 tabular-nums">
           <i class="fa-solid fa-arrow-down text-[10px]"></i>
-          -$${Math.abs(pendingBalance).toFixed(2)} (A favor)
+          -$${Math.abs(pendingBalance).toFixed(2)}
         </span>
       `;
     }
 
     return `
-      <tr class="hover:bg-slate-800/40 transition-colors">
-        <td class="py-3 px-4 font-semibold text-white">
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-300">
+      <tr class="hover:bg-zinc-200/30 dark:hover:bg-white/[0.02] transition-colors">
+        <td class="py-3 px-3 font-semibold text-zinc-900 dark:text-white">
+          <div class="flex items-center gap-2.5">
+            <div class="w-6 h-6 rounded-lg bg-zinc-200 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 flex items-center justify-center text-[10px] font-bold">
               ${worker.nombre.charAt(0).toUpperCase()}
             </div>
             <span>${escapeHtml(worker.nombre)}</span>
           </div>
         </td>
-        <td class="py-3 px-3 text-right font-mono text-slate-300">
+        <td class="py-3 px-2 text-right font-mono text-zinc-500 dark:text-zinc-400 tabular-nums">
           $${Number(worker.tarifaHora || 0).toFixed(2)}/h
         </td>
-        <td class="py-3 px-3 text-right font-mono text-slate-200">
-          <span class="font-bold">${workerHours.toFixed(2)}</span>
-          <span class="text-xs text-slate-500 block">${formatSecondsToTime(workerSeconds)}</span>
+        <td class="py-3 px-2 text-right font-mono text-zinc-900 dark:text-zinc-200 tabular-nums">
+          <span class="font-semibold">${workerHours.toFixed(2)}h</span>
+          <span class="text-[10px] text-zinc-400 dark:text-zinc-500 block">${formatSecondsToTime(workerSeconds)}</span>
         </td>
-        <td class="py-3 px-3 text-right font-mono font-bold text-cyan-400">
+        <td class="py-3 px-2 text-right font-mono font-semibold text-zinc-900 dark:text-white tabular-nums">
           $${workerEarned.toFixed(2)}
         </td>
-        <td class="py-3 px-3 text-right font-mono font-bold text-emerald-400">
+        <td class="py-3 px-2 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
           $${workerPaid.toFixed(2)}
         </td>
-        <td class="py-3 px-4 text-right">
+        <td class="py-3 px-3 text-right">
           ${balanceBadge}
         </td>
       </tr>
@@ -682,17 +697,17 @@ function updateFinancialDashboard() {
   elements.kpiTotalPagado.textContent = `$${totalPagadoGlobal.toFixed(2)}`;
 
   if (globalBalance > 0.005) {
-    elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono text-rose-400";
+    elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono tracking-tight text-rose-600 dark:text-rose-400 tabular-nums";
     elements.kpiSaldoPendiente.textContent = `$${globalBalance.toFixed(2)}`;
-    elements.kpiSaldoDesc.textContent = "Deuda total por liquidar a trabajadores";
+    elements.kpiSaldoDesc.textContent = "Deuda total por liquidar";
   } else if (globalBalance === 0) {
-    elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono text-emerald-400";
+    elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums";
     elements.kpiSaldoPendiente.textContent = "$0.00";
-    elements.kpiSaldoDesc.textContent = "Todos los pagos están al día";
+    elements.kpiSaldoDesc.textContent = "Todos los pagos al día";
   } else {
-    elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono text-cyan-400";
+    elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono tracking-tight text-blue-600 dark:text-blue-400 tabular-nums";
     elements.kpiSaldoPendiente.textContent = `+$${Math.abs(globalBalance).toFixed(2)}`;
-    elements.kpiSaldoDesc.textContent = "Anticipos a favor de la empresa";
+    elements.kpiSaldoDesc.textContent = "Saldo a favor de la empresa";
   }
 }
 
@@ -702,15 +717,15 @@ function resetKPIs() {
   elements.kpiTotalGenerado.textContent = "$0.00";
   elements.kpiTotalPagado.textContent = "$0.00";
   elements.kpiSaldoPendiente.textContent = "$0.00";
-  elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono text-rose-400";
+  elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono tracking-tight text-rose-600 dark:text-rose-400 tabular-nums";
 }
 
 /* ============================================================================
-   11. GESTIÓN DE ELIMINACIONES CON MODAL
+   12. GESTIÓN DE ELIMINACIONES CON MODAL
    ============================================================================ */
 window.requestDelete = function(collectionName, id, label) {
   state.deleteTarget = { collection: collectionName, id, label };
-  elements.deleteModalText.innerHTML = `¿Seguro que deseas eliminar <strong>${label}</strong>? Se recalcularán los saldos de inmediato.`;
+  elements.deleteModalText.innerHTML = `¿Seguro que deseas eliminar <strong>${label}</strong>? Se recalcularán los saldos.`;
   elements.deleteModal.classList.remove("hidden");
   elements.deleteModal.classList.add("flex");
 };
@@ -729,7 +744,6 @@ async function confirmDelete() {
     if (db) {
       await deleteDoc(doc(db, colName, id));
     } else {
-      // Local fallback
       if (colName === "trabajadores") state.workers = state.workers.filter(w => w.id !== id);
       if (colName === "tareas") state.tasks = state.tasks.filter(t => t.id !== id);
       if (colName === "pagos") state.payments = state.payments.filter(p => p.id !== id);
@@ -749,7 +763,7 @@ async function confirmDelete() {
 }
 
 /* ============================================================================
-   12. EVENT LISTENERS Y UTILIDADES
+   13. EVENT LISTENERS Y UTILIDADES
    ============================================================================ */
 function setupEventListeners() {
   // Cronómetro
@@ -759,11 +773,14 @@ function setupEventListeners() {
   elements.btnRegisterTask.addEventListener("click", handleRegisterTask);
   elements.timerWorkerSelect.addEventListener("change", updateLiveCost);
 
+  // Tema Claro / Oscuro
+  elements.themeToggle.addEventListener("click", toggleTheme);
+
   // Formularios
   elements.formWorker.addEventListener("submit", handleSaveWorker);
   elements.formPayment.addEventListener("submit", handleSavePayment);
 
-  // Pestañas Historial
+  // Pestañas Segmented Control
   elements.tabTasks.addEventListener("click", () => switchTab("tasks"));
   elements.tabPayments.addEventListener("click", () => switchTab("payments"));
 
@@ -812,19 +829,18 @@ function updateDbStatus(connected, text) {
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
         <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
       </span>
-      <span class="text-slate-300 font-medium">${text || "Firestore Conectado"}</span>
+      <span class="text-zinc-700 dark:text-zinc-300 font-medium text-[11px]">${text || "Firestore Conectado"}</span>
     `;
   } else {
     elements.dbStatus.innerHTML = `
       <span class="relative flex h-2 w-2">
         <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
       </span>
-      <span class="text-amber-300 font-medium">${text || "Modo Local"}</span>
+      <span class="text-amber-600 dark:text-amber-300 font-medium text-[11px]">${text || "Modo Local"}</span>
     `;
   }
 }
 
-// Formatear segundos en formato HH:MM:SS
 function formatSecondsToTime(totalSeconds) {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -834,7 +850,6 @@ function formatSecondsToTime(totalSeconds) {
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 }
 
-// Escapar texto contra XSS en inserciones dinámicas
 function escapeHtml(str) {
   if (!str) return "";
   return String(str)
@@ -845,39 +860,31 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-// Sistema de Notificaciones Toast
+/* ============================================================================
+   14. SISTEMA DE TOASTS ESTILO SONNER (Emil Kowalski)
+   ============================================================================ */
 function showToast(message, type = "info") {
   const toast = document.createElement("div");
-  toast.className = "toast";
+  toast.className = "sonner-toast";
 
-  let icon = "fa-circle-info text-blue-400";
-  let border = "border-slate-800";
-  if (type === "success") {
-    icon = "fa-circle-check text-emerald-400";
-    border = "border-emerald-500/40";
-  } else if (type === "warning") {
-    icon = "fa-triangle-exclamation text-amber-400";
-    border = "border-amber-500/40";
-  } else if (type === "error") {
-    icon = "fa-circle-xmark text-rose-400";
-    border = "border-rose-500/40";
-  }
+  let icon = "fa-circle-info text-blue-500";
+  if (type === "success") icon = "fa-circle-check text-emerald-500";
+  else if (type === "warning") icon = "fa-triangle-exclamation text-amber-500";
+  else if (type === "error") icon = "fa-circle-xmark text-rose-500";
 
-  toast.classList.add(border);
   toast.innerHTML = `
-    <i class="fa-solid ${icon} text-base flex-shrink-0"></i>
-    <span class="text-slate-200 text-xs sm:text-sm font-medium flex-1">${escapeHtml(message)}</span>
+    <i class="fa-solid ${icon} text-sm flex-shrink-0"></i>
+    <span class="text-xs sm:text-[13px] font-medium flex-1">${escapeHtml(message)}</span>
   `;
 
   elements.toastContainer.appendChild(toast);
 
   setTimeout(() => {
-    toast.classList.add("toast-exit");
-    setTimeout(() => toast.remove(), 250);
-  }, 3500);
+    toast.classList.add("sonner-toast-exit");
+    setTimeout(() => toast.remove(), 180);
+  }, 3200);
 }
 
-// Datos de demostración iniciales (se usan si aún no se ha colocado la API key)
 function loadLocalFallbackData() {
   state.workers = [
     { id: "mock_1", nombre: "Carlos Méndez", tarifaHora: 20.00 },
