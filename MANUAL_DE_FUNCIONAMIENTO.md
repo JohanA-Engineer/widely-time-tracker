@@ -111,15 +111,18 @@ flowchart TD
 
 ### Módulo A: Gestión de Trabajadores
 - **Propósito:** Registrar al personal y su costo de hora laboral.
-- **Inputs:** Nombre Completo y Tarifa por Hora ($ USD).
+- **Inputs:** Nombre Completo (requerido) y Tarifa por Hora ($ USD, opcional con valor por defecto `$0.00`).
 - **Flujo:**
-  1. Al presionar **"Guardar Trabajador"**, se valida que la tarifa sea $\ge 0$ y el nombre no esté vacío.
-  2. Se envía un documento a la colección `trabajadores` en Firestore.
-  3. El listener `onSnapshot` detecta el nuevo documento y automáticamente:
-     - Actualiza el menú desplegable del cronómetro.
-     - Actualiza el menú desplegable del registro de pagos.
-     - Añade al trabajador en la lista de trabajadores activos con su botón de eliminación.
-     - Añade una fila al Dashboard Financiero.
+  1. Al presionar **"Guardar Trabajador"**, se valida que el nombre no esté vacío. Si el campo de tarifa se deja en blanco, se asigna automáticamente como `$0.00/h` (sin tarifa fijada).
+  2. Se envía el documento a la colección `trabajadores` en Firestore.
+  3. **Asignación / Edición de Tarifa en el Menú:**
+     - En la lista de trabajadores activos, cada registro cuenta con un botón interactivo **`[ Asignar Tarifa ]`** o **`[ Editar ]`**.
+     - Al hacer clic (o al pulsar sobre la celda de tarifa en el Dashboard), se despliega un modal centrado que permite configurar o modificar la tarifa por hora en tiempo real mediante `updateDoc()`.
+  4. El listener `onSnapshot` detecta cualquier cambio y actualiza en milisegundos:
+     - El menú desplegable del cronómetro.
+     - El menú desplegable del registro de pagos.
+     - La lista de trabajadores activos.
+     - Los balances y costos del Dashboard Financiero.
 
 ---
 

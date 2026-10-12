@@ -10,6 +10,7 @@ import {
   getFirestore,
   collection,
   addDoc,
+  updateDoc,
   deleteDoc,
   doc,
   onSnapshot,
@@ -146,9 +147,16 @@ const elements = {
   btnCancelDelete: document.getElementById("btnCancelDelete"),
   btnConfirmDelete: document.getElementById("btnConfirmDelete"),
 
+  // Modal Editar Tarifa
+  editRateModal: document.getElementById("editRateModal"),
+  formEditRate: document.getElementById("formEditRate"),
+  editRateWorkerId: document.getElementById("editRateWorkerId"),
+  editRateModalWorker: document.getElementById("editRateModalWorker"),
+  editRateInput: document.getElementById("editRateInput"),
+  btnCancelEditRate: document.getElementById("btnCancelEditRate"),
+
   // Status & Reloj
   currentTime: document.getElementById("currentTime"),
-  dbStatus: document.getElementById("dbStatus"),
   toastContainer: document.getElementById("toastContainer")
 };
 
@@ -373,10 +381,16 @@ async function handleSaveWorker(e) {
   e.preventDefault();
 
   const name = elements.workerName.value.trim();
-  const rate = parseFloat(elements.workerRate.value);
+  const rateRaw = elements.workerRate.value.trim();
+  const rate = rateRaw === "" ? 0 : parseFloat(rateRaw);
 
-  if (!name || isNaN(rate) || rate < 0) {
-    showToast("Ingresa un nombre válido y una tarifa válida.", "warning");
+  if (!name) {
+    showToast("Por favor ingresa el nombre del trabajador.", "warning");
+    return;
+  }
+
+  if (isNaN(rate) || rate < 0) {
+    showToast("La tarifa por hora debe ser un número igual o mayor a 0.", "warning");
     return;
   }
 
@@ -396,7 +410,8 @@ async function handleSaveWorker(e) {
       updateFinancialDashboard();
     }
 
-    showToast(`Trabajador "${name}" guardado exitosamente.`, "success");
+    const rateMsg = rate > 0 ? ` con tarifa de $${rate.toFixed(2)}/h` : " (sin tarifa inicial)";
+    showToast(`Trabajador "${name}" guardado exitosamente${rateMsg}.`, "success");
     elements.formWorker.reset();
   } catch (error) {
     console.error("Error al guardar trabajador:", error);
@@ -467,11 +482,14 @@ function updateWorkersUI() {
   const currentPayVal = elements.paymentWorkerSelect.value;
 
   elements.timerWorkerSelect.innerHTML = `<option value="">-- Selecciona un trabajador --</option>` +
-    state.workers.map(w => `
-      <option value="${w.id}" data-rate="${w.tarifaHora}">
-        ${w.nombre} ($${Number(w.tarifaHora).toFixed(2)}/h)
-      </option>
-    `).join("");
+    state.workers.map(w => {
+      const rate = Number(w.tarifaHora || 0);
+      return `
+        <option value="${w.id}" data-rate="${rate}">
+          ${w.nombre} (${rate > 0 ? `$${rate.toFixed(2)}/h` : 'Sin tarifa'})
+        </option>
+      `;
+    }).join("");
 
   elements.paymentWorkerSelect.innerHTML = `<option value="">-- Selecciona un trabajador --</option>` +
     state.workers.map(w => `
@@ -492,20 +510,40 @@ function updateWorkersUI() {
   if (state.workers.length === 0) {
     elements.workersList.innerHTML = `<div class="text-xs text-slate-400 dark:text-slate-500 text-center py-4">No hay trabajadores registrados aún.</div>`;
   } else {
-    elements.workersList.innerHTML = state.workers.map(w => `
-      <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors text-xs">
-        <div>
-          <div class="font-semibold text-slate-800 dark:text-slate-200">${escapeHtml(w.nombre)}</div>
-          <div class="text-[11px] text-blue-600 dark:text-cyan-400 font-mono font-medium tabular-nums">$${Number(w.tarifaHora).toFixed(2)} / hora</div>
+    elements.workersList.innerHTML = state.workers.map(w => {
+      const rate = Number(w.tarifaHora || 0);
+      const hasRate = rate > 0;
+      return `
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors text-xs">
+          <div class="min-w-0 pr-2">
+            <div class="font-semibold text-slate-800 dark:text-slate-200 truncate">${escapeHtml(w.nombre)}</div>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              ${hasRate 
+                ? `<span class="text-[11px] text-cyan-600 dark:text-cyan-400 font-mono font-medium tabular-nums">$${rate.toFixed(2)}/h</span>` 
+                : `<span class="text-[10px] text-amber-600 dark:text-amber-400 font-mono bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 font-medium">Sin tarifa</span>`
+              }
+            </div>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button 
+              type="button"
+              onclick="window.openEditRateModal('${w.id}', '${escapeHtml(w.nombre)}', ${rate})"
+              title="Asignar o editar tarifa por hora" 
+              class="px-2 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 transition-all active:scale-95 text-xs flex items-center gap-1.5 font-medium">
+              <i class="fa-solid fa-pen-to-square text-[11px]"></i>
+              <span>${hasRate ? 'Editar' : 'Asignar Tarifa'}</span>
+            </button>
+            <button 
+              type="button"
+              onclick="window.requestDelete('trabajadores', '${w.id}', '${escapeHtml(w.nombre)}')"
+              title="Eliminar trabajador" 
+              class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors active:scale-95 text-xs">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+            </button>
+          </div>
         </div>
-        <button 
-          onclick="window.requestDelete('trabajadores', '${w.id}', '${escapeHtml(w.nombre)}')"
-          title="Eliminar trabajador" 
-          class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors active:scale-95">
-          <i class="fa-regular fa-trash-can text-xs"></i>
-        </button>
-      </div>
-    `).join("");
+      `;
+    }).join("");
   }
 
   updateLiveCost();
@@ -660,7 +698,14 @@ function updateFinancialDashboard() {
           </div>
         </td>
         <td class="py-3 px-2 text-right font-mono text-slate-600 dark:text-slate-400 tabular-nums">
-          $${Number(worker.tarifaHora || 0).toFixed(2)}/h
+          <button 
+            type="button"
+            onclick="window.openEditRateModal('${worker.id}', '${escapeHtml(worker.nombre)}', ${Number(worker.tarifaHora || 0)})"
+            class="hover:text-cyan-600 dark:hover:text-cyan-400 hover:underline transition-colors cursor-pointer inline-flex items-center gap-1 group"
+            title="Clic para cambiar tarifa por hora">
+            <span>$${Number(worker.tarifaHora || 0).toFixed(2)}/h</span>
+            <i class="fa-solid fa-pencil text-[9px] opacity-0 group-hover:opacity-100 transition-opacity text-cyan-500"></i>
+          </button>
         </td>
         <td class="py-3 px-2 text-right font-mono text-slate-800 dark:text-slate-200 tabular-nums">
           <span class="font-bold">${workerHours.toFixed(2)}h</span>
@@ -755,6 +800,65 @@ async function confirmDelete() {
 }
 
 /* ============================================================================
+   11.B. MODAL DE ASIGNACIÓN Y EDICIÓN DE TARIFA POR HORA
+   ============================================================================ */
+window.openEditRateModal = function(id, workerName, currentRate) {
+  if (elements.editRateWorkerId) elements.editRateWorkerId.value = id;
+  if (elements.editRateModalWorker) {
+    elements.editRateModalWorker.innerHTML = `Configura la tarifa por hora para <strong>${escapeHtml(workerName)}</strong>.`;
+  }
+  if (elements.editRateInput) {
+    elements.editRateInput.value = currentRate > 0 ? Number(currentRate).toFixed(2) : "";
+    setTimeout(() => elements.editRateInput.focus(), 50);
+  }
+  elements.editRateModal?.classList.remove("hidden");
+  elements.editRateModal?.classList.add("flex");
+};
+
+function closeEditRateModal() {
+  if (!elements.editRateModal) return;
+  elements.editRateModal.classList.add("hidden");
+  elements.editRateModal.classList.remove("flex");
+  if (elements.formEditRate) elements.formEditRate.reset();
+}
+
+async function handleConfirmEditRate(e) {
+  e.preventDefault();
+  const workerId = elements.editRateWorkerId.value;
+  const rateRaw = elements.editRateInput.value.trim();
+  const newRate = rateRaw === "" ? 0 : parseFloat(rateRaw);
+
+  if (isNaN(newRate) || newRate < 0) {
+    showToast("Por favor ingresa un número igual o mayor a 0.", "warning");
+    return;
+  }
+
+  const worker = state.workers.find(w => w.id === workerId);
+  const workerName = worker ? worker.nombre : "Trabajador";
+
+  try {
+    if (db) {
+      await updateDoc(doc(db, "trabajadores", workerId), {
+        tarifaHora: Number(newRate.toFixed(2))
+      });
+    } else {
+      if (worker) {
+        worker.tarifaHora = Number(newRate.toFixed(2));
+      }
+      updateWorkersUI();
+      updateFinancialDashboard();
+    }
+
+    const rateMsg = newRate > 0 ? `$${newRate.toFixed(2)}/h` : "$0.00/h (sin tarifa)";
+    showToast(`Tarifa de "${workerName}" actualizada a ${rateMsg}.`, "success");
+    closeEditRateModal();
+  } catch (error) {
+    console.error("Error al actualizar tarifa:", error);
+    showToast("Error al actualizar: " + error.message, "error");
+  }
+}
+
+/* ============================================================================
    12. EVENT LISTENERS Y UTILIDADES
    ============================================================================ */
 function setupEventListeners() {
@@ -778,6 +882,13 @@ function setupEventListeners() {
   elements.btnConfirmDelete.addEventListener("click", confirmDelete);
   elements.deleteModal.addEventListener("click", (e) => {
     if (e.target === elements.deleteModal) closeDeleteModal();
+  });
+
+  // Modal Asignar / Editar Tarifa
+  elements.btnCancelEditRate?.addEventListener("click", closeEditRateModal);
+  elements.formEditRate?.addEventListener("submit", handleConfirmEditRate);
+  elements.editRateModal?.addEventListener("click", (e) => {
+    if (e.target === elements.editRateModal) closeEditRateModal();
   });
 }
 
