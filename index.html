@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Widely Tracker & Financial Dashboard</title>
 
-  <!-- Google Fonts: Geist & Geist Mono (Vercel Design System) -->
+  <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <!-- Tailwind CSS CDN con configuración personalizada estilo Emil Kowalski -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -19,225 +19,256 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Geist', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-            mono: ['"Geist Mono"', '"JetBrains Mono"', 'monospace'],
-          },
-          colors: {
-            subtle: {
-              light: '#f4f4f5',
-              dark: '#121215'
-            }
-          },
-          boxShadow: {
-            'glow-emerald': '0 0 50px -10px rgba(16, 185, 129, 0.35)',
-            'glow-blue': '0 0 60px -10px rgba(59, 130, 246, 0.35)',
-            'subtle-light': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
-            'subtle-dark': '0 0 0 1px rgba(255, 255, 255, 0.07), 0 8px 24px -4px rgba(0, 0, 0, 0.5)'
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
           }
         }
       }
     }
   </script>
 
-  <!-- Estilos y Animaciones de Alta Fidelidad -->
+  <!-- Script Inmediato de Inicialización y Toggle de Tema (A prueba de fallos) -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('widely_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = savedTheme !== null ? savedTheme === 'dark' : true; // Por defecto oscuro
+      
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+
+    window.toggleTheme = function() {
+      const html = document.documentElement;
+      const isNowDark = !html.classList.contains('dark');
+      
+      if (isNowDark) {
+        html.classList.add('dark');
+        localStorage.setItem('widely_theme', 'dark');
+      } else {
+        html.classList.remove('dark');
+        localStorage.setItem('widely_theme', 'light');
+      }
+      
+      updateThemeControls(isNowDark);
+    };
+
+    function updateThemeControls(isDark) {
+      const icon = document.getElementById('themeIcon');
+      const text = document.getElementById('themeText');
+      if (icon) {
+        icon.className = isDark ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-indigo-600';
+      }
+      if (text) {
+        text.textContent = isDark ? 'Modo Claro' : 'Modo Oscuro';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const isDark = document.documentElement.classList.contains('dark');
+      updateThemeControls(isDark);
+    });
+  </script>
+
+  <!-- Estilos Custom -->
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-zinc-100 dark:bg-[#070709] text-zinc-900 dark:text-zinc-100 font-sans min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black antialiased transition-colors duration-300 relative overflow-x-hidden">
-
-  <!-- Ambient Backdrop Gradient (Linear / Vercel style) -->
-  <div class="fixed inset-0 pointer-events-none -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_-15%,rgba(59,130,246,0.08),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_60%_at_50%_-15%,rgba(59,130,246,0.12),rgba(0,0,0,0))]"></div>
+<body class="bg-slate-100 dark:bg-[#090d16] text-slate-900 dark:text-slate-100 font-sans min-h-screen selection:bg-blue-600 selection:text-white transition-colors duration-200">
 
   <!-- Banner de Advertencia si falta la API Key -->
-  <div id="firebaseWarning" class="hidden bg-amber-500/10 border-b border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs py-2 px-4 text-center">
+  <div id="firebaseWarning" class="hidden bg-amber-500/10 border-b border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs py-2.5 px-4 text-center">
     <div class="max-w-7xl mx-auto flex items-center justify-center gap-2">
       <i class="fa-solid fa-triangle-exclamation"></i>
-      <span><strong>Configuración requerida:</strong> Agrega tus credenciales en <code class="font-mono bg-amber-500/10 px-1.5 py-0.5 rounded">app.js</code> para sincronizar con Firestore.</span>
+      <span><strong>Atención:</strong> Configura tus credenciales en <code class="font-mono bg-amber-500/10 px-1.5 py-0.5 rounded">app.js</code> para sincronizar con Firestore.</span>
     </div>
   </div>
 
-  <!-- Navbar Superior (Ultra-clean Floating Glass) -->
-  <header class="border-b border-zinc-200/80 dark:border-white/[0.08] bg-white/75 dark:bg-[#070709]/75 backdrop-blur-xl sticky top-0 z-40 transition-colors duration-300">
+  <!-- Navbar Superior -->
+  <header class="border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-[#0d121f]/90 backdrop-blur-md sticky top-0 z-40 transition-colors duration-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       
-      <!-- Brand & Title -->
+      <!-- Brand & Título -->
       <div class="flex items-center gap-3">
-        <div class="h-9 w-9 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-black flex items-center justify-center shadow-sm transition-transform active:scale-95 duration-150">
-          <i class="fa-solid fa-bolt text-sm"></i>
+        <div class="h-10 w-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+          <i class="fa-solid fa-stopwatch text-base"></i>
         </div>
         <div>
-          <h1 class="text-sm sm:text-base font-semibold tracking-tight text-zinc-900 dark:text-white flex items-center gap-2">
+          <h1 class="text-base font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             Widely Tracker
-            <span class="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-zinc-200/80 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 border border-zinc-300/60 dark:border-white/10">v2.0</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20">PRO</span>
           </h1>
-          <p class="text-[11px] text-zinc-500 dark:text-zinc-400">Crafted Time & Financial Engine</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Control de Horas & Dashboard Financiero</p>
         </div>
       </div>
 
-      <!-- Right Controls: Status + Time + Theme Switcher -->
-      <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Controles Superiores: Estado + Reloj + Botón Toggle de Modo Claro/Oscuro -->
+      <div class="flex items-center gap-3 sm:gap-4">
         <!-- Indicador de conexión Firebase -->
-        <div id="dbStatus" class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-zinc-200/60 dark:bg-white/[0.06] border border-zinc-300/60 dark:border-white/[0.08] text-xs">
+        <div id="dbStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs">
           <span class="relative flex h-2 w-2">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
-          <span class="text-zinc-700 dark:text-zinc-300 font-medium text-[11px]">Firestore Conectado</span>
+          <span class="text-slate-700 dark:text-slate-300 font-medium text-xs">Firestore Conectado</span>
         </div>
 
         <!-- Reloj Digital Header -->
-        <div id="currentTime" class="hidden sm:block text-xs font-mono text-zinc-500 dark:text-zinc-400 tabular-nums border-l border-zinc-200 dark:border-white/[0.08] pl-3">
+        <div id="currentTime" class="hidden md:block text-xs font-mono text-slate-500 dark:text-slate-400 tabular-nums border-l border-slate-200 dark:border-slate-800 pl-3">
           --:--:--
         </div>
 
-        <!-- Emil Kowalski Theme Toggle (Sun / Moon) -->
-        <button id="themeToggle" type="button" aria-label="Cambiar tema" class="theme-toggle-btn h-9 w-9 rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-zinc-100 dark:bg-white/[0.05] hover:bg-zinc-200/80 dark:hover:bg-white/[0.1] text-zinc-700 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 active:scale-90">
-          <i id="themeIcon" class="fa-regular fa-sun text-sm transition-transform duration-200"></i>
+        <!-- Botón de Modo Claro / Oscuro con Icono y Texto Claro -->
+        <button id="themeToggle" type="button" onclick="window.toggleTheme()" aria-label="Cambiar modo oscuro/claro" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium transition-all active:scale-95 shadow-sm">
+          <i id="themeIcon" class="fa-solid fa-sun text-amber-400 text-sm"></i>
+          <span id="themeText" class="hidden sm:inline">Modo Claro</span>
         </button>
       </div>
 
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-    <!-- KPI Summary Cards (Vercel Style Metric Cards) -->
+    <!-- KPI Summary Cards (Métricas Generales) -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       
       <!-- Total Horas -->
-      <div class="card stat-card group">
+      <div class="kpi-card group">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Horas Trabajadas</span>
-          <div class="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 flex items-center justify-center text-xs border border-zinc-200 dark:border-white/[0.08]">
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Horas Trabajadas</span>
+          <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs border border-blue-200 dark:border-blue-500/20">
             <i class="fa-regular fa-clock"></i>
           </div>
         </div>
-        <div class="mt-3 flex items-baseline gap-2">
-          <span id="kpiTotalHoras" class="text-2xl font-bold font-mono tracking-tight text-zinc-900 dark:text-white tabular-nums">0.00</span>
-          <span class="text-xs text-zinc-500 dark:text-zinc-400">hrs</span>
+        <div class="mt-3 flex items-baseline gap-1.5">
+          <span id="kpiTotalHoras" class="text-2xl font-bold font-mono text-slate-900 dark:text-white tabular-nums">0.00</span>
+          <span class="text-xs text-slate-500">hrs</span>
         </div>
-        <div class="mt-1 text-[11px] text-zinc-500 dark:text-zinc-500 tabular-nums" id="kpiTotalHorasFormatted">0h 0m 0s en total</div>
+        <div class="mt-1 text-xs text-slate-500 tabular-nums" id="kpiTotalHorasFormatted">0h 0m 0s en total</div>
       </div>
 
       <!-- Total Generado -->
-      <div class="card stat-card group">
+      <div class="kpi-card group">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Total Generado</span>
-          <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs border border-blue-500/20">
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Generado</span>
+          <div class="w-8 h-8 rounded-lg bg-cyan-100 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center text-xs border border-cyan-200 dark:border-cyan-500/20">
             <i class="fa-solid fa-receipt"></i>
           </div>
         </div>
-        <div class="mt-3 flex items-baseline gap-2">
-          <span id="kpiTotalGenerado" class="text-2xl font-bold font-mono tracking-tight text-blue-600 dark:text-blue-400 tabular-nums">$0.00</span>
+        <div class="mt-3 flex items-baseline gap-1.5">
+          <span id="kpiTotalGenerado" class="text-2xl font-bold font-mono text-cyan-600 dark:text-cyan-400 tabular-nums">$0.00</span>
         </div>
-        <div class="mt-1 text-[11px] text-zinc-500 dark:text-zinc-500">Costo acumulado de tareas</div>
+        <div class="mt-1 text-xs text-slate-500">Costo acumulado de tareas</div>
       </div>
 
       <!-- Total Pagado -->
-      <div class="card stat-card group">
+      <div class="kpi-card group">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Total Pagado</span>
-          <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs border border-emerald-500/20">
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Pagado</span>
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs border border-emerald-200 dark:border-emerald-500/20">
             <i class="fa-solid fa-circle-check"></i>
           </div>
         </div>
-        <div class="mt-3 flex items-baseline gap-2">
-          <span id="kpiTotalPagado" class="text-2xl font-bold font-mono tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">$0.00</span>
+        <div class="mt-3 flex items-baseline gap-1.5">
+          <span id="kpiTotalPagado" class="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums">$0.00</span>
         </div>
-        <div class="mt-1 text-[11px] text-zinc-500 dark:text-zinc-500">Adelantos y liquidaciones</div>
+        <div class="mt-1 text-xs text-slate-500">Adelantos y liquidaciones</div>
       </div>
 
       <!-- Saldo Pendiente -->
-      <div class="card stat-card group border-rose-500/20 dark:border-rose-500/30">
+      <div class="kpi-card group border-rose-300 dark:border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/10">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-rose-600 dark:text-rose-400">Saldo Pendiente Global</span>
-          <div class="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xs border border-rose-500/20">
+          <span class="text-xs font-medium text-rose-600 dark:text-rose-400 uppercase tracking-wider">Saldo Pendiente Global</span>
+          <div class="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xs border border-rose-200 dark:border-rose-500/20">
             <i class="fa-solid fa-scale-unbalanced"></i>
           </div>
         </div>
-        <div class="mt-3 flex items-baseline gap-2">
-          <span id="kpiSaldoPendiente" class="text-2xl font-bold font-mono tracking-tight text-rose-600 dark:text-rose-400 tabular-nums">$0.00</span>
+        <div class="mt-3 flex items-baseline gap-1.5">
+          <span id="kpiSaldoPendiente" class="text-2xl font-bold font-mono text-rose-600 dark:text-rose-400 tabular-nums">$0.00</span>
         </div>
-        <div class="mt-1 text-[11px] text-zinc-500 dark:text-zinc-500" id="kpiSaldoDesc">Deuda total por liquidar</div>
+        <div class="mt-1 text-xs text-slate-500" id="kpiSaldoDesc">Deuda total por liquidar</div>
       </div>
     </section>
 
-    <!-- Sección Principal: Cronómetro + Formularios de Gestión -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Contenido Principal: 2 Columnas Balanceadas -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-      <!-- COLUMNA IZQUIERDA: Tracker en Vivo (Centerpiece) + Formularios -->
-      <div class="lg:col-span-5 space-y-8">
+      <!-- COLUMNA IZQUIERDA: Tracker + Trabajadores + Pagos (5 columnas) -->
+      <div class="lg:col-span-5 space-y-6">
 
-        <!-- CARD 1: Cronómetro en Vivo (The Kowalski Centerpiece) -->
-        <div class="card p-6 sm:p-7 relative overflow-hidden group">
-          <!-- Ambient Pulsing Glow Aura behind timer -->
-          <div class="timer-glow"></div>
-
-          <!-- Header Card -->
-          <div class="flex items-center justify-between pb-4 border-b border-zinc-200/80 dark:border-white/[0.08]">
+        <!-- CARD 1: Cronómetro en Vivo -->
+        <div class="content-card relative overflow-hidden">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
             <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-              <h2 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">Tracker de Tareas</h2>
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+              <h2 class="text-sm font-bold tracking-tight text-slate-900 dark:text-white uppercase">Tracker de Tareas</h2>
             </div>
-            <span id="timerStatusBadge" class="text-[11px] font-mono font-medium px-2.5 py-0.5 rounded-full bg-zinc-200/80 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 border border-zinc-300/60 dark:border-white/[0.08]">
+            <span id="timerStatusBadge" class="text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">
               Detenido
             </span>
           </div>
 
-          <div class="mt-5 space-y-4">
+          <div class="mt-4 space-y-4">
             <!-- Selector de Trabajador -->
             <div>
-              <label for="timerWorkerSelect" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">
+              <label for="timerWorkerSelect" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                 Trabajador
               </label>
-              <select id="timerWorkerSelect" class="input-base select-base w-full">
+              <select id="timerWorkerSelect" class="form-input w-full">
                 <option value="">-- Selecciona un trabajador --</option>
               </select>
             </div>
 
             <!-- Tarea / Proyecto -->
             <div>
-              <label for="timerTaskDescription" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">
+              <label for="timerTaskDescription" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                 Descripción de la Tarea
               </label>
-              <input type="text" id="timerTaskDescription" placeholder="Ej. Rediseño de componentes, Auditoría UX..." class="input-base w-full">
+              <input type="text" id="timerTaskDescription" placeholder="Ej. Campaña Facebook Ads, Rediseño UI..." class="form-input w-full">
             </div>
 
-            <!-- Display Digital del Reloj (Centro visual) -->
-            <div class="timer-chamber my-5 p-6 sm:p-8 rounded-2xl text-center relative overflow-hidden transition-all duration-300">
-              <div class="text-[10px] font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-1">Tiempo Transcurrido</div>
+            <!-- Display Digital del Reloj -->
+            <div class="timer-chamber my-4 p-6 rounded-2xl text-center relative overflow-hidden">
+              <!-- Glow pulsante sutil cuando corre -->
+              <div id="timerGlowAura" class="timer-glow-pulse"></div>
+
+              <div class="text-[11px] font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Tiempo Transcurrido</div>
               
-              <!-- Dígitos del Cronómetro con tabular-nums -->
-              <div id="timerDisplay" class="font-mono text-5xl sm:text-6xl font-bold tracking-tight text-zinc-900 dark:text-white tabular-nums py-2 select-none">
+              <!-- Números Gigantes del Cronómetro -->
+              <div id="timerDisplay" class="font-mono text-5xl sm:text-6xl font-extrabold tracking-wider text-slate-900 dark:text-white tabular-nums py-2 select-none">
                 00:00:00
               </div>
               
               <!-- Costo Acumulado en Vivo -->
-              <div class="mt-3 pt-3 border-t border-zinc-200/60 dark:border-white/[0.06] flex items-center justify-center gap-2">
-                <span class="text-xs text-zinc-500 dark:text-zinc-400">Costo acumulado:</span>
-                <span id="liveCostBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 tabular-nums">
+              <div class="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-center gap-2">
+                <span class="text-xs text-slate-500 dark:text-slate-400">Costo acumulado:</span>
+                <span id="liveCostBadge" class="text-xs font-mono font-bold px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/20 tabular-nums">
                   $0.00
                 </span>
               </div>
             </div>
 
-            <!-- Controles Táctiles (Micro-interacción spring / active:scale-97) -->
+            <!-- Controles del Cronómetro -->
             <div class="grid grid-cols-3 gap-2">
-              <button id="btnStart" class="btn btn-primary flex items-center justify-center gap-2 text-xs py-2.5">
-                <i class="fa-solid fa-play text-[11px]"></i>
+              <button id="btnStart" class="btn-ctrl btn-green flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-play text-xs"></i>
                 <span>Iniciar</span>
               </button>
-              <button id="btnPause" class="btn btn-secondary flex items-center justify-center gap-2 text-xs py-2.5" disabled>
-                <i class="fa-solid fa-pause text-[11px]"></i>
+              <button id="btnPause" class="btn-ctrl btn-amber flex items-center justify-center gap-1.5" disabled>
+                <i class="fa-solid fa-pause text-xs"></i>
                 <span>Pausar</span>
               </button>
-              <button id="btnReset" class="btn btn-ghost flex items-center justify-center gap-2 text-xs py-2.5" disabled>
-                <i class="fa-solid fa-rotate-left text-[11px]"></i>
+              <button id="btnReset" class="btn-ctrl btn-slate flex items-center justify-center gap-1.5" disabled>
+                <i class="fa-solid fa-rotate-left text-xs"></i>
                 <span>Reiniciar</span>
               </button>
             </div>
 
-            <!-- Guardar Tarea en Firebase -->
-            <button id="btnRegisterTask" class="w-full mt-2 btn btn-emerald flex items-center justify-center gap-2 py-3 text-xs font-semibold">
+            <!-- Botón Principal: Registrar Tarea -->
+            <button id="btnRegisterTask" class="w-full btn-ctrl btn-blue py-3 font-semibold shadow-md flex items-center justify-center gap-2">
               <i class="fa-solid fa-cloud-arrow-up"></i>
               <span>Registrar Tarea y Guardar Costo</span>
             </button>
@@ -245,87 +276,87 @@
         </div>
 
         <!-- CARD 2: Gestión de Trabajadores -->
-        <div class="card p-6 sm:p-7">
-          <div class="flex items-center justify-between pb-4 border-b border-zinc-200/80 dark:border-white/[0.08]">
+        <div class="content-card">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
             <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
-              <h2 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">Gestión de Trabajadores</h2>
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
+              <h2 class="text-sm font-bold tracking-tight text-slate-900 dark:text-white uppercase">Gestión de Trabajadores</h2>
             </div>
-            <i class="fa-solid fa-user-plus text-xs text-zinc-400"></i>
+            <i class="fa-solid fa-user-plus text-slate-400"></i>
           </div>
 
-          <form id="formWorker" class="mt-5 space-y-4">
+          <form id="formWorker" class="mt-4 space-y-4">
             <div>
-              <label for="workerName" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Nombre Completo</label>
-              <input type="text" id="workerName" placeholder="Ej. Camila González" required class="input-base w-full">
+              <label for="workerName" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nombre Completo</label>
+              <input type="text" id="workerName" placeholder="Ej. Camila González" required class="form-input w-full">
             </div>
 
             <div>
-              <label for="workerRate" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Tarifa por Hora ($)</label>
+              <label for="workerRate" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tarifa por Hora ($)</label>
               <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-mono text-xs">$</span>
-                <input type="number" id="workerRate" step="0.01" min="0" placeholder="25.00" required class="input-base w-full pl-7 font-mono text-xs">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-sm">$</span>
+                <input type="number" id="workerRate" step="0.01" min="0" placeholder="25.00" required class="form-input w-full pl-8 font-mono text-sm">
               </div>
             </div>
 
-            <button type="submit" id="btnSaveWorker" class="w-full btn btn-secondary flex items-center justify-center gap-2 text-xs py-2.5 font-medium">
-              <i class="fa-solid fa-plus text-[11px]"></i>
+            <button type="submit" id="btnSaveWorker" class="w-full btn-ctrl btn-cyan flex items-center justify-center gap-2 font-medium">
+              <i class="fa-solid fa-plus text-xs"></i>
               <span>Guardar Trabajador</span>
             </button>
           </form>
 
           <!-- Lista de Trabajadores Activos -->
-          <div class="mt-6 pt-4 border-t border-zinc-200/80 dark:border-white/[0.08]">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Trabajadores Activos</h3>
-              <span id="workerCount" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-zinc-200/70 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400">0</span>
+          <div class="mt-5 pt-4 border-t border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-2.5">
+              <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Trabajadores Activos</h3>
+              <span id="workerCount" class="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">0</span>
             </div>
-            <div id="workersList" class="space-y-1.5 max-h-44 overflow-y-auto pr-1">
-              <div class="text-xs text-zinc-400 text-center py-4">No hay trabajadores registrados.</div>
+            <div id="workersList" class="space-y-2 max-h-40 overflow-y-auto pr-1">
+              <div class="text-xs text-slate-400 text-center py-4">No hay trabajadores registrados.</div>
             </div>
           </div>
         </div>
 
         <!-- CARD 3: Registro de Pagos -->
-        <div class="card p-6 sm:p-7">
-          <div class="flex items-center justify-between pb-4 border-b border-zinc-200/80 dark:border-white/[0.08]">
+        <div class="content-card">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
             <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-              <h2 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">Registro de Pagos y Adelantos</h2>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <h2 class="text-sm font-bold tracking-tight text-slate-900 dark:text-white uppercase">Registro de Pagos y Adelantos</h2>
             </div>
-            <i class="fa-solid fa-money-bill-transfer text-xs text-zinc-400"></i>
+            <i class="fa-solid fa-money-bill-transfer text-slate-400"></i>
           </div>
 
-          <form id="formPayment" class="mt-5 space-y-4">
+          <form id="formPayment" class="mt-4 space-y-4">
             <div>
-              <label for="paymentWorkerSelect" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Trabajador</label>
-              <select id="paymentWorkerSelect" required class="input-base select-base w-full">
+              <label for="paymentWorkerSelect" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Trabajador</label>
+              <select id="paymentWorkerSelect" required class="form-input w-full">
                 <option value="">-- Selecciona un trabajador --</option>
               </select>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label for="paymentAmount" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Monto ($)</label>
+                <label for="paymentAmount" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Monto ($)</label>
                 <div class="relative">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-mono text-xs">$</span>
-                  <input type="number" id="paymentAmount" step="0.01" min="0.01" placeholder="100.00" required class="input-base w-full pl-7 font-mono text-xs">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-sm">$</span>
+                  <input type="number" id="paymentAmount" step="0.01" min="0.01" placeholder="100.00" required class="form-input w-full pl-8 font-mono text-sm">
                 </div>
               </div>
 
               <div>
-                <label for="paymentDate" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Fecha</label>
-                <input type="date" id="paymentDate" required class="input-base w-full font-mono text-xs">
+                <label for="paymentDate" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Fecha</label>
+                <input type="date" id="paymentDate" required class="form-input w-full font-mono text-xs">
               </div>
             </div>
 
             <div>
-              <label for="paymentReference" class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Concepto o Referencia</label>
-              <input type="text" id="paymentReference" placeholder="Ej. Quincena #1, Transferencia #892" class="input-base w-full">
+              <label for="paymentReference" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Concepto o Referencia</label>
+              <input type="text" id="paymentReference" placeholder="Ej. Quincena #1, Transferencia #892" class="form-input w-full">
             </div>
 
-            <button type="submit" id="btnSavePayment" class="w-full btn btn-primary flex items-center justify-center gap-2 text-xs py-2.5 font-medium">
-              <i class="fa-solid fa-check text-[11px]"></i>
+            <button type="submit" id="btnSavePayment" class="w-full btn-ctrl btn-emerald flex items-center justify-center gap-2 font-medium">
+              <i class="fa-solid fa-check text-xs"></i>
               <span>Registrar Pago</span>
             </button>
           </form>
@@ -333,28 +364,28 @@
 
       </div>
 
-      <!-- COLUMNA DERECHA: Dashboard Financiero + Historial -->
-      <div class="lg:col-span-7 space-y-8">
+      <!-- COLUMNA DERECHA: Dashboard Financiero + Historial (7 columnas) -->
+      <div class="lg:col-span-7 space-y-6">
 
-        <!-- TABLA PRINCIPAL: Dashboard Financiero por Trabajador -->
-        <div class="card p-6 sm:p-7">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-200/80 dark:border-white/[0.08] gap-2">
+        <!-- CARD 4: Tabla Principal - Dashboard Financiero -->
+        <div class="content-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 gap-2">
             <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span>
               <div>
-                <h2 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">Dashboard Financiero</h2>
-                <p class="text-[11px] text-zinc-500 dark:text-zinc-400">Balance acumulado y saldo por liquidar</p>
+                <h2 class="text-sm font-bold tracking-tight text-slate-900 dark:text-white uppercase">Dashboard Financiero por Trabajador</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Balance acumulado y saldo por liquidar en tiempo real</p>
               </div>
             </div>
-            <div class="text-[11px] text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5 font-mono">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-mono">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>En vivo</span>
             </div>
           </div>
 
           <div class="mt-4 overflow-x-auto">
             <table class="w-full text-left text-xs">
-              <thead class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-white/[0.08]">
+              <thead class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800">
                 <tr>
                   <th scope="col" class="py-3 px-3 font-semibold">Trabajador</th>
                   <th scope="col" class="py-3 px-2 font-semibold text-right">Tarifa</th>
@@ -364,9 +395,9 @@
                   <th scope="col" class="py-3 px-3 font-semibold text-right">Saldo Pendiente</th>
                 </tr>
               </thead>
-              <tbody id="financialTableBody" class="divide-y divide-zinc-200/60 dark:divide-white/[0.06]">
+              <tbody id="financialTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
                 <tr>
-                  <td colspan="6" class="py-8 text-center text-zinc-400 text-xs">
+                  <td colspan="6" class="py-8 text-center text-slate-400 text-xs">
                     Cargando información financiera...
                   </td>
                 </tr>
@@ -375,18 +406,18 @@
           </div>
         </div>
 
-        <!-- CARD DE HISTORIAL: Tareas y Pagos con Pestañas Pill -->
-        <div class="card p-6 sm:p-7">
-          <div class="flex items-center justify-between pb-4 border-b border-zinc-200/80 dark:border-white/[0.08]">
-            <!-- Segmented Control Tabs (Emil Kowalski Pill Switch) -->
-            <div class="inline-flex p-1 rounded-xl bg-zinc-200/60 dark:bg-white/[0.05] border border-zinc-300/60 dark:border-white/[0.08] gap-1">
-              <button id="tabTasks" class="tab-pill active text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all">
-                <i class="fa-solid fa-list-check text-[11px]"></i>
-                <span>Tareas (<span id="taskCount">0</span>)</span>
+        <!-- CARD 5: Historial y Auditoría de Registros -->
+        <div class="content-card">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+            <!-- Tabs Segmented Control -->
+            <div class="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 gap-1">
+              <button id="tabTasks" class="tab-btn active text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all">
+                <i class="fa-solid fa-list-check text-xs"></i>
+                <span>Tareas Registradas (<span id="taskCount">0</span>)</span>
               </button>
-              <button id="tabPayments" class="tab-pill text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all">
-                <i class="fa-solid fa-receipt text-[11px]"></i>
-                <span>Pagos (<span id="paymentCount">0</span>)</span>
+              <button id="tabPayments" class="tab-btn text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                <i class="fa-solid fa-receipt text-xs"></i>
+                <span>Historial de Pagos (<span id="paymentCount">0</span>)</span>
               </button>
             </div>
           </div>
@@ -395,7 +426,7 @@
           <div id="tasksView" class="mt-4">
             <div class="overflow-x-auto max-h-96 overflow-y-auto">
               <table class="w-full text-left text-xs">
-                <thead class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-white/[0.08] sticky top-0 bg-white/95 dark:bg-[#0c0c10]/95 backdrop-blur-md">
+                <thead class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 sticky top-0">
                   <tr>
                     <th class="py-2.5 px-3">Fecha</th>
                     <th class="py-2.5 px-3">Trabajador</th>
@@ -405,9 +436,9 @@
                     <th class="py-2.5 px-2 text-center">Acción</th>
                   </tr>
                 </thead>
-                <tbody id="tasksTableBody" class="divide-y divide-zinc-200/60 dark:divide-white/[0.06]">
+                <tbody id="tasksTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
                   <tr>
-                    <td colspan="6" class="py-6 text-center text-zinc-400 text-xs">No hay tareas registradas.</td>
+                    <td colspan="6" class="py-6 text-center text-slate-400 text-xs">No hay tareas registradas.</td>
                   </tr>
                 </tbody>
               </table>
@@ -418,7 +449,7 @@
           <div id="paymentsView" class="mt-4 hidden">
             <div class="overflow-x-auto max-h-96 overflow-y-auto">
               <table class="w-full text-left text-xs">
-                <thead class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-white/[0.08] sticky top-0 bg-white/95 dark:bg-[#0c0c10]/95 backdrop-blur-md">
+                <thead class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 sticky top-0">
                   <tr>
                     <th class="py-2.5 px-3">Fecha</th>
                     <th class="py-2.5 px-3">Trabajador</th>
@@ -427,9 +458,9 @@
                     <th class="py-2.5 px-2 text-center">Acción</th>
                   </tr>
                 </thead>
-                <tbody id="paymentsTableBody" class="divide-y divide-zinc-200/60 dark:divide-white/[0.06]">
+                <tbody id="paymentsTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
                   <tr>
-                    <td colspan="5" class="py-6 text-center text-zinc-400 text-xs">No hay pagos registrados.</td>
+                    <td colspan="5" class="py-6 text-center text-slate-400 text-xs">No hay pagos registrados.</td>
                   </tr>
                 </tbody>
               </table>
@@ -444,27 +475,26 @@
 
   </main>
 
-  <!-- Sonner-style Toast Container (Bottom-Right Floating) -->
+  <!-- Contenedor Flotante de Toasts -->
   <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Modal de Confirmación de Borrado (Centrado con escala y desenfoque) -->
-  <div id="deleteModal" class="fixed inset-0 bg-black/50 dark:bg-black/75 backdrop-blur-md hidden items-center justify-center z-50 p-4 transition-opacity duration-200">
-    <div class="modal-dialog card max-w-sm w-full p-6 space-y-4 shadow-2xl border border-zinc-200 dark:border-white/[0.12] transition-transform duration-200">
-      <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center text-base mx-auto border border-rose-500/20">
+  <!-- Modal de Confirmación de Borrado -->
+  <div id="deleteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-opacity duration-200">
+    <div class="bg-white dark:bg-[#111624] border border-slate-200 dark:border-slate-700 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+      <div class="w-11 h-11 rounded-full bg-rose-100 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center text-lg mx-auto border border-rose-200 dark:border-rose-500/20">
         <i class="fa-solid fa-trash-can"></i>
       </div>
       <div class="text-center">
-        <h3 class="text-sm font-semibold text-zinc-900 dark:text-white">¿Confirmar eliminación?</h3>
-        <p id="deleteModalText" class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Esta acción borrará el registro de Firebase y recalculará los balances.</p>
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white">¿Confirmar eliminación?</h3>
+        <p id="deleteModalText" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Esta acción borrará el registro de Firebase y recalculará los balances.</p>
       </div>
       <div class="flex gap-2 pt-2">
-        <button id="btnCancelDelete" class="w-1/2 btn btn-secondary text-xs py-2">Cancelar</button>
-        <button id="btnConfirmDelete" class="w-1/2 btn btn-danger text-xs py-2">Eliminar</button>
+        <button id="btnCancelDelete" class="w-1/2 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Cancelar</button>
+        <button id="btnConfirmDelete" class="w-1/2 py-2 text-xs font-semibold rounded-xl bg-rose-600 hover:bg-rose-500 text-white transition-colors">Eliminar</button>
       </div>
     </div>
   </div>
 
-  <!-- Lógica Principal de la Aplicación -->
   <script type="module" src="app.js"></script>
 </body>
 </html>
