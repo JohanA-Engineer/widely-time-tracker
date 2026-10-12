@@ -1,0 +1,293 @@
+# 📖 Manual de Funcionamiento y Arquitectura del Proyecto
+## **Widely Tracker & Financial Dashboard**
+
+Este documento detalla a fondo la arquitectura, el modelo de datos, la lógica de negocio, los cálculos matemáticos y el flujo operativo de la aplicación web **Widely Tracker**.
+
+---
+
+## 📑 Tabla de Contenidos
+1. [Visión General del Proyecto](#1-visión-general-del-proyecto)
+2. [Arquitectura del Sistema y Stack Tecnológico](#2-arquitectura-del-sistema-y-stack-tecnológico)
+3. [Diagrama de Flujo de Datos (Arquitectura en Tiempo Real)](#3-diagrama-de-flujo-de-datos)
+4. [Módulos y Funcionamiento Paso a Paso](#4-módulos-y-funcionamiento-paso-a-paso)
+   - [Módulo A: Gestión de Trabajadores](#módulo-a-gestión-de-trabajadores)
+   - [Módulo B: Tracker de Tareas (Cronómetro en Vivo)](#módulo-b-tracker-de-tareas-cronómetro-en-vivo)
+   - [Módulo C: Registro de Pagos y Adelantos](#módulo-c-registro-de-pagos-y-adelantos)
+   - [Módulo D: Dashboard Financiero Dinámico](#módulo-d-dashboard-financiero-dinámico)
+   - [Módulo E: Historial y Auditoría de Registros](#módulo-e-historial-y-auditoría-de-registros)
+   - [Módulo F: Sistema de Temas y Tipografía Anybody](#módulo-f-sistema-de-temas-y-tipografía-anybody)
+5. [Fórmulas y Lógica de Negocio](#5-fórmulas-y-lógica-de-negocio)
+6. [Modelo de Datos en Firebase Firestore](#6-modelo-de-datos-en-firebase-firestore)
+7. [Guía de Inicialización, Ejecución y Despliegue](#7-guía-de-inicialización-ejecución-y-despliegue)
+
+---
+
+## 1. Visión General del Proyecto
+
+**Widely Tracker** es una solución integral diseñada para resolver un problema crítico en agencias, consultoras y equipos de trabajo: **el control preciso del tiempo facturable y la conciliación financiera inmediata entre dinero generado y dinero pagado**.
+
+A diferencia de las hojas de cálculo tradicionales o herramientas dispersas, Widely Tracker unifica:
+1. **Medición del tiempo en vivo** con cálculo monetario instantáneo.
+2. **Base de datos reactiva en la nube** (Firestore), permitiendo que múltiples usuarios o administradores vean las actualizaciones sin recargar la página.
+3. **Dashboard de balance en tiempo real**, alertando deudas pendientes por liquidar o anticipos a favor.
+4. **Diseño de alta gama**, con soporte nativo de Modo Claro y Oscuro y la tipografía neo-grotesca **Anybody**.
+
+---
+
+## 2. Arquitectura del Sistema y Stack Tecnológico
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                       CLIENTE (Browser)                     │
+│  ┌───────────────────────┐       ┌───────────────────────┐  │
+│  │      index.html       │       │       styles.css      │  │
+│  │ (Tailwind + Anybody)  │       │ (Theme, Cards, Aura)  │  │
+│  └───────────┬───────────┘       └───────────┬───────────┘  │
+│              │                               │              │
+│              └───────────────┬───────────────┘              │
+│                              ▼                              │
+│                         app.js                              │
+│           (Lógica del Cronómetro, Estado Local,             │
+│            Cálculos Financieros & Reactividad)              │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+               ┌───────────────┴───────────────┐
+               ▼                               ▼
+  ┌────────────────────────┐      ┌────────────────────────┐
+  │   Firebase Firestore   │      │   Backend Python       │
+  │   (Base de Datos NoSQL │      │   (FastAPI + Uvicorn)   │
+  │    en Tiempo Real SDK) │      │   Servidor Local / API  │
+  └────────────────────────┘      └────────────────────────┘
+```
+
+### Tecnologías:
+- **Frontend Core:** HTML5 semántico, JavaScript Vanilla moderno (ES Modules).
+- **Tipografía:** Variable Font **Anybody** (Tyler Finck / Google Fonts), con soporte numérico tabular (`tnum`).
+- **Diseño & Estilos:** Tailwind CSS (CDN) + Hoja de estilos personalizada `styles.css` con variables CSS adaptativas para Dark/Light mode.
+- **Base de Datos:** Google Firebase Firestore SDK v10 (modular ESM), con sincronización reactiva bidireccional (`onSnapshot`).
+- **Backend Opcional:** Python 3.13 con **FastAPI** y **Uvicorn** para servir archivos estáticos, diagnóstico (`/api/health`) y extensibilidad.
+- **Despliegue & Git:** GitHub Pages para hosting estático mundial gratuito con HTTPS y repositorio en GitHub.
+
+---
+
+## 3. Diagrama de Flujo de Datos
+
+```mermaid
+flowchart TD
+    subgraph UI["Interfaz de Usuario (app.js)"]
+        WForm["1. Formulario Trabajador"]
+        Timer["2. Cronómetro en Vivo"]
+        PForm["3. Formulario de Pagos"]
+        Dash["4. Dashboard Financiero"]
+        Hist["5. Historial de Actividad"]
+    end
+
+    subgraph FS["Firebase Firestore"]
+        ColW[("Colección: trabajadores")]
+        ColT[("Colección: tareas")]
+        ColP[("Colección: pagos")]
+    end
+
+    WForm -->|addDoc| ColW
+    Timer -->|addDoc al registrar| ColT
+    PForm -->|addDoc| ColP
+
+    ColW -.->|onSnapshot en vivo| Dash
+    ColW -.->|onSnapshot en vivo| Timer
+    ColW -.->|onSnapshot en vivo| PForm
+
+    ColT -.->|onSnapshot en vivo| Dash
+    ColT -.->|onSnapshot en vivo| Hist
+
+    ColP -.->|onSnapshot en vivo| Dash
+    ColP -.->|onSnapshot en vivo| Hist
+
+    Dash -->|Calcula en milisegundos| Balances["Saldo = Generado - Pagado"]
+```
+
+---
+
+## 4. Módulos y Funcionamiento Paso a Paso
+
+### Módulo A: Gestión de Trabajadores
+- **Propósito:** Registrar al personal y su costo de hora laboral.
+- **Inputs:** Nombre Completo y Tarifa por Hora ($ USD).
+- **Flujo:**
+  1. Al presionar **"Guardar Trabajador"**, se valida que la tarifa sea $\ge 0$ y el nombre no esté vacío.
+  2. Se envía un documento a la colección `trabajadores` en Firestore.
+  3. El listener `onSnapshot` detecta el nuevo documento y automáticamente:
+     - Actualiza el menú desplegable del cronómetro.
+     - Actualiza el menú desplegable del registro de pagos.
+     - Añade al trabajador en la lista de trabajadores activos con su botón de eliminación.
+     - Añade una fila al Dashboard Financiero.
+
+---
+
+### Módulo B: Tracker de Tareas (Cronómetro en Vivo)
+- **Propósito:** Medir la duración de una sesión de trabajo y calcular su costo monetario en tiempo real.
+- **Precisión Temporal:**
+  - En lugar de confiar únicamente en `setInterval(..., 1000)` (que sufre desfases si el navegador entra en segundo plano), el cronómetro almacena la marca de tiempo absoluta:
+    $$\text{startTime} = \text{Date.now}() - (\text{elapsedSeconds} \times 1000)$$
+  - Cada segundo calcula:
+    $$\text{elapsedSeconds} = \lfloor (\text{Date.now}() - \text{startTime}) / 1000 \rfloor$$
+- **Cálculo en Vivo:**
+  - Mientras el reloj avanza, calcula y muestra el costo parcial acumulado:
+    $$\text{Costo en Vivo} = \left(\frac{\text{segundos}}{3600}\right) \times \text{Tarifa del Trabajador Seleccionado}$$
+- **Controles:**
+  - **Iniciar:** Activa el temporizador, enciende el aura pulsante (`.timer-glow-pulse`) y deshabilita el botón Iniciar.
+  - **Pausar:** Detiene la cuenta, conserva los segundos transcurridos y apaga el pulso.
+  - **Reiniciar:** Restablece a `00:00:00` y limpia el costo acumulado.
+  - **Registrar Tarea y Guardar Costo:**
+    - Valida que haya transcurrido al menos 1 segundo y que un trabajador esté seleccionado.
+    - Calcula el costo final redondeado a 2 decimales.
+    - Guarda en la colección `tareas` de Firestore con la fecha actual (ISO) y marca de tiempo (`serverTimestamp()`).
+    - Reinicia el cronómetro automáticamente y emite una notificación toast de confirmación.
+
+---
+
+### Módulo C: Registro de Pagos y Adelantos
+- **Propósito:** Asentar anticipos, quincenas o liquidaciones abonadas a un trabajador.
+- **Inputs:** Selector de Trabajador, Monto ($), Fecha y Concepto/Referencia (ej. "Transferencia #4082").
+- **Flujo:**
+  1. Valida monto $> 0$ y trabajador existente.
+  2. Guarda el documento en la colección `pagos` de Firestore.
+  3. Al confirmarse en Firestore, el Dashboard Financiero reduce instantáneamente el Saldo Pendiente del trabajador correspondiente.
+
+---
+
+### Módulo D: Dashboard Financiero Dinámico
+- **Propósito:** Conciliar en una sola vista el estado contable de cada colaborador y de la empresa en general.
+- **Columnas por Trabajador:**
+  1. **Trabajador:** Avatar con inicial y nombre completo.
+  2. **Tarifa/h:** Costo por hora acordado.
+  3. **Horas:** Total acumulado en formato decimal (ej. `12.50h`) y en horas/minutos/segundos (ej. `12:30:00`).
+  4. **Generado ($):** Suma total de los costos de todas las tareas registradas por ese trabajador.
+  5. **Pagado ($):** Suma total de todos los pagos registrados hacia ese trabajador.
+  6. **Saldo Pendiente ($):** Diferencia exacta calculada:
+     $$\text{Saldo Pendiente} = \text{Generado} - \text{Pagado}$$
+- **Lógica de Formato Condicional (Badges):**
+  - **Saldo $> 0$ (Se le debe dinero):** Badge en **Rojo brillante con animación de pulso** (`+$XX.XX` Deuda por liquidar).
+  - **Saldo $= 0$ (Al día):** Badge en **Verde esmeralda** (`$0.00` Al día).
+  - **Saldo $< 0$ (Anticipo pagado):** Badge en **Azul suave** (`-$XX.XX` Saldo a favor de la empresa).
+- **Tarjetas Superiores (KPIs):**
+  - Muestran las sumatorias globales consolidadas de todo el equipo en tiempo real.
+
+---
+
+### Módulo E: Historial y Auditoría de Registros
+- **Propósito:** Permitir al administrador revisar cada tarea individual y cada pago registrado.
+- **Pestañas:** Conmutador segmentado para ver *"Tareas Registradas"* o *"Historial de Pagos"*.
+- **Eliminación Segura con Modal:**
+  - Al hacer clic en el cesto de basura de cualquier tarea, pago o trabajador, se abre un modal de confirmación centrado con desenfoque de fondo.
+  - Si se confirma, se llama a `deleteDoc()` en Firestore.
+  - Al borrarse el registro en la nube, el Dashboard Financiero recalcula automáticamente los saldos sin requerir F5.
+
+---
+
+### Módulo F: Sistema de Temas y Tipografía Anybody
+- **Modo Claro & Oscuro Instantáneo:**
+  - El archivo `index.html` incluye un script inmediato en el `<head>` que lee `localStorage.getItem('widely_theme')` o la preferencia del sistema operativo antes de pintar la pantalla, evitando parpadeos de luz (FOUC).
+  - El botón superior con icono y texto (**"Modo Claro" / "Modo Oscuro"**) conmuta la clase `.dark` en el elemento `<html>` y actualiza `localStorage`.
+- **Tipografía Variable Anybody:**
+  - Aplicada globalmente para conferir una estética técnica, audaz y de vanguardia.
+  - Las tablas, métricas y el cronómetro usan números tabulares (`font-feature-settings: 'tnum'; font-variant-numeric: tabular-nums`), asegurando que todos los dígitos tengan idéntico ancho geométrico y no bailen en pantalla al cambiar los segundos.
+
+---
+
+## 5. Fórmulas y Lógica de Negocio
+
+### 1. Conversión de Segundos a Horas Decimales:
+$$\text{Horas Decimales} = \frac{\text{segundos}}{3600}$$
+
+### 2. Costo Total de una Tarea:
+$$\text{Costo Tarea} = \text{round}\left(\text{Horas Decimales} \times \text{TarifaHora}, 2\right)$$
+
+### 3. Total Generado por un Trabajador:
+$$\text{Total Generado}_w = \sum_{t \in \text{Tareas}_w} \text{costoTotal}_t$$
+
+### 4. Total Pagado a un Trabajador:
+$$\text{Total Pagado}_w = \sum_{p \in \text{Pagos}_w} \text{monto}_p$$
+
+### 5. Saldo Pendiente de un Trabajador:
+$$\text{Saldo Pendiente}_w = \text{round}\left(\text{Total Generado}_w - \text{Total Pagado}_w, 2\right)$$
+
+---
+
+## 6. Modelo de Datos en Firebase Firestore
+
+### Colección: `trabajadores`
+```json
+{
+  "nombre": "Camila González",
+  "tarifaHora": 25.00,
+  "createdAt": "Timestamp"
+}
+```
+
+### Colección: `tareas`
+```json
+{
+  "fecha": "2026-10-12",
+  "trabajadorId": "abc123DocId",
+  "trabajadorNombre": "Camila González",
+  "descripcion": "Diseño UI y Prototipado",
+  "segundos": 3600,
+  "horas": 1.0,
+  "tarifaHora": 25.00,
+  "costoTotal": 25.00,
+  "createdAt": "Timestamp"
+}
+```
+
+### Colección: `pagos`
+```json
+{
+  "fecha": "2026-10-12",
+  "trabajadorId": "abc123DocId",
+  "trabajadorNombre": "Camila González",
+  "monto": 50.00,
+  "referencia": "Transferencia Bancaria #1092",
+  "createdAt": "Timestamp"
+}
+```
+
+---
+
+## 7. Guía de Inicialización, Ejecución y Despliegue
+
+### Ejecución Local con Python (FastAPI):
+1. Abrir terminal en la carpeta del proyecto:
+   ```powershell
+   cd "time-tracker"
+   ```
+2. Instalar dependencias:
+   ```powershell
+   pip install -r requirements.txt
+   ```
+3. Iniciar el servidor:
+   ```powershell
+   python main.py
+   ```
+4. Navegar a:
+   👉 **`http://localhost:8000`** (App)
+   👉 **`http://localhost:8000/docs`** (Swagger API Docs)
+
+---
+
+### Despliegue en la Nube (GitHub Pages):
+Dado que la aplicación está arquitecturada con **Firebase Firestore Web SDK en el cliente**, no requiere de un servidor tradicional para funcionar en producción.
+
+- **URL Pública Oficial:**
+  👉 **[https://johana-engineer.github.io/widely-time-tracker/](https://johana-engineer.github.io/widely-time-tracker/)**
+
+- **Flujo de Publicación Automática:**
+  Cualquier cambio confirmado en la rama `main` dispara automáticamente la acción de GitHub Pages y actualiza el sitio en menos de 1 minuto:
+  ```powershell
+  git add .
+  git commit -m "feat: nuevo ajuste o mejora"
+  git push origin main
+  ```
+
+---
+
+*Manual elaborado y verificado para Widely Tracker v2.0.*

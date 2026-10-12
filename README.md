@@ -15,13 +15,17 @@ Una aplicación web moderna y elegante para el control de horas trabajadas, regi
 
 ```text
 time-tracker/
-├── index.html        # Interfaz de usuario interactiva y responsiva
-├── styles.css        # Hoja de estilos con diseño oscuro premium
-├── app.js            # Lógica del cronómetro, cálculos y conexión Firestore v10
-├── main.py           # Servidor backend en FastAPI
-├── requirements.txt  # Dependencias de Python
-└── .gitignore        # Archivos ignorados por Git
+├── index.html                  # Interfaz de usuario interactiva y responsiva (Anybody Font + Dark/Light Mode)
+├── styles.css                  # Hoja de estilos de alta gama (Variables CSS, efectos glow y transiciones)
+├── app.js                      # Lógica del cronómetro, cálculos y conexión Firestore v10 modular
+├── main.py                     # Servidor backend en FastAPI
+├── requirements.txt            # Dependencias de Python
+├── MANUAL_DE_FUNCIONAMIENTO.md # Manual técnico y de arquitectura completo
+└── .gitignore                  # Archivos ignorados por Git
 ```
+
+> 📖 **Para una documentación detallada de la arquitectura, flujos de datos y fórmulas matemáticas, consulta el [Manual de Funcionamiento](MANUAL_DE_FUNCIONAMIENTO.md).**
+
 
 ---
 
