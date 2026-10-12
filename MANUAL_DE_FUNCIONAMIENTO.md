@@ -197,6 +197,23 @@ flowchart TD
 
 ---
 
+### Módulo G: Adaptabilidad Universal Multi-Dispositivo
+- **Smartphones y Celulares (320px - 480px):**
+  - Viewport configurado con `viewport-fit=cover` y soporte de `env(safe-area-inset-*)` para notches y barras de navegación móviles.
+  - Tarjetas de KPIs dispuestas en cuadrícula de 2 columnas (`grid-cols-2`) para evitar scroll vertical infinito.
+  - Cronómetro digital con escalado fluido `clamp(2.2rem, 7.5vw, 3.75rem)` que previene cualquier desborde o salto de línea.
+  - Prevención automática del zoom intrusivo de iOS Safari (`font-size: 16px` en inputs bajo 640px).
+  - Tablas de balances con scroll táctil acelerado por hardware (`-webkit-overflow-scrolling: touch`) e indicador visual de desplazamiento.
+- **Tablets y Plegables (600px - 1024px):**
+  - Distribución adaptativa equilibrada con paneles táctiles amplios (tap targets $\ge 44\text{px}$).
+- **Escritorio y Laptops (1024px - 1440px):**
+  - Layout simétrico de 4 niveles con micro-interacciones sutiles (`:active:scale-95`).
+- **Monitores Ultrawide, 4K y Smart TVs (1920px - 3840px):**
+  - Contenedor con expansión ultra-ancha progresiva (`2xl:max-w-[1536px]`, `3xl:max-w-[1780px]`, `4k:max-w-[2200px]`).
+  - Navegación accesible compatible con control remoto de Smart TV / teclado (`:focus-visible` con anillo azul nítido).
+
+---
+
 ## 5. Fórmulas y Lógica de Negocio
 
 ### 1. Conversión de Segundos a Horas Decimales:
