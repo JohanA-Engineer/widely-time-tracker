@@ -1,0 +1,25 @@
+# Entorno Virtual de Python
+venv/
+.venv/
+env/
+ENV/
+
+# Bytecode y cache de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Archivos del Sistema Operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs y Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
