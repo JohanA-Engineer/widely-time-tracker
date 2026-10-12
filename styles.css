@@ -1,6 +1,18 @@
 /* ==============================================================================
-   Widely Tracker - Hojas de Estilo Oficiales (Modo Claro & Oscuro Uniforme)
+   Widely Tracker - Hojas de Estilo Oficiales (Tipografía Anybody)
    ============================================================================== */
+
+body, button, input, select, textarea {
+  font-family: 'Anybody', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.015em;
+}
+
+/* Números y cronómetro tabulares con Anybody */
+.tabular-nums, #timerDisplay, #kpiTotalHoras, #kpiTotalGenerado, #kpiTotalPagado, #kpiSaldoPendiente, #liveCostBadge, table td {
+  font-family: 'Anybody', monospace, sans-serif;
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
+}
 
 /* Tarjetas de Métricas (KPIs) */
 .kpi-card {
