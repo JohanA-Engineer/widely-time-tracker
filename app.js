@@ -19,10 +19,22 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ============================================================================
-   1. CONFIGURACIÓN DE FIREBASE (Credenciales Activas)
+   1. CONFIGURACIÓN DE FIREBASE (Carga Segura de Credenciales)
    ============================================================================ */
+// Prioridad de resolución de API Key:
+// 1. window.__ENV__.FIREBASE_API_KEY (generado por GitHub Actions o localmente en env.js)
+// 2. localStorage.getItem('widely_firebase_api_key') (ingreso manual en el navegador)
+// 3. Placeholder de CI/CD
+const envApiKey = (typeof window !== "undefined" && window.__ENV__?.FIREBASE_API_KEY) ? window.__ENV__.FIREBASE_API_KEY : null;
+const storedApiKey = (typeof localStorage !== "undefined") ? localStorage.getItem("widely_firebase_api_key") : null;
+const injectedApiKey = "__FIREBASE_API_KEY__";
+
+const activeApiKey = (envApiKey && envApiKey !== "TU_API_KEY_AQUI")
+  ? envApiKey
+  : (storedApiKey || (injectedApiKey !== "__FIREBASE_API_KEY__" ? injectedApiKey : ""));
+
 const firebaseConfig = {
-  apiKey: "AIzaSyCrAmepLxl7Tmtq7GNsjMmishqGYtQWXbY",
+  apiKey: activeApiKey,
   authDomain: "widely-time-tracker.firebaseapp.com",
   projectId: "widely-time-tracker",
   storageBucket: "widely-time-tracker.firebasestorage.app",
@@ -30,7 +42,12 @@ const firebaseConfig = {
   appId: "1:919060175591:web:5e7a812f362e3b1bd8a042"
 };
 
-const isConfigured = firebaseConfig.apiKey !== "TU_API_KEY_AQUI" && !firebaseConfig.apiKey.includes("TU_API_KEY");
+const isConfigured = Boolean(
+  firebaseConfig.apiKey &&
+  firebaseConfig.apiKey !== "TU_API_KEY_AQUI" &&
+  !firebaseConfig.apiKey.includes("TU_API_KEY") &&
+  firebaseConfig.apiKey !== "__FIREBASE_API_KEY__"
+);
 
 let db = null;
 if (isConfigured) {
@@ -44,10 +61,20 @@ if (isConfigured) {
     updateDbStatus(false, "Error de Conexión");
   }
 } else {
-  console.warn("[Firebase] Modo local activado temporalmente.");
+  console.warn("[Firebase] API Key no detectada. Operando en modo desconectado.");
   document.getElementById("firebaseWarning")?.classList.remove("hidden");
-  updateDbStatus(false, "Credenciales Pendientes");
+  updateDbStatus(false, "API Key Requerida");
 }
+
+// Handler para botón de ingreso manual si no hay clave detectada
+document.getElementById("btnConfigureKey")?.addEventListener("click", () => {
+  const enteredKey = prompt("Ingresa tu Firebase API Key para este navegador:");
+  if (enteredKey && enteredKey.trim().length > 10) {
+    localStorage.setItem("widely_firebase_api_key", enteredKey.trim());
+    alert("¡Clave guardada localmente! La página se recargará.");
+    window.location.reload();
+  }
+});
 
 /* ============================================================================
    2. ESTADO GLOBAL DE LA APLICACIÓN

@@ -78,10 +78,18 @@
 <body class="bg-slate-100 dark:bg-[#090d16] text-slate-900 dark:text-slate-100 font-sans min-h-screen selection:bg-blue-600 selection:text-white transition-colors duration-200">
 
   <!-- Banner de Advertencia si falta la API Key -->
-  <div id="firebaseWarning" class="hidden bg-amber-500/10 border-b border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs py-2.5 px-4 text-center">
-    <div class="max-w-7xl mx-auto flex items-center justify-center gap-2">
-      <i class="fa-solid fa-triangle-exclamation"></i>
-      <span><strong>Atención:</strong> Configura tus credenciales en <code class="font-mono bg-amber-500/10 px-1.5 py-0.5 rounded">app.js</code> para sincronizar con Firestore.</span>
+  <div id="firebaseWarning" class="hidden bg-amber-500/10 border-b border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs py-2 px-4 text-center">
+    <div class="max-w-7xl mx-auto flex items-center justify-center gap-3 flex-wrap">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span><strong>Modo sin conexión:</strong> API Key de Firebase no detectada.</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btnConfigureKey" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg font-medium transition-colors text-[11px]">
+          Ingresar Clave Manualmente
+        </button>
+        <span class="text-slate-400 dark:text-slate-500 text-[11px]">(o configúrala en GitHub Secrets)</span>
+      </div>
     </div>
   </div>
 
@@ -504,6 +512,8 @@
     </div>
   </div>
 
+  <!-- Script de entorno local o inyectado por GitHub Actions -->
+  <script src="env.js" onerror="console.info('[Widely Env] env.js no encontrado, usando configuración inyectada o almacenada.')"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

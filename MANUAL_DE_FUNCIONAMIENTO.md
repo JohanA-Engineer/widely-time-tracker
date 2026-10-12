@@ -280,8 +280,14 @@ Dado que la aplicación está arquitecturada con **Firebase Firestore Web SDK en
 - **URL Pública Oficial:**
   👉 **[https://johana-engineer.github.io/widely-time-tracker/](https://johana-engineer.github.io/widely-time-tracker/)**
 
+- **Seguridad y Gestión de Secretos (GitHub Secrets):**
+  Para evitar que la clave de API quede expuesta en el repositorio público, la aplicación utiliza una arquitectura de resolución por capas:
+  1. **En GitHub Pages (Producción):** El flujo automatizado de CI/CD `.github/workflows/deploy.yml` inyecta en tiempo de despliegue la clave guardada en los **GitHub Secrets** (`FIREBASE_API_KEY`) dentro de `env.js`.
+  2. **En Local:** Se utiliza un archivo `env.js` (ignorado por `.gitignore`), con plantilla de ejemplo en `env.example.js`.
+  3. **En Navegador (Fallback):** Permite el ingreso manual y almacenamiento local en `localStorage` si no se detecta ninguna clave.
+
 - **Flujo de Publicación Automática:**
-  Cualquier cambio confirmado en la rama `main` dispara automáticamente la acción de GitHub Pages y actualiza el sitio en menos de 1 minuto:
+  Cualquier cambio confirmado en la rama `main` dispara automáticamente el workflow de GitHub Actions que inyecta los secretos y publica la versión en GitHub Pages:
   ```powershell
   git add .
   git commit -m "feat: nuevo ajuste o mejora"
