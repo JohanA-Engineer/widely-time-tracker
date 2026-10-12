@@ -16,6 +16,8 @@ Este documento detalla a fondo la arquitectura, el modelo de datos, la lógica d
    - [Módulo D: Dashboard Financiero Dinámico](#módulo-d-dashboard-financiero-dinámico)
    - [Módulo E: Historial y Auditoría de Registros](#módulo-e-historial-y-auditoría-de-registros)
    - [Módulo F: Sistema de Temas y Tipografía Anybody](#módulo-f-sistema-de-temas-y-tipografía-anybody)
+   - [Módulo G: Adaptabilidad Universal Multi-Dispositivo](#módulo-g-adaptabilidad-universal-multi-dispositivo)
+   - [Módulo H: Sistema de Autenticación, Roles y Perfiles de Trabajador](#módulo-h-sistema-de-autenticación-roles-y-perfiles-de-trabajador)
 5. [Fórmulas y Lógica de Negocio](#5-fórmulas-y-lógica-de-negocio)
 6. [Modelo de Datos en Firebase Firestore](#6-modelo-de-datos-en-firebase-firestore)
 7. [Guía de Inicialización, Ejecución y Despliegue](#7-guía-de-inicialización-ejecución-y-despliegue)
@@ -214,6 +216,26 @@ flowchart TD
 
 ---
 
+### Módulo H: Sistema de Autenticación, Roles y Perfiles de Trabajador
+- **Propósito:** Permitir que cada trabajador cuente con un usuario y contraseña individuales, asegurando una experiencia distribuida, privada y estructurada para todo el equipo.
+- **Roles Soportados:**
+  1. **`admin` (Administrador):**
+     - Control total sobre todas las funciones.
+     - Visualización global del rendimiento y los balances acumulados de todos los colaboradores.
+     - Acceso exclusivo a la **Sección 3: Paneles de Gestión**, permitiendo registrar nuevos trabajadores, modificar sus tarifas por hora y asentar pagos/anticipos.
+     - Capacidad de auditar y eliminar registros en las tablas históricas.
+  2. **`worker` (Colaborador / Trabajador):**
+     - **Vista Personal Exclusiva:** Despliega una alerta superior identificando el *Modo Trabajador*.
+     - **Cronómetro Pre-asignado y Bloqueado:** El menú selector del cronómetro se vincula automáticamente a su cuenta y se inhabilita para evitar que registre horas a nombre de otro colega.
+     - **Métricas Personales (KPIs de Sección 1):** Muestra únicamente sus horas computadas, el dinero que ha acumulado, los pagos que le han transferido y su saldo pendiente exacto por cobrar.
+     - **Historial Filtrado:** Solo visualiza sus propias tareas y pagos en la Sección 4.
+     - **Restricción de Privacidad:** Los paneles de creación de trabajadores, asignación de tarifas y registro de pagos quedan totalmente ocultos.
+- **Mecanismo de Respaldo Failsafe (Zero Lockout):**
+  - Incluye dos accesos rápidos con un solo clic (**"Modo Administrador"** y **"Modo Trabajador"**). Si en Firebase Console aún no se ha activado el proveedor de correo y contraseña, el sistema redirige automáticamente al usuario para que nunca se quede bloqueado y pueda evaluar la experiencia inmediatamente.
+  - La sesión activa se conserva en `localStorage` (`widely_cached_user`) para recordar el rol al recargar la página.
+
+---
+
 ## 5. Fórmulas y Lógica de Negocio
 
 ### 1. Conversión de Segundos a Horas Decimales:
@@ -234,6 +256,18 @@ $$\text{Saldo Pendiente}_w = \text{round}\left(\text{Total Generado}_w - \text{T
 ---
 
 ## 6. Modelo de Datos en Firebase Firestore
+
+### Colección: `usuarios`
+```json
+{
+  "uid": "firebaseAuthUid123",
+  "nombre": "Johan Santana",
+  "email": "johan@widely.com",
+  "rol": "worker",
+  "trabajadorId": "abc123DocId",
+  "createdAt": "Timestamp"
+}
+```
 
 ### Colección: `trabajadores`
 ```json

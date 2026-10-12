@@ -7,9 +7,19 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
   getFirestore,
   collection,
   addDoc,
+  setDoc,
+  getDoc,
   updateDoc,
   deleteDoc,
   doc,
@@ -51,11 +61,13 @@ const isConfigured = Boolean(
 );
 
 let db = null;
+let auth = null;
 if (isConfigured) {
   try {
     const app = initializeApp(firebaseConfig);
     db = getFirestore(app);
-    console.log("[Firebase] Firestore inicializado correctamente.");
+    auth = getAuth(app);
+    console.log("[Firebase] Firestore y Auth inicializados correctamente.");
     document.getElementById("firebaseWarning")?.classList.add("hidden");
   } catch (err) {
     console.error("[Firebase] Error al inicializar:", err);
@@ -82,6 +94,8 @@ let state = {
   workers: [],      // Colección 'trabajadores'
   tasks: [],        // Colección 'tareas'
   payments: [],     // Colección 'pagos'
+  currentUser: null, // Firebase Auth user
+  userProfile: null, // Perfil activo { uid, nombre, email, rol, trabajadorId }
   timer: {
     isRunning: false,
     startTime: 0,
@@ -157,7 +171,31 @@ const elements = {
 
   // Status & Reloj
   currentTime: document.getElementById("currentTime"),
-  toastContainer: document.getElementById("toastContainer")
+  toastContainer: document.getElementById("toastContainer"),
+
+  // Autenticación & Perfiles
+  userProfileBar: document.getElementById("userProfileBar"),
+  userAvatar: document.getElementById("userAvatar"),
+  userNameDisplay: document.getElementById("userNameDisplay"),
+  userRoleBadge: document.getElementById("userRoleBadge"),
+  btnLogout: document.getElementById("btnLogout"),
+  btnLoginOpen: document.getElementById("btnLoginOpen"),
+  workerRoleNotice: document.getElementById("workerRoleNotice"),
+  adminManagementSection: document.getElementById("adminManagementSection"),
+  authModal: document.getElementById("authModal"),
+  btnCancelAuth: document.getElementById("btnCancelAuth"),
+  authTabLogin: document.getElementById("authTabLogin"),
+  authTabRegister: document.getElementById("authTabRegister"),
+  formAuthLogin: document.getElementById("formAuthLogin"),
+  authLoginEmail: document.getElementById("authLoginEmail"),
+  authLoginPassword: document.getElementById("authLoginPassword"),
+  formAuthRegister: document.getElementById("formAuthRegister"),
+  authRegName: document.getElementById("authRegName"),
+  authRegEmail: document.getElementById("authRegEmail"),
+  authRegPassword: document.getElementById("authRegPassword"),
+  authRegRole: document.getElementById("authRegRole"),
+  btnQuickAdmin: document.getElementById("btnQuickAdmin"),
+  btnQuickWorker: document.getElementById("btnQuickWorker")
 };
 
 /* ============================================================================
@@ -166,10 +204,12 @@ const elements = {
 function init() {
   initClock();
   initDefaultDate();
+  initCachedSession();
   setupEventListeners();
 
   if (db) {
     listenToFirestore();
+    initFirebaseAuth();
   } else {
     loadLocalFallbackData();
   }
@@ -179,6 +219,387 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);
 } else {
   init();
+}
+
+/* ============================================================================
+   4.B. SISTEMA DE AUTENTICACIÓN Y ROLES (ADMIN / WORKER)
+   ============================================================================ */
+function initCachedSession() {
+  try {
+    const cached = localStorage.getItem("widely_cached_user");
+    if (cached) {
+      state.userProfile = JSON.parse(cached);
+      applyRoleView();
+    }
+  } catch (e) {
+    console.warn("[Auth] Error leyendo sesión en caché:", e);
+  }
+}
+
+function initFirebaseAuth() {
+  if (!auth) return;
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      state.currentUser = user;
+      try {
+        const userDocRef = doc(db, "usuarios", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          state.userProfile = userDocSnap.data();
+        } else {
+          const fallbackProfile = {
+            uid: user.uid,
+            nombre: user.displayName || (user.email ? user.email.split("@")[0] : "Usuario"),
+            email: user.email || "",
+            rol: (user.email && user.email.toLowerCase().includes("admin")) ? "admin" : "worker",
+            createdAt: new Date().toISOString()
+          };
+          if (fallbackProfile.rol === "worker") {
+            const matchingWorker = state.workers.find(w => 
+              w.nombre && fallbackProfile.nombre && w.nombre.trim().toLowerCase() === fallbackProfile.nombre.trim().toLowerCase()
+            );
+            if (matchingWorker) fallbackProfile.trabajadorId = matchingWorker.id;
+          }
+          await setDoc(userDocRef, fallbackProfile);
+          state.userProfile = fallbackProfile;
+        }
+
+        localStorage.setItem("widely_cached_user", JSON.stringify(state.userProfile));
+        applyRoleView();
+        updateFinancialDashboard();
+        updateTasksUI();
+        updatePaymentsUI();
+        updateWorkersUI();
+      } catch (err) {
+        console.warn("[Auth] Error al sincronizar usuario con Firestore:", err);
+      }
+    }
+  });
+}
+
+function applyRoleView() {
+  const profile = state.userProfile;
+
+  if (profile) {
+    elements.userProfileBar?.classList.remove("hidden");
+    elements.userProfileBar?.classList.add("flex");
+    elements.btnLoginOpen?.classList.add("hidden");
+
+    if (elements.userAvatar) {
+      elements.userAvatar.textContent = (profile.nombre || "U").charAt(0).toUpperCase();
+    }
+    if (elements.userNameDisplay) {
+      elements.userNameDisplay.textContent = profile.nombre || "Usuario";
+    }
+
+    if (profile.rol === "admin") {
+      if (elements.userRoleBadge) {
+        elements.userRoleBadge.textContent = "ADMIN";
+        elements.userRoleBadge.className = "text-[9px] font-mono text-blue-600 dark:text-blue-400 font-bold uppercase";
+      }
+      if (elements.userAvatar) {
+        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm shadow-blue-500/20";
+      }
+      elements.adminManagementSection?.classList.remove("hidden");
+      elements.workerRoleNotice?.classList.add("hidden");
+      if (elements.timerWorkerSelect) {
+        elements.timerWorkerSelect.disabled = false;
+      }
+    } else {
+      if (elements.userRoleBadge) {
+        elements.userRoleBadge.textContent = "COLABORADOR";
+        elements.userRoleBadge.className = "text-[9px] font-mono text-cyan-600 dark:text-cyan-400 font-bold uppercase";
+      }
+      if (elements.userAvatar) {
+        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-cyan-600 text-white flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm shadow-cyan-500/20";
+      }
+      elements.adminManagementSection?.classList.add("hidden");
+      elements.workerRoleNotice?.classList.remove("hidden");
+
+      linkAndLockWorkerSelect();
+    }
+  } else {
+    elements.userProfileBar?.classList.add("hidden");
+    elements.userProfileBar?.classList.remove("flex");
+    elements.btnLoginOpen?.classList.remove("hidden");
+    elements.adminManagementSection?.classList.remove("hidden");
+    elements.workerRoleNotice?.classList.add("hidden");
+    if (elements.timerWorkerSelect) {
+      elements.timerWorkerSelect.disabled = false;
+    }
+  }
+}
+
+function linkAndLockWorkerSelect() {
+  if (!state.userProfile || state.userProfile.rol !== "worker") return;
+  const profile = state.userProfile;
+
+  const matchingWorker = state.workers.find(w => 
+    (profile.trabajadorId && w.id === profile.trabajadorId) ||
+    (w.nombre && profile.nombre && w.nombre.trim().toLowerCase() === profile.nombre.trim().toLowerCase())
+  );
+
+  if (matchingWorker) {
+    if (!profile.trabajadorId) {
+      profile.trabajadorId = matchingWorker.id;
+      localStorage.setItem("widely_cached_user", JSON.stringify(profile));
+    }
+    if (elements.timerWorkerSelect) {
+      elements.timerWorkerSelect.value = matchingWorker.id;
+      elements.timerWorkerSelect.disabled = true;
+      updateLiveCost();
+    }
+  }
+}
+
+function openAuthModal() {
+  elements.authModal?.classList.remove("hidden");
+  elements.authModal?.classList.add("flex");
+}
+
+function closeAuthModal() {
+  elements.authModal?.classList.add("hidden");
+  elements.authModal?.classList.remove("flex");
+  elements.formAuthLogin?.reset();
+  elements.formAuthRegister?.reset();
+}
+
+function switchAuthTab(tab) {
+  if (tab === "login") {
+    elements.authTabLogin?.classList.add("bg-white", "dark:bg-slate-800", "text-slate-900", "dark:text-white", "shadow-sm");
+    elements.authTabLogin?.classList.remove("text-slate-500", "dark:text-slate-400");
+    elements.authTabRegister?.classList.remove("bg-white", "dark:bg-slate-800", "text-slate-900", "dark:text-white", "shadow-sm");
+    elements.authTabRegister?.classList.add("text-slate-500", "dark:text-slate-400");
+    elements.formAuthLogin?.classList.remove("hidden");
+    elements.formAuthRegister?.classList.add("hidden");
+  } else {
+    elements.authTabRegister?.classList.add("bg-white", "dark:bg-slate-800", "text-slate-900", "dark:text-white", "shadow-sm");
+    elements.authTabRegister?.classList.remove("text-slate-500", "dark:text-slate-400");
+    elements.authTabLogin?.classList.remove("bg-white", "dark:bg-slate-800", "text-slate-900", "dark:text-white", "shadow-sm");
+    elements.authTabLogin?.classList.add("text-slate-500", "dark:text-slate-400");
+    elements.formAuthRegister?.classList.remove("hidden");
+    elements.formAuthLogin?.classList.add("hidden");
+  }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = elements.authLoginEmail.value.trim();
+  const password = elements.authLoginPassword.value;
+
+  if (!email || !password) {
+    showToast("Ingresa tu correo y contraseña.", "warning");
+    return;
+  }
+
+  try {
+    if (auth) {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      let profile = null;
+      if (db) {
+        try {
+          const userDocSnap = await getDoc(doc(db, "usuarios", user.uid));
+          if (userDocSnap.exists()) {
+            profile = userDocSnap.data();
+          }
+        } catch (docErr) {
+          console.warn("[Auth] Error leyendo documento:", docErr);
+        }
+      }
+
+      if (!profile) {
+        profile = {
+          uid: user.uid,
+          nombre: user.displayName || email.split("@")[0],
+          email: user.email,
+          rol: email.toLowerCase().includes("admin") ? "admin" : "worker"
+        };
+      }
+
+      if (profile.rol === "worker") {
+        const matchingWorker = state.workers.find(w => 
+          (profile.trabajadorId && w.id === profile.trabajadorId) ||
+          (w.nombre && profile.nombre && w.nombre.trim().toLowerCase() === profile.nombre.trim().toLowerCase())
+        );
+        if (matchingWorker) profile.trabajadorId = matchingWorker.id;
+      }
+
+      state.currentUser = user;
+      state.userProfile = profile;
+      localStorage.setItem("widely_cached_user", JSON.stringify(profile));
+
+      applyRoleView();
+      closeAuthModal();
+      showToast(`¡Bienvenido ${profile.nombre}! Modo ${profile.rol === "admin" ? "Administrador" : "Colaborador"}.`, "success");
+      updateFinancialDashboard();
+      updateTasksUI();
+      updatePaymentsUI();
+      updateWorkersUI();
+    } else {
+      loginMockUser(email.toLowerCase().includes("admin") ? "admin" : "worker", email.split("@")[0]);
+    }
+  } catch (error) {
+    console.error("[Auth] Error en inicio de sesión:", error);
+    let msg = error.message;
+    if (error.code === "auth/invalid-credential" || error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
+      msg = "Credenciales incorrectas. Verifica tu correo y contraseña.";
+    } else if (error.code === "auth/operation-not-allowed") {
+      msg = "Autenticación por contraseña no activada en Firebase Console. Te conectamos en modo seguro.";
+      loginMockUser(email.toLowerCase().includes("admin") ? "admin" : "worker", email.split("@")[0]);
+      return;
+    }
+    showToast(`Error al iniciar sesión: ${msg}`, "error");
+  }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  const name = elements.authRegName.value.trim();
+  const email = elements.authRegEmail.value.trim();
+  const password = elements.authRegPassword.value;
+  const role = elements.authRegRole.value;
+
+  if (!name || !email || !password) {
+    showToast("Completa todos los campos requeridos.", "warning");
+    return;
+  }
+
+  if (password.length < 6) {
+    showToast("La contraseña debe tener mínimo 6 caracteres.", "warning");
+    return;
+  }
+
+  try {
+    if (auth) {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      try {
+        await updateProfile(user, { displayName: name });
+      } catch (pErr) {
+        console.warn("[Auth] No se pudo asignar displayName:", pErr);
+      }
+
+      let workerId = null;
+      if (role === "worker") {
+        const existingWorker = state.workers.find(w => w.nombre.trim().toLowerCase() === name.toLowerCase());
+        if (existingWorker) {
+          workerId = existingWorker.id;
+        } else if (db) {
+          const newWorkerRef = await addDoc(collection(db, "trabajadores"), {
+            nombre: name,
+            tarifaHora: 0,
+            email: email,
+            createdAt: serverTimestamp()
+          });
+          workerId = newWorkerRef.id;
+        }
+      }
+
+      const userProfile = {
+        uid: user.uid,
+        nombre: name,
+        email: email,
+        rol: role,
+        trabajadorId: workerId,
+        createdAt: new Date().toISOString()
+      };
+
+      if (db) {
+        try {
+          await setDoc(doc(db, "usuarios", user.uid), userProfile);
+        } catch (docErr) {
+          console.warn("[Auth] Error guardando usuario:", docErr);
+        }
+      }
+
+      state.currentUser = user;
+      state.userProfile = userProfile;
+      localStorage.setItem("widely_cached_user", JSON.stringify(userProfile));
+
+      applyRoleView();
+      closeAuthModal();
+      showToast(`¡Perfil "${name}" creado exitosamente como ${role === "admin" ? "Administrador" : "Colaborador"}!`, "success");
+      updateFinancialDashboard();
+      updateTasksUI();
+      updatePaymentsUI();
+      updateWorkersUI();
+    } else {
+      loginMockUser(role, name);
+    }
+  } catch (error) {
+    console.error("[Auth] Error al registrar perfil:", error);
+    let msg = error.message;
+    if (error.code === "auth/email-already-in-use") {
+      msg = "Este correo ya está registrado. Inicia sesión con él.";
+    } else if (error.code === "auth/weak-password") {
+      msg = "La contraseña debe tener al menos 6 caracteres.";
+    } else if (error.code === "auth/operation-not-allowed") {
+      msg = "Autenticación por contraseña no activada en Firebase Console. Te conectamos en modo seguro.";
+      loginMockUser(role, name);
+      return;
+    }
+    showToast(`Error al crear perfil: ${msg}`, "error");
+  }
+}
+
+async function handleLogout() {
+  try {
+    if (auth && state.currentUser) {
+      await signOut(auth);
+    }
+  } catch (err) {
+    console.warn("[Auth] Error al desautenticar en Firebase:", err);
+  } finally {
+    state.currentUser = null;
+    state.userProfile = null;
+    localStorage.removeItem("widely_cached_user");
+    applyRoleView();
+    showToast("Sesión cerrada.", "info");
+    updateFinancialDashboard();
+    updateTasksUI();
+    updatePaymentsUI();
+    updateWorkersUI();
+  }
+}
+
+function loginMockUser(role, customName) {
+  let profile = null;
+  if (role === "admin") {
+    profile = {
+      uid: "mock_admin",
+      nombre: customName || "Administrador",
+      email: "admin@widely.com",
+      rol: "admin"
+    };
+  } else {
+    let matchingWorker = state.workers[0];
+    if (customName) {
+      matchingWorker = state.workers.find(w => w.nombre.toLowerCase().includes(customName.toLowerCase())) || matchingWorker;
+    }
+    const workerName = customName || (matchingWorker ? matchingWorker.nombre : "Colaborador Demo");
+    const workerId = matchingWorker ? matchingWorker.id : "mock_w1";
+
+    profile = {
+      uid: "mock_worker",
+      nombre: workerName,
+      email: "colaborador@widely.com",
+      rol: "worker",
+      trabajadorId: workerId
+    };
+  }
+
+  state.userProfile = profile;
+  localStorage.setItem("widely_cached_user", JSON.stringify(profile));
+  applyRoleView();
+  closeAuthModal();
+  showToast(`Modo activo: ${profile.rol === "admin" ? "Administrador Total" : "Colaborador (" + profile.nombre + ")"}`, "success");
+  updateFinancialDashboard();
+  updateTasksUI();
+  updatePaymentsUI();
+  updateWorkersUI();
 }
 
 /* ============================================================================
@@ -308,7 +729,7 @@ function updateLiveCost() {
 
 // Registrar tarea finalizada en Firebase
 async function handleRegisterTask() {
-  const workerId = elements.timerWorkerSelect.value;
+  const workerId = elements.timerWorkerSelect.value || state.userProfile?.trabajadorId;
   const description = elements.timerTaskDescription.value.trim();
   const seconds = state.timer.elapsedSeconds;
 
@@ -362,6 +783,9 @@ async function handleRegisterTask() {
     showToast(`¡Tarea registrada con éxito! Costo: $${totalCost.toFixed(2)}`, "success");
     elements.timerTaskDescription.value = "";
     resetTimer();
+    if (state.userProfile?.rol === "worker") {
+      linkAndLockWorkerSelect();
+    }
   } catch (error) {
     console.error("Error al registrar tarea:", error);
     showToast("Error al guardar en Firebase: " + error.message, "error");
@@ -546,22 +970,42 @@ function updateWorkersUI() {
     }).join("");
   }
 
+  if (state.userProfile?.rol === "worker") {
+    linkAndLockWorkerSelect();
+  } else {
+    if (elements.timerWorkerSelect) elements.timerWorkerSelect.disabled = false;
+  }
+
   updateLiveCost();
 }
 
 function updateTasksUI() {
-  elements.taskCount.textContent = state.tasks.length;
+  const isWorker = state.userProfile?.rol === "worker";
+  let displayedTasks = state.tasks;
 
-  if (state.tasks.length === 0) {
+  if (isWorker) {
+    const myId = state.userProfile.trabajadorId;
+    const myName = (state.userProfile.nombre || "").trim().toLowerCase();
+    displayedTasks = state.tasks.filter(t => 
+      (myId && t.trabajadorId === myId) || 
+      (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === myName)
+    );
+  }
+
+  elements.taskCount.textContent = displayedTasks.length;
+
+  if (displayedTasks.length === 0) {
     elements.tasksTableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="py-6 text-center text-slate-400 dark:text-slate-500 text-xs">No hay tareas registradas todavía.</td>
+        <td colspan="6" class="py-6 text-center text-slate-400 dark:text-slate-500 text-xs">
+          ${isWorker ? "No tienes tareas registradas todavía." : "No hay tareas registradas todavía."}
+        </td>
       </tr>
     `;
     return;
   }
 
-  elements.tasksTableBody.innerHTML = state.tasks.map(t => {
+  elements.tasksTableBody.innerHTML = displayedTasks.map(t => {
     const formattedTime = formatSecondsToTime(t.segundos || 0);
     return `
       <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
@@ -590,18 +1034,32 @@ function updateTasksUI() {
 }
 
 function updatePaymentsUI() {
-  elements.paymentCount.textContent = state.payments.length;
+  const isWorker = state.userProfile?.rol === "worker";
+  let displayedPayments = state.payments;
 
-  if (state.payments.length === 0) {
+  if (isWorker) {
+    const myId = state.userProfile.trabajadorId;
+    const myName = (state.userProfile.nombre || "").trim().toLowerCase();
+    displayedPayments = state.payments.filter(p => 
+      (myId && p.trabajadorId === myId) || 
+      (p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === myName)
+    );
+  }
+
+  elements.paymentCount.textContent = displayedPayments.length;
+
+  if (displayedPayments.length === 0) {
     elements.paymentsTableBody.innerHTML = `
       <tr>
-        <td colspan="5" class="py-6 text-center text-slate-400 dark:text-slate-500 text-xs">No hay pagos registrados.</td>
+        <td colspan="5" class="py-6 text-center text-slate-400 dark:text-slate-500 text-xs">
+          ${isWorker ? "No tienes pagos registrados aún." : "No hay pagos registrados."}
+        </td>
       </tr>
     `;
     return;
   }
 
-  elements.paymentsTableBody.innerHTML = state.payments.map(p => `
+  elements.paymentsTableBody.innerHTML = displayedPayments.map(p => `
     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
       <td class="py-2.5 px-3 text-slate-500 dark:text-slate-400 font-mono whitespace-nowrap tabular-nums">${p.fecha || '-'}</td>
       <td class="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">${escapeHtml(p.trabajadorNombre || '')}</td>
@@ -612,12 +1070,14 @@ function updatePaymentsUI() {
         $${Number(p.monto || 0).toFixed(2)}
       </td>
       <td class="py-2.5 px-2 text-center whitespace-nowrap">
-        <button 
-          onclick="window.requestDelete('pagos', '${p.id}', 'Pago de $${Number(p.monto || 0).toFixed(2)} a ${escapeHtml(p.trabajadorNombre || '')}')"
-          class="text-slate-400 hover:text-rose-500 p-1 rounded-md hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors active:scale-95"
-          title="Eliminar pago">
-          <i class="fa-regular fa-trash-can text-xs"></i>
-        </button>
+        ${!isWorker ? `
+          <button 
+            onclick="window.requestDelete('pagos', '${p.id}', 'Pago de $${Number(p.monto || 0).toFixed(2)} a ${escapeHtml(p.trabajadorNombre || '')}')"
+            class="text-slate-400 hover:text-rose-500 p-1 rounded-md hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors active:scale-95"
+            title="Eliminar pago">
+            <i class="fa-regular fa-trash-can text-xs"></i>
+          </button>
+        ` : `<span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">Registrado</span>`}
       </td>
     </tr>
   `).join("");
@@ -627,11 +1087,25 @@ function updatePaymentsUI() {
    10. CÁLCULO DINÁMICO: DASHBOARD FINANCIERO Y KPIS
    ============================================================================ */
 function updateFinancialDashboard() {
-  if (state.workers.length === 0) {
+  const isWorker = state.userProfile?.rol === "worker";
+
+  let displayedWorkers = state.workers;
+  if (isWorker) {
+    const myId = state.userProfile.trabajadorId;
+    const myName = (state.userProfile.nombre || "").trim().toLowerCase();
+    displayedWorkers = state.workers.filter(w => 
+      (myId && w.id === myId) || 
+      (w.nombre && w.nombre.trim().toLowerCase() === myName)
+    );
+  }
+
+  if (displayedWorkers.length === 0) {
     elements.financialTableBody.innerHTML = `
       <tr>
         <td colspan="6" class="py-8 text-center text-slate-400 dark:text-slate-500 text-xs">
-          Agrega trabajadores para visualizar el balance financiero en tiempo real.
+          ${isWorker 
+            ? "Tu perfil aún no está vinculado a un trabajador en la lista. Puedes usar el cronómetro para registrar tu tiempo."
+            : "Agrega trabajadores para visualizar el balance financiero en tiempo real."}
         </td>
       </tr>
     `;
@@ -644,13 +1118,13 @@ function updateFinancialDashboard() {
   let totalGeneradoGlobal = 0;
   let totalPagadoGlobal = 0;
 
-  const rowsHtml = state.workers.map(worker => {
-    const workerTasks = state.tasks.filter(t => t.trabajadorId === worker.id);
+  const rowsHtml = displayedWorkers.map(worker => {
+    const workerTasks = state.tasks.filter(t => t.trabajadorId === worker.id || (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase()));
     const workerSeconds = workerTasks.reduce((acc, t) => acc + (Number(t.segundos) || 0), 0);
     const workerHours = workerTasks.reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
     const workerEarned = workerTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
 
-    const workerPayments = state.payments.filter(p => p.trabajadorId === worker.id);
+    const workerPayments = state.payments.filter(p => p.trabajadorId === worker.id || (p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase()));
     const workerPaid = workerPayments.reduce((acc, p) => acc + (Number(p.monto) || 0), 0);
 
     const pendingBalance = Number((workerEarned - workerPaid).toFixed(2));
@@ -687,6 +1161,17 @@ function updateFinancialDashboard() {
       `;
     }
 
+    const editRateBtn = !isWorker ? `
+      <button 
+        type="button"
+        onclick="window.openEditRateModal('${worker.id}', '${escapeHtml(worker.nombre)}', ${Number(worker.tarifaHora || 0)})"
+        class="hover:text-cyan-600 dark:hover:text-cyan-400 hover:underline transition-colors cursor-pointer inline-flex items-center gap-1 group"
+        title="Clic para cambiar tarifa por hora">
+        <span>$${Number(worker.tarifaHora || 0).toFixed(2)}/h</span>
+        <i class="fa-solid fa-pencil text-[9px] opacity-0 group-hover:opacity-100 transition-opacity text-cyan-500"></i>
+      </button>
+    ` : `<span>$${Number(worker.tarifaHora || 0).toFixed(2)}/h</span>`;
+
     return `
       <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
         <td class="py-3 px-3 font-semibold text-slate-900 dark:text-white">
@@ -698,14 +1183,7 @@ function updateFinancialDashboard() {
           </div>
         </td>
         <td class="py-3 px-2 text-right font-mono text-slate-600 dark:text-slate-400 tabular-nums">
-          <button 
-            type="button"
-            onclick="window.openEditRateModal('${worker.id}', '${escapeHtml(worker.nombre)}', ${Number(worker.tarifaHora || 0)})"
-            class="hover:text-cyan-600 dark:hover:text-cyan-400 hover:underline transition-colors cursor-pointer inline-flex items-center gap-1 group"
-            title="Clic para cambiar tarifa por hora">
-            <span>$${Number(worker.tarifaHora || 0).toFixed(2)}/h</span>
-            <i class="fa-solid fa-pencil text-[9px] opacity-0 group-hover:opacity-100 transition-opacity text-cyan-500"></i>
-          </button>
+          ${editRateBtn}
         </td>
         <td class="py-3 px-2 text-right font-mono text-slate-800 dark:text-slate-200 tabular-nums">
           <span class="font-bold">${workerHours.toFixed(2)}h</span>
@@ -726,25 +1204,25 @@ function updateFinancialDashboard() {
 
   elements.financialTableBody.innerHTML = rowsHtml;
 
-  // Actualizar KPIs Globales
-  const globalBalance = Number((totalGeneradoGlobal - totalPagadoGlobal).toFixed(2));
+  // Actualizar KPIs Globales o Personales
+  const balance = Number((totalGeneradoGlobal - totalPagadoGlobal).toFixed(2));
   elements.kpiTotalHoras.textContent = totalHorasGlobal.toFixed(2);
-  elements.kpiTotalHorasFormatted.textContent = `${formatSecondsToTime(totalSegundosGlobal)} en total`;
+  elements.kpiTotalHorasFormatted.textContent = `${formatSecondsToTime(totalSegundosGlobal)} ${isWorker ? 'tuyas' : 'en total'}`;
   elements.kpiTotalGenerado.textContent = `$${totalGeneradoGlobal.toFixed(2)}`;
   elements.kpiTotalPagado.textContent = `$${totalPagadoGlobal.toFixed(2)}`;
 
-  if (globalBalance > 0.005) {
+  if (balance > 0.005) {
     elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono text-rose-600 dark:text-rose-400 tabular-nums";
-    elements.kpiSaldoPendiente.textContent = `$${globalBalance.toFixed(2)}`;
-    elements.kpiSaldoDesc.textContent = "Deuda total por liquidar a trabajadores";
-  } else if (globalBalance === 0) {
+    elements.kpiSaldoPendiente.textContent = `$${balance.toFixed(2)}`;
+    elements.kpiSaldoDesc.textContent = isWorker ? "Tu saldo pendiente por cobrar" : "Deuda total por liquidar a trabajadores";
+  } else if (balance === 0) {
     elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums";
     elements.kpiSaldoPendiente.textContent = "$0.00";
-    elements.kpiSaldoDesc.textContent = "Todos los pagos están al día";
+    elements.kpiSaldoDesc.textContent = isWorker ? "Tus pagos están al día" : "Todos los pagos están al día";
   } else {
     elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono text-blue-600 dark:text-blue-400 tabular-nums";
-    elements.kpiSaldoPendiente.textContent = `+$${Math.abs(globalBalance).toFixed(2)}`;
-    elements.kpiSaldoDesc.textContent = "Saldo a favor de la empresa";
+    elements.kpiSaldoPendiente.textContent = `+$${Math.abs(balance).toFixed(2)}`;
+    elements.kpiSaldoDesc.textContent = isWorker ? "Anticipo recibido a tu favor" : "Saldo a favor de la empresa";
   }
 }
 
@@ -761,6 +1239,10 @@ function resetKPIs() {
    11. GESTIÓN DE ELIMINACIONES CON MODAL
    ============================================================================ */
 window.requestDelete = function(collectionName, id, label) {
+  if (state.userProfile?.rol === "worker" && collectionName !== "tareas") {
+    showToast("Los colaboradores solo pueden eliminar sus propias tareas.", "warning");
+    return;
+  }
   state.deleteTarget = { collection: collectionName, id, label };
   elements.deleteModalText.innerHTML = `¿Seguro que deseas eliminar <strong>${label}</strong>? Se recalcularán los saldos de inmediato.`;
   elements.deleteModal.classList.remove("hidden");
@@ -803,6 +1285,10 @@ async function confirmDelete() {
    11.B. MODAL DE ASIGNACIÓN Y EDICIÓN DE TARIFA POR HORA
    ============================================================================ */
 window.openEditRateModal = function(id, workerName, currentRate) {
+  if (state.userProfile?.rol === "worker") {
+    showToast("Solo los administradores pueden modificar las tarifas por hora.", "warning");
+    return;
+  }
   if (elements.editRateWorkerId) elements.editRateWorkerId.value = id;
   if (elements.editRateModalWorker) {
     elements.editRateModalWorker.innerHTML = `Configura la tarifa por hora para <strong>${escapeHtml(workerName)}</strong>.`;
@@ -889,6 +1375,20 @@ function setupEventListeners() {
   elements.formEditRate?.addEventListener("submit", handleConfirmEditRate);
   elements.editRateModal?.addEventListener("click", (e) => {
     if (e.target === elements.editRateModal) closeEditRateModal();
+  });
+
+  // Autenticación & Perfiles
+  elements.btnLoginOpen?.addEventListener("click", openAuthModal);
+  elements.btnCancelAuth?.addEventListener("click", closeAuthModal);
+  elements.btnLogout?.addEventListener("click", handleLogout);
+  elements.authTabLogin?.addEventListener("click", () => switchAuthTab("login"));
+  elements.authTabRegister?.addEventListener("click", () => switchAuthTab("register"));
+  elements.formAuthLogin?.addEventListener("submit", handleLogin);
+  elements.formAuthRegister?.addEventListener("submit", handleRegister);
+  elements.btnQuickAdmin?.addEventListener("click", () => loginMockUser("admin"));
+  elements.btnQuickWorker?.addEventListener("click", () => loginMockUser("worker"));
+  elements.authModal?.addEventListener("click", (e) => {
+    if (e.target === elements.authModal) closeAuthModal();
   });
 }
 
