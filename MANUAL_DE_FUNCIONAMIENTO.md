@@ -217,7 +217,11 @@ flowchart TD
 ---
 
 ### Módulo H: Sistema de Autenticación, Roles y Perfiles de Trabajador
-- **Propósito:** Permitir que cada trabajador cuente con un usuario y contraseña individuales, asegurando una experiencia distribuida, privada y estructurada para todo el equipo.
+- **Propósito:** Garantizar que la **primera vista de la aplicación sea la pantalla de Inicio de Sesión o Registro**, asegurando una experiencia privada, distribuida y con separación estricta de roles antes de acceder al panel de control.
+- **Flujo de Acceso:**
+  - Al ingresar al sitio web sin una sesión activa previa, el usuario es recibido directamente por la **Pantalla de Autenticación** (`#authScreen`), la cual incluye conmutador de pestañas entre *"Iniciar Sesión"* y *"Registrarte"*, formularios con validación, selector de rol (**Administrador** o **Colaborador**), y botones de acceso rápido de prueba.
+  - Al autenticarse con éxito, la pantalla de login se oculta fluidamente y se despliega el **Dashboard Principal** (`#mainAppDashboard`).
+  - Al hacer clic en el botón *"Salir"* (`#btnLogout`) en la barra superior, la sesión se limpia y el usuario retorna a la pantalla inicial de autenticación.
 - **Roles Soportados:**
   1. **`admin` (Administrador):**
      - Control total sobre todas las funciones.

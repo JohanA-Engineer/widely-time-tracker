@@ -174,16 +174,15 @@ const elements = {
   toastContainer: document.getElementById("toastContainer"),
 
   // Autenticación & Perfiles
+  authScreen: document.getElementById("authScreen"),
+  mainAppDashboard: document.getElementById("mainAppDashboard"),
   userProfileBar: document.getElementById("userProfileBar"),
   userAvatar: document.getElementById("userAvatar"),
   userNameDisplay: document.getElementById("userNameDisplay"),
   userRoleBadge: document.getElementById("userRoleBadge"),
   btnLogout: document.getElementById("btnLogout"),
-  btnLoginOpen: document.getElementById("btnLoginOpen"),
   workerRoleNotice: document.getElementById("workerRoleNotice"),
   adminManagementSection: document.getElementById("adminManagementSection"),
-  authModal: document.getElementById("authModal"),
-  btnCancelAuth: document.getElementById("btnCancelAuth"),
   authTabLogin: document.getElementById("authTabLogin"),
   authTabRegister: document.getElementById("authTabRegister"),
   formAuthLogin: document.getElementById("formAuthLogin"),
@@ -281,9 +280,12 @@ function applyRoleView() {
   const profile = state.userProfile;
 
   if (profile) {
+    // Usuario con sesión activa: Mostrar Dashboard y ocultar pantalla de login
+    document.documentElement.classList.add("has-user-session");
+    elements.authScreen?.classList.add("hidden");
+    elements.mainAppDashboard?.classList.remove("hidden");
     elements.userProfileBar?.classList.remove("hidden");
     elements.userProfileBar?.classList.add("flex");
-    elements.btnLoginOpen?.classList.add("hidden");
 
     if (elements.userAvatar) {
       elements.userAvatar.textContent = (profile.nombre || "U").charAt(0).toUpperCase();
@@ -319,9 +321,12 @@ function applyRoleView() {
       linkAndLockWorkerSelect();
     }
   } else {
+    // Sin sesión activa: Mostrar Pantalla de Login / Registro y ocultar Dashboard
+    document.documentElement.classList.remove("has-user-session");
+    elements.authScreen?.classList.remove("hidden");
+    elements.mainAppDashboard?.classList.add("hidden");
     elements.userProfileBar?.classList.add("hidden");
     elements.userProfileBar?.classList.remove("flex");
-    elements.btnLoginOpen?.classList.remove("hidden");
     elements.adminManagementSection?.classList.remove("hidden");
     elements.workerRoleNotice?.classList.add("hidden");
     if (elements.timerWorkerSelect) {
@@ -353,13 +358,10 @@ function linkAndLockWorkerSelect() {
 }
 
 function openAuthModal() {
-  elements.authModal?.classList.remove("hidden");
-  elements.authModal?.classList.add("flex");
+  applyRoleView();
 }
 
 function closeAuthModal() {
-  elements.authModal?.classList.add("hidden");
-  elements.authModal?.classList.remove("flex");
   elements.formAuthLogin?.reset();
   elements.formAuthRegister?.reset();
 }
@@ -556,8 +558,11 @@ async function handleLogout() {
     state.currentUser = null;
     state.userProfile = null;
     localStorage.removeItem("widely_cached_user");
+    document.documentElement.classList.remove("has-user-session");
     applyRoleView();
-    showToast("Sesión cerrada.", "info");
+    elements.formAuthLogin?.reset();
+    elements.formAuthRegister?.reset();
+    showToast("Sesión cerrada. Inicia sesión o regístrate para ingresar.", "info");
     updateFinancialDashboard();
     updateTasksUI();
     updatePaymentsUI();
@@ -1378,8 +1383,6 @@ function setupEventListeners() {
   });
 
   // Autenticación & Perfiles
-  elements.btnLoginOpen?.addEventListener("click", openAuthModal);
-  elements.btnCancelAuth?.addEventListener("click", closeAuthModal);
   elements.btnLogout?.addEventListener("click", handleLogout);
   elements.authTabLogin?.addEventListener("click", () => switchAuthTab("login"));
   elements.authTabRegister?.addEventListener("click", () => switchAuthTab("register"));
@@ -1387,9 +1390,6 @@ function setupEventListeners() {
   elements.formAuthRegister?.addEventListener("submit", handleRegister);
   elements.btnQuickAdmin?.addEventListener("click", () => loginMockUser("admin"));
   elements.btnQuickWorker?.addEventListener("click", () => loginMockUser("worker"));
-  elements.authModal?.addEventListener("click", (e) => {
-    if (e.target === elements.authModal) closeAuthModal();
-  });
 }
 
 function switchTab(tab) {

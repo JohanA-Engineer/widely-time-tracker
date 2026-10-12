@@ -383,3 +383,12 @@ body, button, input, select, textarea {
   outline-offset: 2px !important;
 }
 
+/* Control de visibilidad entre Pantalla de Inicio de Sesión y Dashboard */
+html.has-user-session #authScreen {
+  display: none !important;
+}
+
+html.has-user-session #mainAppDashboard {
+  display: block !important;
+}
+
