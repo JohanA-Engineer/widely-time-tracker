@@ -2579,13 +2579,13 @@ window.openStatementModal = function(workerId, preferredType) {
         return `
           <tr class="text-xs">
             <td class="py-2 px-3 font-mono text-slate-500 whitespace-nowrap">${t.fecha || '-'}</td>
-            <td class="py-2 px-3 font-semibold text-slate-800 dark:text-slate-200">${escapeHtml(t.cliente || 'General')}</td>
-            <td class="py-2 px-3 text-slate-700 dark:text-slate-300">
+            <td class="py-2 px-3 font-semibold text-slate-800">${escapeHtml(t.cliente || 'General')}</td>
+            <td class="py-2 px-3 text-slate-700">
               <span class="font-medium">${escapeHtml(t.descripcion || 'Servicio')}</span>
-              <span class="text-[10px] text-slate-400 block">${cat.label}</span>
+              <span class="text-[10px] text-slate-500 block">${cat.label}</span>
             </td>
             <td class="py-2 px-2 text-right font-mono text-slate-500 whitespace-nowrap">${Number(t.horas || 0).toFixed(2)}h</td>
-            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 dark:text-cyan-400 whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
+            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
           </tr>
         `;
       }).join("");
@@ -2603,7 +2603,7 @@ window.openStatementModal = function(workerId, preferredType) {
   if (elements.receiptTotalPaid) elements.receiptTotalPaid.textContent = `$${totalPaid.toFixed(2)}`;
   if (elements.receiptNetBalance) {
     elements.receiptNetBalance.textContent = (netBalance >= 0 ? "+$" : "-$") + Math.abs(netBalance).toFixed(2);
-    elements.receiptNetBalance.className = netBalance > 0 ? "text-base sm:text-lg font-bold font-mono text-rose-600 dark:text-rose-400" : "text-base sm:text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400";
+    elements.receiptNetBalance.className = netBalance > 0 ? "text-base sm:text-lg font-bold font-mono text-rose-600" : "text-base sm:text-lg font-bold font-mono text-emerald-600";
   }
   if (elements.receiptSignWorkerName) elements.receiptSignWorkerName.textContent = worker.nombre;
 
@@ -2613,13 +2613,13 @@ window.openStatementModal = function(workerId, preferredType) {
     } else {
       elements.receiptTasksBody.innerHTML = filteredTasks.map(t => {
         const cat = getCategoryMeta(t.categoria);
-        const catPill = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ${cat.bg} ${cat.color} border"><i class="fa-solid ${cat.icon}"></i> ${cat.label}</span>`;
-        const clientPill = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"><i class="fa-solid fa-briefcase text-blue-500"></i> ${escapeHtml(t.cliente)}</span>` : "";
+        const catPill = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 text-slate-700 border border-slate-200"><i class="fa-solid ${cat.icon}"></i> ${cat.label}</span>`;
+        const clientPill = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 text-slate-700 border border-slate-200"><i class="fa-solid fa-briefcase text-blue-600"></i> ${escapeHtml(t.cliente)}</span>` : "";
 
         return `
           <tr class="text-xs">
             <td class="py-2 px-3 font-mono text-slate-500 whitespace-nowrap">${t.fecha || '-'}</td>
-            <td class="py-2 px-3 text-slate-800 dark:text-slate-200">
+            <td class="py-2 px-3 text-slate-800">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-medium">${escapeHtml(t.descripcion || 'Tarea')}</span>
                 ${clientPill}
@@ -2627,7 +2627,7 @@ window.openStatementModal = function(workerId, preferredType) {
               </div>
             </td>
             <td class="py-2 px-2 text-right font-mono text-slate-500 whitespace-nowrap">${Number(t.horas || 0).toFixed(2)}h</td>
-            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 dark:text-cyan-400 whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
+            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
           </tr>
         `;
       }).join("");
@@ -2641,8 +2641,8 @@ window.openStatementModal = function(workerId, preferredType) {
       elements.receiptPaymentsBody.innerHTML = filteredPayments.map(p => `
         <tr class="text-xs">
           <td class="py-2 px-3 font-mono text-slate-500 whitespace-nowrap">${p.fecha || '-'}</td>
-          <td class="py-2 px-3 text-slate-800 dark:text-slate-200">${escapeHtml(p.referencia || 'Transferencia / Liquidación')}</td>
-          <td class="py-2 px-3 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">$${Number(p.monto || 0).toFixed(2)}</td>
+          <td class="py-2 px-3 text-slate-800">${escapeHtml(p.referencia || 'Transferencia / Liquidación')}</td>
+          <td class="py-2 px-3 text-right font-mono font-bold text-emerald-600 whitespace-nowrap">$${Number(p.monto || 0).toFixed(2)}</td>
         </tr>
       `).join("");
     }
@@ -2747,20 +2747,46 @@ function setupEventListeners() {
     const worker = state.workers.find(w => w.id === currentStatementWorkerId);
     const workerNameClean = (worker?.nombre || "Colaborador").trim().replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]/g, "_");
 
+    // Cambiar título para el nombre por defecto del archivo PDF
     if (currentStatementDocType === "bill") {
       document.title = `Cuenta_de_Cobro_${workerNameClean}`;
     } else {
       document.title = `Recibo_de_Pago_${workerNameClean}`;
     }
 
+    // Aislamiento total de tema: Si la app está en modo oscuro, desactivar temporalmente
+    // la clase 'dark' para que el motor de PDF del navegador genere un documento 100% blanco.
+    const wasDark = document.documentElement.classList.contains("dark");
+    if (wasDark) {
+      document.documentElement.classList.remove("dark");
+    }
+
     window.print();
 
-    setTimeout(() => {
+    const restorePrintState = () => {
       document.title = originalTitle;
-    }, 1200);
+      if (wasDark) {
+        document.documentElement.classList.add("dark");
+      }
+    };
+
+    window.addEventListener("afterprint", restorePrintState, { once: true });
+    setTimeout(restorePrintState, 1500);
+  });
+
+  // Respaldo global para atajos de teclado (Ctrl+P / Cmd+P)
+  let _globalDarkRestore = false;
+  window.addEventListener("beforeprint", () => {
+    if (document.documentElement.classList.contains("dark")) {
+      document.documentElement.classList.remove("dark");
+      _globalDarkRestore = true;
+    }
   });
   window.addEventListener("afterprint", () => {
-    document.title = "Time Tracker | Lina De La Espriella";
+    if (_globalDarkRestore) {
+      document.documentElement.classList.add("dark");
+      _globalDarkRestore = false;
+    }
   });
   elements.statementModal?.addEventListener("click", (e) => {
     if (e.target === elements.statementModal) closeStatementModal();

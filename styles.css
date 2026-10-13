@@ -517,18 +517,26 @@ html.has-user-session #authTopNavbar {
     print-color-adjust: exact !important;
   }
 
+  #statementModal,
+  #statementModal > div,
+  #statementModal #docViewBill,
+  #statementModal #docViewReceipt {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
   #statementModal .bg-slate-50,
-  #statementModal .dark\:bg-slate-900\/60,
-  #statementModal .dark\:bg-slate-900,
-  #statementModal .dark\:bg-slate-800,
+  #statementModal .bg-slate-100,
   #statementModal thead {
-    background-color: #f1f5f9 !important;
+    background-color: #f8fafc !important;
+    background: #f8fafc !important;
   }
 
   #statementModal .bg-blue-50\/70,
-  #statementModal .bg-blue-50,
-  #statementModal .dark\:bg-blue-500\/10 {
+  #statementModal .bg-blue-50 {
     background-color: #eff6ff !important;
+    background: #eff6ff !important;
   }
 
   #statementModal .border,
@@ -540,34 +548,32 @@ html.has-user-session #authTopNavbar {
     border-color: #cbd5e1 !important;
   }
 
-  #statementModal .border-slate-900,
-  #statementModal .dark\:border-slate-100 {
+  #statementModal .border-slate-900 {
     border-color: #0f172a !important;
   }
 
   #statementModal .text-blue-600,
-  #statementModal .text-blue-700,
-  #statementModal .dark\:text-blue-300,
-  #statementModal .dark\:text-blue-400 {
+  #statementModal .text-blue-700 {
     color: #1d4ed8 !important;
   }
 
   #statementModal .text-emerald-600,
-  #statementModal .text-emerald-700,
-  #statementModal .dark\:text-emerald-400 {
+  #statementModal .text-emerald-700 {
     color: #047857 !important;
   }
 
   #statementModal .text-rose-600,
-  #statementModal .text-rose-700,
-  #statementModal .dark\:text-rose-400 {
+  #statementModal .text-rose-700 {
     color: #b91c1c !important;
   }
 
   #statementModal .text-slate-500,
-  #statementModal .text-slate-400,
-  #statementModal .dark\:text-slate-500 {
+  #statementModal .text-slate-400 {
     color: #475569 !important;
+  }
+
+  #statementModal .text-slate-900 {
+    color: #0f172a !important;
   }
 
   /* Quitar líneas punteadas de edición durante la impresión */

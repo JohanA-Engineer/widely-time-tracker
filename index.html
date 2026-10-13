@@ -1119,30 +1119,30 @@
 
   <!-- Modal Documentos: Cuenta de Cobro Formal & Recibo de Pago Imprimibles -->
   <div id="statementModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center z-50 p-2 sm:p-4 md:p-6 overflow-y-auto transition-opacity duration-200 print:p-0 print:bg-white print:overflow-visible">
-    <div class="bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] border border-[#E2E8F0] dark:border-[#1E293B] rounded-2xl max-w-3xl w-full p-4 sm:p-6 md:p-8 space-y-4 shadow-xl mx-auto my-auto print:m-0 print:border-none print:shadow-none print:w-full print:p-6 print:text-black print:bg-white">
+    <div class="bg-white text-slate-900 border border-slate-200 rounded-2xl max-w-3xl w-full p-4 sm:p-6 md:p-8 space-y-4 shadow-2xl mx-auto my-auto print:m-0 print:border-none print:shadow-none print:w-full print:p-0 print:text-black print:bg-white">
       
       <!-- Barra Superior: Selector de Documento y Botones de Acción (Oculto en Impresión) -->
-      <div id="statementHeaderBar" class="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-[#E2E8F0] dark:border-[#1E293B] print:hidden">
-        <div id="statementDocTypeSelector" class="inline-flex p-1 rounded-lg bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] text-xs font-medium gap-1">
+      <div id="statementHeaderBar" class="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-slate-200 print:hidden">
+        <div id="statementDocTypeSelector" class="inline-flex p-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-medium gap-1">
           <button type="button" id="docTypeBillBtn" class="px-3 py-1.5 rounded-md transition-all active:scale-95 flex items-center gap-1.5 bg-[#2563EB] text-white shadow-none">
             <i class="fa-solid fa-file-invoice-dollar text-xs"></i>
             <span>Cuenta de Cobro</span>
           </button>
-          <button type="button" id="docTypeReceiptBtn" class="px-3 py-1.5 rounded-md transition-all active:scale-95 flex items-center gap-1.5 text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white">
+          <button type="button" id="docTypeReceiptBtn" class="px-3 py-1.5 rounded-md transition-all active:scale-95 flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
             <i class="fa-solid fa-receipt text-xs"></i>
             <span>Recibo de Pago</span>
           </button>
         </div>
 
         <div id="statementWorkerTitleBadge" class="hidden items-center gap-2">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2563EB]/10 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/20 text-xs font-semibold">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20 text-xs font-semibold">
             <i class="fa-solid fa-file-invoice-dollar"></i>
             <span>Cuenta de Cobro</span>
           </span>
         </div>
 
         <div class="flex items-center gap-2">
-          <button type="button" id="btnCloseStatement" class="py-1.5 px-3 text-xs font-medium rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-[#F1F5F9] dark:bg-[#162032] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B] transition-colors">
+          <button type="button" id="btnCloseStatement" class="py-1.5 px-3 text-xs font-medium rounded-lg border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
             Cerrar
           </button>
           <button type="button" id="btnPrintStatement" class="btn-primary py-1.5 px-3.5 sm:px-4 text-xs font-medium rounded-lg flex items-center gap-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-none">
@@ -1157,67 +1157,67 @@
            ============================================================ -->
       <div id="docViewBill" class="space-y-4">
         <!-- Encabezado Cuenta de Cobro -->
-        <div class="flex flex-col sm:flex-row items-start justify-between pb-3 border-b-2 border-slate-900 dark:border-slate-100 print:border-black gap-2">
+        <div class="flex flex-col sm:flex-row items-start justify-between pb-3 border-b-2 border-slate-900 print:border-black gap-2">
           <div>
-            <span class="text-[10px] font-mono uppercase tracking-widest text-[#64748B] print:text-gray-600 block">Documento de Cobro por Honorarios</span>
-            <h2 class="text-xl sm:text-2xl font-bold tracking-tight uppercase">CUENTA DE COBRO</h2>
-            <div class="text-xs font-mono font-semibold text-[#2563EB] dark:text-[#60A5FA] print:text-black mt-0.5" id="billConsecutive">No. CC-2026-001</div>
+            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500 print:text-gray-600 block">Documento de Cobro por Honorarios</span>
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight uppercase text-slate-900">CUENTA DE COBRO</h2>
+            <div class="text-xs font-mono font-semibold text-[#2563EB] print:text-black mt-0.5" id="billConsecutive">No. CC-2026-001</div>
           </div>
-          <div class="text-left sm:text-right text-xs space-y-0.5">
-            <div><strong>Fecha de Emisión:</strong> <span id="billDate" class="font-mono">--</span></div>
-            <div><strong>Ciudad:</strong> <span id="billCity" contenteditable="true" title="Clic para editar ciudad" class="border-b border-dashed border-[#64748B] outline-none px-1 font-medium">Bogotá D.C.</span></div>
-            <div><strong>Período:</strong> <span id="billPeriodTag" class="font-semibold text-[#2563EB] dark:text-[#60A5FA] print:text-black">--</span></div>
+          <div class="text-left sm:text-right text-xs space-y-0.5 text-slate-700">
+            <div><strong class="text-slate-900">Fecha de Emisión:</strong> <span id="billDate" class="font-mono">--</span></div>
+            <div><strong class="text-slate-900">Ciudad:</strong> <span id="billCity" contenteditable="true" title="Clic para editar ciudad" class="border-b border-dashed border-slate-400 outline-none px-1 font-medium text-slate-900">Bogotá D.C.</span></div>
+            <div><strong class="text-slate-900">Período:</strong> <span id="billPeriodTag" class="font-semibold text-[#2563EB] print:text-black">--</span></div>
           </div>
         </div>
 
         <!-- Información Exclusiva del Prestador de Servicios (Solo Trabajador) -->
-        <div class="p-3.5 sm:p-4 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] print:bg-transparent print:border print:border-gray-300 border border-[#E2E8F0] dark:border-[#1E293B] text-xs space-y-2.5">
-          <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-[#64748B] print:text-gray-600 flex items-center justify-between">
+        <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 print:bg-transparent print:border print:border-gray-300 border border-slate-200 text-xs space-y-2.5">
+          <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 print:text-gray-600 flex items-center justify-between">
             <span>INFORMACIÓN DEL PRESTADOR DE SERVICIOS:</span>
-            <span class="text-[9px] text-[#64748B] print:hidden font-normal">(Edita tus datos aquí con un clic)</span>
+            <span class="text-[9px] text-slate-400 print:hidden font-normal">(Edita tus datos aquí con un clic)</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
-              <span class="text-[10px] text-[#64748B] print:text-gray-600 block">Nombre Completo:</span>
-              <div id="billWorkerName" class="text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC] print:text-black">--</div>
+              <span class="text-[10px] text-slate-500 print:text-gray-600 block">Nombre Completo:</span>
+              <div id="billWorkerName" class="text-sm font-bold text-slate-900 print:text-black">--</div>
             </div>
             <div>
-              <span class="text-[10px] text-[#64748B] print:text-gray-600 block">C.C. / ID / Identificación:</span>
-              <span id="billWorkerIdNumber" contenteditable="true" title="Clic para ingresar tu número de cédula o ID" class="font-mono font-semibold border-b border-dashed border-[#2563EB] outline-none px-1 block text-[#0F172A] dark:text-[#F8FAFC] print:text-black">Ingresa C.C. aquí</span>
+              <span class="text-[10px] text-slate-500 print:text-gray-600 block">C.C. / ID / Identificación:</span>
+              <span id="billWorkerIdNumber" contenteditable="true" title="Clic para ingresar tu número de cédula o ID" class="font-mono font-semibold border-b border-dashed border-[#2563EB] outline-none px-1 block text-slate-900 print:text-black">Ingresa C.C. aquí</span>
             </div>
             <div>
-              <span class="text-[10px] text-[#64748B] print:text-gray-600 block">Correo Electrónico:</span>
-              <span id="billWorkerEmail" class="font-mono block truncate text-[#64748B] dark:text-[#94A3B8] print:text-black">--</span>
+              <span class="text-[10px] text-slate-500 print:text-gray-600 block">Correo Electrónico:</span>
+              <span id="billWorkerEmail" class="font-mono block truncate text-slate-600 print:text-black">--</span>
             </div>
             <div>
-              <span class="text-[10px] text-[#64748B] print:text-gray-600 block">Teléfono / Celular:</span>
-              <span id="billWorkerPhone" contenteditable="true" title="Clic para editar teléfono" class="font-mono border-b border-dashed border-[#64748B] outline-none px-1 block text-[#0F172A] dark:text-[#F8FAFC] print:text-black">+57 (Opcional)</span>
+              <span class="text-[10px] text-slate-500 print:text-gray-600 block">Teléfono / Celular:</span>
+              <span id="billWorkerPhone" contenteditable="true" title="Clic para editar teléfono" class="font-mono border-b border-dashed border-slate-400 outline-none px-1 block text-slate-900 print:text-black">+57 (Opcional)</span>
             </div>
           </div>
-          <div class="pt-2 border-t border-[#E2E8F0] dark:border-[#1E293B] print:border-gray-200 text-[#0F172A] dark:text-[#F8FAFC] print:text-gray-800 text-[11px]">
-            <strong>Por concepto de:</strong> Honorarios por actividades y servicios prestados en el período <span id="billConceptPeriod" class="font-semibold text-[#2563EB] dark:text-[#60A5FA] print:text-black">actual</span> según la relación de actividades anexa.
+          <div class="pt-2 border-t border-slate-200 print:border-gray-200 text-slate-800 text-[11px]">
+            <strong>Por concepto de:</strong> Honorarios por actividades y servicios prestados en el período <span id="billConceptPeriod" class="font-semibold text-[#2563EB] print:text-black">actual</span> según la relación de actividades anexa.
           </div>
         </div>
 
         <!-- Monto Destacado Formal -->
-        <div class="p-3.5 rounded-xl bg-[#2563EB]/10 dark:bg-[#2563EB]/15 print:bg-transparent print:border print:border-gray-300 border border-[#2563EB]/20 text-xs">
+        <div class="p-3.5 rounded-xl bg-blue-50/70 print:bg-transparent print:border print:border-gray-300 border border-blue-200 text-xs">
           <div class="flex flex-col sm:flex-row items-baseline justify-between gap-1">
-            <span class="text-[10px] uppercase font-mono font-bold tracking-wider text-[#2563EB] dark:text-[#60A5FA] print:text-black">VALOR TOTAL A COBRAR:</span>
-            <span id="billTotalAmount" class="text-xl sm:text-2xl font-bold font-mono text-[#2563EB] dark:text-[#60A5FA] print:text-black tabular-nums">$0.00</span>
+            <span class="text-[10px] uppercase font-mono font-bold tracking-wider text-blue-700 print:text-black">VALOR TOTAL A COBRAR:</span>
+            <span id="billTotalAmount" class="text-xl sm:text-2xl font-bold font-mono text-blue-700 print:text-black tabular-nums">$0.00</span>
           </div>
-          <div class="mt-1 pt-1 border-t border-[#2563EB]/20 print:border-gray-300 text-[11px] text-[#64748B] dark:text-[#94A3B8] print:text-gray-700">
+          <div class="mt-1 pt-1 border-t border-blue-200 print:border-gray-300 text-[11px] text-slate-600 print:text-gray-700">
             <strong>SON:</strong> <span id="billAmountInWords" class="italic">Cero dólares con 00/100</span>
           </div>
         </div>
 
         <!-- Tabla Detallada de Tareas -->
         <div>
-          <div class="text-[11px] font-semibold uppercase tracking-wider text-[#0F172A] dark:text-[#F8FAFC] print:text-black mb-1.5">
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-900 print:text-black mb-1.5">
             Relación Detallada de Actividades Realizadas
           </div>
-          <div class="max-h-56 overflow-y-auto border border-[#E2E8F0] dark:border-[#1E293B] print:border-gray-300 rounded-xl overflow-x-auto">
+          <div class="max-h-56 overflow-y-auto border border-slate-200 print:border-gray-300 rounded-xl overflow-x-auto">
             <table class="w-full text-left text-xs min-w-[500px]">
-              <thead class="bg-[#F1F5F9] dark:bg-[#162032] print:bg-gray-100 text-[#64748B] dark:text-[#94A3B8] print:text-black font-semibold sticky top-0">
+              <thead class="bg-slate-100 print:bg-gray-100 text-slate-600 print:text-black font-semibold sticky top-0">
                 <tr>
                   <th class="py-2 px-3">Fecha</th>
                   <th class="py-2 px-3">Cliente / Proyecto</th>
@@ -1226,7 +1226,7 @@
                   <th class="py-2 px-3 text-right">Total</th>
                 </tr>
               </thead>
-              <tbody id="billTasksBody" class="divide-y divide-[#E2E8F0] dark:divide-[#1E293B] print:divide-gray-200">
+              <tbody id="billTasksBody" class="divide-y divide-slate-200 print:divide-gray-200">
                 <!-- Dinámico -->
               </tbody>
             </table>
@@ -1235,58 +1235,58 @@
 
         <!-- Resumen de Liquidación -->
         <div class="grid grid-cols-3 gap-2 text-center text-xs">
-          <div class="p-2 rounded-lg bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] print:border-gray-300">
-            <span class="text-[10px] uppercase font-mono text-[#64748B] block">Total Causado</span>
-            <span id="billGrossEarned" class="font-bold font-mono text-[#0F172A] dark:text-[#F8FAFC] print:text-black">$0.00</span>
+          <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:border-gray-300">
+            <span class="text-[10px] uppercase font-mono text-slate-500 block">Total Causado</span>
+            <span id="billGrossEarned" class="font-bold font-mono text-slate-900 print:text-black">$0.00</span>
           </div>
-          <div class="p-2 rounded-lg bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] print:border-gray-300">
-            <span class="text-[10px] uppercase font-mono text-[#64748B] block">Anticipos Recibidos</span>
-            <span id="billPaidDeduction" class="font-bold font-mono text-[#2563EB] print:text-black">-$0.00</span>
+          <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:border-gray-300">
+            <span class="text-[10px] uppercase font-mono text-slate-500 block">Anticipos Recibidos</span>
+            <span id="billPaidDeduction" class="font-bold font-mono text-blue-600 print:text-black">-$0.00</span>
           </div>
-          <div class="p-2 rounded-lg bg-[#2563EB]/10 dark:bg-[#2563EB]/15 border border-[#2563EB]/20 print:border-gray-300">
-            <span class="text-[10px] uppercase font-mono text-[#2563EB] dark:text-[#60A5FA] print:text-black block font-semibold">Saldo Neto a Cobrar</span>
-            <span id="billNetPayable" class="font-bold font-mono text-[#2563EB] dark:text-[#60A5FA] print:text-black">$0.00</span>
+          <div class="p-2 rounded-lg bg-blue-50 border border-blue-200 print:border-gray-300">
+            <span class="text-[10px] uppercase font-mono text-blue-700 print:text-black block font-semibold">Saldo Neto a Cobrar</span>
+            <span id="billNetPayable" class="font-bold font-mono text-blue-700 print:text-black">$0.00</span>
           </div>
         </div>
 
         <!-- Información Bancaria para Consignación (Editable y Guardable) -->
-        <div class="p-3 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] print:border-gray-300 text-xs space-y-1">
-          <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-[#64748B] print:text-gray-600 flex items-center justify-between">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 print:border-gray-300 text-xs space-y-1">
+          <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 print:text-gray-600 flex items-center justify-between">
             <span>INFORMACIÓN PARA CONSIGNACIÓN O TRANSFERENCIA:</span>
-            <span class="text-[9px] text-[#64748B] print:hidden font-normal">(Edita tus datos aquí, se guardarán automáticamente)</span>
+            <span class="text-[9px] text-slate-400 print:hidden font-normal">(Edita tus datos aquí, se guardarán automáticamente)</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 pt-1">
             <div>
-              <span class="text-[10px] text-[#64748B] block">Entidad Bancaria:</span>
-              <span id="billBank" contenteditable="true" class="font-semibold border-b border-dashed border-[#64748B] outline-none px-1 block">Bancolombia</span>
+              <span class="text-[10px] text-slate-500 block">Entidad Bancaria:</span>
+              <span id="billBank" contenteditable="true" class="font-semibold border-b border-dashed border-slate-400 outline-none px-1 block text-slate-900">Bancolombia</span>
             </div>
             <div>
-              <span class="text-[10px] text-[#64748B] block">Tipo de Cuenta:</span>
-              <span id="billAccountType" contenteditable="true" class="font-semibold border-b border-dashed border-[#64748B] outline-none px-1 block">Ahorros</span>
+              <span class="text-[10px] text-slate-500 block">Tipo de Cuenta:</span>
+              <span id="billAccountType" contenteditable="true" class="font-semibold border-b border-dashed border-slate-400 outline-none px-1 block text-slate-900">Ahorros</span>
             </div>
             <div>
-              <span class="text-[10px] text-[#64748B] block">Número de Cuenta:</span>
-              <span id="billAccountNumber" contenteditable="true" class="font-mono font-semibold border-b border-dashed border-[#64748B] outline-none px-1 block">000-000000-00</span>
+              <span class="text-[10px] text-slate-500 block">Número de Cuenta:</span>
+              <span id="billAccountNumber" contenteditable="true" class="font-mono font-semibold border-b border-dashed border-slate-400 outline-none px-1 block text-slate-900">000-000000-00</span>
             </div>
             <div>
-              <span class="text-[10px] text-[#64748B] block">Nequi / Daviplata / Otro:</span>
-              <span id="billAccountMobile" contenteditable="true" class="font-mono font-semibold border-b border-dashed border-[#64748B] outline-none px-1 block">Opcional</span>
+              <span class="text-[10px] text-slate-500 block">Nequi / Daviplata / Otro:</span>
+              <span id="billAccountMobile" contenteditable="true" class="font-mono font-semibold border-b border-dashed border-slate-400 outline-none px-1 block text-slate-900">Opcional</span>
             </div>
           </div>
         </div>
 
         <!-- Cláusula y Firma del Prestador de Servicios -->
         <div class="pt-2 text-xs space-y-3">
-          <p class="text-[10px] text-[#64748B] dark:text-[#94A3B8] print:text-gray-600 italic leading-tight">
+          <p class="text-[10px] text-slate-500 print:text-gray-600 italic leading-tight">
             Para constancia de lo anterior, certifico que los servicios y tiempos relacionados fueron ejecutados a entera satisfacción dentro de las condiciones acordadas.
           </p>
           <div class="pt-4 flex justify-between items-end">
-            <div class="text-left w-64 border-t border-[#64748B] dark:border-[#1E293B] print:border-black pt-1">
-              <div id="billSignWorkerName" class="font-semibold text-[#0F172A] dark:text-[#F8FAFC] print:text-black">--</div>
-              <div class="text-[10px] text-[#64748B] print:text-gray-600">Firma del Prestador del Servicio</div>
-              <div class="text-[10px] font-mono text-[#64748B] print:text-gray-600" id="billSignWorkerId">C.C. --</div>
+            <div class="text-left w-64 border-t border-slate-400 print:border-black pt-1">
+              <div id="billSignWorkerName" class="font-semibold text-slate-900 print:text-black">--</div>
+              <div class="text-[10px] text-slate-500 print:text-gray-600">Firma del Prestador del Servicio</div>
+              <div class="text-[10px] font-mono text-slate-500 print:text-gray-600" id="billSignWorkerId">C.C. --</div>
             </div>
-            <div class="text-right text-[10px] font-mono text-[#64748B] print:text-gray-500">
+            <div class="text-right text-[10px] font-mono text-slate-500 print:text-gray-500">
               Documento formal expedido electrónicamente
             </div>
           </div>
@@ -1298,61 +1298,61 @@
            ============================================================ -->
       <div id="docViewReceipt" class="space-y-4 hidden">
         <!-- Encabezado Recibo de Pago -->
-        <div class="flex flex-col sm:flex-row items-start justify-between pb-3 border-b-2 border-slate-900 dark:border-slate-100 print:border-black gap-2">
+        <div class="flex flex-col sm:flex-row items-start justify-between pb-3 border-b-2 border-slate-900 print:border-black gap-2">
           <div class="flex items-center gap-3">
             <div class="h-10 w-10 rounded-xl bg-[#2563EB] text-white flex items-center justify-center font-bold text-lg print:border print:border-black">
               <i class="fa-solid fa-stopwatch"></i>
             </div>
             <div>
-              <h2 class="text-lg sm:text-xl font-bold tracking-tight uppercase">Lina De La Espriella</h2>
-              <p class="text-xs text-[#64748B] dark:text-[#94A3B8] print:text-gray-600">Comprobante de Liquidación Laboral & Pago de Honorarios</p>
+              <h2 class="text-lg sm:text-xl font-bold tracking-tight uppercase text-slate-900">Lina De La Espriella</h2>
+              <p class="text-xs text-slate-500 print:text-gray-600">Comprobante de Liquidación Laboral & Pago de Honorarios</p>
             </div>
           </div>
-          <div class="text-left sm:text-right text-xs space-y-0.5">
-            <div class="font-mono font-semibold text-[#2563EB] dark:text-[#60A5FA] print:text-black" id="receiptConsecutive">No. LP-2026-001</div>
-            <div><strong>Fecha Emisión:</strong> <span id="receiptDate" class="font-mono">--</span></div>
-            <div><strong>Período Liquidado:</strong> <span id="receiptPeriodTag" class="font-semibold text-[#2563EB] dark:text-[#60A5FA] print:text-black">--</span></div>
+          <div class="text-left sm:text-right text-xs space-y-0.5 text-slate-700">
+            <div class="font-mono font-semibold text-[#2563EB] print:text-black" id="receiptConsecutive">No. LP-2026-001</div>
+            <div><strong class="text-slate-900">Fecha Emisión:</strong> <span id="receiptDate" class="font-mono">--</span></div>
+            <div><strong class="text-slate-900">Período Liquidado:</strong> <span id="receiptPeriodTag" class="font-semibold text-[#2563EB] print:text-black">--</span></div>
           </div>
         </div>
 
         <!-- Datos del Colaborador y Tarifa -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] print:bg-transparent print:border print:border-gray-300 border border-[#E2E8F0] dark:border-[#1E293B] text-xs">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-slate-50 print:bg-transparent print:border print:border-gray-300 border border-slate-200 text-xs">
           <div>
-            <span class="text-[10px] text-[#64748B] uppercase font-mono block">Colaborador / Beneficiario</span>
-            <span id="receiptWorkerName" class="font-semibold text-[#0F172A] dark:text-[#F8FAFC] print:text-black text-sm">--</span>
+            <span class="text-[10px] text-slate-500 uppercase font-mono block">Colaborador / Beneficiario</span>
+            <span id="receiptWorkerName" class="font-semibold text-slate-900 print:text-black text-sm">--</span>
           </div>
           <div>
-            <span class="text-[10px] text-[#64748B] uppercase font-mono block">Tarifa por Hora Pactada</span>
-            <span id="receiptWorkerRate" class="font-mono font-semibold text-[#0F172A] dark:text-[#F8FAFC] print:text-black">$0.00/h</span>
+            <span class="text-[10px] text-slate-500 uppercase font-mono block">Tarifa por Hora Pactada</span>
+            <span id="receiptWorkerRate" class="font-mono font-semibold text-slate-900 print:text-black">$0.00/h</span>
           </div>
           <div class="col-span-2 sm:col-span-1">
-            <span class="text-[10px] text-[#64748B] uppercase font-mono block">Total Horas Liquidadas</span>
-            <span id="receiptTotalHours" class="font-mono font-semibold text-[#2563EB] dark:text-[#60A5FA] print:text-black">0.00 hrs</span>
+            <span class="text-[10px] text-slate-500 uppercase font-mono block">Total Horas Liquidadas</span>
+            <span id="receiptTotalHours" class="font-mono font-semibold text-[#2563EB] print:text-black">0.00 hrs</span>
           </div>
         </div>
 
         <!-- Resumen Financiero Recibo -->
         <div class="grid grid-cols-3 gap-2 sm:gap-3 text-center">
-          <div class="p-3 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] print:border-gray-300">
-            <span class="text-[10px] uppercase font-mono text-[#64748B] print:text-black block font-medium">Total Generado</span>
-            <span id="receiptTotalEarned" class="text-base sm:text-lg font-bold font-mono text-[#0F172A] dark:text-[#F8FAFC] print:text-black">$0.00</span>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 print:border-gray-300">
+            <span class="text-[10px] uppercase font-mono text-slate-500 print:text-black block font-medium">Total Generado</span>
+            <span id="receiptTotalEarned" class="text-base sm:text-lg font-bold font-mono text-slate-900 print:text-black">$0.00</span>
           </div>
-          <div class="p-3 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] print:border-gray-300">
-            <span class="text-[10px] uppercase font-mono text-[#64748B] print:text-black block font-medium">Total Pagado / Abonado</span>
-            <span id="receiptTotalPaid" class="text-base sm:text-lg font-bold font-mono text-[#2563EB] print:text-black">$0.00</span>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 print:border-gray-300">
+            <span class="text-[10px] uppercase font-mono text-slate-500 print:text-black block font-medium">Total Pagado / Abonado</span>
+            <span id="receiptTotalPaid" class="text-base sm:text-lg font-bold font-mono text-blue-600 print:text-black">$0.00</span>
           </div>
-          <div class="p-3 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] print:border-gray-300">
-            <span class="text-[10px] uppercase font-mono text-[#64748B] print:text-black block font-medium">Saldo Pendiente</span>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 print:border-gray-300">
+            <span class="text-[10px] uppercase font-mono text-slate-500 print:text-black block font-medium">Saldo Pendiente</span>
             <span id="receiptNetBalance" class="text-base sm:text-lg font-bold font-mono text-[#BF6863] print:text-black">$0.00</span>
           </div>
         </div>
 
         <!-- Tabla Detalle de Tareas -->
         <div>
-          <h4 class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] print:text-black uppercase tracking-wider mb-2">Detalle de Actividades Aprobadas</h4>
-          <div class="max-h-52 overflow-y-auto border border-[#E2E8F0] dark:border-[#1E293B] print:border-gray-300 rounded-xl overflow-x-auto">
+          <h4 class="text-xs font-semibold text-slate-900 print:text-black uppercase tracking-wider mb-2">Detalle de Actividades Aprobadas</h4>
+          <div class="max-h-52 overflow-y-auto border border-slate-200 print:border-gray-300 rounded-xl overflow-x-auto">
             <table class="w-full text-left text-xs min-w-[500px]">
-              <thead class="bg-[#F1F5F9] dark:bg-[#162032] print:bg-gray-100 text-[#64748B] print:text-black font-semibold sticky top-0">
+              <thead class="bg-slate-100 print:bg-gray-100 text-slate-600 print:text-black font-semibold sticky top-0">
                 <tr>
                   <th class="py-2 px-3">Fecha</th>
                   <th class="py-2 px-3">Cliente / Actividad</th>
@@ -1360,7 +1360,7 @@
                   <th class="py-2 px-3 text-right">Monto</th>
                 </tr>
               </thead>
-              <tbody id="receiptTasksBody" class="divide-y divide-[#E2E8F0] dark:divide-[#1E293B] print:divide-gray-200">
+              <tbody id="receiptTasksBody" class="divide-y divide-slate-200 print:divide-gray-200">
                 <!-- Dinámico -->
               </tbody>
             </table>
@@ -1369,17 +1369,17 @@
 
         <!-- Tabla de Pagos Aplicados en este período -->
         <div id="receiptPaymentsSection">
-          <h4 class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] print:text-black uppercase tracking-wider mb-2">Desembolsos y Pagos Registrados</h4>
-          <div class="max-h-36 overflow-y-auto border border-[#E2E8F0] dark:border-[#1E293B] print:border-gray-300 rounded-xl overflow-x-auto">
+          <h4 class="text-xs font-semibold text-slate-900 print:text-black uppercase tracking-wider mb-2">Desembolsos y Pagos Registrados</h4>
+          <div class="max-h-36 overflow-y-auto border border-slate-200 print:border-gray-300 rounded-xl overflow-x-auto">
             <table class="w-full text-left text-xs">
-              <thead class="bg-[#F1F5F9] dark:bg-[#162032] print:bg-gray-100 text-[#64748B] print:text-black font-semibold sticky top-0">
+              <thead class="bg-slate-100 print:bg-gray-100 text-slate-600 print:text-black font-semibold sticky top-0">
                 <tr>
                   <th class="py-2 px-3">Fecha</th>
                   <th class="py-2 px-3">Concepto / Referencia</th>
                   <th class="py-2 px-3 text-right">Monto Abonado</th>
                 </tr>
               </thead>
-              <tbody id="receiptPaymentsBody" class="divide-y divide-[#E2E8F0] dark:divide-[#1E293B] print:divide-gray-200">
+              <tbody id="receiptPaymentsBody" class="divide-y divide-slate-200 print:divide-gray-200">
                 <!-- Dinámico -->
               </tbody>
             </table>
@@ -1388,17 +1388,17 @@
 
         <!-- Certificación y Doble Firma Formal -->
         <div class="pt-2 text-xs space-y-3">
-          <p class="text-[10px] text-slate-500 dark:text-slate-400 print:text-gray-600 italic leading-tight">
+          <p class="text-[10px] text-slate-500 print:text-gray-600 italic leading-tight">
             Lina De La Espriella certifica que los valores y horas aquí descritos fueron liquidados conforme al acuerdo de servicios y registros de la plataforma.
           </p>
           <div class="pt-6 grid grid-cols-2 gap-8">
-            <div class="border-t border-slate-400 dark:border-slate-600 print:border-black pt-1 text-center">
-              <div class="font-bold text-slate-900 dark:text-white print:text-black">Lina De La Espriella</div>
+            <div class="border-t border-slate-400 print:border-black pt-1 text-center">
+              <div class="font-bold text-slate-900 print:text-black">Lina De La Espriella</div>
               <div class="text-[10px] text-slate-500 print:text-gray-600">Por la Administración (Finanzas)</div>
               <div class="text-[10px] font-mono text-slate-400 print:text-gray-500">Gestión de Pagos & Nómina</div>
             </div>
-            <div class="border-t border-slate-400 dark:border-slate-600 print:border-black pt-1 text-center">
-              <div id="receiptSignWorkerName" class="font-bold text-slate-900 dark:text-white print:text-black">--</div>
+            <div class="border-t border-slate-400 print:border-black pt-1 text-center">
+              <div id="receiptSignWorkerName" class="font-bold text-slate-900 print:text-black">--</div>
               <div class="text-[10px] text-slate-500 print:text-gray-600">Recibí Conforme (Colaborador)</div>
               <div class="text-[10px] font-mono text-slate-400 print:text-gray-500">Firma y Documento de Identidad</div>
             </div>
