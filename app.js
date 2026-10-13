@@ -517,9 +517,12 @@ function applyRoleView() {
       const sidebarAdminLinks = document.getElementById("sidebarAdminLinks");
       const navBillingLabel = document.getElementById("navBillingLabel");
       const topbarSubtitle = document.getElementById("topbarSubtitle");
+      const adminHeaderBadge = document.getElementById("adminHeaderBadge");
+      const adminName = profile.nombre || "Lina De La Espriella";
       if (sidebarAdminLinks) sidebarAdminLinks.classList.remove("hidden");
       if (navBillingLabel) navBillingLabel.textContent = "Liquidaciones & Nómina";
-      if (topbarSubtitle) topbarSubtitle.textContent = "Centro de Mando & Finanzas • Lina Alvarez";
+      if (topbarSubtitle) topbarSubtitle.textContent = `Centro de Mando & Finanzas • ${adminName}`;
+      if (adminHeaderBadge) adminHeaderBadge.textContent = `ADMIN: ${adminName}`;
     } else {
       document.documentElement.classList.add("role-worker");
       document.documentElement.classList.remove("role-admin");
