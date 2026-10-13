@@ -226,11 +226,25 @@ if (document.readyState === "loading") {
 /* ============================================================================
    4.B. SISTEMA DE AUTENTICACIÓN Y ROLES (ADMIN / WORKER)
    ============================================================================ */
+// Correo maestro con acceso exclusivo de Administrador
+const MASTER_ADMIN_EMAILS = [
+  "linadelae@gmail.com",
+  "linadeae@gmail.com"
+];
+
+function isMasterAdmin(email) {
+  if (!email) return false;
+  return MASTER_ADMIN_EMAILS.includes(email.trim().toLowerCase());
+}
+
 function initCachedSession() {
   try {
     const cached = localStorage.getItem("widely_cached_user");
     if (cached) {
       state.userProfile = JSON.parse(cached);
+      if (isMasterAdmin(state.userProfile?.email)) {
+        state.userProfile.rol = "admin";
+      }
       applyRoleView();
     }
   } catch (e) {
@@ -246,14 +260,25 @@ function initFirebaseAuth() {
       try {
         const userDocRef = doc(db, "usuarios", user.uid);
         const userDocSnap = await getDoc(userDocRef);
+        const isAdmin = isMasterAdmin(user.email);
+
         if (userDocSnap.exists()) {
           state.userProfile = userDocSnap.data();
+          if (isAdmin && state.userProfile.rol !== "admin") {
+            state.userProfile.rol = "admin";
+            try {
+              await updateDoc(userDocRef, { rol: "admin" });
+            } catch (errUp) {
+              console.warn("[Auth] Error actualizando rol:", errUp);
+            }
+          }
         } else {
           const fallbackProfile = {
             uid: user.uid,
             nombre: user.displayName || (user.email ? user.email.split("@")[0] : "Usuario"),
             email: user.email || "",
-            rol: (user.email && user.email.toLowerCase().includes("admin")) ? "admin" : "worker",
+            fotoUrl: user.photoURL || "",
+            rol: isAdmin ? "admin" : "worker",
             createdAt: new Date().toISOString()
           };
           if (fallbackProfile.rol === "worker") {
@@ -283,6 +308,9 @@ function applyRoleView() {
   const profile = state.userProfile;
 
   if (profile) {
+    if (isMasterAdmin(profile.email)) {
+      profile.rol = "admin";
+    }
     // Usuario con sesión activa: Mostrar Dashboard y ocultar pantalla de login
     document.documentElement.classList.add("has-user-session");
     elements.authScreen?.classList.add("hidden");
@@ -423,8 +451,10 @@ async function handleLogin(e) {
           uid: user.uid,
           nombre: user.displayName || email.split("@")[0],
           email: user.email,
-          rol: email.toLowerCase().includes("admin") ? "admin" : "worker"
+          rol: isMasterAdmin(user.email) ? "admin" : "worker"
         };
+      } else if (isMasterAdmin(user.email)) {
+        profile.rol = "admin";
       }
 
       if (profile.rol === "worker") {
@@ -447,7 +477,7 @@ async function handleLogin(e) {
       updatePaymentsUI();
       updateWorkersUI();
     } else {
-      loginMockUser(email.toLowerCase().includes("admin") ? "admin" : "worker", email.split("@")[0]);
+      loginMockUser(isMasterAdmin(email) ? "admin" : "worker", email.split("@")[0]);
     }
   } catch (error) {
     console.error("[Auth] Error en inicio de sesión:", error);
@@ -457,7 +487,7 @@ async function handleLogin(e) {
       showToast(`Error al iniciar sesión: ${msg}`, "error");
     } else if (error.code === "auth/configuration-not-found" || error.code === "auth/operation-not-allowed") {
       showToast(`Conectando... En Firebase Console debes presionar "Comenzar" en Authentication.`, "info");
-      await loginMockUser(email.toLowerCase().includes("admin") ? "admin" : "worker", email.split("@")[0], email);
+      await loginMockUser(isMasterAdmin(email) ? "admin" : "worker", email.split("@")[0], email);
       return;
     } else {
       showToast(`Error al iniciar sesión: ${msg}`, "error");
@@ -470,7 +500,7 @@ async function handleRegister(e) {
   const name = elements.authRegName.value.trim();
   const email = elements.authRegEmail.value.trim();
   const password = elements.authRegPassword.value;
-  const role = elements.authRegRole.value;
+  const role = isMasterAdmin(email) ? "admin" : "worker";
 
   if (!name || !email || !password) {
     showToast("Completa todos los campos requeridos.", "warning");
@@ -583,6 +613,10 @@ async function handleGoogleAuth() {
 
         if (userDocSnap.exists()) {
           profile = userDocSnap.data();
+          if (isMasterAdmin(user.email) && profile.rol !== "admin") {
+            profile.rol = "admin";
+            await updateDoc(userDocRef, { rol: "admin" });
+          }
           if (user.photoURL && profile.fotoUrl !== user.photoURL) {
             profile.fotoUrl = user.photoURL;
             await updateDoc(userDocRef, { fotoUrl: user.photoURL });
@@ -590,8 +624,7 @@ async function handleGoogleAuth() {
         } else {
           const userName = user.displayName || (user.email ? user.email.split("@")[0] : "Usuario");
           const userEmail = user.email || "";
-          const isUserAdmin = userEmail.toLowerCase().includes("admin");
-          const role = isUserAdmin ? "admin" : "worker";
+          const role = isMasterAdmin(userEmail) ? "admin" : "worker";
 
           profile = {
             uid: user.uid,
@@ -636,7 +669,7 @@ async function handleGoogleAuth() {
         nombre: user.displayName || user.email?.split("@")[0] || "Usuario",
         email: user.email || "",
         fotoUrl: user.photoURL || "",
-        rol: user.email?.toLowerCase().includes("admin") ? "admin" : "worker"
+        rol: isMasterAdmin(user.email) ? "admin" : "worker"
       };
     }
 
