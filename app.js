@@ -2658,14 +2658,14 @@ window.openStatementModal = function(workerId, preferredType) {
         const cat = getCategoryMeta(t.categoria);
         return `
           <tr class="text-xs">
-            <td class="py-2 px-3 font-mono text-slate-500 whitespace-nowrap">${t.fecha || '-'}</td>
-            <td class="py-2 px-3 font-semibold text-slate-800">${escapeHtml(t.cliente || 'General')}</td>
-            <td class="py-2 px-3 text-slate-700">
+            <td class="py-2.5 px-3 font-medium text-slate-600 tabular-nums whitespace-nowrap">${t.fecha || '-'}</td>
+            <td class="py-2.5 px-3 font-semibold text-slate-800">${escapeHtml(t.cliente || 'General')}</td>
+            <td class="py-2.5 px-3 text-slate-700">
               <span class="font-medium">${escapeHtml(t.descripcion || 'Servicio')}</span>
               <span class="text-[10px] text-slate-500 block">${cat.label}</span>
             </td>
-            <td class="py-2 px-2 text-right font-mono text-slate-500 whitespace-nowrap">${Number(t.horas || 0).toFixed(2)}h</td>
-            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
+            <td class="py-2.5 px-2 text-right font-medium text-slate-600 tabular-nums whitespace-nowrap">${Number(t.horas || 0).toFixed(2)}h</td>
+            <td class="py-2.5 px-3 text-right font-bold text-slate-900 tabular-nums whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
           </tr>
         `;
       }).join("");
@@ -2683,7 +2683,7 @@ window.openStatementModal = function(workerId, preferredType) {
   if (elements.receiptTotalPaid) elements.receiptTotalPaid.textContent = `$${totalPaid.toFixed(2)}`;
   if (elements.receiptNetBalance) {
     elements.receiptNetBalance.textContent = (netBalance >= 0 ? "+$" : "-$") + Math.abs(netBalance).toFixed(2);
-    elements.receiptNetBalance.className = netBalance > 0 ? "text-base sm:text-lg font-bold font-mono text-rose-600" : "text-base sm:text-lg font-bold font-mono text-emerald-600";
+    elements.receiptNetBalance.className = netBalance > 0 ? "text-base sm:text-lg font-bold tabular-nums text-rose-600" : "text-base sm:text-lg font-bold tabular-nums text-emerald-600";
   }
   if (elements.receiptSignWorkerName) elements.receiptSignWorkerName.textContent = worker.nombre;
 
@@ -2698,16 +2698,16 @@ window.openStatementModal = function(workerId, preferredType) {
 
         return `
           <tr class="text-xs">
-            <td class="py-2 px-3 font-mono text-slate-500 whitespace-nowrap">${t.fecha || '-'}</td>
-            <td class="py-2 px-3 text-slate-800">
+            <td class="py-2.5 px-3 font-medium text-slate-600 tabular-nums whitespace-nowrap">${t.fecha || '-'}</td>
+            <td class="py-2.5 px-3 text-slate-800">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-medium">${escapeHtml(t.descripcion || 'Tarea')}</span>
                 ${clientPill}
                 ${catPill}
               </div>
             </td>
-            <td class="py-2 px-2 text-right font-mono text-slate-500 whitespace-nowrap">${Number(t.horas || 0).toFixed(2)}h</td>
-            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
+            <td class="py-2.5 px-2 text-right font-medium text-slate-600 tabular-nums whitespace-nowrap">${Number(t.horas || 0).toFixed(2)}h</td>
+            <td class="py-2.5 px-3 text-right font-bold text-slate-900 tabular-nums whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
           </tr>
         `;
       }).join("");
@@ -2720,9 +2720,9 @@ window.openStatementModal = function(workerId, preferredType) {
     } else {
       elements.receiptPaymentsBody.innerHTML = filteredPayments.map(p => `
         <tr class="text-xs">
-          <td class="py-2 px-3 font-mono text-slate-500 whitespace-nowrap">${p.fecha || '-'}</td>
-          <td class="py-2 px-3 text-slate-800">${escapeHtml(p.referencia || 'Transferencia / Liquidación')}</td>
-          <td class="py-2 px-3 text-right font-mono font-bold text-emerald-600 whitespace-nowrap">$${Number(p.monto || 0).toFixed(2)}</td>
+          <td class="py-2.5 px-3 font-medium text-slate-600 tabular-nums whitespace-nowrap">${p.fecha || '-'}</td>
+          <td class="py-2.5 px-3 text-slate-800">${escapeHtml(p.referencia || 'Transferencia / Liquidación')}</td>
+          <td class="py-2.5 px-3 text-right font-bold text-emerald-600 tabular-nums whitespace-nowrap">$${Number(p.monto || 0).toFixed(2)}</td>
         </tr>
       `).join("");
     }

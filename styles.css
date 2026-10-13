@@ -398,35 +398,40 @@ html.has-user-session #authTopNavbar {
 }
 
 /* ============================================================================
-   ESTILOS DE IMPRESIÓN Y EXPORTACIÓN A PDF ULTRA-LIMPIA
-   (Cuenta de Cobro & Recibo de Pago Aislados)
+   ESTILOS DE IMPRESIÓN Y EXPORTACIÓN A PDF ULTRA-LIMPIA Y PROFESIONAL
+   (Cuenta de Cobro & Recibo de Pago Sin Encabezados/Pies de Navegador)
    ============================================================================ */
 @media print {
+  /* 1. Margen 0 en la página para suprimir los encabezados (título/fecha) y pies de página (URL/página) del navegador */
   @page {
-    margin: 1cm;
-    size: portrait;
+    margin: 0 !important;
+    size: auto;
   }
 
-  /* Reset radical para evitar cualquier fondo, scroll o artefacto visual */
+  /* 2. Reset radical para evitar cualquier scroll, fondo oscuro o artefacto visual */
   html, body {
     background: #ffffff !important;
     background-color: #ffffff !important;
-    color: #000000 !important;
+    color: #0f172a !important;
     padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
     overflow: visible !important;
-    font-size: 11pt !important;
+    font-size: 10pt !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
   }
 
-  /* Ocultar ABSOLUTAMENTE TODOS los elementos hermanos fuera de #statementModal */
+  /* 3. Ocultar absolutamente todos los elementos fuera de #statementModal */
   body > *:not(#statementModal) {
     display: none !important;
   }
 
-  /* Reforzar la ocultación de componentes clave de la aplicación */
+  /* Reforzar la ocultación de componentes de la aplicación */
   header,
   footer,
   #firebaseWarning,
@@ -447,7 +452,7 @@ html.has-user-session #authTopNavbar {
     display: none !important;
   }
 
-  /* Desanclar el modal de pantalla fija y convertirlo en el único contenedor de la página */
+  /* 4. Desanclar el modal de pantalla fija y convertirlo en el flujo natural de la hoja */
   #statementModal {
     display: block !important;
     position: static !important;
@@ -458,7 +463,7 @@ html.has-user-session #authTopNavbar {
     height: auto !important;
     padding: 0 !important;
     margin: 0 !important;
-    background: transparent !important;
+    background: #ffffff !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     overflow: visible !important;
@@ -467,21 +472,26 @@ html.has-user-session #authTopNavbar {
     border: none !important;
   }
 
-  /* El contenido interno del modal ocupa toda la página sin márgenes de modal ni fondos oscuros */
+  /* 5. El contenedor del documento con márgenes físicos elegantes y tipografía de imprenta */
   #statementModal > div {
     max-width: 100% !important;
     width: 100% !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 14mm 16mm !important;
+    box-sizing: border-box !important;
     border: none !important;
+    border-radius: 0 !important;
     box-shadow: none !important;
     background: #ffffff !important;
-    color: #000000 !important;
-    border-radius: 0 !important;
+    color: #0f172a !important;
     overflow: visible !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
   }
 
-  /* Ocultar barra superior de navegación y botones dentro del modal */
+  /* 6. Ocultar controles interactivos del modal */
   #statementHeaderBar,
   #statementDocTypeSelector,
   #statementWorkerTitleBadge,
@@ -492,13 +502,13 @@ html.has-user-session #authTopNavbar {
     display: none !important;
   }
 
-  /* Asegurar que el documento inactivo quede 100% oculto */
+  /* Documento inactivo 100% oculto */
   #docViewBill.hidden,
   #docViewReceipt.hidden {
     display: none !important;
   }
 
-  /* Expandir todas las tablas para que NINGUNA fila quede oculta ni con scrollbar */
+  /* 7. Desplegar todas las tablas sin scrolls ni recortes */
   #statementModal .max-h-56,
   #statementModal .max-h-52,
   #statementModal .max-h-36,
@@ -508,9 +518,37 @@ html.has-user-session #authTopNavbar {
     overflow: visible !important;
   }
 
-  /* Forzar colores nítidos y legibles en papel/PDF independientemente del tema activo */
+  /* 8. Tipografía nítida y moderna para documentos formales (Inter) */
+  #statementModal,
+  #statementModal h1,
+  #statementModal h2,
+  #statementModal h3,
+  #statementModal h4,
+  #statementModal p,
+  #statementModal span:not([class*="fa-"]),
+  #statementModal div:not([class*="fa-"]),
+  #statementModal td,
+  #statementModal th,
+  #statementModal strong,
+  #statementModal em {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
+  }
+
+  /* Cifras y números tabulares claros y nítidos */
+  #statementModal .tabular-nums,
+  #statementModal .font-mono,
+  #statementModal td.font-mono {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-feature-settings: 'tnum' 1, 'cv05' 1 !important;
+    font-variant-numeric: tabular-nums !important;
+    letter-spacing: 0.01em !important;
+  }
+
+  /* 9. Fidelidad de colores y fondos en exportación a PDF */
   #statementModal * {
-    color: #0f172a !important;
     text-shadow: none !important;
     box-shadow: none !important;
     -webkit-print-color-adjust: exact !important;
@@ -527,10 +565,14 @@ html.has-user-session #authTopNavbar {
   }
 
   #statementModal .bg-slate-50,
-  #statementModal .bg-slate-100,
   #statementModal thead {
     background-color: #f8fafc !important;
     background: #f8fafc !important;
+  }
+
+  #statementModal .bg-slate-100 {
+    background-color: #f1f5f9 !important;
+    background: #f1f5f9 !important;
   }
 
   #statementModal .bg-blue-50\/70,
@@ -548,12 +590,36 @@ html.has-user-session #authTopNavbar {
     border-color: #cbd5e1 !important;
   }
 
-  #statementModal .border-slate-900 {
+  #statementModal .border-slate-900,
+  #statementModal .border-b-2 {
     border-color: #0f172a !important;
   }
 
+  #statementModal .text-slate-900 {
+    color: #0f172a !important;
+  }
+
+  #statementModal .text-slate-800 {
+    color: #1e293b !important;
+  }
+
+  #statementModal .text-slate-700 {
+    color: #334155 !important;
+  }
+
+  #statementModal .text-slate-600,
+  #statementModal .text-slate-500 {
+    color: #475569 !important;
+  }
+
+  #statementModal .text-slate-400 {
+    color: #64748b !important;
+  }
+
   #statementModal .text-blue-600,
-  #statementModal .text-blue-700 {
+  #statementModal .text-blue-700,
+  #statementModal .text-\[\#2563EB\],
+  #statementModal .text-\[\#1E40AF\] {
     color: #1d4ed8 !important;
   }
 
@@ -563,26 +629,28 @@ html.has-user-session #authTopNavbar {
   }
 
   #statementModal .text-rose-600,
-  #statementModal .text-rose-700 {
+  #statementModal .text-rose-700,
+  #statementModal .text-\[\#BF6863\] {
     color: #b91c1c !important;
   }
 
-  #statementModal .text-slate-500,
-  #statementModal .text-slate-400 {
-    color: #475569 !important;
+  /* Logotipo e icono institucional en Recibo */
+  #statementModal .bg-\[\#2563EB\] {
+    background-color: #2563EB !important;
   }
 
-  #statementModal .text-slate-900 {
-    color: #0f172a !important;
+  #statementModal .bg-\[\#2563EB\] i,
+  #statementModal .bg-\[\#2563EB\] * {
+    color: #ffffff !important;
   }
 
-  /* Quitar líneas punteadas de edición durante la impresión */
+  /* 10. Quitar líneas punteadas de edición durante la impresión */
   #statementModal [contenteditable="true"] {
     border-bottom: none !important;
     outline: none !important;
   }
 
-  /* Paginación correcta de tablas */
+  /* 11. Paginación correcta de tablas */
   table {
     width: 100% !important;
     page-break-inside: auto;
