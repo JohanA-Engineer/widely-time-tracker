@@ -155,6 +155,8 @@ let state = {
   currentUser: null, // Firebase Auth user
   userProfile: null, // Perfil activo { uid, nombre, email, rol, trabajadorId }
   filterPeriod: "all", // Filtro de liquidación: 'all', 'this_month', 'current_fortnight', 'last_month'
+  taskStatusFilter: "all", // Filtro de estado: 'all', 'pendiente', 'aprobada', 'rechazada'
+  rejectTargetId: null,
   timer: {
     isRunning: false,
     startTime: 0,
@@ -257,6 +259,25 @@ const elements = {
   manualCalculatedCost: document.getElementById("manualCalculatedCost"),
   btnCancelManualEntry: document.getElementById("btnCancelManualEntry"),
   btnCloseManualModal: document.getElementById("btnCloseManualModal"),
+
+  // Modal de Rechazo de Horas Manuales
+  rejectTaskModal: document.getElementById("rejectTaskModal"),
+  rejectTaskId: document.getElementById("rejectTaskId"),
+  rejectModalWorker: document.getElementById("rejectModalWorker"),
+  rejectModalDetails: document.getElementById("rejectModalDetails"),
+  rejectReasonInput: document.getElementById("rejectReasonInput"),
+  formRejectTask: document.getElementById("formRejectTask"),
+  btnCancelRejectTask: document.getElementById("btnCancelRejectTask"),
+  btnConfirmRejectTask: document.getElementById("btnConfirmRejectTask"),
+
+  // Badges y Filtros de Estado
+  pendingReviewBadge: document.getElementById("pendingReviewBadge"),
+  pendingReviewCount: document.getElementById("pendingReviewCount"),
+  filterCountAll: document.getElementById("filterCountAll"),
+  filterCountPending: document.getElementById("filterCountPending"),
+  filterCountApproved: document.getElementById("filterCountApproved"),
+  filterCountRejected: document.getElementById("filterCountRejected"),
+  taskStatusFilterGroup: document.getElementById("taskStatusFilterGroup"),
 
   // Modal Documentos: Cuenta de Cobro Formal & Recibo de Pago
   statementModal: document.getElementById("statementModal"),
@@ -1344,6 +1365,8 @@ async function handleRegisterTask() {
     horas: Number(hours.toFixed(4)),
     tarifaHora: rate,
     costoTotal: totalCost,
+    esManual: false,
+    estado: "aprobada",
     createdAt: db ? serverTimestamp() : new Date().toISOString()
   };
 
@@ -1598,6 +1621,12 @@ function isDateInPeriod(dateStr, period) {
   return true;
 }
 
+function isTaskApproved(t) {
+  // Las tareas previas sin el campo 'estado' se consideran aprobadas para mantener la integridad histórica
+  if (!t.estado) return true;
+  return t.estado === "aprobada";
+}
+
 function getFilteredTasks() {
   return state.tasks.filter(t => isDateInPeriod(t.fecha, state.filterPeriod));
 }
@@ -1633,27 +1662,84 @@ function setFilterPeriod(period) {
   updatePaymentsUI();
 }
 
+window.setTaskStatusFilter = function(status) {
+  state.taskStatusFilter = status;
+  const buttons = document.querySelectorAll(".btn-status-filter");
+  buttons.forEach(btn => {
+    if (btn.dataset.status === status) {
+      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 bg-[#2563EB] text-white shadow-sm flex items-center gap-1";
+    } else {
+      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white flex items-center gap-1.5";
+    }
+  });
+  updateTasksUI();
+};
+
 function updateTasksUI() {
   const isWorker = state.userProfile?.rol === "worker";
-  let displayedTasks = getFilteredTasks();
+  const isAdmin = state.userProfile?.rol === "admin" || isMasterAdmin(state.currentUser?.email);
+  const myId = state.userProfile?.trabajadorId;
+  const myName = (state.userProfile?.nombre || "").trim().toLowerCase();
 
+  let allUserTasks = getFilteredTasks();
   if (isWorker) {
-    const myId = state.userProfile.trabajadorId;
-    const myName = (state.userProfile.nombre || "").trim().toLowerCase();
-    displayedTasks = displayedTasks.filter(t => 
+    allUserTasks = allUserTasks.filter(t => 
       (myId && t.trabajadorId === myId) || 
       (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === myName)
     );
+  }
+
+  // Contadores por estado para la barra de filtros
+  const totalCount = allUserTasks.length;
+  const pendingCount = allUserTasks.filter(t => t.estado === "pendiente").length;
+  const approvedCount = allUserTasks.filter(t => isTaskApproved(t)).length;
+  const rejectedCount = allUserTasks.filter(t => t.estado === "rechazada").length;
+
+  if (elements.filterCountAll) elements.filterCountAll.textContent = `(${totalCount})`;
+  if (elements.filterCountPending) elements.filterCountPending.textContent = pendingCount;
+  if (elements.filterCountApproved) elements.filterCountApproved.textContent = approvedCount;
+  if (elements.filterCountRejected) elements.filterCountRejected.textContent = rejectedCount;
+
+  // Alerta de revisión para el Administrador
+  if (elements.pendingReviewBadge) {
+    if (isAdmin && pendingCount > 0) {
+      elements.pendingReviewBadge.classList.remove("hidden");
+      elements.pendingReviewBadge.classList.add("inline-flex");
+      if (elements.pendingReviewCount) {
+        elements.pendingReviewCount.textContent = `${pendingCount} hora${pendingCount > 1 ? 's' : ''} por revisar`;
+      }
+    } else {
+      elements.pendingReviewBadge.classList.add("hidden");
+      elements.pendingReviewBadge.classList.remove("inline-flex");
+    }
+  }
+
+  // Filtrado activo según botón seleccionado
+  let displayedTasks = allUserTasks;
+  if (state.taskStatusFilter === "pendiente") {
+    displayedTasks = allUserTasks.filter(t => t.estado === "pendiente");
+  } else if (state.taskStatusFilter === "aprobada") {
+    displayedTasks = allUserTasks.filter(t => isTaskApproved(t));
+  } else if (state.taskStatusFilter === "rechazada") {
+    displayedTasks = allUserTasks.filter(t => t.estado === "rechazada");
   }
 
   elements.taskCount.textContent = displayedTasks.length;
   updateClientsDatalist();
 
   if (displayedTasks.length === 0) {
+    const emptyMsg = state.taskStatusFilter === "pendiente" 
+      ? "No hay horas pendientes de revisión en este período."
+      : state.taskStatusFilter === "rechazada"
+      ? "No hay horas rechazadas en este período."
+      : isWorker 
+      ? "No tienes tareas registradas en este período." 
+      : "No hay tareas registradas en este período.";
+
     elements.tasksTableBody.innerHTML = `
       <tr>
         <td colspan="6" class="py-6 text-center text-slate-400 dark:text-slate-500 text-xs">
-          ${isWorker ? "No tienes tareas registradas en este período." : "No hay tareas registradas en este período."}
+          ${emptyMsg}
         </td>
       </tr>
     `;
@@ -1667,8 +1753,117 @@ function updateTasksUI() {
     const catBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium ${cat.bg} ${cat.color} border shrink-0"><i class="fa-solid ${cat.icon} text-[9px]"></i><span>${cat.label}</span></span>`;
     const clientBadge = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-[#F1F5F9] dark:bg-[#162032] text-[#0F172A] dark:text-[#F8FAFC] border border-[#E2E8F0] dark:border-[#1E293B] shrink-0"><i class="fa-solid fa-briefcase text-[9px] text-[#2563EB]"></i><span>${escapeHtml(t.cliente)}</span></span>` : "";
 
+    const taskStatus = t.estado || "aprobada";
+    let statusBadge = "";
+    if (taskStatus === "pendiente") {
+      statusBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 shrink-0" title="Pendiente de aprobación por la administración"><i class="fa-solid fa-clock-rotate-left text-[9px]"></i><span>Pendiente</span></span>`;
+    } else if (taskStatus === "rechazada") {
+      const reasonTitle = t.motivoRechazo ? `Motivo: ${escapeHtml(t.motivoRechazo)}` : "Horas rechazadas por la administración";
+      statusBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shrink-0 cursor-help" title="${reasonTitle}"><i class="fa-solid fa-circle-xmark text-[9px]"></i><span>Rechazada</span></span>`;
+    } else if (t.esManual) {
+      statusBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0" title="Aprobada"><i class="fa-solid fa-circle-check text-[9px]"></i><span>Aprobada</span></span>`;
+    }
+
+    const rejectionNotice = (taskStatus === "rechazada" && t.motivoRechazo) 
+      ? `<div class="text-[11px] text-rose-600 dark:text-rose-400 font-medium italic mt-1 flex items-center gap-1.5 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900/50">
+           <i class="fa-solid fa-circle-exclamation text-[10px] shrink-0"></i>
+           <span><strong>Motivo:</strong> ${escapeHtml(t.motivoRechazo)}</span>
+         </div>`
+      : "";
+
+    const pendingNotice = (taskStatus === "pendiente")
+      ? `<div class="text-[10px] text-amber-600 dark:text-amber-400 italic mt-0.5 flex items-center gap-1">
+           <i class="fa-regular fa-clock text-[9px] shrink-0"></i>
+           <span>Horas manuales en espera de validación administrativa</span>
+         </div>`
+      : "";
+
+    let costDisplay = "";
+    if (taskStatus === "rechazada") {
+      costDisplay = `<span class="line-through text-slate-400 dark:text-slate-500 tabular-nums" title="Horas rechazadas (no computan en liquidación)">$${Number(t.costoTotal || 0).toFixed(2)}</span>`;
+    } else if (taskStatus === "pendiente") {
+      costDisplay = `<span class="text-amber-600 dark:text-amber-400 font-semibold tabular-nums" title="Pendiente de aprobación">$${Number(t.costoTotal || 0).toFixed(2)}</span>`;
+    } else {
+      costDisplay = `<span class="tabular-nums font-semibold">$${Number(t.costoTotal || 0).toFixed(2)}</span>`;
+    }
+
+    let actionButtons = "";
+    if (isAdmin) {
+      if (taskStatus === "pendiente") {
+        actionButtons = `
+          <div class="flex items-center justify-center gap-1">
+            <button 
+              onclick="window.approveTask('${t.id}')"
+              class="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 p-1.5 rounded-lg hover:bg-emerald-500/15 transition-colors active:scale-95"
+              title="Aprobar horas">
+              <i class="fa-solid fa-check text-xs"></i>
+            </button>
+            <button 
+              onclick="window.openRejectModal('${t.id}')"
+              class="text-rose-600 hover:text-rose-700 dark:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/15 transition-colors active:scale-95"
+              title="Rechazar horas">
+              <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+            <button 
+              onclick="window.requestDelete('tareas', '${t.id}', 'Tarea: ${escapeHtml(t.descripcion || '')}')"
+              class="text-[#64748B] hover:text-[#BF6863] p-1.5 rounded-lg hover:bg-[#BF6863]/10 transition-colors active:scale-95"
+              title="Eliminar registro">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+            </button>
+          </div>
+        `;
+      } else if (taskStatus === "rechazada") {
+        actionButtons = `
+          <div class="flex items-center justify-center gap-1">
+            <button 
+              onclick="window.approveTask('${t.id}')"
+              class="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 p-1.5 rounded-lg hover:bg-emerald-500/15 transition-colors active:scale-95"
+              title="Reconsiderar y Aprobar">
+              <i class="fa-solid fa-check text-xs"></i>
+            </button>
+            <button 
+              onclick="window.requestDelete('tareas', '${t.id}', 'Tarea: ${escapeHtml(t.descripcion || '')}')"
+              class="text-[#64748B] hover:text-[#BF6863] p-1.5 rounded-lg hover:bg-[#BF6863]/10 transition-colors active:scale-95"
+              title="Eliminar registro">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+            </button>
+          </div>
+        `;
+      } else {
+        // Aprobada
+        actionButtons = `
+          <div class="flex items-center justify-center gap-1">
+            ${t.esManual ? `
+              <button 
+                onclick="window.openRejectModal('${t.id}')"
+                class="text-[#64748B] hover:text-rose-600 dark:text-[#94A3B8] p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors active:scale-95"
+                title="Rechazar horas previamente aprobadas">
+                <i class="fa-solid fa-ban text-xs"></i>
+              </button>
+            ` : ''}
+            <button 
+              onclick="window.requestDelete('tareas', '${t.id}', 'Tarea: ${escapeHtml(t.descripcion || '')}')"
+              class="text-[#64748B] hover:text-[#BF6863] p-1.5 rounded-lg hover:bg-[#BF6863]/10 transition-colors active:scale-95"
+              title="Eliminar tarea">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+            </button>
+          </div>
+        `;
+      }
+    } else {
+      // Colaborador
+      actionButtons = `
+        <button 
+          onclick="window.requestDelete('tareas', '${t.id}', 'Tarea: ${escapeHtml(t.descripcion || '')}')"
+          class="text-[#64748B] hover:text-[#BF6863] p-1.5 rounded-lg hover:bg-[#BF6863]/10 transition-colors active:scale-95"
+          title="Eliminar registro">
+          <i class="fa-regular fa-trash-can text-xs"></i>
+        </button>
+      `;
+    }
+
     return `
-      <tr class="hover:bg-[#F1F5F9] dark:hover:bg-[#162032] transition-colors">
+      <tr class="hover:bg-[#F1F5F9] dark:hover:bg-[#162032] transition-colors ${taskStatus === 'rechazada' ? 'opacity-75 bg-rose-50/30 dark:bg-rose-950/20' : taskStatus === 'pendiente' ? 'bg-amber-50/30 dark:bg-amber-950/20' : ''}">
         <td class="py-2.5 px-3 text-[#64748B] dark:text-[#94A3B8] font-mono whitespace-nowrap tabular-nums">${t.fecha || '-'}</td>
         <td class="py-2.5 px-3 font-semibold text-[#0F172A] dark:text-[#F8FAFC] whitespace-nowrap">${escapeHtml(t.trabajadorNombre || 'Anónimo')}</td>
         <td class="py-2.5 px-3 text-[#64748B] dark:text-[#94A3B8] max-w-sm">
@@ -1677,21 +1872,19 @@ function updateTasksUI() {
             ${clientBadge}
             ${catBadge}
             ${isManualTag}
+            ${statusBadge}
           </div>
+          ${rejectionNotice}
+          ${pendingNotice}
         </td>
         <td class="py-2.5 px-2 text-right font-mono text-[#64748B] dark:text-[#94A3B8] whitespace-nowrap tabular-nums">
           ${formattedTime} <span class="text-[10px] text-[#64748B]/80 dark:text-[#94A3B8]/80">(${Number(t.horas || 0).toFixed(2)}h)</span>
         </td>
         <td class="py-2.5 px-2 text-right font-mono font-medium text-[#0F172A] dark:text-[#F8FAFC] whitespace-nowrap tabular-nums">
-          $${Number(t.costoTotal || 0).toFixed(2)}
+          ${costDisplay}
         </td>
         <td class="py-2.5 px-2 text-center whitespace-nowrap">
-          <button 
-            onclick="window.requestDelete('tareas', '${t.id}', 'Tarea: ${escapeHtml(t.descripcion || '')}')"
-            class="text-[#64748B] hover:text-[#BF6863] p-1 rounded-md hover:bg-[#BF6863]/10 transition-colors active:scale-95"
-            title="Eliminar tarea">
-            <i class="fa-regular fa-trash-can text-xs"></i>
-          </button>
+          ${actionButtons}
         </td>
       </tr>
     `;
@@ -1787,7 +1980,10 @@ function updateFinancialDashboard() {
   let totalPagadoGlobal = 0;
 
   const rowsHtml = displayedWorkers.map(worker => {
-    const workerTasks = allFilteredTasks.filter(t => t.trabajadorId === worker.id || (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase()));
+    const workerTasks = allFilteredTasks.filter(t => 
+      (t.trabajadorId === worker.id || (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase())) &&
+      isTaskApproved(t)
+    );
     const workerSeconds = workerTasks.reduce((acc, t) => acc + (Number(t.segundos) || 0), 0);
     const workerHours = workerTasks.reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
     const workerEarned = workerTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
@@ -2006,7 +2202,7 @@ function renderProductivityCharts() {
   const isDark = document.documentElement.classList.contains("dark");
   const isWorker = state.userProfile?.rol === "worker";
 
-  let filteredTasks = getFilteredTasks();
+  let filteredTasks = getFilteredTasks().filter(isTaskApproved);
   if (isWorker) {
     const myId = state.userProfile.trabajadorId;
     const myName = (state.userProfile.nombre || "").trim().toLowerCase();
@@ -2421,6 +2617,8 @@ async function handleSaveManualEntry(e) {
   const cost = Number((hours * rate).toFixed(2));
   const seconds = Math.round(hours * 3600);
 
+  const initialStatus = isWorkerRole ? "pendiente" : "aprobada";
+
   const taskData = {
     fecha: date || new Date().toISOString().split("T")[0],
     trabajadorId: workerId,
@@ -2434,6 +2632,8 @@ async function handleSaveManualEntry(e) {
     tarifaHora: rate,
     costoTotal: cost,
     esManual: true,
+    estado: initialStatus,
+    creadoPorRol: isWorkerRole ? "worker" : "admin",
     createdAt: db ? serverTimestamp() : new Date().toISOString()
   };
 
@@ -2446,11 +2646,131 @@ async function handleSaveManualEntry(e) {
       updateTasksUI();
       updateFinancialDashboard();
     }
-    showToast(`Tarea manual de ${hours}h guardada para ${workerName} ($${cost.toFixed(2)}).`, "success");
+    if (isWorkerRole) {
+      showToast(`Tarea manual de ${hours}h enviada a revisión por la administración.`, "info");
+    } else {
+      showToast(`Tarea manual de ${hours}h guardada y aprobada para ${workerName} ($${cost.toFixed(2)}).`, "success");
+    }
     closeManualEntryModal();
   } catch (err) {
     console.error("Error guardando tarea manual:", err);
     showToast("Error al guardar: " + err.message, "error");
+  }
+}
+
+/* ============================================================================
+   11.C. GESTIÓN DE APROBACIÓN Y RECHAZO DE HORAS MANUALES
+   ============================================================================ */
+window.approveTask = async function(taskId) {
+  const isAdmin = state.userProfile?.rol === "admin" || isMasterAdmin(state.currentUser?.email);
+  if (!isAdmin) {
+    showToast("Solo la administradora puede aprobar horas.", "warning");
+    return;
+  }
+
+  const task = state.tasks.find(t => t.id === taskId);
+  const workerName = task?.trabajadorNombre || "el colaborador";
+  const hours = Number(task?.horas || 0).toFixed(2);
+
+  try {
+    if (db) {
+      await updateDoc(doc(db, "tareas", taskId), {
+        estado: "aprobada",
+        motivoRechazo: null,
+        aprobadoPor: state.currentUser?.email || "admin",
+        aprobadoEn: serverTimestamp()
+      });
+    } else {
+      if (task) {
+        task.estado = "aprobada";
+        task.motivoRechazo = null;
+        updateTasksUI();
+        updateFinancialDashboard();
+      }
+    }
+    showToast(`✓ Aprobadas ${hours}h de ${workerName}. Ya computan en su liquidación.`, "success");
+  } catch (err) {
+    console.error("Error al aprobar tarea:", err);
+    showToast("Error al aprobar horas: " + err.message, "error");
+  }
+};
+
+window.openRejectModal = function(taskId) {
+  const isAdmin = state.userProfile?.rol === "admin" || isMasterAdmin(state.currentUser?.email);
+  if (!isAdmin) {
+    showToast("Solo la administradora puede rechazar horas.", "warning");
+    return;
+  }
+
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) {
+    showToast("Tarea no encontrada.", "error");
+    return;
+  }
+
+  state.rejectTargetId = taskId;
+  if (elements.rejectTaskId) elements.rejectTaskId.value = taskId;
+  if (elements.rejectModalWorker) {
+    elements.rejectModalWorker.textContent = `${task.trabajadorNombre || 'Colaborador'} — ${Number(task.horas || 0).toFixed(2)}h ($${Number(task.costoTotal || 0).toFixed(2)})`;
+  }
+  if (elements.rejectModalDetails) {
+    elements.rejectModalDetails.textContent = `${task.fecha || 'Sin fecha'} | ${task.cliente ? task.cliente + ' | ' : ''}${task.descripcion || 'Sin descripción'}`;
+  }
+  if (elements.rejectReasonInput) {
+    elements.rejectReasonInput.value = "";
+  }
+
+  if (elements.rejectTaskModal) {
+    elements.rejectTaskModal.classList.remove("hidden");
+    elements.rejectTaskModal.classList.add("flex");
+    elements.rejectReasonInput?.focus();
+  }
+};
+
+function closeRejectTaskModal() {
+  state.rejectTargetId = null;
+  if (elements.rejectTaskModal) {
+    elements.rejectTaskModal.classList.add("hidden");
+    elements.rejectTaskModal.classList.remove("flex");
+  }
+  if (elements.formRejectTask) {
+    elements.formRejectTask.reset();
+  }
+}
+
+async function handleConfirmRejectTask(e) {
+  e.preventDefault();
+  const taskId = elements.rejectTaskId?.value || state.rejectTargetId;
+  if (!taskId) {
+    showToast("No se seleccionó ninguna tarea para rechazar.", "warning");
+    return;
+  }
+
+  const reason = elements.rejectReasonInput?.value.trim() || "Horas no aprobadas por la administración.";
+  const task = state.tasks.find(t => t.id === taskId);
+  const workerName = task?.trabajadorNombre || "el colaborador";
+
+  try {
+    if (db) {
+      await updateDoc(doc(db, "tareas", taskId), {
+        estado: "rechazada",
+        motivoRechazo: reason,
+        rechazadoPor: state.currentUser?.email || "admin",
+        rechazadoEn: serverTimestamp()
+      });
+    } else {
+      if (task) {
+        task.estado = "rechazada";
+        task.motivoRechazo = reason;
+        updateTasksUI();
+        updateFinancialDashboard();
+      }
+    }
+    showToast(`✕ Horas de ${workerName} rechazadas. Se notificó el motivo.`, "info");
+    closeRejectTaskModal();
+  } catch (err) {
+    console.error("Error al rechazar tarea:", err);
+    showToast("Error al rechazar: " + err.message, "error");
   }
 }
 
@@ -2583,7 +2903,8 @@ window.openStatementModal = function(workerId, preferredType) {
 
   const filteredTasks = state.tasks.filter(t => 
     (t.trabajadorId === worker.id || (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase())) &&
-    isDateInPeriod(t.fecha, state.filterPeriod)
+    isDateInPeriod(t.fecha, state.filterPeriod) &&
+    isTaskApproved(t)
   );
 
   const filteredPayments = state.payments.filter(p =>
@@ -2816,6 +3137,21 @@ function setupEventListeners() {
   elements.manualHours?.addEventListener("input", updateManualCost);
   elements.manualEntryModal?.addEventListener("click", (e) => {
     if (e.target === elements.manualEntryModal) closeManualEntryModal();
+  });
+
+  // Modal Rechazo de Horas Manuales
+  elements.btnCancelRejectTask?.addEventListener("click", closeRejectTaskModal);
+  elements.formRejectTask?.addEventListener("submit", handleConfirmRejectTask);
+  elements.rejectTaskModal?.addEventListener("click", (e) => {
+    if (e.target === elements.rejectTaskModal) closeRejectTaskModal();
+  });
+
+  // Filtros de estado de actividades
+  document.querySelectorAll(".btn-status-filter").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const status = btn.dataset.status || "all";
+      window.setTaskStatusFilter(status);
+    });
   });
 
   // Modal Documentos: Cuenta de Cobro Formal & Recibo de Pago

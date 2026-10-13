@@ -442,6 +442,7 @@ html.has-user-session #authTopNavbar {
   #deleteModal,
   #editRateModal,
   #manualEntryModal,
+  #rejectTaskModal,
   #clientsDatalist,
   .print\:hidden {
     display: none !important;
