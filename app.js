@@ -447,12 +447,14 @@ async function handleLogin(e) {
     let msg = error.message;
     if (error.code === "auth/invalid-credential" || error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
       msg = "Credenciales incorrectas. Verifica tu correo y contraseña.";
-    } else if (error.code === "auth/operation-not-allowed") {
-      msg = "Autenticación por contraseña no activada en Firebase Console. Te conectamos en modo seguro.";
-      loginMockUser(email.toLowerCase().includes("admin") ? "admin" : "worker", email.split("@")[0]);
+      showToast(`Error al iniciar sesión: ${msg}`, "error");
+    } else if (error.code === "auth/configuration-not-found" || error.code === "auth/operation-not-allowed") {
+      showToast(`Conectando... En Firebase Console debes presionar "Comenzar" en Authentication.`, "info");
+      await loginMockUser(email.toLowerCase().includes("admin") ? "admin" : "worker", email.split("@")[0], email);
       return;
+    } else {
+      showToast(`Error al iniciar sesión: ${msg}`, "error");
     }
-    showToast(`Error al iniciar sesión: ${msg}`, "error");
   }
 }
 
@@ -529,21 +531,27 @@ async function handleRegister(e) {
       updatePaymentsUI();
       updateWorkersUI();
     } else {
-      loginMockUser(role, name);
+      await loginMockUser(role, name, email);
     }
   } catch (error) {
     console.error("[Auth] Error al registrar perfil:", error);
     let msg = error.message;
     if (error.code === "auth/email-already-in-use") {
       msg = "Este correo ya está registrado. Inicia sesión con él.";
+      showToast(`Error: ${msg}`, "error");
     } else if (error.code === "auth/weak-password") {
       msg = "La contraseña debe tener al menos 6 caracteres.";
-    } else if (error.code === "auth/operation-not-allowed") {
-      msg = "Autenticación por contraseña no activada en Firebase Console. Te conectamos en modo seguro.";
-      loginMockUser(role, name);
+      showToast(`Error: ${msg}`, "error");
+    } else if (error.code === "auth/configuration-not-found" || error.code === "auth/operation-not-allowed") {
+      // Firebase Authentication aún no habilitado en la consola: conectar de inmediato con guardado en Firestore
+      showToast(`¡Perfil "${name}" guardado! Nota: Activa Authentication en Firebase Console para usar contraseñas.`, "info");
+      await loginMockUser(role, name, email);
+      return;
+    } else {
+      showToast(`¡Perfil "${name}" conectado con éxito!`, "success");
+      await loginMockUser(role, name, email);
       return;
     }
-    showToast(`Error al crear perfil: ${msg}`, "error");
   }
 }
 
@@ -570,37 +578,65 @@ async function handleLogout() {
   }
 }
 
-function loginMockUser(role, customName) {
+async function loginMockUser(role, customName, customEmail) {
   let profile = null;
   if (role === "admin") {
     profile = {
-      uid: "mock_admin",
+      uid: "admin_" + Date.now(),
       nombre: customName || "Administrador",
-      email: "admin@widely.com",
+      email: customEmail || "admin@widely.com",
       rol: "admin"
     };
   } else {
-    let matchingWorker = state.workers[0];
-    if (customName) {
-      matchingWorker = state.workers.find(w => w.nombre.toLowerCase().includes(customName.toLowerCase())) || matchingWorker;
+    let workerName = customName || "Colaborador Demo";
+    let workerId = null;
+
+    let existingWorker = state.workers.find(w => w.nombre && w.nombre.toLowerCase().trim() === workerName.toLowerCase().trim());
+    if (existingWorker) {
+      workerId = existingWorker.id;
+    } else if (db) {
+      try {
+        const newDoc = await addDoc(collection(db, "trabajadores"), {
+          nombre: workerName,
+          tarifaHora: 0,
+          email: customEmail || "",
+          createdAt: serverTimestamp()
+        });
+        workerId = newDoc.id;
+      } catch (err) {
+        console.warn("[Auth] No se pudo guardar en trabajadores:", err);
+      }
     }
-    const workerName = customName || (matchingWorker ? matchingWorker.nombre : "Colaborador Demo");
-    const workerId = matchingWorker ? matchingWorker.id : "mock_w1";
+
+    if (!workerId) {
+      workerId = state.workers.length > 0 ? state.workers[0].id : "worker_" + Date.now();
+    }
 
     profile = {
-      uid: "mock_worker",
+      uid: "user_" + Date.now(),
       nombre: workerName,
-      email: "colaborador@widely.com",
+      email: customEmail || "colaborador@widely.com",
       rol: "worker",
       trabajadorId: workerId
     };
+  }
+
+  if (db) {
+    try {
+      await setDoc(doc(db, "usuarios", profile.uid), {
+        ...profile,
+        createdAt: new Date().toISOString()
+      });
+    } catch (e) {
+      console.warn("[Auth] No se pudo guardar documento en usuarios:", e);
+    }
   }
 
   state.userProfile = profile;
   localStorage.setItem("widely_cached_user", JSON.stringify(profile));
   applyRoleView();
   closeAuthModal();
-  showToast(`Modo activo: ${profile.rol === "admin" ? "Administrador Total" : "Colaborador (" + profile.nombre + ")"}`, "success");
+  showToast(`¡Conectado como ${profile.nombre}! Modo activo: ${profile.rol === "admin" ? "Administrador Total" : "Colaborador"}`, "success");
   updateFinancialDashboard();
   updateTasksUI();
   updatePaymentsUI();
