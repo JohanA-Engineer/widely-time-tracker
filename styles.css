@@ -1,44 +1,44 @@
 /* ==============================================================================
-   Widely Social - Sistema de Diseño Natural, Elegante y Profesional (SaaS)
-   Paleta: Sage Green (#526B57), Warm Beige (#F5F5F0, #C29A70), Charcoal (#202923, #292F2A)
+   Widely Social - Sistema de Diseño Azul y Blanco (SaaS Ejecutivo & Enterprise)
+   Paleta: Sapphire Blue (#2563EB, #1D4ED8), Slate Navy (#0F172A), Pure White (#FFFFFF)
    ============================================================================== */
 
 :root {
-  --bg-app: #F5F5F0;
-  --bg-sidebar: #202923;
+  --bg-app: #F8FAFC;
+  --bg-sidebar: #0F172A;
   --bg-card: #FFFFFF;
-  --bg-subtle: #FAF9F6;
-  --primary: #526B57;
-  --primary-hover: #445948;
-  --primary-soft: #718873;
-  --accent-warm: #C29A70;
-  --accent-warm-hover: #B0885E;
-  --text-main: #292F2A;
-  --text-secondary: #777F78;
-  --border-soft: #E4E7E0;
-  --border-strong: #D1D6CC;
-  --positive: #438363;
-  --warning: #C58B42;
-  --danger: #BF6863;
+  --bg-subtle: #F1F5F9;
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --primary-soft: #3B82F6;
+  --accent-warm: #0284C7;
+  --accent-warm-hover: #0369A1;
+  --text-main: #0F172A;
+  --text-secondary: #64748B;
+  --border-soft: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --positive: #2563EB;
+  --warning: #D97706;
+  --danger: #DC2626;
 }
 
 .dark {
-  --bg-app: #141A16;
-  --bg-sidebar: #101512;
-  --bg-card: #1B221E;
-  --bg-subtle: #171E1A;
-  --primary: #637F69;
-  --primary-hover: #729079;
-  --primary-soft: #829A84;
-  --accent-warm: #D4AF87;
-  --accent-warm-hover: #E0BC94;
-  --text-main: #EDF0EC;
-  --text-secondary: #9EA69F;
-  --border-soft: #28332B;
-  --border-strong: #334037;
-  --positive: #529B77;
-  --warning: #D99F55;
-  --danger: #CF7873;
+  --bg-app: #0B0F19;
+  --bg-sidebar: #080C14;
+  --bg-card: #111827;
+  --bg-subtle: #162032;
+  --primary: #3B82F6;
+  --primary-hover: #60A5FA;
+  --primary-soft: #93C5FD;
+  --accent-warm: #38BDF8;
+  --accent-warm-hover: #7DD3FC;
+  --text-main: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --border-soft: #1E293B;
+  --border-strong: #334155;
+  --positive: #3B82F6;
+  --warning: #F59E0B;
+  --danger: #EF4444;
 }
 
 body, button, input, select, textarea {
@@ -101,7 +101,7 @@ body, button, input, select, textarea {
 
 .form-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(82, 107, 87, 0.12);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .form-input::placeholder {
@@ -135,57 +135,46 @@ body, button, input, select, textarea {
   cursor: not-allowed;
 }
 
-/* Variantes Semánticas de Botones Naturales */
-.btn-green {
-  background-color: #438363;
+/* Variantes Semánticas de Botones Azul & Blanco */
+.btn-green,
+.btn-blue,
+.btn-primary,
+.btn-emerald {
+  background-color: #2563EB;
   color: #ffffff;
 }
-.btn-green:not(:disabled):hover {
-  background-color: #386e53;
+.btn-green:not(:disabled):hover,
+.btn-blue:not(:disabled):hover,
+.btn-primary:not(:disabled):hover,
+.btn-emerald:not(:disabled):hover {
+  background-color: #1D4ED8;
 }
 
 .btn-amber {
-  background-color: #C29A70;
+  background-color: #D97706;
   color: #ffffff;
 }
 .btn-amber:not(:disabled):hover {
-  background-color: #b0885e;
+  background-color: #B45309;
 }
 
 .btn-slate {
-  background-color: var(--bg-subtle);
-  color: var(--text-secondary);
+  background-color: #FFFFFF;
+  color: var(--text-main);
   border: 1px solid var(--border-soft);
 }
 .btn-slate:not(:disabled):hover {
-  background-color: var(--border-soft);
-  color: var(--text-main);
-}
-
-.btn-blue,
-.btn-primary {
-  background-color: #526B57;
-  color: #ffffff;
-}
-.btn-blue:not(:disabled):hover,
-.btn-primary:not(:disabled):hover {
-  background-color: #445948;
+  background-color: var(--bg-subtle);
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 .btn-cyan {
-  background-color: #718873;
+  background-color: #0284C7;
   color: #ffffff;
 }
 .btn-cyan:not(:disabled):hover {
-  background-color: #5f7561;
-}
-
-.btn-emerald {
-  background-color: #526B57;
-  color: #ffffff;
-}
-.btn-emerald:not(:disabled):hover {
-  background-color: #445948;
+  background-color: #0369A1;
 }
 
 /* Pestañas Segmented Control */
@@ -342,7 +331,7 @@ html.has-user-session #mainAppDashboard {
 }
 
 .btn-period-filter.active-period {
-  background-color: #526B57 !important;
+  background-color: #2563EB !important;
   color: #ffffff !important;
   box-shadow: none !important;
 }
@@ -367,7 +356,7 @@ html.has-user-session #authTopNavbar {
 
 @keyframes flashHighlight {
   0% {
-    box-shadow: 0 0 0 3px rgba(82, 107, 87, 0.4);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.4);
   }
   100% {
     box-shadow: none;
@@ -375,7 +364,7 @@ html.has-user-session #authTopNavbar {
 }
 
 /* ============================================================================
-   ESTILOS SIDEBAR SAAS: VERDE CARBÓN (#202923) & SAGE (#526B57)
+   ESTILOS SIDEBAR SAAS: SLATE NAVY (#0F172A) & SAPPHIRE BLUE (#2563EB)
    ============================================================================ */
 .sidebar-nav-link {
   display: flex;
@@ -385,7 +374,7 @@ html.has-user-session #authTopNavbar {
   border-radius: 0.5rem;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #A2ACA4;
+  color: #94A3B8;
   transition: background-color 140ms ease, color 140ms ease;
   cursor: pointer;
   text-decoration: none;
@@ -394,11 +383,11 @@ html.has-user-session #authTopNavbar {
 
 .sidebar-nav-link:hover {
   color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .sidebar-nav-link.active {
-  background-color: #526B57;
+  background-color: #2563EB;
   color: #ffffff;
   font-weight: 600;
   box-shadow: none;

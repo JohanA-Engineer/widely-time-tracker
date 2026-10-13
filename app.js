@@ -94,13 +94,13 @@ document.getElementById("btnConfigureKey")?.addEventListener("click", () => {
    CATEGORÍAS DE ACTIVIDAD & METADATA
    ============================================================================ */
 const CATEGORIES = {
-  general: { label: "General", icon: "fa-briefcase", color: "text-[#777F78] dark:text-[#9EA69F]", bg: "bg-[#F5F5F0] dark:bg-[#171E1A] border-[#E4E7E0] dark:border-[#28332B]", chartColor: "#777F78" },
-  diseno: { label: "Diseño Gráfico", icon: "fa-palette", color: "text-[#526B57] dark:text-[#829A84]", bg: "bg-[#526B57]/10 border-[#526B57]/20", chartColor: "#526B57" },
-  video: { label: "Edición Video", icon: "fa-film", color: "text-[#946E4A] dark:text-[#D4AF87]", bg: "bg-[#C29A70]/10 border-[#C29A70]/20", chartColor: "#C29A70" },
-  copy: { label: "Redacción & Copy", icon: "fa-pen-nib", color: "text-[#438363] dark:text-[#529B77]", bg: "bg-[#438363]/10 border-[#438363]/20", chartColor: "#438363" },
-  ads: { label: "Pauta & Ads", icon: "fa-chart-line", color: "text-[#718873] dark:text-[#9FB5A1]", bg: "bg-[#718873]/10 border-[#718873]/20", chartColor: "#718873" },
-  reunion: { label: "Reunión", icon: "fa-users", color: "text-[#777F78] dark:text-[#9EA69F]", bg: "bg-[#F5F5F0] dark:bg-[#171E1A] border-[#E4E7E0] dark:border-[#28332B]", chartColor: "#8FA092" },
-  estrategia: { label: "Estrategia", icon: "fa-lightbulb", color: "text-[#C58B42] dark:text-[#D99F55]", bg: "bg-[#C58B42]/10 border-[#C58B42]/20", chartColor: "#C58B42" }
+  general: { label: "General", icon: "fa-briefcase", color: "text-[#64748B] dark:text-[#94A3B8]", bg: "bg-[#F8FAFC] dark:bg-[#162032] border-[#E2E8F0] dark:border-[#1E293B]", chartColor: "#64748B" },
+  diseno: { label: "Diseño Gráfico", icon: "fa-palette", color: "text-[#2563EB] dark:text-[#60A5FA]", bg: "bg-[#2563EB]/10 border-[#2563EB]/20", chartColor: "#2563EB" },
+  video: { label: "Edición Video", icon: "fa-film", color: "text-[#0284C7] dark:text-[#38BDF8]", bg: "bg-[#0284C7]/10 border-[#0284C7]/20", chartColor: "#0284C7" },
+  copy: { label: "Redacción & Copy", icon: "fa-pen-nib", color: "text-[#3B82F6] dark:text-[#93C5FD]", bg: "bg-[#3B82F6]/10 border-[#3B82F6]/20", chartColor: "#3B82F6" },
+  ads: { label: "Pauta & Ads", icon: "fa-chart-line", color: "text-[#1D4ED8] dark:text-[#60A5FA]", bg: "bg-[#1D4ED8]/10 border-[#1D4ED8]/20", chartColor: "#1D4ED8" },
+  reunion: { label: "Reunión", icon: "fa-users", color: "text-[#64748B] dark:text-[#94A3B8]", bg: "bg-[#F8FAFC] dark:bg-[#162032] border-[#E2E8F0] dark:border-[#1E293B]", chartColor: "#94A3B8" },
+  estrategia: { label: "Estrategia", icon: "fa-lightbulb", color: "text-[#0284C7] dark:text-[#38BDF8]", bg: "bg-[#0284C7]/10 border-[#0284C7]/20", chartColor: "#0284C7" }
 };
 
 function getCategoryMeta(key) {
@@ -1585,33 +1585,33 @@ function updateTasksUI() {
 
   elements.tasksTableBody.innerHTML = displayedTasks.map(t => {
     const formattedTime = formatSecondsToTime(t.segundos || 0);
-    const isManualTag = t.esManual ? `<span class="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded bg-[#C29A70]/15 text-[#946E4A] dark:text-[#D4AF87] border border-[#C29A70]/25 shrink-0">Manual</span>` : "";
+    const isManualTag = t.esManual ? `<span class="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded bg-[#0284C7]/15 text-[#0284C7] dark:text-[#D4AF87] border border-[#0284C7]/25 shrink-0">Manual</span>` : "";
     const cat = getCategoryMeta(t.categoria);
     const catBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium ${cat.bg} ${cat.color} border shrink-0"><i class="fa-solid ${cat.icon} text-[9px]"></i><span>${cat.label}</span></span>`;
-    const clientBadge = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-[#FAF9F6] dark:bg-[#171E1A] text-[#292F2A] dark:text-[#EDF0EC] border border-[#E4E7E0] dark:border-[#28332B] shrink-0"><i class="fa-solid fa-briefcase text-[9px] text-[#526B57]"></i><span>${escapeHtml(t.cliente)}</span></span>` : "";
+    const clientBadge = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-[#F1F5F9] dark:bg-[#162032] text-[#0F172A] dark:text-[#F8FAFC] border border-[#E2E8F0] dark:border-[#1E293B] shrink-0"><i class="fa-solid fa-briefcase text-[9px] text-[#2563EB]"></i><span>${escapeHtml(t.cliente)}</span></span>` : "";
 
     return `
-      <tr class="hover:bg-[#FAF9F6] dark:hover:bg-[#171E1A] transition-colors">
-        <td class="py-2.5 px-3 text-[#777F78] dark:text-[#9EA69F] font-mono whitespace-nowrap tabular-nums">${t.fecha || '-'}</td>
-        <td class="py-2.5 px-3 font-semibold text-[#292F2A] dark:text-[#EDF0EC] whitespace-nowrap">${escapeHtml(t.trabajadorNombre || 'Anónimo')}</td>
-        <td class="py-2.5 px-3 text-[#777F78] dark:text-[#9EA69F] max-w-sm">
+      <tr class="hover:bg-[#F1F5F9] dark:hover:bg-[#162032] transition-colors">
+        <td class="py-2.5 px-3 text-[#64748B] dark:text-[#94A3B8] font-mono whitespace-nowrap tabular-nums">${t.fecha || '-'}</td>
+        <td class="py-2.5 px-3 font-semibold text-[#0F172A] dark:text-[#F8FAFC] whitespace-nowrap">${escapeHtml(t.trabajadorNombre || 'Anónimo')}</td>
+        <td class="py-2.5 px-3 text-[#64748B] dark:text-[#94A3B8] max-w-sm">
           <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="font-medium text-[#292F2A] dark:text-[#EDF0EC]" title="${escapeHtml(t.descripcion || '')}">${escapeHtml(t.descripcion || 'Sin descripción')}</span>
+            <span class="font-medium text-[#0F172A] dark:text-[#F8FAFC]" title="${escapeHtml(t.descripcion || '')}">${escapeHtml(t.descripcion || 'Sin descripción')}</span>
             ${clientBadge}
             ${catBadge}
             ${isManualTag}
           </div>
         </td>
-        <td class="py-2.5 px-2 text-right font-mono text-[#777F78] dark:text-[#9EA69F] whitespace-nowrap tabular-nums">
-          ${formattedTime} <span class="text-[10px] text-[#777F78]/80 dark:text-[#9EA69F]/80">(${Number(t.horas || 0).toFixed(2)}h)</span>
+        <td class="py-2.5 px-2 text-right font-mono text-[#64748B] dark:text-[#94A3B8] whitespace-nowrap tabular-nums">
+          ${formattedTime} <span class="text-[10px] text-[#64748B]/80 dark:text-[#94A3B8]/80">(${Number(t.horas || 0).toFixed(2)}h)</span>
         </td>
-        <td class="py-2.5 px-2 text-right font-mono font-medium text-[#292F2A] dark:text-[#EDF0EC] whitespace-nowrap tabular-nums">
+        <td class="py-2.5 px-2 text-right font-mono font-medium text-[#0F172A] dark:text-[#F8FAFC] whitespace-nowrap tabular-nums">
           $${Number(t.costoTotal || 0).toFixed(2)}
         </td>
         <td class="py-2.5 px-2 text-center whitespace-nowrap">
           <button 
             onclick="window.requestDelete('tareas', '${t.id}', 'Tarea: ${escapeHtml(t.descripcion || '')}')"
-            class="text-[#777F78] hover:text-[#BF6863] p-1 rounded-md hover:bg-[#BF6863]/10 transition-colors active:scale-95"
+            class="text-[#64748B] hover:text-[#BF6863] p-1 rounded-md hover:bg-[#BF6863]/10 transition-colors active:scale-95"
             title="Eliminar tarea">
             <i class="fa-regular fa-trash-can text-xs"></i>
           </button>
@@ -1639,7 +1639,7 @@ function updatePaymentsUI() {
   if (displayedPayments.length === 0) {
     elements.paymentsTableBody.innerHTML = `
       <tr>
-        <td colspan="5" class="py-6 text-center text-[#777F78] dark:text-[#9EA69F] text-xs">
+        <td colspan="5" class="py-6 text-center text-[#64748B] dark:text-[#94A3B8] text-xs">
           ${isWorker ? "No tienes pagos registrados en este período." : "No hay pagos registrados en este período."}
         </td>
       </tr>
@@ -1648,24 +1648,24 @@ function updatePaymentsUI() {
   }
 
   elements.paymentsTableBody.innerHTML = displayedPayments.map(p => `
-    <tr class="hover:bg-[#FAF9F6] dark:hover:bg-[#171E1A] transition-colors">
-      <td class="py-2.5 px-3 text-[#777F78] dark:text-[#9EA69F] font-mono whitespace-nowrap tabular-nums">${p.fecha || '-'}</td>
-      <td class="py-2.5 px-3 font-semibold text-[#292F2A] dark:text-[#EDF0EC] whitespace-nowrap">${escapeHtml(p.trabajadorNombre || '')}</td>
-      <td class="py-2.5 px-3 text-[#777F78] dark:text-[#9EA69F] max-w-xs truncate" title="${escapeHtml(p.referencia || '')}">
+    <tr class="hover:bg-[#F1F5F9] dark:hover:bg-[#162032] transition-colors">
+      <td class="py-2.5 px-3 text-[#64748B] dark:text-[#94A3B8] font-mono whitespace-nowrap tabular-nums">${p.fecha || '-'}</td>
+      <td class="py-2.5 px-3 font-semibold text-[#0F172A] dark:text-[#F8FAFC] whitespace-nowrap">${escapeHtml(p.trabajadorNombre || '')}</td>
+      <td class="py-2.5 px-3 text-[#64748B] dark:text-[#94A3B8] max-w-xs truncate" title="${escapeHtml(p.referencia || '')}">
         ${escapeHtml(p.referencia || 'Pago')}
       </td>
-      <td class="py-2.5 px-2 text-right font-mono font-medium text-[#438363] whitespace-nowrap tabular-nums">
+      <td class="py-2.5 px-2 text-right font-mono font-medium text-[#2563EB] whitespace-nowrap tabular-nums">
         $${Number(p.monto || 0).toFixed(2)}
       </td>
       <td class="py-2.5 px-2 text-center whitespace-nowrap">
         ${!isWorker ? `
           <button 
             onclick="window.requestDelete('pagos', '${p.id}', 'Pago de $${Number(p.monto || 0).toFixed(2)} a ${escapeHtml(p.trabajadorNombre || '')}')"
-            class="text-[#777F78] hover:text-[#BF6863] p-1 rounded-md hover:bg-[#BF6863]/10 transition-colors active:scale-95"
+            class="text-[#64748B] hover:text-[#BF6863] p-1 rounded-md hover:bg-[#BF6863]/10 transition-colors active:scale-95"
             title="Eliminar pago">
             <i class="fa-regular fa-trash-can text-xs"></i>
           </button>
-        ` : `<span class="text-[10px] text-[#777F78] dark:text-[#9EA69F] font-mono">Registrado</span>`}
+        ` : `<span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-mono">Registrado</span>`}
       </td>
     </tr>
   `).join("");
@@ -1737,7 +1737,7 @@ function updateFinancialDashboard() {
     } else if (pendingBalance === 0) {
       // Al día: Verde natural
       balanceBadge = `
-        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold font-mono bg-[#438363]/10 dark:bg-[#438363]/15 text-[#438363] border border-[#438363]/25 tabular-nums">
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold font-mono bg-[#2563EB]/10 dark:bg-[#2563EB]/15 text-[#2563EB] border border-[#2563EB]/25 tabular-nums">
           <i class="fa-solid fa-check text-[10px]"></i>
           $0.00
         </span>
@@ -1745,7 +1745,7 @@ function updateFinancialDashboard() {
     } else {
       // Anticipo a favor
       balanceBadge = `
-        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold font-mono bg-[#718873]/10 dark:bg-[#718873]/15 text-[#526B57] dark:text-[#829A84] border border-[#718873]/25 tabular-nums">
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold font-mono bg-[#3B82F6]/10 dark:bg-[#3B82F6]/15 text-[#2563EB] dark:text-[#60A5FA] border border-[#3B82F6]/25 tabular-nums">
           <i class="fa-solid fa-arrow-down text-[10px]"></i>
           -$${Math.abs(pendingBalance).toFixed(2)}
         </span>
@@ -1756,10 +1756,10 @@ function updateFinancialDashboard() {
       <button 
         type="button" 
         onclick="window.openEditRateModal('${worker.id}', '${escapeHtml(worker.nombre)}', ${Number(worker.tarifaHora || 0)})"
-        class="hover:text-[#526B57] dark:hover:text-[#829A84] hover:underline transition-colors cursor-pointer inline-flex items-center gap-1 group"
+        class="hover:text-[#2563EB] dark:hover:text-[#60A5FA] hover:underline transition-colors cursor-pointer inline-flex items-center gap-1 group"
         title="Clic para cambiar tarifa por hora">
         <span>$${Number(worker.tarifaHora || 0).toFixed(2)}/h</span>
-        <i class="fa-solid fa-pencil text-[9px] opacity-0 group-hover:opacity-100 transition-opacity text-[#718873]"></i>
+        <i class="fa-solid fa-pencil text-[9px] opacity-0 group-hover:opacity-100 transition-opacity text-[#3B82F6]"></i>
       </button>
     ` : `<span>$${Number(worker.tarifaHora || 0).toFixed(2)}/h</span>`;
 
@@ -1767,7 +1767,7 @@ function updateFinancialDashboard() {
       <button 
         type="button" 
         onclick="window.openStatementModal('${worker.id}', 'bill')" 
-        class="px-2.5 py-1.5 rounded-lg bg-[#526B57]/10 hover:bg-[#526B57]/20 text-[#526B57] dark:text-[#829A84] border border-[#526B57]/20 text-xs font-medium active:scale-95 transition-all inline-flex items-center gap-1.5 cursor-pointer"
+        class="px-2.5 py-1.5 rounded-lg bg-[#2563EB]/10 hover:bg-[#2563EB]/20 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/20 text-xs font-medium active:scale-95 transition-all inline-flex items-center gap-1.5 cursor-pointer"
         title="Generar y descargar mi Cuenta de Cobro formal">
         <i class="fa-solid fa-file-invoice-dollar text-xs"></i>
         <span>Descargar Cuenta de Cobro</span>
@@ -1777,7 +1777,7 @@ function updateFinancialDashboard() {
         <button 
           type="button" 
           onclick="window.openStatementModal('${worker.id}', 'receipt')" 
-          class="px-2.5 py-1.5 rounded-lg bg-[#526B57] hover:bg-[#445948] text-white text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          class="px-2.5 py-1.5 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
           title="Generar Recibo de Pago Oficial (PDF)">
           <i class="fa-solid fa-receipt text-[10px]"></i>
           <span class="hidden sm:inline">Recibo Oficial</span>
@@ -1786,14 +1786,14 @@ function updateFinancialDashboard() {
         <button 
           type="button" 
           onclick="window.openStatementModal('${worker.id}', 'bill')" 
-          class="px-2 py-1.5 rounded-lg bg-[#FAF9F6] dark:bg-[#1B221E] hover:bg-[#E4E7E0] dark:hover:bg-[#28332B] text-[#526B57] dark:text-[#829A84] border border-[#E4E7E0] dark:border-[#28332B] text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          class="px-2 py-1.5 rounded-lg bg-[#F1F5F9] dark:bg-[#111827] hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B] text-[#2563EB] dark:text-[#60A5FA] border border-[#E2E8F0] dark:border-[#1E293B] text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
           title="Auditar Cuenta de Cobro de este colaborador">
           <i class="fa-solid fa-file-invoice-dollar text-[10px]"></i>
         </button>
         <button 
           type="button" 
           onclick="window.quickPayWorker('${worker.id}', '${escapeHtml(worker.nombre)}', ${pendingBalance})" 
-          class="px-2 py-1.5 rounded-lg bg-[#C29A70]/15 hover:bg-[#C29A70]/25 text-[#946E4A] dark:text-[#D4AF87] border border-[#C29A70]/30 text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          class="px-2 py-1.5 rounded-lg bg-[#0284C7]/15 hover:bg-[#0284C7]/25 text-[#0284C7] dark:text-[#D4AF87] border border-[#0284C7]/30 text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
           title="Abonar / Registrar pago a ${escapeHtml(worker.nombre)}">
           <i class="fa-solid fa-money-bill-transfer text-[10px]"></i>
         </button>
@@ -1801,26 +1801,26 @@ function updateFinancialDashboard() {
     `;
 
     return `
-      <tr class="hover:bg-[#FAF9F6] dark:hover:bg-[#171E1A] transition-colors">
-        <td class="py-3 px-3 font-semibold text-[#292F2A] dark:text-[#EDF0EC]">
+      <tr class="hover:bg-[#F1F5F9] dark:hover:bg-[#162032] transition-colors">
+        <td class="py-3 px-3 font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
           <div class="flex items-center gap-2.5">
-            <div class="w-7 h-7 rounded-lg bg-[#526B57]/10 text-[#526B57] dark:text-[#829A84] flex items-center justify-center text-xs font-semibold border border-[#526B57]/20">
+            <div class="w-7 h-7 rounded-lg bg-[#2563EB]/10 text-[#2563EB] dark:text-[#60A5FA] flex items-center justify-center text-xs font-semibold border border-[#2563EB]/20">
               ${worker.nombre.charAt(0).toUpperCase()}
             </div>
             <span>${escapeHtml(worker.nombre)}</span>
           </div>
         </td>
-        <td class="py-3 px-2 text-right font-mono text-[#777F78] dark:text-[#9EA69F] tabular-nums">
+        <td class="py-3 px-2 text-right font-mono text-[#64748B] dark:text-[#94A3B8] tabular-nums">
           ${editRateBtn}
         </td>
-        <td class="py-3 px-2 text-right font-mono text-[#292F2A] dark:text-[#EDF0EC] tabular-nums">
+        <td class="py-3 px-2 text-right font-mono text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">
           <span class="font-medium">${workerHours.toFixed(2)}h</span>
-          <span class="text-[10px] text-[#777F78] dark:text-[#9EA69F] block">${formatSecondsToTime(workerSeconds)}</span>
+          <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block">${formatSecondsToTime(workerSeconds)}</span>
         </td>
-        <td class="py-3 px-2 text-right font-mono font-medium text-[#292F2A] dark:text-[#EDF0EC] tabular-nums">
+        <td class="py-3 px-2 text-right font-mono font-medium text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">
           $${workerEarned.toFixed(2)}
         </td>
-        <td class="py-3 px-2 text-right font-mono font-medium text-[#438363] tabular-nums">
+        <td class="py-3 px-2 text-right font-mono font-medium text-[#2563EB] tabular-nums">
           $${workerPaid.toFixed(2)}
         </td>
         <td class="py-3 px-3 text-right">
@@ -1847,11 +1847,11 @@ function updateFinancialDashboard() {
     elements.kpiSaldoPendiente.textContent = `$${balance.toFixed(2)}`;
     elements.kpiSaldoDesc.textContent = isWorker ? "Tu saldo pendiente por cobrar" : "Deuda total por liquidar a trabajadores";
   } else if (balance === 0) {
-    elements.kpiSaldoPendiente.className = "text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#438363] tabular-nums";
+    elements.kpiSaldoPendiente.className = "text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#2563EB] tabular-nums";
     elements.kpiSaldoPendiente.textContent = "$0.00";
     elements.kpiSaldoDesc.textContent = isWorker ? "Tus pagos están al día" : "Todos los pagos están al día";
   } else {
-    elements.kpiSaldoPendiente.className = "text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#526B57] dark:text-[#829A84] tabular-nums";
+    elements.kpiSaldoPendiente.className = "text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#2563EB] dark:text-[#60A5FA] tabular-nums";
     elements.kpiSaldoPendiente.textContent = `+$${Math.abs(balance).toFixed(2)}`;
     elements.kpiSaldoDesc.textContent = isWorker ? "Anticipo recibido a tu favor" : "Saldo a favor de la empresa";
   }
@@ -1867,10 +1867,10 @@ function updateFinancialDashboard() {
         elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-[#BF6863] tabular-nums";
       } else if (balance === 0) {
         elements.workerKpiBalance.textContent = "$0.00";
-        elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-[#438363] tabular-nums";
+        elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-[#2563EB] tabular-nums";
       } else {
         elements.workerKpiBalance.textContent = `+$${Math.abs(balance).toFixed(2)}`;
-        elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-[#526B57] dark:text-[#829A84] tabular-nums";
+        elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-[#2563EB] dark:text-[#60A5FA] tabular-nums";
       }
     }
 
@@ -1995,8 +1995,8 @@ function renderProductivityCharts() {
         datasets: [{
           label: "Horas trabajadas",
           data: chartData,
-          backgroundColor: isDark ? "rgba(99, 127, 105, 0.85)" : "rgba(82, 107, 87, 0.85)",
-          hoverBackgroundColor: isDark ? "#718873" : "#445948",
+          backgroundColor: isDark ? "rgba(59, 130, 246, 0.85)" : "rgba(37, 99, 235, 0.85)",
+          hoverBackgroundColor: isDark ? "#60A5FA" : "#1D4ED8",
           borderRadius: 6,
           borderSkipped: false,
           maxBarThickness: 32
@@ -2008,10 +2008,10 @@ function renderProductivityCharts() {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: isDark ? "#1B221E" : "#FFFFFF",
-            titleColor: isDark ? "#EDF0EC" : "#292F2A",
-            bodyColor: isDark ? "#9EA69F" : "#777F78",
-            borderColor: isDark ? "#28332B" : "#E4E7E0",
+            backgroundColor: isDark ? "#111827" : "#FFFFFF",
+            titleColor: isDark ? "#F8FAFC" : "#0F172A",
+            bodyColor: isDark ? "#94A3B8" : "#64748B",
+            borderColor: isDark ? "#1E293B" : "#E2E8F0",
             borderWidth: 1,
             padding: 10,
             cornerRadius: 8,
@@ -2024,17 +2024,17 @@ function renderProductivityCharts() {
           x: {
             grid: { display: false },
             ticks: {
-              color: isDark ? "#9EA69F" : "#777F78",
+              color: isDark ? "#94A3B8" : "#64748B",
               font: { family: "'Inter', sans-serif", size: 10 }
             }
           },
           y: {
             beginAtZero: true,
             grid: {
-              color: isDark ? "rgba(255, 255, 255, 0.05)" : "#E4E7E0"
+              color: isDark ? "rgba(255, 255, 255, 0.05)" : "#E2E8F0"
             },
             ticks: {
-              color: isDark ? "#9EA69F" : "#777F78",
+              color: isDark ? "#94A3B8" : "#64748B",
               font: { family: "'Inter', sans-serif", size: 10 },
               callback: (v) => `${v}h`
             }
@@ -2072,7 +2072,7 @@ function renderProductivityCharts() {
     } else {
       catLabels = ["Sin registros"];
       catData = [1];
-      catColors = [isDark ? "#28332B" : "#E4E7E0"];
+      catColors = [isDark ? "#1E293B" : "#E2E8F0"];
     }
 
     const ctxCat = elements.productivityCategoryChart.getContext("2d");
@@ -2084,7 +2084,7 @@ function renderProductivityCharts() {
           data: catData,
           backgroundColor: catColors,
           borderWidth: 2,
-          borderColor: isDark ? "#1B221E" : "#FFFFFF",
+          borderColor: isDark ? "#111827" : "#FFFFFF",
           hoverOffset: 4
         }]
       },
@@ -2096,7 +2096,7 @@ function renderProductivityCharts() {
           legend: {
             position: "bottom",
             labels: {
-              color: isDark ? "#9EA69F" : "#777F78",
+              color: isDark ? "#94A3B8" : "#64748B",
               boxWidth: 8,
               boxHeight: 8,
               padding: 10,
@@ -2104,10 +2104,10 @@ function renderProductivityCharts() {
             }
           },
           tooltip: {
-            backgroundColor: isDark ? "#1B221E" : "#FFFFFF",
-            titleColor: isDark ? "#EDF0EC" : "#292F2A",
-            bodyColor: isDark ? "#9EA69F" : "#777F78",
-            borderColor: isDark ? "#28332B" : "#E4E7E0",
+            backgroundColor: isDark ? "#111827" : "#FFFFFF",
+            titleColor: isDark ? "#F8FAFC" : "#0F172A",
+            bodyColor: isDark ? "#94A3B8" : "#64748B",
+            borderColor: isDark ? "#1E293B" : "#E2E8F0",
             borderWidth: 1,
             padding: 10,
             cornerRadius: 8,
