@@ -21,6 +21,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Obtiene el trabajadorId asignado al usuario autenticado desde /usuarios/{uid}
+    function getUserWorkerId() {
+      return (request.auth != null && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))) ?
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.trabajadorId : null;
+    }
+
     // =========================================================================
     // REGLAS POR COLECCIÓN
     // =========================================================================
@@ -64,13 +70,25 @@ service cloud.firestore {
 
     // 3. Colección de Tareas Registradas (/tareas/{taskId})
     match /tareas/{taskId} {
-      // Todos los autenticados pueden leer tareas (el filtrado visual por usuario se asegura en la UI)
-      allow read: if isAuthenticated();
+      // Privacidad Estricta: Lina consulta todas las tareas del equipo;
+      // un colaborador SOLO puede consultar sus propias tareas registradas
+      allow read: if isMasterAdmin() || (
+        isAuthenticated() && (
+          (getUserWorkerId() != null && resource.data.trabajadorId == getUserWorkerId()) ||
+          (resource.data.userId != null && resource.data.userId == request.auth.uid)
+        )
+      );
       
-      // Los colaboradores pueden registrar sus propias tareas con tiempo y descripción
+      // Autoría Estricta: Un colaborador solo puede registrar tareas a su propio nombre y trabajadorId
       allow create: if isAuthenticated() && (
-        request.resource.data.horas > 0 &&
-        request.resource.data.descripcion is string
+        isMasterAdmin() || (
+          request.resource.data.horas > 0 &&
+          request.resource.data.descripcion is string &&
+          (
+            (getUserWorkerId() != null && request.resource.data.trabajadorId == getUserWorkerId()) ||
+            (request.resource.data.userId == request.auth.uid)
+          )
+        )
       );
       
       // Solo Lina puede modificar o eliminar tareas ya registradas (auditoría financiera)
@@ -79,8 +97,13 @@ service cloud.firestore {
 
     // 4. Colección de Pagos y Desembolsos (/pagos/{paymentId})
     match /pagos/{paymentId} {
-      // Los usuarios autenticados pueden consultar pagos para validar sus recibos y balances
-      allow read: if isAuthenticated();
+      // Privacidad Estricta: Lina consulta todos los pagos;
+      // un colaborador SOLO puede consultar sus propios recibos y desembolsos
+      allow read: if isMasterAdmin() || (
+        isAuthenticated() && (
+          getUserWorkerId() != null && resource.data.trabajadorId == getUserWorkerId()
+        )
+      );
       
       // ÚNICAMENTE la Administradora Maestra (Lina) puede registrar, editar o anular pagos
       // Ningún colaborador puede crear o alterar comprobantes de pago bajo ninguna circunstancia

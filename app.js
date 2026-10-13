@@ -28,6 +28,7 @@ import {
   doc,
   onSnapshot,
   query,
+  where,
   orderBy,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -358,7 +359,7 @@ function init() {
   initPWA();
 
   if (db) {
-    listenToFirestore();
+    setupFirestoreListeners(state.userProfile);
     initFirebaseAuth();
   } else {
     loadLocalFallbackData();
@@ -440,6 +441,7 @@ function initFirebaseAuth() {
         }
 
         localStorage.setItem("widely_cached_user", JSON.stringify(state.userProfile));
+        setupFirestoreListeners(state.userProfile);
         applyRoleView();
         updateFinancialDashboard();
         updateTasksUI();
@@ -447,6 +449,13 @@ function initFirebaseAuth() {
         updateWorkersUI();
       } catch (err) {
         console.warn("[Auth] Error al sincronizar usuario con Firestore:", err);
+      }
+    } else {
+      state.currentUser = null;
+      if (!localStorage.getItem("widely_cached_user")) {
+        state.userProfile = null;
+        setupFirestoreListeners(null);
+        applyRoleView();
       }
     }
   });
@@ -602,14 +611,21 @@ function linkAndLockWorkerSelect() {
   );
 
   if (matchingWorker) {
-    if (!profile.trabajadorId) {
+    const wasMissing = !profile.trabajadorId || profile.trabajadorId !== matchingWorker.id;
+    if (wasMissing) {
       profile.trabajadorId = matchingWorker.id;
       localStorage.setItem("widely_cached_user", JSON.stringify(profile));
+      if (db && state.currentUser) {
+        updateDoc(doc(db, "usuarios", state.currentUser.uid), { trabajadorId: matchingWorker.id }).catch(console.warn);
+      }
     }
     if (elements.timerWorkerSelect) {
       elements.timerWorkerSelect.value = matchingWorker.id;
       elements.timerWorkerSelect.disabled = true;
       updateLiveCost();
+    }
+    if (wasMissing) {
+      setupFirestoreListeners(profile);
     }
   }
 }
@@ -691,6 +707,7 @@ async function handleLogin(e) {
       state.userProfile = profile;
       localStorage.setItem("widely_cached_user", JSON.stringify(profile));
 
+      setupFirestoreListeners(profile);
       applyRoleView();
       closeAuthModal();
       showToast(`¡Bienvenido ${profile.nombre}! Modo ${profile.rol === "admin" ? "Administrador" : "Colaborador"}.`, "success");
@@ -782,6 +799,7 @@ async function handleRegister(e) {
       state.userProfile = userProfile;
       localStorage.setItem("widely_cached_user", JSON.stringify(userProfile));
 
+      setupFirestoreListeners(userProfile);
       applyRoleView();
       closeAuthModal();
       showToast(`¡Perfil "${name}" creado exitosamente como ${role === "admin" ? "Administrador" : "Colaborador"}!`, "success");
@@ -899,6 +917,7 @@ async function handleGoogleAuth() {
     state.userProfile = profile;
     localStorage.setItem("widely_cached_user", JSON.stringify(profile));
 
+    setupFirestoreListeners(profile);
     applyRoleView();
     closeAuthModal();
     showToast(`¡Bienvenido ${profile.nombre}! Has ingresado con Google.`, "success");
@@ -935,6 +954,7 @@ async function handleLogout() {
     state.currentUser = null;
     state.userProfile = null;
     localStorage.removeItem("widely_cached_user");
+    setupFirestoreListeners(null);
     document.documentElement.classList.remove("has-user-session");
     applyRoleView();
     elements.formAuthLogin?.reset();
@@ -1013,53 +1033,115 @@ async function loginMockUser(role, customName, customEmail) {
 }
 
 /* ============================================================================
-   5. LISTENERS EN TIEMPO REAL CON FIRESTORE (onSnapshot)
+   5. LISTENERS EN TIEMPO REAL CON FIRESTORE (onSnapshot con Privacidad Estricta)
    ============================================================================ */
-function listenToFirestore() {
-  // A. Colección: trabajadores
-  const workersCol = collection(db, "trabajadores");
-  onSnapshot(workersCol, (snapshot) => {
-    state.workers = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })).sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
+let workersUnsubscribe = null;
+let tasksUnsubscribe = null;
+let paymentsUnsubscribe = null;
 
-    updateWorkersUI();
-    updateFinancialDashboard();
-  }, (error) => {
-    console.error("Error en trabajadores:", error);
-    showToast("Error al sincronizar trabajadores: " + error.message, "error");
-  });
+function setupFirestoreListeners(profile) {
+  if (!db) return;
 
-  // B. Colección: tareas
-  const tasksQuery = query(collection(db, "tareas"), orderBy("createdAt", "desc"));
-  onSnapshot(tasksQuery, (snapshot) => {
-    state.tasks = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+  // Escuchar trabajadores siempre para los usuarios autenticados
+  if (!workersUnsubscribe) {
+    const workersCol = collection(db, "trabajadores");
+    workersUnsubscribe = onSnapshot(workersCol, (snapshot) => {
+      state.workers = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })).sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
 
+      updateWorkersUI();
+      updateFinancialDashboard();
+    }, (error) => {
+      console.warn("[Firestore] Trabajadores snapshot:", error.message);
+    });
+  }
+
+  // Cancelar suscripciones previas de tareas y pagos para evitar mezclas de sesiones
+  if (tasksUnsubscribe) {
+    tasksUnsubscribe();
+    tasksUnsubscribe = null;
+  }
+  if (paymentsUnsubscribe) {
+    paymentsUnsubscribe();
+    paymentsUnsubscribe = null;
+  }
+
+  // Si no hay sesión activa, vaciar colecciones privadas
+  if (!profile) {
+    state.tasks = [];
+    state.payments = [];
     updateTasksUI();
-    updateFinancialDashboard();
-  }, (error) => {
-    console.error("Error en tareas:", error);
-    showToast("Error al sincronizar tareas: " + error.message, "error");
-  });
-
-  // C. Colección: pagos
-  const paymentsQuery = query(collection(db, "pagos"), orderBy("createdAt", "desc"));
-  onSnapshot(paymentsQuery, (snapshot) => {
-    state.payments = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-
     updatePaymentsUI();
     updateFinancialDashboard();
-  }, (error) => {
-    console.error("Error en pagos:", error);
-    showToast("Error al sincronizar pagos: " + error.message, "error");
-  });
+    return;
+  }
+
+  const isAdmin = profile.rol === "admin" || isMasterAdmin(profile.email);
+
+  // 1. TAREAS: La Administradora lee todo; el Colaborador solo sus propias tareas
+  let tasksQuery = null;
+  if (isAdmin) {
+    tasksQuery = query(collection(db, "tareas"));
+  } else if (profile.trabajadorId) {
+    tasksQuery = query(collection(db, "tareas"), where("trabajadorId", "==", profile.trabajadorId));
+  } else {
+    state.tasks = [];
+    updateTasksUI();
+    updateFinancialDashboard();
+  }
+
+  if (tasksQuery) {
+    tasksUnsubscribe = onSnapshot(tasksQuery, (snapshot) => {
+      state.tasks = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })).sort((a, b) => {
+        // Ordenar en cliente para evitar requerir índices compuestos manuales en Firestore
+        const dateA = a.fecha || "";
+        const dateB = b.fecha || "";
+        return dateB.localeCompare(dateA);
+      });
+
+      updateTasksUI();
+      updateFinancialDashboard();
+    }, (error) => {
+      console.error("[Firestore] Error al sincronizar tareas:", error);
+      showToast("Error al sincronizar tareas: " + error.message, "error");
+    });
+  }
+
+  // 2. PAGOS: La Administradora lee todo; el Colaborador solo sus pagos recibidos
+  let paymentsQuery = null;
+  if (isAdmin) {
+    paymentsQuery = query(collection(db, "pagos"));
+  } else if (profile.trabajadorId) {
+    paymentsQuery = query(collection(db, "pagos"), where("trabajadorId", "==", profile.trabajadorId));
+  } else {
+    state.payments = [];
+    updatePaymentsUI();
+    updateFinancialDashboard();
+  }
+
+  if (paymentsQuery) {
+    paymentsUnsubscribe = onSnapshot(paymentsQuery, (snapshot) => {
+      state.payments = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })).sort((a, b) => {
+        const dateA = a.fecha || "";
+        const dateB = b.fecha || "";
+        return dateB.localeCompare(dateA);
+      });
+
+      updatePaymentsUI();
+      updateFinancialDashboard();
+    }, (error) => {
+      console.error("[Firestore] Error al sincronizar pagos:", error);
+      showToast("Error al sincronizar pagos: " + error.message, "error");
+    });
+  }
 }
 
 /* ============================================================================
@@ -1228,7 +1310,9 @@ function updateLiveCost() {
 
 // Registrar tarea finalizada en Firebase
 async function handleRegisterTask() {
-  const workerId = elements.timerWorkerSelect.value || state.userProfile?.trabajadorId;
+  const isWorkerRole = state.userProfile?.rol === "worker";
+  const userWorkerId = state.userProfile?.trabajadorId;
+  const workerId = (isWorkerRole && userWorkerId) ? userWorkerId : (elements.timerWorkerSelect.value || userWorkerId);
   const client = elements.timerClientProject?.value.trim() || "";
   const category = elements.timerCategory?.value || "general";
   const description = elements.timerTaskDescription.value.trim();
@@ -1260,6 +1344,7 @@ async function handleRegisterTask() {
     fecha: today,
     trabajadorId: worker.id,
     trabajadorNombre: worker.nombre,
+    userId: state.currentUser?.uid || state.userProfile?.uid || null,
     cliente: client,
     categoria: category,
     descripcion: description || "Tarea sin descripción",
@@ -2316,7 +2401,9 @@ function updateManualCost() {
 
 async function handleSaveManualEntry(e) {
   e.preventDefault();
-  const workerId = elements.manualWorkerSelect.value || state.userProfile?.trabajadorId;
+  const isWorkerRole = state.userProfile?.rol === "worker";
+  const userWorkerId = state.userProfile?.trabajadorId;
+  const workerId = (isWorkerRole && userWorkerId) ? userWorkerId : (elements.manualWorkerSelect.value || userWorkerId);
   const client = elements.manualClientProject?.value.trim() || "";
   const category = elements.manualCategory?.value || "general";
   const date = elements.manualDate.value;
@@ -2346,6 +2433,7 @@ async function handleSaveManualEntry(e) {
     fecha: date || new Date().toISOString().split("T")[0],
     trabajadorId: workerId,
     trabajadorNombre: workerName,
+    userId: state.currentUser?.uid || state.userProfile?.uid || null,
     cliente: client,
     categoria: category,
     descripcion: description,
