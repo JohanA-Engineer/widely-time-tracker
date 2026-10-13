@@ -131,6 +131,9 @@ function playOvertimeNotificationSound() {
 
 let dailyChartInstance = null;
 let categoryChartInstance = null;
+let workersUnsubscribe = null;
+let tasksUnsubscribe = null;
+let paymentsUnsubscribe = null;
 
 /* ============================================================================
    2. ESTADO GLOBAL DE LA APLICACIÓN
@@ -1034,10 +1037,6 @@ async function loginMockUser(role, customName, customEmail) {
 /* ============================================================================
    5. LISTENERS EN TIEMPO REAL CON FIRESTORE (onSnapshot con Privacidad Estricta)
    ============================================================================ */
-let workersUnsubscribe = null;
-let tasksUnsubscribe = null;
-let paymentsUnsubscribe = null;
-
 function setupFirestoreListeners(profile) {
   if (!db) return;
 
