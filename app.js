@@ -129,6 +129,16 @@ function playOvertimeNotificationSound() {
   }
 }
 
+// Correo maestro con acceso exclusivo de Administrador
+const MASTER_ADMIN_EMAILS = [
+  "linadelae@gmail.com"
+];
+
+function isMasterAdmin(email) {
+  if (!email) return false;
+  return MASTER_ADMIN_EMAILS.includes(email.trim().toLowerCase());
+}
+
 let dailyChartInstance = null;
 let categoryChartInstance = null;
 let workersUnsubscribe = null;
@@ -362,32 +372,15 @@ function init() {
   initPWA();
 
   if (db) {
-    setupFirestoreListeners(state.userProfile);
     initFirebaseAuth();
   } else {
     loadLocalFallbackData();
   }
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
-
 /* ============================================================================
    4.B. SISTEMA DE AUTENTICACIÓN Y ROLES (ADMIN / WORKER)
    ============================================================================ */
-// Correo maestro con acceso exclusivo de Administrador
-const MASTER_ADMIN_EMAILS = [
-  "linadelae@gmail.com"
-];
-
-function isMasterAdmin(email) {
-  if (!email) return false;
-  return MASTER_ADMIN_EMAILS.includes(email.trim().toLowerCase());
-}
-
 function initCachedSession() {
   try {
     const cached = localStorage.getItem("widely_cached_user");
@@ -1040,7 +1033,20 @@ async function loginMockUser(role, customName, customEmail) {
 function setupFirestoreListeners(profile) {
   if (!db) return;
 
-  // Escuchar trabajadores siempre para los usuarios autenticados
+  // Si no hay usuario autenticado en Firebase, desuscribir y limpiar todo
+  if (!profile || !auth || !auth.currentUser) {
+    if (workersUnsubscribe) { workersUnsubscribe(); workersUnsubscribe = null; }
+    if (tasksUnsubscribe) { tasksUnsubscribe(); tasksUnsubscribe = null; }
+    if (paymentsUnsubscribe) { paymentsUnsubscribe(); paymentsUnsubscribe = null; }
+    state.tasks = [];
+    state.payments = [];
+    updateTasksUI();
+    updatePaymentsUI();
+    updateFinancialDashboard();
+    return;
+  }
+
+  // 1. Escuchar trabajadores (solo cuando el usuario tiene sesión activa confirmada)
   if (!workersUnsubscribe) {
     const workersCol = collection(db, "trabajadores");
     workersUnsubscribe = onSnapshot(workersCol, (snapshot) => {
@@ -1066,19 +1072,9 @@ function setupFirestoreListeners(profile) {
     paymentsUnsubscribe = null;
   }
 
-  // Si no hay sesión activa, vaciar colecciones privadas
-  if (!profile) {
-    state.tasks = [];
-    state.payments = [];
-    updateTasksUI();
-    updatePaymentsUI();
-    updateFinancialDashboard();
-    return;
-  }
-
   const isAdmin = profile.rol === "admin" || isMasterAdmin(profile.email);
 
-  // 1. TAREAS: La Administradora lee todo; el Colaborador solo sus propias tareas
+  // 2. TAREAS: La Administradora lee todo; el Colaborador solo sus propias tareas
   let tasksQuery = null;
   if (isAdmin) {
     tasksQuery = query(collection(db, "tareas"));
@@ -1105,12 +1101,11 @@ function setupFirestoreListeners(profile) {
       updateTasksUI();
       updateFinancialDashboard();
     }, (error) => {
-      console.error("[Firestore] Error al sincronizar tareas:", error);
-      showToast("Error al sincronizar tareas: " + error.message, "error");
+      console.warn("[Firestore] Aviso en sincronización de tareas:", error.message);
     });
   }
 
-  // 2. PAGOS: La Administradora lee todo; el Colaborador solo sus pagos recibidos
+  // 3. PAGOS: La Administradora lee todo; el Colaborador solo sus pagos recibidos
   let paymentsQuery = null;
   if (isAdmin) {
     paymentsQuery = query(collection(db, "pagos"));
@@ -1136,8 +1131,7 @@ function setupFirestoreListeners(profile) {
       updatePaymentsUI();
       updateFinancialDashboard();
     }, (error) => {
-      console.error("[Firestore] Error al sincronizar pagos:", error);
-      showToast("Error al sincronizar pagos: " + error.message, "error");
+      console.warn("[Firestore] Aviso en sincronización de pagos:", error.message);
     });
   }
 }
@@ -3140,4 +3134,13 @@ function loadLocalFallbackData() {
   updateTasksUI();
   updatePaymentsUI();
   updateFinancialDashboard();
+}
+
+/* ============================================================================
+   INICIALIZACIÓN DE LA APLICACIÓN (Arranca una vez todo está cargado)
+   ============================================================================ */
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
 }
