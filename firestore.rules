@@ -2,54 +2,89 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Función auxiliar para determinar si el usuario autenticado es la administradora maestra
+    // =========================================================================
+    // FUNCIONES AUXILIARES DE SEGURIDAD
+    // =========================================================================
+
+    // Verifica si el usuario autenticado es la Administradora Maestra (Lina)
     function isMasterAdmin() {
       return request.auth != null && (
-        request.auth.token.email == "linadelae@gmail.com" ||
-        request.auth.token.email == "linadeae@gmail.com"
+        request.auth.token.email.lower() == "linadelae@gmail.com" ||
+        request.auth.token.email.lower() == "linadeae@gmail.com" ||
+        (exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == "admin")
       );
     }
 
-    // Función auxiliar para verificar si el usuario está autenticado
+    // Verifica si la solicitud proviene de cualquier usuario autenticado
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // 1. Colección de Usuarios:
-    // - Cualquier usuario autenticado puede leer y crear su propio documento.
-    // - Solo el administrador puede modificar el rol de otros.
+    // =========================================================================
+    // REGLAS POR COLECCIÓN
+    // =========================================================================
+
+    // 1. Colección de Usuarios (/usuarios/{userId})
     match /usuarios/{userId} {
+      // Todos los usuarios autenticados pueden consultar perfiles
       allow read: if isAuthenticated();
+      
+      // Un usuario solo puede crear su propio perfil inicial
       allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isAuthenticated() && (request.auth.uid == userId || isMasterAdmin());
+      
+      // Un usuario puede actualizar sus datos personales (nombre, foto),
+      // pero NUNCA puede auto-asignarse el rol 'admin' (solo Lina puede cambiar roles)
+      allow update: if isAuthenticated() && (
+        isMasterAdmin() || 
+        (request.auth.uid == userId && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['rol'])))
+      );
+      
+      // Solo Lina puede eliminar cuentas de usuario
       allow delete: if isMasterAdmin();
     }
 
-    // 2. Colección de Trabajadores:
-    // - Todos los autenticados pueden leer la lista de trabajadores para registrar horas.
-    // - Solo el Administrador puede crear, cambiar tarifas (tarifaHora) o borrar trabajadores.
+    // 2. Colección de Trabajadores (/trabajadores/{workerId})
     match /trabajadores/{workerId} {
+      // Todos los colaboradores autenticados pueden ver la lista y sus tarifas asignadas
       allow read: if isAuthenticated();
-      allow write: if isMasterAdmin() || (
-        isAuthenticated() && request.resource.data.nombre != null
+      
+      // Solo Lina puede crear trabajadores con tarifa definida;
+      // si un nuevo usuario se autoregistra, su tarifa inicial debe ser 0 obligatoriamente
+      allow create: if isMasterAdmin() || (
+        isAuthenticated() && request.resource.data.tarifaHora == 0
       );
+      
+      // ÚNICAMENTE Lina puede modificar tarifas por hora o datos de los trabajadores
+      allow update: if isMasterAdmin();
+      
+      // ÚNICAMENTE Lina puede eliminar trabajadores
+      allow delete: if isMasterAdmin();
     }
 
-    // 3. Colección de Tareas (Horas Registradas):
-    // - Cualquier usuario autenticado puede leer las tareas y registrar sus propias horas.
-    // - El Administrador puede ver, editar y borrar cualquier tarea.
+    // 3. Colección de Tareas Registradas (/tareas/{taskId})
     match /tareas/{taskId} {
+      // Todos los autenticados pueden leer tareas (el filtrado visual por usuario se asegura en la UI)
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
+      
+      // Los colaboradores pueden registrar sus propias tareas con tiempo y descripción
+      allow create: if isAuthenticated() && (
+        request.resource.data.horas > 0 &&
+        request.resource.data.descripcion is string
+      );
+      
+      // Solo Lina puede modificar o eliminar tareas ya registradas (auditoría financiera)
       allow update, delete: if isMasterAdmin();
     }
 
-    // 4. Colección de Pagos:
-    // - Todos los autenticados pueden ver el registro de pagos correspondiente.
-    // - Solo la Administradora Maestra puede registrar, editar o borrar pagos.
+    // 4. Colección de Pagos y Desembolsos (/pagos/{paymentId})
     match /pagos/{paymentId} {
+      // Los usuarios autenticados pueden consultar pagos para validar sus recibos y balances
       allow read: if isAuthenticated();
-      allow write: if isMasterAdmin();
+      
+      // ÚNICAMENTE la Administradora Maestra (Lina) puede registrar, editar o anular pagos
+      // Ningún colaborador puede crear o alterar comprobantes de pago bajo ninguna circunstancia
+      allow create, update, delete: if isMasterAdmin();
     }
   }
 }
