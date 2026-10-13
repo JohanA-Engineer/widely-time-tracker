@@ -20,6 +20,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+  <!-- Chart.js CDN para Dashboard Ejecutivo -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -68,6 +71,7 @@
       }
       
       updateThemeControls(isNowDark);
+      window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: isNowDark } }));
     };
 
     function updateThemeControls(isDark) {
@@ -362,6 +366,48 @@
       </div>
     </section>
 
+    <!-- SECCIÓN: GRÁFICO VISUAL DE HORAS Y PRODUCTIVIDAD -->
+    <section class="content-card">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-4 border-b border-slate-200 dark:border-slate-800 gap-2">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm shrink-0">
+            <i class="fa-solid fa-chart-column"></i>
+          </div>
+          <div>
+            <h2 class="text-xs sm:text-sm font-bold tracking-tight text-slate-900 dark:text-white uppercase">Métricas de Productividad & Tiempo</h2>
+            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Distribución de horas por día y por categoría de actividad</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] font-mono text-slate-400 dark:text-slate-500" id="chartPeriodNote">Filtrado por período</span>
+        </div>
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+        <!-- Gráfico 1: Horas por Día (2 cols) -->
+        <div class="lg:col-span-2">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Horas Trabajadas por Día</span>
+            <span id="chartTotalHoursBadge" class="text-[11px] font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-500/20 tabular-nums">0.00 hrs</span>
+          </div>
+          <div class="relative h-56 sm:h-64 w-full">
+            <canvas id="productivityDailyChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfico 2: Distribución por Categoría (1 col) -->
+        <div class="lg:col-span-1 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 pt-4 lg:pt-0 lg:pl-6">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Horas por Categoría</span>
+            <span class="text-[10px] font-mono text-slate-400 uppercase">Actividades</span>
+          </div>
+          <div class="relative h-52 sm:h-56 w-full flex items-center justify-center">
+            <canvas id="productivityCategoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- SECCIÓN 2: ESPACIO DE TRABAJO PRINCIPAL (Cronómetro + Dashboard Financiero en Vivo) -->
     <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
 
@@ -390,6 +436,30 @@
                 </select>
               </div>
 
+              <!-- Fila: Cliente / Cuenta y Categoría de Actividad -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label for="timerClientProject" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Cliente / Cuenta
+                  </label>
+                  <input type="text" id="timerClientProject" list="clientsDatalist" placeholder="Ej. Nike, Widely, StartupX..." class="form-input w-full text-xs">
+                </div>
+                <div>
+                  <label for="timerCategory" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Categoría
+                  </label>
+                  <select id="timerCategory" class="form-input w-full text-xs">
+                    <option value="general">💼 General / Otros</option>
+                    <option value="diseno">🎨 Diseño Gráfico</option>
+                    <option value="video">🎬 Edición de Video</option>
+                    <option value="copy">✍️ Redacción & Copy</option>
+                    <option value="ads">📈 Pauta & Ads</option>
+                    <option value="reunion">🤝 Reunión & Sync</option>
+                    <option value="estrategia">💡 Estrategia</option>
+                  </select>
+                </div>
+              </div>
+
               <!-- Tarea / Proyecto -->
               <div>
                 <label for="timerTaskDescription" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
@@ -401,6 +471,22 @@
               <!-- Display Digital del Reloj -->
               <div class="timer-chamber my-3 sm:my-4 p-4 sm:p-6 rounded-2xl text-center relative overflow-hidden">
                 <div id="timerGlowAura" class="timer-glow-pulse"></div>
+
+                <!-- Alerta de Cronómetro Olvidado (> 4 horas) -->
+                <div id="timerOvertimeAlert" class="hidden mb-3 p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs flex items-center justify-between gap-2.5 text-left animate-pulse">
+                  <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                      <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="leading-tight">
+                      <strong class="font-bold">¿Sigues trabajando?</strong>
+                      <span class="block text-[11px] opacity-90">Llevas más de 4 horas continuas con este cronómetro activo.</span>
+                    </div>
+                  </div>
+                  <button type="button" id="btnDismissOvertimeAlert" class="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold text-[10px] shrink-0 transition-colors shadow-sm">
+                    Continuar
+                  </button>
+                </div>
 
                 <div class="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Tiempo Transcurrido</div>
                 
@@ -781,6 +867,25 @@
           </div>
         </div>
 
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="manualClientProject" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Cliente / Cuenta</label>
+            <input type="text" id="manualClientProject" list="clientsDatalist" placeholder="Ej. Nike, Widely..." class="form-input w-full text-xs">
+          </div>
+          <div>
+            <label for="manualCategory" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Categoría</label>
+            <select id="manualCategory" class="form-input w-full text-xs">
+              <option value="general">💼 General / Otros</option>
+              <option value="diseno">🎨 Diseño Gráfico</option>
+              <option value="video">🎬 Edición de Video</option>
+              <option value="copy">✍️ Redacción & Copy</option>
+              <option value="ads">📈 Pauta & Ads</option>
+              <option value="reunion">🤝 Reunión & Sync</option>
+              <option value="estrategia">💡 Estrategia</option>
+            </select>
+          </div>
+        </div>
+
         <div>
           <label for="manualDescription" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Descripción de la Tarea</label>
           <input type="text" id="manualDescription" placeholder="Ej. Diseño de banners para campaña de fin de semana" required class="form-input w-full text-xs">
@@ -860,7 +965,7 @@
             <thead class="bg-slate-100 dark:bg-slate-900 text-slate-500 font-semibold sticky top-0">
               <tr>
                 <th class="py-2 px-3">Fecha</th>
-                <th class="py-2 px-3">Actividad</th>
+                <th class="py-2 px-3">Cliente / Actividad</th>
                 <th class="py-2 px-2 text-right">Tiempo</th>
                 <th class="py-2 px-3 text-right">Monto</th>
               </tr>
@@ -885,6 +990,9 @@
 
     </div>
   </div>
+
+  <!-- Datalist Dinámico para Autocompletado de Clientes y Cuentas -->
+  <datalist id="clientsDatalist"></datalist>
 
   <!-- Script de entorno local o inyectado por GitHub Actions -->
   <script src="env.js" onerror="console.info('[Widely Env] env.js no encontrado, usando configuración inyectada o almacenada.')"></script>

@@ -91,6 +91,47 @@ document.getElementById("btnConfigureKey")?.addEventListener("click", () => {
 });
 
 /* ============================================================================
+   CATEGORÍAS DE ACTIVIDAD & METADATA
+   ============================================================================ */
+const CATEGORIES = {
+  general: { label: "General", icon: "fa-briefcase", color: "text-slate-600 dark:text-slate-400", bg: "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700", chartColor: "#64748b" },
+  diseno: { label: "Diseño Gráfico", icon: "fa-palette", color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-100 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20", chartColor: "#a855f7" },
+  video: { label: "Edición Video", icon: "fa-film", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-100 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20", chartColor: "#f59e0b" },
+  copy: { label: "Redacción & Copy", icon: "fa-pen-nib", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-100 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20", chartColor: "#10b981" },
+  ads: { label: "Pauta & Ads", icon: "fa-chart-line", color: "text-cyan-600 dark:text-cyan-400", bg: "bg-cyan-100 dark:bg-cyan-500/10 border-cyan-200 dark:border-cyan-500/20", chartColor: "#06b6d4" },
+  reunion: { label: "Reunión", icon: "fa-users", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-100 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20", chartColor: "#3b82f6" },
+  estrategia: { label: "Estrategia", icon: "fa-lightbulb", color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-100 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20", chartColor: "#6366f1" }
+};
+
+function getCategoryMeta(key) {
+  return CATEGORIES[key] || CATEGORIES.general;
+}
+
+function playOvertimeNotificationSound() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.5);
+  } catch (e) {
+    // Audio contextual omitido si no permitido por navegador
+  }
+}
+
+let dailyChartInstance = null;
+let categoryChartInstance = null;
+
+/* ============================================================================
    2. ESTADO GLOBAL DE LA APLICACIÓN
    ============================================================================ */
 let state = {
@@ -104,7 +145,8 @@ let state = {
     isRunning: false,
     startTime: 0,
     elapsedSeconds: 0,
-    intervalId: null
+    intervalId: null,
+    overtimeAlertDismissed: false
   },
   deleteTarget: null
 };
@@ -115,14 +157,25 @@ let state = {
 const elements = {
   // Cronómetro
   timerWorkerSelect: document.getElementById("timerWorkerSelect"),
+  timerClientProject: document.getElementById("timerClientProject"),
+  timerCategory: document.getElementById("timerCategory"),
   timerTaskDescription: document.getElementById("timerTaskDescription"),
   timerDisplay: document.getElementById("timerDisplay"),
+  timerOvertimeAlert: document.getElementById("timerOvertimeAlert"),
+  btnDismissOvertimeAlert: document.getElementById("btnDismissOvertimeAlert"),
   liveCostBadge: document.getElementById("liveCostBadge"),
   timerStatusBadge: document.getElementById("timerStatusBadge"),
   btnStart: document.getElementById("btnStart"),
   btnPause: document.getElementById("btnPause"),
   btnReset: document.getElementById("btnReset"),
   btnRegisterTask: document.getElementById("btnRegisterTask"),
+  clientsDatalist: document.getElementById("clientsDatalist"),
+
+  // Métricas y Gráficos
+  chartPeriodNote: document.getElementById("chartPeriodNote"),
+  chartTotalHoursBadge: document.getElementById("chartTotalHoursBadge"),
+  productivityDailyChart: document.getElementById("productivityDailyChart"),
+  productivityCategoryChart: document.getElementById("productivityCategoryChart"),
 
   // Trabajadores
   formWorker: document.getElementById("formWorker"),
@@ -184,6 +237,8 @@ const elements = {
   manualWorkerSelect: document.getElementById("manualWorkerSelect"),
   manualDate: document.getElementById("manualDate"),
   manualHours: document.getElementById("manualHours"),
+  manualClientProject: document.getElementById("manualClientProject"),
+  manualCategory: document.getElementById("manualCategory"),
   manualDescription: document.getElementById("manualDescription"),
   manualCalculatedCost: document.getElementById("manualCalculatedCost"),
   btnCancelManualEntry: document.getElementById("btnCancelManualEntry"),
@@ -882,6 +937,8 @@ function saveTimerState() {
       startTime: state.timer.startTime,
       elapsedSeconds: state.timer.elapsedSeconds,
       workerId: elements.timerWorkerSelect?.value || "",
+      client: elements.timerClientProject?.value || "",
+      category: elements.timerCategory?.value || "general",
       description: elements.timerTaskDescription?.value || ""
     }));
   } catch (e) {
@@ -906,6 +963,12 @@ function restoreActiveTimer() {
 
     if (data.workerId && elements.timerWorkerSelect) {
       elements.timerWorkerSelect.value = data.workerId;
+    }
+    if (data.client && elements.timerClientProject) {
+      elements.timerClientProject.value = data.client;
+    }
+    if (data.category && elements.timerCategory) {
+      elements.timerCategory.value = data.category;
     }
     if (data.description && elements.timerTaskDescription) {
       elements.timerTaskDescription.value = data.description;
@@ -952,6 +1015,15 @@ function startTimer() {
     state.timer.elapsedSeconds = Math.floor((Date.now() - state.timer.startTime) / 1000);
     renderTimerDisplay();
     updateLiveCost();
+
+    // Alerta de Cronómetro Olvidado (> 4 horas = 14,400 segundos)
+    if (state.timer.elapsedSeconds >= 14400 && !state.timer.overtimeAlertDismissed) {
+      if (elements.timerOvertimeAlert?.classList.contains("hidden")) {
+        elements.timerOvertimeAlert.classList.remove("hidden");
+        elements.timerOvertimeAlert.classList.add("flex");
+        playOvertimeNotificationSound();
+      }
+    }
   }, 1000);
 
   elements.btnStart.disabled = true;
@@ -961,6 +1033,13 @@ function startTimer() {
 
   elements.timerStatusBadge.className = "text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 flex items-center gap-1.5";
   elements.timerStatusBadge.innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Activo`;
+}
+
+function dismissOvertimeAlert() {
+  state.timer.overtimeAlertDismissed = true;
+  elements.timerOvertimeAlert?.classList.add("hidden");
+  elements.timerOvertimeAlert?.classList.remove("flex");
+  showToast("Alerta silenciada. Puedes continuar registrando tu tiempo.", "info");
 }
 
 function pauseTimer() {
@@ -983,6 +1062,9 @@ function resetTimer() {
 
   pauseTimer();
   state.timer.elapsedSeconds = 0;
+  state.timer.overtimeAlertDismissed = false;
+  elements.timerOvertimeAlert?.classList.add("hidden");
+  elements.timerOvertimeAlert?.classList.remove("flex");
   clearTimerState();
   renderTimerDisplay();
   updateLiveCost();
@@ -1012,6 +1094,8 @@ function updateLiveCost() {
 // Registrar tarea finalizada en Firebase
 async function handleRegisterTask() {
   const workerId = elements.timerWorkerSelect.value || state.userProfile?.trabajadorId;
+  const client = elements.timerClientProject?.value.trim() || "";
+  const category = elements.timerCategory?.value || "general";
   const description = elements.timerTaskDescription.value.trim();
   const seconds = state.timer.elapsedSeconds;
 
@@ -1041,6 +1125,8 @@ async function handleRegisterTask() {
     fecha: today,
     trabajadorId: worker.id,
     trabajadorNombre: worker.nombre,
+    cliente: client,
+    categoria: category,
     descripcion: description || "Tarea sin descripción",
     segundos: seconds,
     horas: Number(hours.toFixed(4)),
@@ -1064,6 +1150,8 @@ async function handleRegisterTask() {
 
     showToast(`¡Tarea registrada con éxito! Costo: $${totalCost.toFixed(2)}`, "success");
     elements.timerTaskDescription.value = "";
+    if (elements.timerClientProject) elements.timerClientProject.value = "";
+    if (elements.timerCategory) elements.timerCategory.value = "general";
     resetTimer();
     if (state.userProfile?.rol === "worker") {
       linkAndLockWorkerSelect();
@@ -1347,6 +1435,7 @@ function updateTasksUI() {
   }
 
   elements.taskCount.textContent = displayedTasks.length;
+  updateClientsDatalist();
 
   if (displayedTasks.length === 0) {
     elements.tasksTableBody.innerHTML = `
@@ -1361,13 +1450,22 @@ function updateTasksUI() {
 
   elements.tasksTableBody.innerHTML = displayedTasks.map(t => {
     const formattedTime = formatSecondsToTime(t.segundos || 0);
-    const isManualTag = t.esManual ? `<span class="ml-1 text-[9px] font-mono font-semibold px-1 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">Manual</span>` : "";
+    const isManualTag = t.esManual ? `<span class="text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">Manual</span>` : "";
+    const cat = getCategoryMeta(t.categoria);
+    const catBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium ${cat.bg} ${cat.color} border shrink-0"><i class="fa-solid ${cat.icon} text-[9px]"></i><span>${cat.label}</span></span>`;
+    const clientBadge = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0"><i class="fa-solid fa-briefcase text-[9px] text-blue-500"></i><span>${escapeHtml(t.cliente)}</span></span>` : "";
+
     return `
       <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
         <td class="py-2.5 px-3 text-slate-500 dark:text-slate-400 font-mono whitespace-nowrap tabular-nums">${t.fecha || '-'}</td>
         <td class="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">${escapeHtml(t.trabajadorNombre || 'Anónimo')}</td>
-        <td class="py-2.5 px-3 text-slate-600 dark:text-slate-300 max-w-xs truncate" title="${escapeHtml(t.descripcion || '')}">
-          ${escapeHtml(t.descripcion || 'Sin descripción')} ${isManualTag}
+        <td class="py-2.5 px-3 text-slate-600 dark:text-slate-300 max-w-sm">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="font-medium text-slate-800 dark:text-slate-200" title="${escapeHtml(t.descripcion || '')}">${escapeHtml(t.descripcion || 'Sin descripción')}</span>
+            ${clientBadge}
+            ${catBadge}
+            ${isManualTag}
+          </div>
         </td>
         <td class="py-2.5 px-2 text-right font-mono text-slate-500 dark:text-slate-400 whitespace-nowrap tabular-nums">
           ${formattedTime} <span class="text-[10px] text-slate-400 dark:text-slate-500">(${Number(t.horas || 0).toFixed(2)}h)</span>
@@ -1596,6 +1694,9 @@ function updateFinancialDashboard() {
     elements.kpiSaldoPendiente.textContent = `+$${Math.abs(balance).toFixed(2)}`;
     elements.kpiSaldoDesc.textContent = isWorker ? "Anticipo recibido a tu favor" : "Saldo a favor de la empresa";
   }
+
+  renderProductivityCharts();
+  updateClientsDatalist();
 }
 
 function resetKPIs() {
@@ -1605,6 +1706,220 @@ function resetKPIs() {
   elements.kpiTotalPagado.textContent = "$0.00";
   elements.kpiSaldoPendiente.textContent = "$0.00";
   elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono text-rose-600 dark:text-rose-400 tabular-nums";
+  renderProductivityCharts();
+}
+
+/* ============================================================================
+   10.B. DASHBOARD EJECUTIVO: GRÁFICOS DE PRODUCTIVIDAD (Chart.js)
+   ============================================================================ */
+function updateClientsDatalist() {
+  const clients = Array.from(new Set(state.tasks.map(t => (t.cliente || "").trim()).filter(Boolean))).sort();
+  if (elements.clientsDatalist) {
+    elements.clientsDatalist.innerHTML = clients.map(c => `<option value="${escapeHtml(c)}"></option>`).join("");
+  }
+}
+
+function renderProductivityCharts() {
+  if (typeof Chart === "undefined") {
+    return;
+  }
+
+  const isDark = document.documentElement.classList.contains("dark");
+  const isWorker = state.userProfile?.rol === "worker";
+
+  let filteredTasks = getFilteredTasks();
+  if (isWorker) {
+    const myId = state.userProfile.trabajadorId;
+    const myName = (state.userProfile.nombre || "").trim().toLowerCase();
+    filteredTasks = filteredTasks.filter(t => 
+      (myId && t.trabajadorId === myId) || 
+      (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === myName)
+    );
+  }
+
+  const periodLabels = {
+    all: "Histórico completo",
+    this_month: "Mes en curso",
+    current_fortnight: "Quincena actual",
+    last_month: "Mes anterior"
+  };
+  if (elements.chartPeriodNote) {
+    elements.chartPeriodNote.textContent = periodLabels[state.filterPeriod] || "Período seleccionado";
+  }
+
+  const totalPeriodHours = filteredTasks.reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
+  if (elements.chartTotalHoursBadge) {
+    elements.chartTotalHoursBadge.textContent = `${totalPeriodHours.toFixed(2)} hrs`;
+  }
+
+  // 1. Gráfico de Horas por Día (Bar Chart)
+  if (elements.productivityDailyChart) {
+    if (dailyChartInstance) {
+      dailyChartInstance.destroy();
+      dailyChartInstance = null;
+    }
+
+    const dailyMap = {};
+    filteredTasks.forEach(t => {
+      const d = t.fecha || "Sin fecha";
+      dailyMap[d] = (dailyMap[d] || 0) + (Number(t.horas) || 0);
+    });
+
+    const sortedDates = Object.keys(dailyMap).sort();
+    let chartLabels = sortedDates;
+    let chartData = sortedDates.map(d => Number(dailyMap[d].toFixed(2)));
+
+    const formattedLabels = chartLabels.map(d => {
+      try {
+        const parts = d.split("-");
+        if (parts.length === 3) {
+          const dt = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+          return dt.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+        }
+      } catch (e) {}
+      return d;
+    });
+
+    if (sortedDates.length === 0) {
+      chartLabels = ["Sin tareas"];
+      chartData = [0];
+    }
+
+    const ctxDaily = elements.productivityDailyChart.getContext("2d");
+    dailyChartInstance = new Chart(ctxDaily, {
+      type: "bar",
+      data: {
+        labels: sortedDates.length > 0 ? formattedLabels : chartLabels,
+        datasets: [{
+          label: "Horas trabajadas",
+          data: chartData,
+          backgroundColor: isDark ? "rgba(59, 130, 246, 0.85)" : "rgba(37, 99, 235, 0.85)",
+          hoverBackgroundColor: isDark ? "rgba(96, 165, 250, 1)" : "rgba(29, 78, 216, 1)",
+          borderRadius: 8,
+          borderSkipped: false,
+          maxBarThickness: 36
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: isDark ? "#111624" : "#ffffff",
+            titleColor: isDark ? "#ffffff" : "#0f172a",
+            bodyColor: isDark ? "#94a3b8" : "#475569",
+            borderColor: isDark ? "#1e263c" : "#e2e8f0",
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 10,
+            callbacks: {
+              label: (item) => ` ${item.raw} horas trabajadas`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: isDark ? "#94a3b8" : "#64748b",
+              font: { family: "'Anybody', sans-serif", size: 10 }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.05)"
+            },
+            ticks: {
+              color: isDark ? "#94a3b8" : "#64748b",
+              font: { family: "'Anybody', sans-serif", size: 10 },
+              callback: (v) => `${v}h`
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // 2. Gráfico por Categoría (Doughnut Chart)
+  if (elements.productivityCategoryChart) {
+    if (categoryChartInstance) {
+      categoryChartInstance.destroy();
+      categoryChartInstance = null;
+    }
+
+    const categoryMap = {};
+    filteredTasks.forEach(t => {
+      const catKey = t.categoria || "general";
+      categoryMap[catKey] = (categoryMap[catKey] || 0) + (Number(t.horas) || 0);
+    });
+
+    const activeCatKeys = Object.keys(categoryMap).filter(k => categoryMap[k] > 0);
+    let catLabels = [];
+    let catData = [];
+    let catColors = [];
+
+    if (activeCatKeys.length > 0) {
+      activeCatKeys.forEach(k => {
+        const meta = getCategoryMeta(k);
+        catLabels.push(meta.label);
+        catData.push(Number(categoryMap[k].toFixed(2)));
+        catColors.push(meta.chartColor);
+      });
+    } else {
+      catLabels = ["Sin registros"];
+      catData = [1];
+      catColors = [isDark ? "#1e293b" : "#e2e8f0"];
+    }
+
+    const ctxCat = elements.productivityCategoryChart.getContext("2d");
+    categoryChartInstance = new Chart(ctxCat, {
+      type: "doughnut",
+      data: {
+        labels: catLabels,
+        datasets: [{
+          data: catData,
+          backgroundColor: catColors,
+          borderWidth: 2,
+          borderColor: isDark ? "#111624" : "#ffffff",
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "68%",
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              color: isDark ? "#94a3b8" : "#64748b",
+              boxWidth: 10,
+              boxHeight: 10,
+              padding: 10,
+              font: { family: "'Anybody', sans-serif", size: 10 }
+            }
+          },
+          tooltip: {
+            backgroundColor: isDark ? "#111624" : "#ffffff",
+            titleColor: isDark ? "#ffffff" : "#0f172a",
+            bodyColor: isDark ? "#94a3b8" : "#475569",
+            borderColor: isDark ? "#1e263c" : "#e2e8f0",
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 10,
+            callbacks: {
+              label: (item) => {
+                if (activeCatKeys.length === 0) return " 0 horas";
+                return ` ${item.label}: ${item.raw}h`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
 }
 
 /* ============================================================================
@@ -1800,6 +2115,8 @@ function updateManualCost() {
 async function handleSaveManualEntry(e) {
   e.preventDefault();
   const workerId = elements.manualWorkerSelect.value || state.userProfile?.trabajadorId;
+  const client = elements.manualClientProject?.value.trim() || "";
+  const category = elements.manualCategory?.value || "general";
   const date = elements.manualDate.value;
   const hours = parseFloat(elements.manualHours.value);
   const description = elements.manualDescription.value.trim();
@@ -1827,6 +2144,8 @@ async function handleSaveManualEntry(e) {
     fecha: date || new Date().toISOString().split("T")[0],
     trabajadorId: workerId,
     trabajadorNombre: workerName,
+    cliente: client,
+    categoria: category,
     descripcion: description,
     segundos: seconds,
     horas: Number(hours.toFixed(2)),
@@ -1896,14 +2215,26 @@ window.openStatementModal = function(workerId) {
     if (filteredTasks.length === 0) {
       elements.statementTasksBody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400 text-xs">No hay actividades en este período.</td></tr>`;
     } else {
-      elements.statementTasksBody.innerHTML = filteredTasks.map(t => `
-        <tr class="text-xs">
-          <td class="py-2 px-3 font-mono text-slate-500">${t.fecha || '-'}</td>
-          <td class="py-2 px-3 text-slate-800 dark:text-slate-200">${escapeHtml(t.descripcion || 'Tarea')}</td>
-          <td class="py-2 px-2 text-right font-mono text-slate-500">${Number(t.horas || 0).toFixed(2)}h</td>
-          <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 dark:text-cyan-400">$${Number(t.costoTotal || 0).toFixed(2)}</td>
-        </tr>
-      `).join("");
+      elements.statementTasksBody.innerHTML = filteredTasks.map(t => {
+        const cat = getCategoryMeta(t.categoria);
+        const catPill = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ${cat.bg} ${cat.color} border shrink-0"><i class="fa-solid ${cat.icon}"></i> ${cat.label}</span>`;
+        const clientPill = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0"><i class="fa-solid fa-briefcase text-blue-500"></i> ${escapeHtml(t.cliente)}</span>` : "";
+
+        return `
+          <tr class="text-xs">
+            <td class="py-2 px-3 font-mono text-slate-500">${t.fecha || '-'}</td>
+            <td class="py-2 px-3 text-slate-800 dark:text-slate-200">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-medium">${escapeHtml(t.descripcion || 'Tarea')}</span>
+                ${clientPill}
+                ${catPill}
+              </div>
+            </td>
+            <td class="py-2 px-2 text-right font-mono text-slate-500">${Number(t.horas || 0).toFixed(2)}h</td>
+            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 dark:text-cyan-400">$${Number(t.costoTotal || 0).toFixed(2)}</td>
+          </tr>
+        `;
+      }).join("");
     }
   }
 
@@ -1926,6 +2257,12 @@ function setupEventListeners() {
   elements.btnReset.addEventListener("click", resetTimer);
   elements.btnRegisterTask.addEventListener("click", handleRegisterTask);
   elements.timerWorkerSelect.addEventListener("change", updateLiveCost);
+  elements.btnDismissOvertimeAlert?.addEventListener("click", dismissOvertimeAlert);
+
+  // Escuchar cambio de tema Claro / Oscuro para refrescar colores de los gráficos
+  window.addEventListener("themeChanged", () => {
+    renderProductivityCharts();
+  });
 
   // Formularios
   elements.formWorker.addEventListener("submit", handleSaveWorker);
@@ -2072,6 +2409,8 @@ function loadLocalFallbackData() {
       fecha: new Date().toISOString().split("T")[0],
       trabajadorId: "mock_1",
       trabajadorNombre: "Carlos Méndez",
+      cliente: "Widely Media",
+      categoria: "diseno",
       descripcion: "Desarrollo de landing page",
       segundos: 7200,
       horas: 2.0,
