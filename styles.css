@@ -399,12 +399,19 @@ html.has-user-session #mainAppDashboard {
   box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3) !important;
 }
 
-/* Estilos para Impresión y Generación de PDF Limpio */
+/* Estilos para Impresión y Generación de PDF Limpio (Cuenta de Cobro & Recibo de Pago) */
 @media print {
-  body {
+  @page {
+    margin: 1.2cm;
+    size: auto;
+  }
+
+  body, html {
     background-color: #ffffff !important;
-    color: #000000 !important;
+    color: #0f172a !important;
     padding: 0 !important;
+    margin: 0 !important;
+    font-size: 11pt;
   }
 
   header, #firebaseWarning, #authScreen, #mainAppDashboard, #toastContainer, #deleteModal, #editRateModal, #manualEntryModal {
@@ -412,7 +419,7 @@ html.has-user-session #mainAppDashboard {
   }
 
   #statementModal {
-    display: flex !important;
+    display: block !important;
     position: static !important;
     background: transparent !important;
     padding: 0 !important;
@@ -427,6 +434,25 @@ html.has-user-session #mainAppDashboard {
     padding: 0 !important;
     background: #ffffff !important;
     color: #000000 !important;
+  }
+
+  /* Eliminar líneas punteadas de edición durante la impresión */
+  [contenteditable="true"] {
+    border-bottom: none !important;
+    outline: none !important;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
   }
 }
 

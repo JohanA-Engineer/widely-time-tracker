@@ -244,19 +244,53 @@ const elements = {
   btnCancelManualEntry: document.getElementById("btnCancelManualEntry"),
   btnCloseManualModal: document.getElementById("btnCloseManualModal"),
 
-  // Modal Comprobante de Liquidación (PDF/Print)
+  // Modal Documentos: Cuenta de Cobro Formal & Recibo de Pago
   statementModal: document.getElementById("statementModal"),
-  statementDate: document.getElementById("statementDate"),
-  statementPeriodTag: document.getElementById("statementPeriodTag"),
-  statementWorkerName: document.getElementById("statementWorkerName"),
-  statementWorkerRate: document.getElementById("statementWorkerRate"),
-  statementTotalHours: document.getElementById("statementTotalHours"),
-  statementTotalEarned: document.getElementById("statementTotalEarned"),
-  statementTotalPaid: document.getElementById("statementTotalPaid"),
-  statementNetBalance: document.getElementById("statementNetBalance"),
-  statementTasksBody: document.getElementById("statementTasksBody"),
+  docTypeBillBtn: document.getElementById("docTypeBillBtn"),
+  docTypeReceiptBtn: document.getElementById("docTypeReceiptBtn"),
+  docViewBill: document.getElementById("docViewBill"),
+  docViewReceipt: document.getElementById("docViewReceipt"),
   btnCloseStatement: document.getElementById("btnCloseStatement"),
   btnPrintStatement: document.getElementById("btnPrintStatement"),
+  btnPrintStatementLabel: document.getElementById("btnPrintStatementLabel"),
+  btnWorkerOpenBill: document.getElementById("btnWorkerOpenBill"),
+
+  // Plantilla Cuenta de Cobro
+  billConsecutive: document.getElementById("billConsecutive"),
+  billDate: document.getElementById("billDate"),
+  billCity: document.getElementById("billCity"),
+  billPeriodTag: document.getElementById("billPeriodTag"),
+  billWorkerName: document.getElementById("billWorkerName"),
+  billWorkerIdNumber: document.getElementById("billWorkerIdNumber"),
+  billWorkerEmail: document.getElementById("billWorkerEmail"),
+  billWorkerPhone: document.getElementById("billWorkerPhone"),
+  billConceptPeriod: document.getElementById("billConceptPeriod"),
+  billTotalAmount: document.getElementById("billTotalAmount"),
+  billAmountInWords: document.getElementById("billAmountInWords"),
+  billTasksBody: document.getElementById("billTasksBody"),
+  billGrossEarned: document.getElementById("billGrossEarned"),
+  billPaidDeduction: document.getElementById("billPaidDeduction"),
+  billNetPayable: document.getElementById("billNetPayable"),
+  billBank: document.getElementById("billBank"),
+  billAccountType: document.getElementById("billAccountType"),
+  billAccountNumber: document.getElementById("billAccountNumber"),
+  billAccountMobile: document.getElementById("billAccountMobile"),
+  billSignWorkerName: document.getElementById("billSignWorkerName"),
+  billSignWorkerId: document.getElementById("billSignWorkerId"),
+
+  // Plantilla Recibo de Pago
+  receiptConsecutive: document.getElementById("receiptConsecutive"),
+  receiptDate: document.getElementById("receiptDate"),
+  receiptPeriodTag: document.getElementById("receiptPeriodTag"),
+  receiptWorkerName: document.getElementById("receiptWorkerName"),
+  receiptWorkerRate: document.getElementById("receiptWorkerRate"),
+  receiptTotalHours: document.getElementById("receiptTotalHours"),
+  receiptTotalEarned: document.getElementById("receiptTotalEarned"),
+  receiptTotalPaid: document.getElementById("receiptTotalPaid"),
+  receiptNetBalance: document.getElementById("receiptNetBalance"),
+  receiptTasksBody: document.getElementById("receiptTasksBody"),
+  receiptPaymentsBody: document.getElementById("receiptPaymentsBody"),
+  receiptSignWorkerName: document.getElementById("receiptSignWorkerName"),
 
   // Status & Reloj
   currentTime: document.getElementById("currentTime"),
@@ -1628,14 +1662,24 @@ function updateFinancialDashboard() {
       </button>
     ` : `<span>$${Number(worker.tarifaHora || 0).toFixed(2)}/h</span>`;
 
-    const statementBtn = `
+    const statementBtn = isWorker ? `
       <button 
         type="button" 
-        onclick="window.openStatementModal('${worker.id}')" 
-        class="px-2 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-[11px] font-semibold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
-        title="Generar liquidación / comprobante en PDF">
+        onclick="window.openStatementModal('${worker.id}', 'bill')" 
+        class="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-[11px] font-semibold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+        title="Generar y descargar mi Cuenta de Cobro formal">
         <i class="fa-solid fa-file-invoice-dollar text-[10px]"></i>
-        <span class="hidden sm:inline">Recibo</span>
+        <span>Cuenta de Cobro</span>
+      </button>
+    ` : `
+      <button 
+        type="button" 
+        onclick="window.openStatementModal('${worker.id}', 'receipt')" 
+        class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+        title="Generar Recibo de Pago y Liquidación">
+        <i class="fa-solid fa-receipt text-[10px]"></i>
+        <span class="hidden sm:inline">Recibo de Pago</span>
+        <span class="sm:hidden">Recibo</span>
       </button>
     `;
 
@@ -2172,9 +2216,127 @@ async function handleSaveManualEntry(e) {
   }
 }
 
-window.openStatementModal = function(workerId) {
+let currentStatementWorkerId = null;
+let currentStatementDocType = "bill";
+
+window.setStatementDocType = function(type) {
+  currentStatementDocType = type;
+  if (type === "bill") {
+    elements.docTypeBillBtn?.classList.add("bg-blue-600", "text-white", "shadow-sm");
+    elements.docTypeBillBtn?.classList.remove("text-slate-500", "dark:text-slate-400");
+    elements.docTypeReceiptBtn?.classList.remove("bg-blue-600", "text-white", "shadow-sm");
+    elements.docTypeReceiptBtn?.classList.add("text-slate-500", "dark:text-slate-400");
+    elements.docViewBill?.classList.remove("hidden");
+    elements.docViewReceipt?.classList.add("hidden");
+    if (elements.btnPrintStatementLabel) {
+      elements.btnPrintStatementLabel.textContent = "Imprimir Cuenta de Cobro (PDF)";
+    }
+  } else {
+    elements.docTypeReceiptBtn?.classList.add("bg-blue-600", "text-white", "shadow-sm");
+    elements.docTypeReceiptBtn?.classList.remove("text-slate-500", "dark:text-slate-400");
+    elements.docTypeBillBtn?.classList.remove("bg-blue-600", "text-white", "shadow-sm");
+    elements.docTypeBillBtn?.classList.add("text-slate-500", "dark:text-slate-400");
+    elements.docViewReceipt?.classList.remove("hidden");
+    elements.docViewBill?.classList.add("hidden");
+    if (elements.btnPrintStatementLabel) {
+      elements.btnPrintStatementLabel.textContent = "Imprimir Recibo de Pago (PDF)";
+    }
+  }
+};
+
+function numeroALetras(monto) {
+  const num = Math.abs(Number(monto) || 0);
+  const entero = Math.floor(num);
+  const centavos = Math.round((num - entero) * 100);
+  const centavosStr = String(centavos).padStart(2, "0");
+
+  const unidades = ["", "UN", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"];
+  const decenas = ["", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"];
+  const diezY = ["DIEZ", "ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE", "DIECISÉIS", "DIECISIETE", "DIECIOCHO", "DIECINUEVE"];
+  const veinti = ["VEINTE", "VEINTIUNO", "VEINTIDÓS", "VEINTITRÉS", "VEINTICUATRO", "VEINTICINCO", "VEINTISÉIS", "VEINTISIETE", "VEINTIOCHO", "VEINTINUEVE"];
+  const centenas = ["", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS"];
+
+  function convertirCentenas(n) {
+    if (n === 0) return "";
+    if (n === 100) return "CIEN";
+    const c = Math.floor(n / 100);
+    const d = Math.floor((n % 100) / 10);
+    const u = n % 10;
+    let res = centenas[c] || "";
+    if (d === 1) {
+      res += (res ? " " : "") + diezY[u];
+    } else if (d === 2) {
+      res += (res ? " " : "") + veinti[u];
+    } else {
+      if (d > 2) {
+        res += (res ? " " : "") + decenas[d];
+        if (u > 0) res += " Y " + unidades[u];
+      } else if (u > 0) {
+        res += (res ? " " : "") + unidades[u];
+      }
+    }
+    return res;
+  }
+
+  if (entero === 0) {
+    return `CERO DÓLARES CON ${centavosStr}/100`;
+  }
+
+  let letras = "";
+  const millones = Math.floor(entero / 1000000);
+  const miles = Math.floor((entero % 1000000) / 1000);
+  const resto = entero % 1000;
+
+  if (millones > 0) {
+    if (millones === 1) letras += "UN MILLÓN ";
+    else letras += convertirCentenas(millones) + " MILLONES ";
+  }
+
+  if (miles > 0) {
+    if (miles === 1) letras += "MIL ";
+    else letras += convertirCentenas(miles) + " MIL ";
+  }
+
+  if (resto > 0) {
+    letras += convertirCentenas(resto);
+  }
+
+  return `${letras.trim()} DÓLARES CON ${centavosStr}/100`;
+}
+
+function saveWorkerBankingPrefs(workerId) {
+  if (!workerId) return;
+  const data = {
+    idNumber: elements.billWorkerIdNumber?.textContent.trim() || "",
+    phone: elements.billWorkerPhone?.textContent.trim() || "",
+    city: elements.billCity?.textContent.trim() || "Bogotá D.C.",
+    bank: elements.billBank?.textContent.trim() || "Bancolombia",
+    accountType: elements.billAccountType?.textContent.trim() || "Ahorros",
+    accountNumber: elements.billAccountNumber?.textContent.trim() || "",
+    mobile: elements.billAccountMobile?.textContent.trim() || ""
+  };
+  try {
+    localStorage.setItem(`widely_banking_${workerId}`, JSON.stringify(data));
+  } catch (e) {}
+}
+
+function loadWorkerBankingPrefs(workerId) {
+  if (!workerId) return {};
+  try {
+    const raw = localStorage.getItem(`widely_banking_${workerId}`);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+window.openStatementModal = function(workerId, preferredType) {
   const worker = state.workers.find(w => w.id === workerId);
-  if (!worker) return;
+  if (!worker) {
+    showToast("Trabajador no encontrado.", "error");
+    return;
+  }
+  currentStatementWorkerId = worker.id;
 
   const filteredTasks = state.tasks.filter(t => 
     (t.trabajadorId === worker.id || (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase())) &&
@@ -2192,37 +2354,108 @@ window.openStatementModal = function(workerId) {
   const totalPaid = filteredPayments.reduce((acc, p) => acc + (Number(p.monto) || 0), 0);
   const netBalance = Number((totalEarned - totalPaid).toFixed(2));
 
-  if (elements.statementWorkerName) elements.statementWorkerName.textContent = worker.nombre;
-  if (elements.statementWorkerRate) elements.statementWorkerRate.textContent = `$${Number(worker.tarifaHora || 0).toFixed(2)}/h`;
-  if (elements.statementTotalHours) elements.statementTotalHours.textContent = `${totalHours.toFixed(2)} hrs (${formatSecondsToTime(totalSeconds)})`;
-  if (elements.statementTotalEarned) elements.statementTotalEarned.textContent = `$${totalEarned.toFixed(2)}`;
-  if (elements.statementTotalPaid) elements.statementTotalPaid.textContent = `$${totalPaid.toFixed(2)}`;
-  if (elements.statementNetBalance) {
-    elements.statementNetBalance.textContent = (netBalance >= 0 ? "+$" : "-$") + Math.abs(netBalance).toFixed(2);
-    elements.statementNetBalance.className = netBalance > 0 ? "text-base sm:text-lg font-bold font-mono text-rose-600 dark:text-rose-400" : "text-base sm:text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400";
-  }
-
   const periodLabels = {
     all: "Todo el Histórico",
     this_month: "Mes en Curso",
     current_fortnight: "Quincena en Curso",
     last_month: "Mes Anterior"
   };
-  if (elements.statementPeriodTag) elements.statementPeriodTag.textContent = periodLabels[state.filterPeriod] || "Período Seleccionado";
-  if (elements.statementDate) elements.statementDate.textContent = `Emisión: ${new Date().toLocaleDateString()}`;
+  const periodLabel = periodLabels[state.filterPeriod] || "Período Actual";
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+  const yearStr = now.getFullYear();
+  const workerInitials = (worker.nombre || "W").replace(/[^a-zA-Z]/g, "").slice(0, 3).toUpperCase();
+  const monthPad = String(now.getMonth() + 1).padStart(2, "0");
 
-  if (elements.statementTasksBody) {
+  const billConsecutiveStr = `No. CC-${yearStr}-${workerInitials}-${monthPad}`;
+  const receiptConsecutiveStr = `No. LP-${yearStr}-${monthPad}-${workerInitials}`;
+
+  // Cargar preferencias bancarias guardadas
+  const banking = loadWorkerBankingPrefs(worker.id);
+
+  // 1. POBLAR CUENTA DE COBRO FORMAL
+  if (elements.billConsecutive) elements.billConsecutive.textContent = billConsecutiveStr;
+  if (elements.billDate) elements.billDate.textContent = dateStr;
+  if (elements.billCity) elements.billCity.textContent = banking.city || "Bogotá D.C.";
+  if (elements.billPeriodTag) elements.billPeriodTag.textContent = periodLabel;
+  if (elements.billConceptPeriod) elements.billConceptPeriod.textContent = periodLabel;
+
+  if (elements.billWorkerName) elements.billWorkerName.textContent = worker.nombre;
+  if (elements.billWorkerIdNumber) {
+    elements.billWorkerIdNumber.textContent = banking.idNumber || "Ingresa C.C. aquí";
+  }
+  if (elements.billWorkerEmail) elements.billWorkerEmail.textContent = worker.email || state.userProfile?.email || "correo@widely.com";
+  if (elements.billWorkerPhone) {
+    elements.billWorkerPhone.textContent = banking.phone || "+57 (Opcional)";
+  }
+
+  const payableAmount = netBalance > 0 ? netBalance : totalEarned;
+  if (elements.billTotalAmount) elements.billTotalAmount.textContent = `$${payableAmount.toFixed(2)}`;
+  if (elements.billAmountInWords) elements.billAmountInWords.textContent = numeroALetras(payableAmount);
+
+  if (elements.billGrossEarned) elements.billGrossEarned.textContent = `$${totalEarned.toFixed(2)}`;
+  if (elements.billPaidDeduction) elements.billPaidDeduction.textContent = `-$${totalPaid.toFixed(2)}`;
+  if (elements.billNetPayable) elements.billNetPayable.textContent = `$${netBalance.toFixed(2)}`;
+
+  if (elements.billBank) elements.billBank.textContent = banking.bank || "Bancolombia";
+  if (elements.billAccountType) elements.billAccountType.textContent = banking.accountType || "Ahorros";
+  if (elements.billAccountNumber) elements.billAccountNumber.textContent = banking.accountNumber || "000-000000-00";
+  if (elements.billAccountMobile) elements.billAccountMobile.textContent = banking.mobile || "Opcional";
+
+  if (elements.billSignWorkerName) elements.billSignWorkerName.textContent = worker.nombre;
+  if (elements.billSignWorkerId) {
+    elements.billSignWorkerId.textContent = banking.idNumber ? `C.C. ${banking.idNumber}` : "C.C. ________________";
+  }
+
+  if (elements.billTasksBody) {
     if (filteredTasks.length === 0) {
-      elements.statementTasksBody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400 text-xs">No hay actividades en este período.</td></tr>`;
+      elements.billTasksBody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400 text-xs">No hay actividades registradas en este período.</td></tr>`;
     } else {
-      elements.statementTasksBody.innerHTML = filteredTasks.map(t => {
+      elements.billTasksBody.innerHTML = filteredTasks.map(t => {
         const cat = getCategoryMeta(t.categoria);
-        const catPill = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ${cat.bg} ${cat.color} border shrink-0"><i class="fa-solid ${cat.icon}"></i> ${cat.label}</span>`;
-        const clientPill = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0"><i class="fa-solid fa-briefcase text-blue-500"></i> ${escapeHtml(t.cliente)}</span>` : "";
+        return `
+          <tr class="text-xs">
+            <td class="py-2 px-3 font-mono text-slate-500 whitespace-nowrap">${t.fecha || '-'}</td>
+            <td class="py-2 px-3 font-semibold text-slate-800 dark:text-slate-200">${escapeHtml(t.cliente || 'General')}</td>
+            <td class="py-2 px-3 text-slate-700 dark:text-slate-300">
+              <span class="font-medium">${escapeHtml(t.descripcion || 'Servicio')}</span>
+              <span class="text-[10px] text-slate-400 block">${cat.label}</span>
+            </td>
+            <td class="py-2 px-2 text-right font-mono text-slate-500 whitespace-nowrap">${Number(t.horas || 0).toFixed(2)}h</td>
+            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 dark:text-cyan-400 whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+  }
+
+  // 2. POBLAR RECIBO DE PAGO Y LIQUIDACIÓN
+  if (elements.receiptConsecutive) elements.receiptConsecutive.textContent = receiptConsecutiveStr;
+  if (elements.receiptDate) elements.receiptDate.textContent = dateStr;
+  if (elements.receiptPeriodTag) elements.receiptPeriodTag.textContent = periodLabel;
+  if (elements.receiptWorkerName) elements.receiptWorkerName.textContent = worker.nombre;
+  if (elements.receiptWorkerRate) elements.receiptWorkerRate.textContent = `$${Number(worker.tarifaHora || 0).toFixed(2)}/h`;
+  if (elements.receiptTotalHours) elements.receiptTotalHours.textContent = `${totalHours.toFixed(2)} hrs (${formatSecondsToTime(totalSeconds)})`;
+  if (elements.receiptTotalEarned) elements.receiptTotalEarned.textContent = `$${totalEarned.toFixed(2)}`;
+  if (elements.receiptTotalPaid) elements.receiptTotalPaid.textContent = `$${totalPaid.toFixed(2)}`;
+  if (elements.receiptNetBalance) {
+    elements.receiptNetBalance.textContent = (netBalance >= 0 ? "+$" : "-$") + Math.abs(netBalance).toFixed(2);
+    elements.receiptNetBalance.className = netBalance > 0 ? "text-base sm:text-lg font-bold font-mono text-rose-600 dark:text-rose-400" : "text-base sm:text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400";
+  }
+  if (elements.receiptSignWorkerName) elements.receiptSignWorkerName.textContent = worker.nombre;
+
+  if (elements.receiptTasksBody) {
+    if (filteredTasks.length === 0) {
+      elements.receiptTasksBody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400 text-xs">No hay actividades aprobadas en este período.</td></tr>`;
+    } else {
+      elements.receiptTasksBody.innerHTML = filteredTasks.map(t => {
+        const cat = getCategoryMeta(t.categoria);
+        const catPill = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ${cat.bg} ${cat.color} border"><i class="fa-solid ${cat.icon}"></i> ${cat.label}</span>`;
+        const clientPill = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"><i class="fa-solid fa-briefcase text-blue-500"></i> ${escapeHtml(t.cliente)}</span>` : "";
 
         return `
           <tr class="text-xs">
-            <td class="py-2 px-3 font-mono text-slate-500">${t.fecha || '-'}</td>
+            <td class="py-2 px-3 font-mono text-slate-500 whitespace-nowrap">${t.fecha || '-'}</td>
             <td class="py-2 px-3 text-slate-800 dark:text-slate-200">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-medium">${escapeHtml(t.descripcion || 'Tarea')}</span>
@@ -2230,13 +2463,32 @@ window.openStatementModal = function(workerId) {
                 ${catPill}
               </div>
             </td>
-            <td class="py-2 px-2 text-right font-mono text-slate-500">${Number(t.horas || 0).toFixed(2)}h</td>
-            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 dark:text-cyan-400">$${Number(t.costoTotal || 0).toFixed(2)}</td>
+            <td class="py-2 px-2 text-right font-mono text-slate-500 whitespace-nowrap">${Number(t.horas || 0).toFixed(2)}h</td>
+            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 dark:text-cyan-400 whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
           </tr>
         `;
       }).join("");
     }
   }
+
+  if (elements.receiptPaymentsBody) {
+    if (filteredPayments.length === 0) {
+      elements.receiptPaymentsBody.innerHTML = `<tr><td colspan="3" class="py-3 text-center text-slate-400 text-xs">No hay pagos registrados para este colaborador en el período.</td></tr>`;
+    } else {
+      elements.receiptPaymentsBody.innerHTML = filteredPayments.map(p => `
+        <tr class="text-xs">
+          <td class="py-2 px-3 font-mono text-slate-500 whitespace-nowrap">${p.fecha || '-'}</td>
+          <td class="py-2 px-3 text-slate-800 dark:text-slate-200">${escapeHtml(p.referencia || 'Transferencia / Liquidación')}</td>
+          <td class="py-2 px-3 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">$${Number(p.monto || 0).toFixed(2)}</td>
+        </tr>
+      `).join("");
+    }
+  }
+
+  // Activar documento correspondiente
+  const isWorker = state.userProfile?.rol === "worker";
+  const docTypeToUse = preferredType || (isWorker ? "bill" : "receipt");
+  window.setStatementDocType(docTypeToUse);
 
   elements.statementModal?.classList.remove("hidden");
   elements.statementModal?.classList.add("flex");
@@ -2306,11 +2558,50 @@ function setupEventListeners() {
     if (e.target === elements.manualEntryModal) closeManualEntryModal();
   });
 
-  // Modal Comprobante de Liquidación
+  // Modal Documentos: Cuenta de Cobro Formal & Recibo de Pago
+  elements.docTypeBillBtn?.addEventListener("click", () => window.setStatementDocType("bill"));
+  elements.docTypeReceiptBtn?.addEventListener("click", () => window.setStatementDocType("receipt"));
   elements.btnCloseStatement?.addEventListener("click", closeStatementModal);
   elements.btnPrintStatement?.addEventListener("click", () => window.print());
   elements.statementModal?.addEventListener("click", (e) => {
     if (e.target === elements.statementModal) closeStatementModal();
+  });
+
+  // Botón directo para el colaborador: Generar Mi Cuenta de Cobro
+  elements.btnWorkerOpenBill?.addEventListener("click", () => {
+    const profile = state.userProfile;
+    if (!profile) return;
+    const workerId = profile.trabajadorId || state.workers.find(w => w.nombre?.trim().toLowerCase() === profile.nombre?.trim().toLowerCase())?.id;
+    if (workerId) {
+      window.openStatementModal(workerId, "bill");
+    } else if (state.workers.length > 0) {
+      window.openStatementModal(state.workers[0].id, "bill");
+    } else {
+      showToast("No tienes un perfil de trabajador asignado aún.", "warning");
+    }
+  });
+
+  // Guardado reactivo en LocalStorage de datos bancarios e identificación al editar
+  const bankingInputs = [
+    elements.billWorkerIdNumber,
+    elements.billCity,
+    elements.billWorkerPhone,
+    elements.billBank,
+    elements.billAccountType,
+    elements.billAccountNumber,
+    elements.billAccountMobile
+  ];
+  bankingInputs.forEach(inputEl => {
+    if (!inputEl) return;
+    inputEl.addEventListener("blur", () => {
+      if (currentStatementWorkerId) {
+        saveWorkerBankingPrefs(currentStatementWorkerId);
+        if (elements.billSignWorkerId && elements.billWorkerIdNumber) {
+          const idVal = elements.billWorkerIdNumber.textContent.trim();
+          elements.billSignWorkerId.textContent = (idVal && !idVal.includes("Ingresa C.C.")) ? `C.C. ${idVal}` : "C.C. ________________";
+        }
+      }
+    });
   });
 
   // Autenticación & Perfiles
