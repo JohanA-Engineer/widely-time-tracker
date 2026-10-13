@@ -12,7 +12,9 @@ import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
-  updateProfile
+  updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
   getFirestore,
@@ -194,7 +196,8 @@ const elements = {
   authRegPassword: document.getElementById("authRegPassword"),
   authRegRole: document.getElementById("authRegRole"),
   btnQuickAdmin: document.getElementById("btnQuickAdmin"),
-  btnQuickWorker: document.getElementById("btnQuickWorker")
+  btnQuickWorker: document.getElementById("btnQuickWorker"),
+  btnGoogleAuth: document.getElementById("btnGoogleAuth")
 };
 
 /* ============================================================================
@@ -288,7 +291,11 @@ function applyRoleView() {
     elements.userProfileBar?.classList.add("flex");
 
     if (elements.userAvatar) {
-      elements.userAvatar.textContent = (profile.nombre || "U").charAt(0).toUpperCase();
+      if (profile.fotoUrl) {
+        elements.userAvatar.innerHTML = `<img src="${escapeHtml(profile.fotoUrl)}" alt="${escapeHtml(profile.nombre || '')}" class="w-full h-full object-cover rounded-lg" referrerpolicy="no-referrer">`;
+      } else {
+        elements.userAvatar.textContent = (profile.nombre || "U").charAt(0).toUpperCase();
+      }
     }
     if (elements.userNameDisplay) {
       elements.userNameDisplay.textContent = profile.nombre || "Usuario";
@@ -552,6 +559,109 @@ async function handleRegister(e) {
       await loginMockUser(role, name, email);
       return;
     }
+  }
+}
+
+async function handleGoogleAuth() {
+  if (!auth) {
+    showToast("Firebase no está inicializado. Iniciando sesión demo.", "info");
+    loginMockUser("worker", "Usuario Google");
+    return;
+  }
+
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    let profile = null;
+    if (db) {
+      try {
+        const userDocRef = doc(db, "usuarios", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          profile = userDocSnap.data();
+          if (user.photoURL && profile.fotoUrl !== user.photoURL) {
+            profile.fotoUrl = user.photoURL;
+            await updateDoc(userDocRef, { fotoUrl: user.photoURL });
+          }
+        } else {
+          const userName = user.displayName || (user.email ? user.email.split("@")[0] : "Usuario");
+          const userEmail = user.email || "";
+          const isUserAdmin = userEmail.toLowerCase().includes("admin");
+          const role = isUserAdmin ? "admin" : "worker";
+
+          profile = {
+            uid: user.uid,
+            nombre: userName,
+            email: userEmail,
+            fotoUrl: user.photoURL || "",
+            rol: role,
+            createdAt: new Date().toISOString()
+          };
+
+          if (role === "worker") {
+            const matchingWorker = state.workers.find(w =>
+              w.nombre && userName && w.nombre.trim().toLowerCase() === userName.trim().toLowerCase()
+            );
+            if (matchingWorker) {
+              profile.trabajadorId = matchingWorker.id;
+            } else {
+              try {
+                const newWorkerRef = await addDoc(collection(db, "trabajadores"), {
+                  nombre: userName,
+                  tarifaHora: 0,
+                  activo: true,
+                  createdAt: serverTimestamp()
+                });
+                profile.trabajadorId = newWorkerRef.id;
+              } catch (e) {
+                console.warn("[Auth] No se pudo crear registro de trabajador automático:", e);
+              }
+            }
+          }
+
+          await setDoc(userDocRef, profile);
+        }
+      } catch (docErr) {
+        console.warn("[Auth] Error leyendo/guardando usuario de Google:", docErr);
+      }
+    }
+
+    if (!profile) {
+      profile = {
+        uid: user.uid,
+        nombre: user.displayName || user.email?.split("@")[0] || "Usuario",
+        email: user.email || "",
+        fotoUrl: user.photoURL || "",
+        rol: user.email?.toLowerCase().includes("admin") ? "admin" : "worker"
+      };
+    }
+
+    state.currentUser = user;
+    state.userProfile = profile;
+    localStorage.setItem("widely_cached_user", JSON.stringify(profile));
+
+    applyRoleView();
+    closeAuthModal();
+    showToast(`¡Bienvenido ${profile.nombre}! Has ingresado con Google.`, "success");
+    updateFinancialDashboard();
+    updateTasksUI();
+    updatePaymentsUI();
+    updateWorkersUI();
+  } catch (error) {
+    console.error("[Auth] Error en Google Auth:", error);
+    if (error.code === "auth/popup-closed-by-user") {
+      // Usuario cerró el popup de Google, no mostrar error
+      return;
+    }
+    if (error.code === "auth/configuration-not-found" || error.code === "auth/operation-not-allowed") {
+      showToast("Activa el proveedor 'Google' en Firebase Console > Authentication > Sign-in method.", "warning");
+      return;
+    }
+    showToast(`Error al iniciar con Google: ${error.message}`, "error");
   }
 }
 
@@ -1426,6 +1536,7 @@ function setupEventListeners() {
   elements.formAuthRegister?.addEventListener("submit", handleRegister);
   elements.btnQuickAdmin?.addEventListener("click", () => loginMockUser("admin"));
   elements.btnQuickWorker?.addEventListener("click", () => loginMockUser("worker"));
+  elements.btnGoogleAuth?.addEventListener("click", handleGoogleAuth);
 }
 
 function switchTab(tab) {
