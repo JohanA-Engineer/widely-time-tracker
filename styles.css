@@ -400,6 +400,44 @@ html.has-user-session #mainAppDashboard {
 }
 
 /* ============================================================================
+   ESTILOS DE ARQUITECTURA DUAL PORTAL (Colaborador vs Administrador)
+   ============================================================================ */
+.role-worker .admin-only-feature {
+  display: none !important;
+}
+
+.role-admin .worker-only-feature {
+  display: none !important;
+}
+
+.pulse-subtle {
+  animation: pulseSubtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* Efecto de destello al resaltar formulario de pago */
+.highlight-pulse {
+  animation: flashHighlight 1.5s ease-out;
+}
+
+@keyframes flashHighlight {
+  0% {
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.6);
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+
+/* ============================================================================
    ESTILOS DE IMPRESIÓN Y EXPORTACIÓN A PDF ULTRA-LIMPIA
    (Cuenta de Cobro & Recibo de Pago Aislados)
    ============================================================================ */

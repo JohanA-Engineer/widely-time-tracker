@@ -307,8 +307,32 @@ const elements = {
   userNameDisplay: document.getElementById("userNameDisplay"),
   userRoleBadge: document.getElementById("userRoleBadge"),
   btnLogout: document.getElementById("btnLogout"),
-  workerRoleNotice: document.getElementById("workerRoleNotice"),
   adminManagementSection: document.getElementById("adminManagementSection"),
+
+  // Dual Portal (Administrador vs Colaborador)
+  workerPortalView: document.getElementById("workerPortalView"),
+  adminPortalView: document.getElementById("adminPortalView"),
+  workerHeroAvatar: document.getElementById("workerHeroAvatar"),
+  workerHeroName: document.getElementById("workerHeroName"),
+  workerHeroRate: document.getElementById("workerHeroRate"),
+  btnWorkerOpenManualEntry: document.getElementById("btnWorkerOpenManualEntry"),
+  workerKpiHours: document.getElementById("workerKpiHours"),
+  workerKpiEarned: document.getElementById("workerKpiEarned"),
+  workerKpiPaid: document.getElementById("workerKpiPaid"),
+  workerKpiBalance: document.getElementById("workerKpiBalance"),
+  workerTimerSlot: document.getElementById("workerTimerSlot"),
+  adminTimerSlot: document.getElementById("adminTimerSlot"),
+  workerTasksSlot: document.getElementById("workerTasksSlot"),
+  adminTasksSlot: document.getElementById("adminTasksSlot"),
+  timerMainCard: document.getElementById("timerMainCard"),
+  tasksSectionCard: document.getElementById("tasksSectionCard"),
+  timerWorkerSelectContainer: document.getElementById("timerWorkerSelectContainer"),
+  btnToggleAdminTimer: document.getElementById("btnToggleAdminTimer"),
+  btnAdminScrollToPayment: document.getElementById("btnAdminScrollToPayment"),
+  btnAdminScrollToWorker: document.getElementById("btnAdminScrollToWorker"),
+  tabTasksLabel: document.getElementById("tabTasksLabel"),
+  tasksWorkerColHeader: document.getElementById("tasksWorkerColHeader"),
+
   authTabLogin: document.getElementById("authTabLogin"),
   authTabRegister: document.getElementById("authTabRegister"),
   formAuthLogin: document.getElementById("formAuthLogin"),
@@ -454,6 +478,9 @@ function applyRoleView() {
     }
 
     if (profile.rol === "admin") {
+      document.documentElement.classList.add("role-admin");
+      document.documentElement.classList.remove("role-worker");
+
       if (elements.userRoleBadge) {
         elements.userRoleBadge.textContent = "ADMIN";
         elements.userRoleBadge.className = "text-[9px] font-mono text-blue-600 dark:text-blue-400 font-bold uppercase";
@@ -461,12 +488,35 @@ function applyRoleView() {
       if (elements.userAvatar) {
         elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm shadow-blue-500/20";
       }
-      elements.adminManagementSection?.classList.remove("hidden");
-      elements.workerRoleNotice?.classList.add("hidden");
+
+      // Activar Portal de Administrador
+      elements.adminPortalView?.classList.remove("hidden");
+      elements.workerPortalView?.classList.add("hidden");
+
+      // Mover Cronómetro y Auditoría al Admin Portal si no están allí
+      if (elements.adminTimerSlot && elements.timerMainCard && elements.timerMainCard.parentElement !== elements.adminTimerSlot) {
+        elements.adminTimerSlot.appendChild(elements.timerMainCard);
+      }
+      if (elements.adminTasksSlot && elements.tasksSectionCard && elements.tasksSectionCard.parentElement !== elements.adminTasksSlot) {
+        elements.adminTasksSlot.appendChild(elements.tasksSectionCard);
+      }
+
+      if (elements.timerWorkerSelectContainer) {
+        elements.timerWorkerSelectContainer.classList.remove("hidden");
+      }
       if (elements.timerWorkerSelect) {
         elements.timerWorkerSelect.disabled = false;
       }
+      if (elements.tasksWorkerColHeader) {
+        elements.tasksWorkerColHeader.textContent = "Trabajador";
+      }
+      if (elements.tabPayments) {
+        elements.tabPayments.classList.remove("hidden");
+      }
     } else {
+      document.documentElement.classList.add("role-worker");
+      document.documentElement.classList.remove("role-admin");
+
       if (elements.userRoleBadge) {
         elements.userRoleBadge.textContent = "COLABORADOR";
         elements.userRoleBadge.className = "text-[9px] font-mono text-cyan-600 dark:text-cyan-400 font-bold uppercase";
@@ -474,20 +524,51 @@ function applyRoleView() {
       if (elements.userAvatar) {
         elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-cyan-600 text-white flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm shadow-cyan-500/20";
       }
-      elements.adminManagementSection?.classList.add("hidden");
-      elements.workerRoleNotice?.classList.remove("hidden");
+
+      // Activar Portal de Colaborador
+      elements.workerPortalView?.classList.remove("hidden");
+      elements.adminPortalView?.classList.add("hidden");
+
+      // Mover Cronómetro y Auditoría al Worker Portal si no están allí
+      if (elements.workerTimerSlot && elements.timerMainCard && elements.timerMainCard.parentElement !== elements.workerTimerSlot) {
+        elements.workerTimerSlot.appendChild(elements.timerMainCard);
+      }
+      if (elements.workerTasksSlot && elements.tasksSectionCard && elements.tasksSectionCard.parentElement !== elements.workerTasksSlot) {
+        elements.workerTasksSlot.appendChild(elements.tasksSectionCard);
+      }
+
+      if (elements.timerWorkerSelectContainer) {
+        elements.timerWorkerSelectContainer.classList.add("hidden");
+      }
+      if (elements.workerHeroName) {
+        elements.workerHeroName.textContent = `¡Hola, ${profile.nombre || "Colaborador"}! 👋`;
+      }
+      if (elements.workerHeroAvatar) {
+        if (profile.fotoUrl) {
+          elements.workerHeroAvatar.innerHTML = `<img src="${escapeHtml(profile.fotoUrl)}" alt="" class="w-full h-full object-cover rounded-2xl">`;
+        } else {
+          elements.workerHeroAvatar.textContent = (profile.nombre || "W").charAt(0).toUpperCase();
+        }
+      }
+      if (elements.tasksWorkerColHeader) {
+        elements.tasksWorkerColHeader.textContent = "Cliente / Cuenta";
+      }
+      if (elements.tabPayments) {
+        elements.tabPayments.classList.add("hidden");
+      }
+      switchTab("tasks");
 
       linkAndLockWorkerSelect();
     }
   } else {
     // Sin sesión activa: Mostrar Pantalla de Login / Registro y ocultar Dashboard
-    document.documentElement.classList.remove("has-user-session");
+    document.documentElement.classList.remove("has-user-session", "role-admin", "role-worker");
     elements.authScreen?.classList.remove("hidden");
     elements.mainAppDashboard?.classList.add("hidden");
     elements.userProfileBar?.classList.add("hidden");
     elements.userProfileBar?.classList.remove("flex");
-    elements.adminManagementSection?.classList.remove("hidden");
-    elements.workerRoleNotice?.classList.add("hidden");
+    elements.adminPortalView?.classList.remove("hidden");
+    elements.workerPortalView?.classList.add("hidden");
     if (elements.timerWorkerSelect) {
       elements.timerWorkerSelect.disabled = false;
     }
@@ -1669,28 +1750,35 @@ function updateFinancialDashboard() {
       <button 
         type="button" 
         onclick="window.openStatementModal('${worker.id}', 'bill')" 
-        class="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-[11px] font-semibold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+        class="px-2.5 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-xs font-semibold active:scale-95 transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
         title="Generar y descargar mi Cuenta de Cobro formal">
-        <i class="fa-solid fa-file-invoice-dollar text-[10px]"></i>
-        <span>Cuenta de Cobro</span>
+        <i class="fa-solid fa-file-invoice-dollar text-xs"></i>
+        <span>Descargar Cuenta de Cobro</span>
       </button>
     ` : `
-      <div class="inline-flex items-center gap-1">
+      <div class="inline-flex items-center gap-1.5">
         <button 
           type="button" 
           onclick="window.openStatementModal('${worker.id}', 'receipt')" 
-          class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
-          title="Generar Recibo de Pago y Liquidación">
+          class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-bold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          title="Generar Recibo de Pago Oficial (PDF)">
           <i class="fa-solid fa-receipt text-[10px]"></i>
-          <span class="hidden sm:inline">Recibo de Pago</span>
+          <span class="hidden sm:inline">Recibo Oficial</span>
           <span class="sm:hidden">Recibo</span>
         </button>
         <button 
           type="button" 
           onclick="window.openStatementModal('${worker.id}', 'bill')" 
-          class="px-2 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-[11px] font-semibold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
-          title="Ver Cuenta de Cobro del trabajador">
+          class="px-2 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-[11px] font-semibold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          title="Auditar Cuenta de Cobro de este colaborador">
           <i class="fa-solid fa-file-invoice-dollar text-[10px]"></i>
+        </button>
+        <button 
+          type="button" 
+          onclick="window.quickPayWorker('${worker.id}', '${escapeHtml(worker.nombre)}', ${pendingBalance})" 
+          class="px-2 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 text-[11px] font-semibold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          title="Abonar / Registrar pago a ${escapeHtml(worker.nombre)}">
+          <i class="fa-solid fa-money-bill-transfer text-[10px]"></i>
         </button>
       </div>
     `;
@@ -1751,9 +1839,49 @@ function updateFinancialDashboard() {
     elements.kpiSaldoDesc.textContent = isWorker ? "Anticipo recibido a tu favor" : "Saldo a favor de la empresa";
   }
 
+  // Actualizar KPIs del Portal del Colaborador
+  if (isWorker) {
+    if (elements.workerKpiHours) elements.workerKpiHours.textContent = totalHorasGlobal.toFixed(2);
+    if (elements.workerKpiEarned) elements.workerKpiEarned.textContent = `$${totalGeneradoGlobal.toFixed(2)}`;
+    if (elements.workerKpiPaid) elements.workerKpiPaid.textContent = `$${totalPagadoGlobal.toFixed(2)}`;
+    if (elements.workerKpiBalance) {
+      if (balance > 0.005) {
+        elements.workerKpiBalance.textContent = `$${balance.toFixed(2)}`;
+        elements.workerKpiBalance.className = "text-2xl font-black font-mono text-blue-700 dark:text-blue-300 tabular-nums";
+      } else if (balance === 0) {
+        elements.workerKpiBalance.textContent = "$0.00";
+        elements.workerKpiBalance.className = "text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400 tabular-nums";
+      } else {
+        elements.workerKpiBalance.textContent = `+$${Math.abs(balance).toFixed(2)}`;
+        elements.workerKpiBalance.className = "text-2xl font-black font-mono text-cyan-600 dark:text-cyan-400 tabular-nums";
+      }
+    }
+    const workerObj = displayedWorkers[0];
+    if (workerObj && elements.workerHeroRate) {
+      elements.workerHeroRate.textContent = `$${Number(workerObj.tarifaHora || 0).toFixed(2)} / h`;
+    }
+  }
+
   renderProductivityCharts();
   updateClientsDatalist();
 }
+
+window.quickPayWorker = function(workerId, workerName, pendingBalance) {
+  if (elements.paymentWorkerSelect) elements.paymentWorkerSelect.value = workerId;
+  if (elements.paymentAmount) {
+    elements.paymentAmount.value = pendingBalance > 0 ? pendingBalance.toFixed(2) : "";
+  }
+  if (elements.paymentReference) {
+    elements.paymentReference.value = "Liquidación " + (elements.periodFilterLabel?.textContent || "");
+  }
+  const paymentCard = document.getElementById("adminPaymentCard") || elements.formPayment;
+  if (paymentCard) {
+    paymentCard.scrollIntoView({ behavior: "smooth", block: "center" });
+    paymentCard.classList.add("highlight-pulse");
+    setTimeout(() => paymentCard.classList.remove("highlight-pulse"), 1600);
+  }
+  showToast(`Formulario de pago listo para ${workerName} ($${pendingBalance > 0 ? pendingBalance.toFixed(2) : '0.00'}).`, "info");
+};
 
 function resetKPIs() {
   elements.kpiTotalHoras.textContent = "0.00";
@@ -2631,6 +2759,39 @@ function setupEventListeners() {
       window.openStatementModal(state.workers[0].id, "bill");
     } else {
       showToast("No tienes un perfil de trabajador asignado aún.", "warning");
+    }
+  });
+
+  // Botón para que el Colaborador registre horas manuales
+  elements.btnWorkerOpenManualEntry?.addEventListener("click", openManualEntryModal);
+
+  // Acciones Rápidas del Administrador
+  elements.btnAdminScrollToPayment?.addEventListener("click", () => {
+    const card = document.getElementById("adminPaymentCard") || elements.formPayment;
+    if (card) {
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      card.classList.add("highlight-pulse");
+      setTimeout(() => card.classList.remove("highlight-pulse"), 1600);
+    }
+  });
+
+  elements.btnAdminScrollToWorker?.addEventListener("click", () => {
+    if (elements.formWorker) {
+      elements.formWorker.scrollIntoView({ behavior: "smooth", block: "center" });
+      elements.workerName?.focus();
+    }
+  });
+
+  elements.btnToggleAdminTimer?.addEventListener("click", () => {
+    if (!elements.adminTimerSlot) return;
+    const isHidden = elements.adminTimerSlot.classList.toggle("hidden");
+    if (!isHidden) {
+      if (elements.timerMainCard && elements.timerMainCard.parentElement !== elements.adminTimerSlot) {
+        elements.adminTimerSlot.appendChild(elements.timerMainCard);
+      }
+      elements.btnToggleAdminTimer.innerHTML = '<i class="fa-solid fa-eye-slash mr-1"></i><span>Ocultar Cronómetro</span>';
+    } else {
+      elements.btnToggleAdminTimer.innerHTML = '<i class="fa-solid fa-stopwatch mr-1"></i><span>Ver Cronómetro</span>';
     }
   });
 
