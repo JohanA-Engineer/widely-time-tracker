@@ -246,6 +246,9 @@ const elements = {
 
   // Modal Documentos: Cuenta de Cobro Formal & Recibo de Pago
   statementModal: document.getElementById("statementModal"),
+  statementHeaderBar: document.getElementById("statementHeaderBar"),
+  statementDocTypeSelector: document.getElementById("statementDocTypeSelector"),
+  statementWorkerTitleBadge: document.getElementById("statementWorkerTitleBadge"),
   docTypeBillBtn: document.getElementById("docTypeBillBtn"),
   docTypeReceiptBtn: document.getElementById("docTypeReceiptBtn"),
   docViewBill: document.getElementById("docViewBill"),
@@ -1672,15 +1675,24 @@ function updateFinancialDashboard() {
         <span>Cuenta de Cobro</span>
       </button>
     ` : `
-      <button 
-        type="button" 
-        onclick="window.openStatementModal('${worker.id}', 'receipt')" 
-        class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
-        title="Generar Recibo de Pago y Liquidación">
-        <i class="fa-solid fa-receipt text-[10px]"></i>
-        <span class="hidden sm:inline">Recibo de Pago</span>
-        <span class="sm:hidden">Recibo</span>
-      </button>
+      <div class="inline-flex items-center gap-1">
+        <button 
+          type="button" 
+          onclick="window.openStatementModal('${worker.id}', 'receipt')" 
+          class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          title="Generar Recibo de Pago y Liquidación">
+          <i class="fa-solid fa-receipt text-[10px]"></i>
+          <span class="hidden sm:inline">Recibo de Pago</span>
+          <span class="sm:hidden">Recibo</span>
+        </button>
+        <button 
+          type="button" 
+          onclick="window.openStatementModal('${worker.id}', 'bill')" 
+          class="px-2 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-[11px] font-semibold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          title="Ver Cuenta de Cobro del trabajador">
+          <i class="fa-solid fa-file-invoice-dollar text-[10px]"></i>
+        </button>
+      </div>
     `;
 
     return `
@@ -2220,6 +2232,11 @@ let currentStatementWorkerId = null;
 let currentStatementDocType = "bill";
 
 window.setStatementDocType = function(type) {
+  const isWorker = state.userProfile?.rol === "worker";
+  if (isWorker && type === "receipt") {
+    type = "bill";
+  }
+
   currentStatementDocType = type;
   if (type === "bill") {
     elements.docTypeBillBtn?.classList.add("bg-blue-600", "text-white", "shadow-sm");
@@ -2229,7 +2246,7 @@ window.setStatementDocType = function(type) {
     elements.docViewBill?.classList.remove("hidden");
     elements.docViewReceipt?.classList.add("hidden");
     if (elements.btnPrintStatementLabel) {
-      elements.btnPrintStatementLabel.textContent = "Imprimir Cuenta de Cobro (PDF)";
+      elements.btnPrintStatementLabel.textContent = "Imprimir / Guardar Cuenta de Cobro (PDF)";
     }
   } else {
     elements.docTypeReceiptBtn?.classList.add("bg-blue-600", "text-white", "shadow-sm");
@@ -2239,7 +2256,7 @@ window.setStatementDocType = function(type) {
     elements.docViewReceipt?.classList.remove("hidden");
     elements.docViewBill?.classList.add("hidden");
     if (elements.btnPrintStatementLabel) {
-      elements.btnPrintStatementLabel.textContent = "Imprimir Recibo de Pago (PDF)";
+      elements.btnPrintStatementLabel.textContent = "Imprimir / Guardar Recibo de Pago (PDF)";
     }
   }
 };
@@ -2485,9 +2502,26 @@ window.openStatementModal = function(workerId, preferredType) {
     }
   }
 
-  // Activar documento correspondiente
+  // Control de roles para documentos: El trabajador SOLO puede ver y generar Cuenta de Cobro
   const isWorker = state.userProfile?.rol === "worker";
-  const docTypeToUse = preferredType || (isWorker ? "bill" : "receipt");
+
+  if (isWorker) {
+    if (elements.statementDocTypeSelector) elements.statementDocTypeSelector.classList.add("hidden");
+    if (elements.statementWorkerTitleBadge) {
+      elements.statementWorkerTitleBadge.classList.remove("hidden");
+      elements.statementWorkerTitleBadge.classList.add("flex");
+    }
+    if (elements.docTypeReceiptBtn) elements.docTypeReceiptBtn.classList.add("hidden");
+  } else {
+    if (elements.statementDocTypeSelector) elements.statementDocTypeSelector.classList.remove("hidden");
+    if (elements.statementWorkerTitleBadge) {
+      elements.statementWorkerTitleBadge.classList.add("hidden");
+      elements.statementWorkerTitleBadge.classList.remove("flex");
+    }
+    if (elements.docTypeReceiptBtn) elements.docTypeReceiptBtn.classList.remove("hidden");
+  }
+
+  const docTypeToUse = isWorker ? "bill" : (preferredType || "receipt");
   window.setStatementDocType(docTypeToUse);
 
   elements.statementModal?.classList.remove("hidden");
@@ -2562,7 +2596,26 @@ function setupEventListeners() {
   elements.docTypeBillBtn?.addEventListener("click", () => window.setStatementDocType("bill"));
   elements.docTypeReceiptBtn?.addEventListener("click", () => window.setStatementDocType("receipt"));
   elements.btnCloseStatement?.addEventListener("click", closeStatementModal);
-  elements.btnPrintStatement?.addEventListener("click", () => window.print());
+  elements.btnPrintStatement?.addEventListener("click", () => {
+    const originalTitle = document.title;
+    const worker = state.workers.find(w => w.id === currentStatementWorkerId);
+    const workerNameClean = (worker?.nombre || "Colaborador").trim().replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]/g, "_");
+
+    if (currentStatementDocType === "bill") {
+      document.title = `Cuenta_de_Cobro_${workerNameClean}`;
+    } else {
+      document.title = `Recibo_de_Pago_${workerNameClean}`;
+    }
+
+    window.print();
+
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 1200);
+  });
+  window.addEventListener("afterprint", () => {
+    document.title = "Widely Tracker | Control de Tiempos y Honorarios";
+  });
   elements.statementModal?.addEventListener("click", (e) => {
     if (e.target === elements.statementModal) closeStatementModal();
   });

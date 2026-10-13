@@ -399,50 +399,188 @@ html.has-user-session #mainAppDashboard {
   box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3) !important;
 }
 
-/* Estilos para Impresión y Generación de PDF Limpio (Cuenta de Cobro & Recibo de Pago) */
+/* ============================================================================
+   ESTILOS DE IMPRESIÓN Y EXPORTACIÓN A PDF ULTRA-LIMPIA
+   (Cuenta de Cobro & Recibo de Pago Aislados)
+   ============================================================================ */
 @media print {
   @page {
-    margin: 1.2cm;
-    size: auto;
+    margin: 1cm;
+    size: portrait;
   }
 
-  body, html {
+  /* Reset radical para evitar cualquier fondo, scroll o artefacto visual */
+  html, body {
+    background: #ffffff !important;
     background-color: #ffffff !important;
-    color: #0f172a !important;
+    color: #000000 !important;
     padding: 0 !important;
     margin: 0 !important;
-    font-size: 11pt;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    font-size: 11pt !important;
   }
 
-  header, #firebaseWarning, #authScreen, #mainAppDashboard, #toastContainer, #deleteModal, #editRateModal, #manualEntryModal {
+  /* Ocultar ABSOLUTAMENTE TODOS los elementos hermanos fuera de #statementModal */
+  body > *:not(#statementModal) {
     display: none !important;
   }
 
+  /* Reforzar la ocultación de componentes clave de la aplicación */
+  header,
+  footer,
+  #firebaseWarning,
+  #authScreen,
+  #mainAppDashboard,
+  html.has-user-session #mainAppDashboard,
+  #toastContainer,
+  #deleteModal,
+  #editRateModal,
+  #manualEntryModal,
+  #clientsDatalist,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Si el modal está cerrado, no mostrar nada */
+  #statementModal.hidden {
+    display: none !important;
+  }
+
+  /* Desanclar el modal de pantalla fija y convertirlo en el único contenedor de la página */
   #statementModal {
     display: block !important;
     position: static !important;
-    background: transparent !important;
-    padding: 0 !important;
     inset: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    overflow: visible !important;
+    z-index: auto !important;
+    box-shadow: none !important;
+    border: none !important;
   }
 
+  /* El contenido interno del modal ocupa toda la página sin márgenes de modal ni fondos oscuros */
   #statementModal > div {
-    border: none !important;
-    box-shadow: none !important;
     max-width: 100% !important;
     width: 100% !important;
+    margin: 0 !important;
     padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
     background: #ffffff !important;
     color: #000000 !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
   }
 
-  /* Eliminar líneas punteadas de edición durante la impresión */
-  [contenteditable="true"] {
+  /* Ocultar barra superior de navegación y botones dentro del modal */
+  #statementHeaderBar,
+  #statementDocTypeSelector,
+  #statementWorkerTitleBadge,
+  #docTypeBillBtn,
+  #docTypeReceiptBtn,
+  #btnCloseStatement,
+  #btnPrintStatement {
+    display: none !important;
+  }
+
+  /* Asegurar que el documento inactivo quede 100% oculto */
+  #docViewBill.hidden,
+  #docViewReceipt.hidden {
+    display: none !important;
+  }
+
+  /* Expandir todas las tablas para que NINGUNA fila quede oculta ni con scrollbar */
+  #statementModal .max-h-56,
+  #statementModal .max-h-52,
+  #statementModal .max-h-36,
+  #statementModal .overflow-y-auto,
+  #statementModal .overflow-x-auto {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Forzar colores nítidos y legibles en papel/PDF independientemente del tema activo */
+  #statementModal * {
+    color: #0f172a !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #statementModal .bg-slate-50,
+  #statementModal .dark\:bg-slate-900\/60,
+  #statementModal .dark\:bg-slate-900,
+  #statementModal .dark\:bg-slate-800,
+  #statementModal thead {
+    background-color: #f1f5f9 !important;
+  }
+
+  #statementModal .bg-blue-50\/70,
+  #statementModal .bg-blue-50,
+  #statementModal .dark\:bg-blue-500\/10 {
+    background-color: #eff6ff !important;
+  }
+
+  #statementModal .border,
+  #statementModal .border-t,
+  #statementModal .border-b,
+  #statementModal .border-l,
+  #statementModal .border-r,
+  #statementModal .divide-y > * {
+    border-color: #cbd5e1 !important;
+  }
+
+  #statementModal .border-slate-900,
+  #statementModal .dark\:border-slate-100 {
+    border-color: #0f172a !important;
+  }
+
+  #statementModal .text-blue-600,
+  #statementModal .text-blue-700,
+  #statementModal .dark\:text-blue-300,
+  #statementModal .dark\:text-blue-400 {
+    color: #1d4ed8 !important;
+  }
+
+  #statementModal .text-emerald-600,
+  #statementModal .text-emerald-700,
+  #statementModal .dark\:text-emerald-400 {
+    color: #047857 !important;
+  }
+
+  #statementModal .text-rose-600,
+  #statementModal .text-rose-700,
+  #statementModal .dark\:text-rose-400 {
+    color: #b91c1c !important;
+  }
+
+  #statementModal .text-slate-500,
+  #statementModal .text-slate-400,
+  #statementModal .dark\:text-slate-500 {
+    color: #475569 !important;
+  }
+
+  /* Quitar líneas punteadas de edición durante la impresión */
+  #statementModal [contenteditable="true"] {
     border-bottom: none !important;
     outline: none !important;
   }
 
+  /* Paginación correcta de tablas */
   table {
+    width: 100% !important;
     page-break-inside: auto;
   }
 

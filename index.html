@@ -913,8 +913,8 @@
     <div class="bg-white dark:bg-[#0d121f] text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-3xl w-full p-4 sm:p-6 md:p-8 space-y-4 shadow-2xl mx-auto my-auto print:m-0 print:border-none print:shadow-none print:w-full print:p-6 print:text-black print:bg-white">
       
       <!-- Barra Superior: Selector de Documento y Botones de Acción (Oculto en Impresión) -->
-      <div class="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-slate-200 dark:border-slate-800 print:hidden">
-        <div class="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold gap-1">
+      <div id="statementHeaderBar" class="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-slate-200 dark:border-slate-800 print:hidden">
+        <div id="statementDocTypeSelector" class="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold gap-1">
           <button type="button" id="docTypeBillBtn" class="px-3 py-1.5 rounded-lg transition-all active:scale-95 flex items-center gap-1.5 bg-blue-600 text-white shadow-sm">
             <i class="fa-solid fa-file-invoice-dollar text-xs"></i>
             <span>Cuenta de Cobro</span>
@@ -923,6 +923,13 @@
             <i class="fa-solid fa-receipt text-xs"></i>
             <span>Recibo de Pago</span>
           </button>
+        </div>
+
+        <div id="statementWorkerTitleBadge" class="hidden items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-bold">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <span>Cuenta de Cobro</span>
+          </span>
         </div>
 
         <div class="flex items-center gap-2">
@@ -954,30 +961,32 @@
           </div>
         </div>
 
-        <!-- Partes: DEBE A (Contratista) / A LA EMPRESA (Cliente / Pagador) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 print:bg-transparent print:border print:border-gray-300 border border-slate-200 dark:border-slate-800 text-xs">
-          <div class="space-y-1">
-            <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 print:text-gray-600">DEBE A (Prestador de Servicios):</div>
-            <div id="billWorkerName" class="text-sm font-bold text-slate-900 dark:text-white print:text-black">--</div>
+        <!-- Información Exclusiva del Prestador de Servicios (Solo Trabajador) -->
+        <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 print:bg-transparent print:border print:border-gray-300 border border-slate-200 dark:border-slate-800 text-xs space-y-2.5">
+          <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 print:text-gray-600 flex items-center justify-between">
+            <span>INFORMACIÓN DEL PRESTADOR DE SERVICIOS:</span>
+            <span class="text-[9px] text-slate-400 print:hidden font-normal">(Edita tus datos aquí con un clic)</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
-              <span class="text-slate-500 print:text-gray-600">C.C. / ID / NIT: </span>
-              <span id="billWorkerIdNumber" contenteditable="true" title="Clic para ingresar tu número de cédula o ID" class="font-mono font-semibold border-b border-dashed border-blue-400 outline-none px-1">Ingresa C.C. aquí</span>
+              <span class="text-[10px] text-slate-500 print:text-gray-600 block">Nombre Completo:</span>
+              <div id="billWorkerName" class="text-sm font-bold text-slate-900 dark:text-white print:text-black">--</div>
             </div>
             <div>
-              <span class="text-slate-500 print:text-gray-600">Correo: </span>
-              <span id="billWorkerEmail" class="font-mono">--</span>
+              <span class="text-[10px] text-slate-500 print:text-gray-600 block">C.C. / ID / Identificación:</span>
+              <span id="billWorkerIdNumber" contenteditable="true" title="Clic para ingresar tu número de cédula o ID" class="font-mono font-semibold border-b border-dashed border-blue-400 outline-none px-1 block text-slate-900 dark:text-white print:text-black">Ingresa C.C. aquí</span>
             </div>
             <div>
-              <span class="text-slate-500 print:text-gray-600">Teléfono: </span>
-              <span id="billWorkerPhone" contenteditable="true" title="Clic para editar teléfono" class="font-mono border-b border-dashed border-slate-400 outline-none px-1">+57 (Opcional)</span>
+              <span class="text-[10px] text-slate-500 print:text-gray-600 block">Correo Electrónico:</span>
+              <span id="billWorkerEmail" class="font-mono block truncate text-slate-700 dark:text-slate-300 print:text-black">--</span>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-500 print:text-gray-600 block">Teléfono / Celular:</span>
+              <span id="billWorkerPhone" contenteditable="true" title="Clic para editar teléfono" class="font-mono border-b border-dashed border-slate-400 outline-none px-1 block text-slate-900 dark:text-white print:text-black">+57 (Opcional)</span>
             </div>
           </div>
-
-          <div class="space-y-1 sm:border-l sm:border-slate-200 dark:sm:border-slate-800 print:sm:border-gray-300 sm:pl-3">
-            <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 print:text-gray-600">A LA EMPRESA (Cliente / Pagador):</div>
-            <div class="text-sm font-bold text-slate-900 dark:text-white print:text-black">Widely Social</div>
-            <div class="text-slate-600 dark:text-slate-300 print:text-gray-700"><strong>NIT:</strong> 901.458.729-1</div>
-            <div class="text-slate-600 dark:text-slate-300 print:text-gray-700"><strong>Concepto:</strong> Honorarios por prestación de servicios digitales, diseño y gestión en el período <span id="billConceptPeriod" class="font-semibold">actual</span>.</div>
+          <div class="pt-2 border-t border-slate-200 dark:border-slate-800 print:border-gray-200 text-slate-700 dark:text-slate-300 print:text-gray-800 text-[11px]">
+            <strong>Por concepto de:</strong> Honorarios por actividades y servicios prestados en el período <span id="billConceptPeriod" class="font-semibold text-blue-600 dark:text-blue-400 print:text-black">actual</span> según la relación de actividades anexa.
           </div>
         </div>
 
@@ -1069,7 +1078,7 @@
               <div class="text-[10px] font-mono text-slate-500 print:text-gray-600" id="billSignWorkerId">C.C. --</div>
             </div>
             <div class="text-right text-[10px] font-mono text-slate-400 print:text-gray-500">
-              Expedido vía Widely Tracker
+              Documento formal expedido electrónicamente
             </div>
           </div>
         </div>
