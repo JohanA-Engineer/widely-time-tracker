@@ -1,13 +1,13 @@
 {
-  "name": "Widely Tracker & Financial Dashboard",
-  "short_name": "Widely Tracker",
+  "name": "Time Tracker — Lina De La Espriella",
+  "short_name": "Time Tracker",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#090d16",
   "theme_color": "#2563eb",
   "orientation": "any",
-  "description": "Control de Horas, Cronómetro en Vivo y Dashboard Financiero para Widely Social",
+  "description": "Control de Horas, Cronómetro en Vivo y Dashboard Financiero — Lina De La Espriella",
   "icons": [
     {
       "src": "icon-192.svg",

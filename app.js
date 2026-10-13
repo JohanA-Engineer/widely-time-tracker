@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * WIDELY TIME TRACKER & FINANCIAL DASHBOARD
+ * TIME TRACKER — LINA DE LA ESPRIELLA
  * Lógica Frontend y Conexión en Tiempo Real con Firebase Firestore (SDK v10 ESM)
  * ============================================================================
  */
@@ -2547,7 +2547,7 @@ window.openStatementModal = function(workerId, preferredType) {
   if (elements.billWorkerIdNumber) {
     elements.billWorkerIdNumber.textContent = banking.idNumber || "Ingresa C.C. aquí";
   }
-  if (elements.billWorkerEmail) elements.billWorkerEmail.textContent = worker.email || state.userProfile?.email || "correo@widely.com";
+  if (elements.billWorkerEmail) elements.billWorkerEmail.textContent = worker.email || state.userProfile?.email || "correo@ejemplo.com";
   if (elements.billWorkerPhone) {
     elements.billWorkerPhone.textContent = banking.phone || "+57 (Opcional)";
   }
@@ -2760,7 +2760,7 @@ function setupEventListeners() {
     }, 1200);
   });
   window.addEventListener("afterprint", () => {
-    document.title = "Widely Tracker | Control de Tiempos y Honorarios";
+    document.title = "Time Tracker | Lina De La Espriella";
   });
   elements.statementModal?.addEventListener("click", (e) => {
     if (e.target === elements.statementModal) closeStatementModal();
@@ -3004,7 +3004,7 @@ function loadLocalFallbackData() {
       fecha: new Date().toISOString().split("T")[0],
       trabajadorId: "mock_1",
       trabajadorNombre: "Carlos Méndez",
-      cliente: "Widely Media",
+      cliente: "Proyecto General",
       categoria: "diseno",
       descripcion: "Desarrollo de landing page",
       segundos: 7200,
