@@ -513,6 +513,13 @@ function applyRoleView() {
       if (elements.tabPayments) {
         elements.tabPayments.classList.remove("hidden");
       }
+
+      const sidebarAdminLinks = document.getElementById("sidebarAdminLinks");
+      const navBillingLabel = document.getElementById("navBillingLabel");
+      const topbarSubtitle = document.getElementById("topbarSubtitle");
+      if (sidebarAdminLinks) sidebarAdminLinks.classList.remove("hidden");
+      if (navBillingLabel) navBillingLabel.textContent = "Liquidaciones & Nómina";
+      if (topbarSubtitle) topbarSubtitle.textContent = "Centro de Mando & Finanzas • Lina Alvarez";
     } else {
       document.documentElement.classList.add("role-worker");
       document.documentElement.classList.remove("role-admin");
@@ -557,6 +564,13 @@ function applyRoleView() {
         elements.tabPayments.classList.add("hidden");
       }
       switchTab("tasks");
+
+      const sidebarAdminLinks = document.getElementById("sidebarAdminLinks");
+      const navBillingLabel = document.getElementById("navBillingLabel");
+      const topbarSubtitle = document.getElementById("topbarSubtitle");
+      if (sidebarAdminLinks) sidebarAdminLinks.classList.add("hidden");
+      if (navBillingLabel) navBillingLabel.textContent = "Mi Cuenta de Cobro";
+      if (topbarSubtitle) topbarSubtitle.textContent = `Workspace Personal • ${profile.nombre || "Colaborador"}`;
 
       linkAndLockWorkerSelect();
     }
@@ -2826,6 +2840,78 @@ function setupEventListeners() {
   elements.btnForgotPassword?.addEventListener("click", handleForgotPassword);
   elements.formAuthRegister?.addEventListener("submit", handleRegister);
   elements.btnGoogleAuth?.addEventListener("click", handleGoogleAuth);
+
+  // Inicializar Navegación Lateral (Modelo 1 - Sidebar SaaS Pro)
+  setupSidebarNavigation();
+}
+
+/* ============================================================================
+   12.1 NAVEGACIÓN Y COMPORTAMIENTO DEL SIDEBAR SAAS PRO (MODELO 1)
+   ============================================================================ */
+function setupSidebarNavigation() {
+  const sidebarLinks = document.querySelectorAll(".sidebar-nav-link");
+  const appSidebar = document.getElementById("appSidebar");
+  const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+  const btnToggleMobileSidebar = document.getElementById("btnToggleMobileSidebar");
+  const btnCloseSidebarMobile = document.getElementById("btnCloseSidebarMobile");
+
+  function openSidebar() {
+    appSidebar?.classList.remove("-translate-x-full");
+    sidebarBackdrop?.classList.remove("hidden");
+  }
+
+  function closeSidebar() {
+    appSidebar?.classList.add("-translate-x-full");
+    sidebarBackdrop?.classList.add("hidden");
+  }
+
+  btnToggleMobileSidebar?.addEventListener("click", openSidebar);
+  btnCloseSidebarMobile?.addEventListener("click", closeSidebar);
+  sidebarBackdrop?.addEventListener("click", closeSidebar);
+
+  sidebarLinks.forEach(link => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const navKey = link.dataset.nav;
+      if (!navKey) return;
+
+      sidebarLinks.forEach(l => l.classList.remove("active"));
+      link.classList.add("active");
+
+      const isWorker = state.userProfile?.rol === "worker";
+
+      let targetId = null;
+      if (navKey === "dashboard") {
+        targetId = isWorker ? "workerDashboardSection" : "adminDashboardSection";
+      } else if (navKey === "tracker") {
+        targetId = isWorker ? "workerTimerSlot" : "adminTimerSlot";
+        if (!isWorker && elements.adminTimerSlot?.classList.contains("hidden")) {
+          elements.btnToggleAdminTimer?.click();
+        }
+      } else if (navKey === "billing") {
+        targetId = isWorker ? "workerBillingHub" : "adminFinancialSection";
+      } else if (navKey === "tasks") {
+        targetId = isWorker ? "workerTasksSlot" : "adminTasksSlot";
+      } else if (navKey === "reports") {
+        targetId = isWorker ? "workerDashboardSection" : "adminReportsSection";
+      } else if (navKey === "team") {
+        targetId = "formWorker";
+      } else if (navKey === "payments") {
+        targetId = "adminPaymentCard";
+      }
+
+      if (targetId) {
+        const el = document.getElementById(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+
+      if (window.innerWidth < 1024) {
+        closeSidebar();
+      }
+    });
+  });
 }
 
 function switchTab(tab) {

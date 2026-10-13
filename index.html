@@ -116,58 +116,29 @@
     </div>
   </div>
 
-  <!-- Navbar Superior -->
-  <header class="border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-[#0d121f]/90 backdrop-blur-md sticky top-0 z-40 transition-colors duration-200">
+  <!-- Navbar Superior de Acceso / Login (Visible solo cuando no hay sesión iniciada) -->
+  <header id="authTopNavbar" class="border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-[#0d121f]/90 backdrop-blur-md sticky top-0 z-40 transition-colors duration-200">
     <div class="max-w-7xl 2xl:max-w-[1536px] 3xl:max-w-[1780px] 4k:max-w-[2200px] mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
       
       <!-- Brand & Título -->
       <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
-        <div class="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0 text-sm sm:text-base">
+        <div class="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-blue-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0 text-sm sm:text-base">
           <i class="fa-solid fa-stopwatch"></i>
         </div>
         <div class="min-w-0">
           <h1 class="text-sm sm:text-base font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5 sm:gap-2 truncate">
-            <span>Widely Tracker</span>
-            <span class="text-[9px] sm:text-[10px] font-mono font-semibold px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 shrink-0">PRO</span>
+            <span>Widely Social</span>
+            <span class="text-[9px] sm:text-[10px] font-mono font-semibold px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 shrink-0">SAAS PRO</span>
           </h1>
-          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate hidden xs:block">Control de Horas & Dashboard Financiero</p>
+          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate hidden xs:block">Time Tracking & Payroll Settlement Platform</p>
         </div>
       </div>
 
-      <!-- Controles Superiores -->
-      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-        <!-- Reloj Digital Header -->
-        <div id="currentTime" class="hidden sm:block text-xs font-mono text-slate-500 dark:text-slate-400 tabular-nums">
-          --:--:--
-        </div>
-
-        <div class="h-4 w-px bg-slate-200 dark:border-slate-800 hidden sm:block"></div>
-
-        <!-- Toggle Modo Claro / Oscuro -->
-        <button id="themeToggle" type="button" onclick="window.toggleTheme()" aria-label="Cambiar modo oscuro/claro" class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium transition-all active:scale-95 shadow-sm">
-          <i id="themeIcon" class="fa-solid fa-sun text-amber-400 text-sm"></i>
-          <span id="themeText" class="hidden md:inline">Modo Claro</span>
-        </button>
-
-        <div class="h-4 w-px bg-slate-200 dark:border-slate-800"></div>
-
-        <!-- Perfil de Usuario Autenticado -->
-        <div id="userProfileBar" class="hidden items-center gap-2">
-          <div class="flex items-center gap-1.5 sm:gap-2 px-1.5 sm:px-2 py-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
-            <div id="userAvatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm shadow-blue-500/20">
-              A
-            </div>
-            <div class="hidden sm:block leading-tight text-left">
-              <div id="userNameDisplay" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[100px]">Admin</div>
-              <div id="userRoleBadge" class="text-[9px] font-mono text-blue-600 dark:text-blue-400 font-bold uppercase">ADMIN</div>
-            </div>
-          </div>
-          <button id="btnLogout" type="button" title="Cerrar sesión" class="px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors active:scale-95 text-xs flex items-center gap-1.5 font-semibold">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <span class="hidden sm:inline text-[11px]">Salir</span>
-          </button>
-        </div>
-      </div>
+      <!-- Toggle Modo Claro / Oscuro para Pantalla de Login -->
+      <button type="button" onclick="window.toggleTheme()" aria-label="Cambiar modo oscuro/claro" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium transition-all active:scale-95 shadow-sm">
+        <i class="fa-solid fa-circle-half-stroke text-amber-400 text-sm"></i>
+        <span class="hidden sm:inline">Tema</span>
+      </button>
 
     </div>
   </header>
@@ -277,40 +248,152 @@
     </div>
   </section>
 
-  <main id="mainAppDashboard" class="hidden max-w-7xl 2xl:max-w-[1536px] 3xl:max-w-[1780px] 4k:max-w-[2200px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8">
+  <!-- =========================================================================
+       MODELO 1: SAAS PRO DASHBOARD SHELL (Sidebar Vertical + Canvas Principal)
+       ========================================================================= -->
+  <div id="mainAppDashboard" class="hidden min-h-screen flex flex-col lg:flex-row bg-slate-100 dark:bg-[#090d16] text-slate-900 dark:text-slate-100 selection:bg-emerald-600 selection:text-white">
+    
+    <!-- BACKDROP MÓVIL PARA SIDEBAR -->
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden hidden transition-opacity"></div>
 
-    <!-- BARRA DE FILTROS POR PERÍODO (Liquidación y Contabilidad) -->
-    <div class="flex flex-wrap items-center justify-between gap-3 p-2.5 sm:p-3 rounded-2xl bg-white dark:bg-[#111624] border border-slate-200 dark:border-slate-800 shadow-sm">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs">
-          <i class="fa-solid fa-calendar-days"></i>
+    <!-- 1. SIDEBAR VERTICAL (Modelo 1 - SaaS Pro) -->
+    <aside id="appSidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0d121f] text-slate-300 border-r border-slate-800 flex flex-col justify-between transition-transform duration-300 -translate-x-full lg:translate-x-0 lg:static lg:min-h-screen shrink-0 shadow-2xl lg:shadow-none">
+      
+      <div>
+        <!-- Brand & Logo -->
+        <div class="p-5 flex items-center justify-between border-b border-slate-800/80">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-blue-600 text-white flex items-center justify-center text-lg font-black shadow-lg shadow-emerald-500/20 shrink-0">
+              <i class="fa-solid fa-stopwatch"></i>
+            </div>
+            <div>
+              <div class="font-extrabold text-white tracking-tight text-base leading-none">Widely Social</div>
+              <span class="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-semibold block mt-1">Time & Payroll Pro</span>
+            </div>
+          </div>
+          <!-- Botón Cerrar en Pantallas Móviles -->
+          <button type="button" id="btnCloseSidebarMobile" class="lg:hidden text-slate-400 hover:text-white p-1 rounded-lg">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
         </div>
-        <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Período de Liquidación:</span>
-        <span id="periodFilterLabel" class="text-[11px] font-mono text-slate-400 dark:text-slate-500 hidden sm:inline">(Todo el histórico)</span>
+
+        <!-- Enlaces de Navegación del Sidebar -->
+        <nav class="p-3.5 space-y-1.5 overflow-y-auto text-xs">
+          <a href="javascript:void(0)" class="sidebar-nav-link active" data-nav="dashboard">
+            <i class="fa-solid fa-gauge-high text-sm w-5 text-center"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="tracker">
+            <i class="fa-solid fa-stopwatch text-sm w-5 text-center"></i>
+            <span>Tracker de Horas</span>
+          </a>
+          <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="billing">
+            <i class="fa-solid fa-file-invoice-dollar text-sm w-5 text-center"></i>
+            <span id="navBillingLabel">Cuentas & Liquidación</span>
+          </a>
+          <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="tasks">
+            <i class="fa-solid fa-list-check text-sm w-5 text-center"></i>
+            <span>Registro de Tareas</span>
+          </a>
+          <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="reports">
+            <i class="fa-solid fa-chart-pie text-sm w-5 text-center"></i>
+            <span>Reportes & Métricas</span>
+          </a>
+
+          <!-- Accesos exclusivos de Administración (Solo Lina) -->
+          <div id="sidebarAdminLinks" class="pt-3 mt-3 border-t border-slate-800/80 space-y-1.5">
+            <div class="px-3 text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold">Administración</div>
+            <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="team">
+              <i class="fa-solid fa-users text-sm w-5 text-center"></i>
+              <span>Equipo & Tarifas</span>
+            </a>
+            <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="payments">
+              <i class="fa-solid fa-money-bill-transfer text-sm w-5 text-center"></i>
+              <span>Registrar Pago</span>
+            </a>
+          </div>
+        </nav>
       </div>
 
-      <div class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0 text-[11px] font-semibold" id="periodFilterButtonGroup">
-        <button type="button" class="btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 bg-blue-600 text-white shadow-sm" data-period="all">
-          Todo
-        </button>
-        <button type="button" class="btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-period="this_month">
-          Este Mes
-        </button>
-        <button type="button" class="btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-period="current_fortnight">
-          Quincena Actual
-        </button>
-        <button type="button" class="btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-period="last_month">
-          Mes Pasado
-        </button>
+      <!-- Footer del Sidebar: Perfil de Usuario, Tema y Salir -->
+      <div class="p-3.5 border-t border-slate-800/80 bg-[#090d16] flex items-center justify-between gap-2">
+        <div id="userProfileBar" class="flex items-center gap-2.5 min-w-0">
+          <div id="userAvatar" class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+            U
+          </div>
+          <div class="min-w-0 leading-tight">
+            <div id="userNameDisplay" class="text-xs font-bold text-white truncate max-w-[90px]">Usuario</div>
+            <div id="userRoleBadge" class="text-[9px] font-mono text-emerald-400 font-bold uppercase">COLABORADOR</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-1 shrink-0">
+          <button id="themeToggle" type="button" onclick="window.toggleTheme()" aria-label="Cambiar tema" class="w-7 h-7 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-amber-400 flex items-center justify-center text-xs transition-colors" title="Cambiar modo claro/oscuro">
+            <i id="themeIcon" class="fa-solid fa-sun text-amber-400 text-xs"></i>
+            <span id="themeText" class="hidden">Modo Claro</span>
+          </button>
+          <button id="btnLogout" type="button" title="Cerrar sesión" class="w-7 h-7 rounded-lg hover:bg-rose-500/15 text-slate-400 hover:text-rose-400 flex items-center justify-center text-xs transition-colors">
+            <i class="fa-solid fa-right-from-bracket text-xs"></i>
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- =========================================================================
-         PORTAL 1: COLABORADOR (Workspace Personal de Tiempos & Cobro)
-         ========================================================================= -->
-    <div id="workerPortalView" class="space-y-6 hidden">
-      <!-- 1. Banner Hero Personal del Colaborador -->
-      <div class="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-blue-900/30 via-cyan-900/15 to-slate-900/60 border border-cyan-500/20 backdrop-blur-md shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    </aside>
+
+    <!-- 2. LIENZO PRINCIPAL (MAIN CANVAS) -->
+    <div class="flex-1 flex flex-col min-w-0 min-h-screen">
+      
+      <!-- Topbar Header del Lienzo -->
+      <header class="sticky top-0 z-30 bg-white/90 dark:bg-[#0d121f]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3 transition-colors">
+        
+        <div class="flex items-center gap-3 min-w-0">
+          <button type="button" id="btnToggleMobileSidebar" class="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Abrir menú">
+            <i class="fa-solid fa-bars text-base"></i>
+          </button>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">Widely Workspace</span>
+              <span class="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            </div>
+            <div class="text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 truncate" id="topbarSubtitle">Control de tiempos y honorarios</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+          <!-- Filtro de Períodos -->
+          <div class="flex items-center gap-1 overflow-x-auto text-[11px] font-semibold" id="periodFilterButtonGroup">
+            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-xl transition-all active:scale-95 bg-emerald-600 text-white shadow-sm" data-period="all">
+              Todo
+            </button>
+            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-xl transition-all active:scale-95 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-period="this_month">
+              Este Mes
+            </button>
+            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-xl transition-all active:scale-95 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hidden xs:inline-block" data-period="current_fortnight">
+              Quincena Actual
+            </button>
+            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-xl transition-all active:scale-95 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hidden sm:inline-block" data-period="last_month">
+              Mes Pasado
+            </button>
+          </div>
+
+          <span id="periodFilterLabel" class="text-[11px] font-mono text-slate-400 dark:text-slate-500 hidden md:inline"></span>
+
+          <!-- Reloj Digital -->
+          <div id="currentTime" class="hidden sm:block text-xs font-mono text-slate-500 dark:text-slate-400 tabular-nums font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+            --:--:--
+          </div>
+        </div>
+
+      </header>
+
+      <!-- Contenedor Scrollable del Lienzo -->
+      <main class="flex-1 p-3.5 sm:p-6 lg:p-8 space-y-6 max-w-7xl 2xl:max-w-[1600px] w-full mx-auto">
+
+        <!-- =========================================================================
+             PORTAL 1: COLABORADOR (Workspace Personal de Tiempos & Cobro)
+             ========================================================================= -->
+        <div id="workerPortalView" class="space-y-6 hidden">
+          <!-- 1. Banner Hero Personal del Colaborador -->
+          <div id="workerDashboardSection" class="section-anchor p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-blue-900/30 via-cyan-900/15 to-slate-900/60 border border-cyan-500/20 backdrop-blur-md shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div class="flex items-center gap-4">
           <div id="workerHeroAvatar" class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white flex items-center justify-center text-xl sm:text-2xl font-black shadow-lg shadow-cyan-500/25 shrink-0">
             W
@@ -585,7 +668,7 @@
          ========================================================================= -->
     <div id="adminPortalView" class="space-y-6">
       <!-- 1. Cabecera Ejecutiva Admin -->
-      <div class="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-blue-900/30 via-indigo-900/20 to-slate-900/70 border border-blue-500/20 backdrop-blur-md shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div id="adminDashboardSection" class="section-anchor p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-blue-900/30 via-indigo-900/20 to-slate-900/70 border border-blue-500/20 backdrop-blur-md shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div class="flex items-center gap-3.5">
           <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-blue-600 text-white flex items-center justify-center text-xl font-bold shadow-lg shadow-amber-500/20 shrink-0">
             <i class="fa-solid fa-crown text-amber-300"></i>
@@ -676,7 +759,7 @@
       </section>
 
       <!-- 3. Centro de Liquidaciones de Colaboradores (Tabla Maestra) -->
-      <section class="content-card">
+      <section id="adminFinancialSection" class="section-anchor content-card">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-4 border-b border-slate-200 dark:border-slate-800 gap-2">
           <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center text-sm shrink-0">
@@ -716,7 +799,7 @@
       </section>
 
       <!-- 4. Gráficos de Rendimiento y Clientes -->
-      <section class="content-card">
+      <section id="adminReportsSection" class="section-anchor content-card">
         <div class="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-200 dark:border-slate-800">
           <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm shrink-0">
@@ -869,7 +952,9 @@
       </div>
     </div>
 
-  </main>
+      </main>
+    </div>
+  </div>
 
   <!-- Contenedor Flotante de Toasts Adaptativo -->
   <div id="toastContainer" class="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 left-4 sm:left-auto z-50 flex flex-col gap-2 pointer-events-none items-center sm:items-end"></div>

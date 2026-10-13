@@ -402,6 +402,10 @@ html.has-user-session #mainAppDashboard {
 /* ============================================================================
    ESTILOS DE ARQUITECTURA DUAL PORTAL (Colaborador vs Administrador)
    ============================================================================ */
+html.has-user-session #authTopNavbar {
+  display: none !important;
+}
+
 .role-worker .admin-only-feature {
   display: none !important;
 }
@@ -434,6 +438,63 @@ html.has-user-session #mainAppDashboard {
   }
   100% {
     box-shadow: none;
+  }
+}
+
+/* ============================================================================
+   ESTILOS MODELO 1: SIDEBAR SAAS PRO (Navegación Lateral & Workspace)
+   ============================================================================ */
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #94a3b8;
+  transition: all 160ms ease;
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;
+}
+
+.sidebar-nav-link:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-nav-link.active {
+  background-color: #10b981;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+
+.dark .sidebar-nav-link.active {
+  background-color: #10b981;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Indicador de sección activa suave */
+.section-anchor {
+  scroll-margin-top: 5.5rem;
+}
+
+/* Píldora circular animada para el cronómetro estilo Modelo 1 */
+.circular-timer-ring {
+  background: conic-gradient(from 0deg, #10b981, #3b82f6, #8b5cf6, #10b981);
+  padding: 3px;
+  border-radius: 9999px;
+  animation: rotateRing 8s linear infinite;
+}
+
+@keyframes rotateRing {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
