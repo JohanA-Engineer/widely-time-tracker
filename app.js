@@ -14,7 +14,8 @@ import {
   signOut,
   updateProfile,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
   getFirestore,
@@ -98,6 +99,7 @@ let state = {
   payments: [],     // Colección 'pagos'
   currentUser: null, // Firebase Auth user
   userProfile: null, // Perfil activo { uid, nombre, email, rol, trabajadorId }
+  filterPeriod: "all", // Filtro de liquidación: 'all', 'this_month', 'current_fortnight', 'last_month'
   timer: {
     isRunning: false,
     startTime: 0,
@@ -157,6 +159,10 @@ const elements = {
   kpiSaldoPendiente: document.getElementById("kpiSaldoPendiente"),
   kpiSaldoDesc: document.getElementById("kpiSaldoDesc"),
 
+  // Filtros de Período
+  periodFilterLabel: document.getElementById("periodFilterLabel"),
+  periodFilterButtonGroup: document.getElementById("periodFilterButtonGroup"),
+
   // Modal Borrado
   deleteModal: document.getElementById("deleteModal"),
   deleteModalText: document.getElementById("deleteModalText"),
@@ -170,6 +176,32 @@ const elements = {
   editRateModalWorker: document.getElementById("editRateModalWorker"),
   editRateInput: document.getElementById("editRateInput"),
   btnCancelEditRate: document.getElementById("btnCancelEditRate"),
+
+  // Modal Registro Manual de Horas
+  btnOpenManualEntry: document.getElementById("btnOpenManualEntry"),
+  manualEntryModal: document.getElementById("manualEntryModal"),
+  formManualEntry: document.getElementById("formManualEntry"),
+  manualWorkerSelect: document.getElementById("manualWorkerSelect"),
+  manualDate: document.getElementById("manualDate"),
+  manualHours: document.getElementById("manualHours"),
+  manualDescription: document.getElementById("manualDescription"),
+  manualCalculatedCost: document.getElementById("manualCalculatedCost"),
+  btnCancelManualEntry: document.getElementById("btnCancelManualEntry"),
+  btnCloseManualModal: document.getElementById("btnCloseManualModal"),
+
+  // Modal Comprobante de Liquidación (PDF/Print)
+  statementModal: document.getElementById("statementModal"),
+  statementDate: document.getElementById("statementDate"),
+  statementPeriodTag: document.getElementById("statementPeriodTag"),
+  statementWorkerName: document.getElementById("statementWorkerName"),
+  statementWorkerRate: document.getElementById("statementWorkerRate"),
+  statementTotalHours: document.getElementById("statementTotalHours"),
+  statementTotalEarned: document.getElementById("statementTotalEarned"),
+  statementTotalPaid: document.getElementById("statementTotalPaid"),
+  statementNetBalance: document.getElementById("statementNetBalance"),
+  statementTasksBody: document.getElementById("statementTasksBody"),
+  btnCloseStatement: document.getElementById("btnCloseStatement"),
+  btnPrintStatement: document.getElementById("btnPrintStatement"),
 
   // Status & Reloj
   currentTime: document.getElementById("currentTime"),
@@ -190,13 +222,11 @@ const elements = {
   formAuthLogin: document.getElementById("formAuthLogin"),
   authLoginEmail: document.getElementById("authLoginEmail"),
   authLoginPassword: document.getElementById("authLoginPassword"),
+  btnForgotPassword: document.getElementById("btnForgotPassword"),
   formAuthRegister: document.getElementById("formAuthRegister"),
   authRegName: document.getElementById("authRegName"),
   authRegEmail: document.getElementById("authRegEmail"),
   authRegPassword: document.getElementById("authRegPassword"),
-  authRegRole: document.getElementById("authRegRole"),
-  btnQuickAdmin: document.getElementById("btnQuickAdmin"),
-  btnQuickWorker: document.getElementById("btnQuickWorker"),
   btnGoogleAuth: document.getElementById("btnGoogleAuth")
 };
 
@@ -207,7 +237,9 @@ function init() {
   initClock();
   initDefaultDate();
   initCachedSession();
+  restoreActiveTimer();
   setupEventListeners();
+  initPWA();
 
   if (db) {
     listenToFirestore();
@@ -841,8 +873,67 @@ function listenToFirestore() {
 }
 
 /* ============================================================================
-   6. LÓGICA DEL CRONÓMETRO DE TAREAS
+   6. LÓGICA DEL CRONÓMETRO DE TAREAS & PERSISTENCIA LOCALSTORAGE
    ============================================================================ */
+function saveTimerState() {
+  try {
+    localStorage.setItem("widely_active_timer", JSON.stringify({
+      isRunning: state.timer.isRunning,
+      startTime: state.timer.startTime,
+      elapsedSeconds: state.timer.elapsedSeconds,
+      workerId: elements.timerWorkerSelect?.value || "",
+      description: elements.timerTaskDescription?.value || ""
+    }));
+  } catch (e) {
+    console.warn("[Timer] Error guardando estado:", e);
+  }
+}
+
+function clearTimerState() {
+  try {
+    localStorage.removeItem("widely_active_timer");
+  } catch (e) {
+    console.warn("[Timer] Error limpiando estado:", e);
+  }
+}
+
+function restoreActiveTimer() {
+  try {
+    const raw = localStorage.getItem("widely_active_timer");
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data) return;
+
+    if (data.workerId && elements.timerWorkerSelect) {
+      elements.timerWorkerSelect.value = data.workerId;
+    }
+    if (data.description && elements.timerTaskDescription) {
+      elements.timerTaskDescription.value = data.description;
+    }
+
+    if (data.isRunning && data.startTime) {
+      const now = Date.now();
+      const elapsed = Math.floor((now - data.startTime) / 1000);
+      if (elapsed > 0) {
+        state.timer.elapsedSeconds = elapsed;
+        startTimer();
+        showToast("¡Cronómetro restaurado! Se continuó contando sin interrupciones.", "info");
+      }
+    } else if (data.elapsedSeconds) {
+      state.timer.elapsedSeconds = data.elapsedSeconds;
+      renderTimerDisplay();
+      updateLiveCost();
+      elements.btnStart.disabled = false;
+      elements.btnPause.disabled = true;
+      elements.btnReset.disabled = false;
+      elements.timerStatusBadge.className = "text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30";
+      elements.timerStatusBadge.textContent = "Pausado";
+    }
+  } catch (err) {
+    console.warn("[Timer] Error restaurando timer:", err);
+  }
+}
+
 function startTimer() {
   const workerId = elements.timerWorkerSelect.value;
   if (!workerId) {
@@ -855,6 +946,7 @@ function startTimer() {
 
   state.timer.isRunning = true;
   state.timer.startTime = Date.now() - (state.timer.elapsedSeconds * 1000);
+  saveTimerState();
 
   state.timer.intervalId = setInterval(() => {
     state.timer.elapsedSeconds = Math.floor((Date.now() - state.timer.startTime) / 1000);
@@ -876,6 +968,7 @@ function pauseTimer() {
 
   state.timer.isRunning = false;
   clearInterval(state.timer.intervalId);
+  saveTimerState();
 
   elements.btnStart.disabled = false;
   elements.btnPause.disabled = true;
@@ -890,6 +983,7 @@ function resetTimer() {
 
   pauseTimer();
   state.timer.elapsedSeconds = 0;
+  clearTimerState();
   renderTimerDisplay();
   updateLiveCost();
 
@@ -1167,14 +1261,86 @@ function updateWorkersUI() {
   updateLiveCost();
 }
 
+/* ============================================================================
+   8.B. FILTROS DE PERÍODO & PERIOD LIQUIDATION
+   ============================================================================ */
+function isDateInPeriod(dateStr, period) {
+  if (!period || period === "all") return true;
+  if (!dateStr) return false;
+
+  const targetDate = new Date(dateStr + "T00:00:00");
+  if (isNaN(targetDate.getTime())) return true;
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+  const currentDay = now.getDate();
+
+  const targetYear = targetDate.getFullYear();
+  const targetMonth = targetDate.getMonth();
+  const targetDay = targetDate.getDate();
+
+  if (period === "this_month") {
+    return targetYear === currentYear && targetMonth === currentMonth;
+  }
+
+  if (period === "current_fortnight") {
+    if (targetYear !== currentYear || targetMonth !== currentMonth) return false;
+    return currentDay <= 15 ? targetDay <= 15 : targetDay >= 16;
+  }
+
+  if (period === "last_month") {
+    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    return targetYear === lastMonthYear && targetMonth === lastMonth;
+  }
+
+  return true;
+}
+
+function getFilteredTasks() {
+  return state.tasks.filter(t => isDateInPeriod(t.fecha, state.filterPeriod));
+}
+
+function getFilteredPayments() {
+  return state.payments.filter(p => isDateInPeriod(p.fecha, state.filterPeriod));
+}
+
+function setFilterPeriod(period) {
+  state.filterPeriod = period;
+
+  const buttons = document.querySelectorAll(".btn-period-filter");
+  buttons.forEach(btn => {
+    if (btn.dataset.period === period) {
+      btn.className = "btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 bg-blue-600 text-white shadow-sm";
+    } else {
+      btn.className = "btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800";
+    }
+  });
+
+  const labels = {
+    all: "(Todo el histórico)",
+    this_month: "(Este mes)",
+    current_fortnight: "(Quincena actual)",
+    last_month: "(Mes pasado)"
+  };
+  if (elements.periodFilterLabel) {
+    elements.periodFilterLabel.textContent = labels[period] || "";
+  }
+
+  updateFinancialDashboard();
+  updateTasksUI();
+  updatePaymentsUI();
+}
+
 function updateTasksUI() {
   const isWorker = state.userProfile?.rol === "worker";
-  let displayedTasks = state.tasks;
+  let displayedTasks = getFilteredTasks();
 
   if (isWorker) {
     const myId = state.userProfile.trabajadorId;
     const myName = (state.userProfile.nombre || "").trim().toLowerCase();
-    displayedTasks = state.tasks.filter(t => 
+    displayedTasks = displayedTasks.filter(t => 
       (myId && t.trabajadorId === myId) || 
       (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === myName)
     );
@@ -1186,7 +1352,7 @@ function updateTasksUI() {
     elements.tasksTableBody.innerHTML = `
       <tr>
         <td colspan="6" class="py-6 text-center text-slate-400 dark:text-slate-500 text-xs">
-          ${isWorker ? "No tienes tareas registradas todavía." : "No hay tareas registradas todavía."}
+          ${isWorker ? "No tienes tareas registradas en este período." : "No hay tareas registradas en este período."}
         </td>
       </tr>
     `;
@@ -1195,12 +1361,13 @@ function updateTasksUI() {
 
   elements.tasksTableBody.innerHTML = displayedTasks.map(t => {
     const formattedTime = formatSecondsToTime(t.segundos || 0);
+    const isManualTag = t.esManual ? `<span class="ml-1 text-[9px] font-mono font-semibold px-1 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">Manual</span>` : "";
     return `
       <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
         <td class="py-2.5 px-3 text-slate-500 dark:text-slate-400 font-mono whitespace-nowrap tabular-nums">${t.fecha || '-'}</td>
         <td class="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">${escapeHtml(t.trabajadorNombre || 'Anónimo')}</td>
         <td class="py-2.5 px-3 text-slate-600 dark:text-slate-300 max-w-xs truncate" title="${escapeHtml(t.descripcion || '')}">
-          ${escapeHtml(t.descripcion || 'Sin descripción')}
+          ${escapeHtml(t.descripcion || 'Sin descripción')} ${isManualTag}
         </td>
         <td class="py-2.5 px-2 text-right font-mono text-slate-500 dark:text-slate-400 whitespace-nowrap tabular-nums">
           ${formattedTime} <span class="text-[10px] text-slate-400 dark:text-slate-500">(${Number(t.horas || 0).toFixed(2)}h)</span>
@@ -1223,12 +1390,12 @@ function updateTasksUI() {
 
 function updatePaymentsUI() {
   const isWorker = state.userProfile?.rol === "worker";
-  let displayedPayments = state.payments;
+  let displayedPayments = getFilteredPayments();
 
   if (isWorker) {
     const myId = state.userProfile.trabajadorId;
     const myName = (state.userProfile.nombre || "").trim().toLowerCase();
-    displayedPayments = state.payments.filter(p => 
+    displayedPayments = displayedPayments.filter(p => 
       (myId && p.trabajadorId === myId) || 
       (p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === myName)
     );
@@ -1240,7 +1407,7 @@ function updatePaymentsUI() {
     elements.paymentsTableBody.innerHTML = `
       <tr>
         <td colspan="5" class="py-6 text-center text-slate-400 dark:text-slate-500 text-xs">
-          ${isWorker ? "No tienes pagos registrados aún." : "No hay pagos registrados."}
+          ${isWorker ? "No tienes pagos registrados en este período." : "No hay pagos registrados en este período."}
         </td>
       </tr>
     `;
@@ -1290,7 +1457,7 @@ function updateFinancialDashboard() {
   if (displayedWorkers.length === 0) {
     elements.financialTableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="py-8 text-center text-slate-400 dark:text-slate-500 text-xs">
+        <td colspan="7" class="py-8 text-center text-slate-400 dark:text-slate-500 text-xs">
           ${isWorker 
             ? "Tu perfil aún no está vinculado a un trabajador en la lista. Puedes usar el cronómetro para registrar tu tiempo."
             : "Agrega trabajadores para visualizar el balance financiero en tiempo real."}
@@ -1301,18 +1468,21 @@ function updateFinancialDashboard() {
     return;
   }
 
+  const allFilteredTasks = getFilteredTasks();
+  const allFilteredPayments = getFilteredPayments();
+
   let totalHorasGlobal = 0;
   let totalSegundosGlobal = 0;
   let totalGeneradoGlobal = 0;
   let totalPagadoGlobal = 0;
 
   const rowsHtml = displayedWorkers.map(worker => {
-    const workerTasks = state.tasks.filter(t => t.trabajadorId === worker.id || (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase()));
+    const workerTasks = allFilteredTasks.filter(t => t.trabajadorId === worker.id || (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase()));
     const workerSeconds = workerTasks.reduce((acc, t) => acc + (Number(t.segundos) || 0), 0);
     const workerHours = workerTasks.reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
     const workerEarned = workerTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
 
-    const workerPayments = state.payments.filter(p => p.trabajadorId === worker.id || (p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase()));
+    const workerPayments = allFilteredPayments.filter(p => p.trabajadorId === worker.id || (p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase()));
     const workerPaid = workerPayments.reduce((acc, p) => acc + (Number(p.monto) || 0), 0);
 
     const pendingBalance = Number((workerEarned - workerPaid).toFixed(2));
@@ -1324,7 +1494,7 @@ function updateFinancialDashboard() {
 
     let balanceBadge = "";
     if (pendingBalance > 0.005) {
-      // Debe dinero: Rojo vibrante con pulso
+      // Debe dinero: Rojo vibrante
       balanceBadge = `
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono bg-rose-100 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 tabular-nums animate-pulse">
           <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
@@ -1351,7 +1521,7 @@ function updateFinancialDashboard() {
 
     const editRateBtn = !isWorker ? `
       <button 
-        type="button"
+        type="button" 
         onclick="window.openEditRateModal('${worker.id}', '${escapeHtml(worker.nombre)}', ${Number(worker.tarifaHora || 0)})"
         class="hover:text-cyan-600 dark:hover:text-cyan-400 hover:underline transition-colors cursor-pointer inline-flex items-center gap-1 group"
         title="Clic para cambiar tarifa por hora">
@@ -1359,6 +1529,17 @@ function updateFinancialDashboard() {
         <i class="fa-solid fa-pencil text-[9px] opacity-0 group-hover:opacity-100 transition-opacity text-cyan-500"></i>
       </button>
     ` : `<span>$${Number(worker.tarifaHora || 0).toFixed(2)}/h</span>`;
+
+    const statementBtn = `
+      <button 
+        type="button" 
+        onclick="window.openStatementModal('${worker.id}')" 
+        class="px-2 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-[11px] font-semibold active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+        title="Generar liquidación / comprobante en PDF">
+        <i class="fa-solid fa-file-invoice-dollar text-[10px]"></i>
+        <span class="hidden sm:inline">Recibo</span>
+      </button>
+    `;
 
     return `
       <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
@@ -1385,6 +1566,9 @@ function updateFinancialDashboard() {
         </td>
         <td class="py-3 px-3 text-right">
           ${balanceBadge}
+        </td>
+        <td class="py-3 px-2 text-center whitespace-nowrap">
+          ${statementBtn}
         </td>
       </tr>
     `;
@@ -1533,6 +1717,206 @@ async function handleConfirmEditRate(e) {
 }
 
 /* ============================================================================
+   11.B. REGISTRO MANUAL DE HORAS & LIQUIDACIÓN (RECIBO)
+   ============================================================================ */
+function initPWA() {
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch((err) => {
+        console.warn("[PWA] Error registrando Service Worker:", err);
+      });
+    });
+  }
+}
+
+async function handleForgotPassword() {
+  const email = elements.authLoginEmail?.value.trim();
+  if (!email) {
+    showToast("Escribe tu correo en el campo de arriba y presiona de nuevo '¿Olvidaste tu contraseña?'.", "warning");
+    elements.authLoginEmail?.focus();
+    return;
+  }
+
+  if (!auth) {
+    showToast("Recuperación de contraseña disponible con Firebase conectado.", "warning");
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showToast(`Se envió un enlace para restablecer tu contraseña a "${email}". Revisa tu correo o spam.`, "success");
+  } catch (error) {
+    console.error("[Auth] Error en recuperación de contraseña:", error);
+    if (error.code === "auth/user-not-found") {
+      showToast("No se encontró ninguna cuenta registrada con este correo.", "error");
+    } else {
+      showToast(`Error al enviar correo: ${error.message}`, "error");
+    }
+  }
+}
+
+function openManualEntryModal() {
+  if (!elements.manualEntryModal) return;
+
+  elements.manualWorkerSelect.innerHTML = `<option value="">-- Selecciona trabajador --</option>` +
+    state.workers.map(w => {
+      const rate = Number(w.tarifaHora || 0);
+      return `<option value="${w.id}" data-rate="${rate}">${w.nombre} (${rate > 0 ? `$${rate.toFixed(2)}/h` : 'Sin tarifa'})</option>`;
+    }).join("");
+
+  if (state.userProfile?.rol === "worker" && state.userProfile?.trabajadorId) {
+    elements.manualWorkerSelect.value = state.userProfile.trabajadorId;
+    elements.manualWorkerSelect.disabled = true;
+  } else {
+    elements.manualWorkerSelect.disabled = false;
+  }
+
+  if (elements.manualDate) {
+    elements.manualDate.value = new Date().toISOString().split("T")[0];
+  }
+  updateManualCost();
+  elements.manualEntryModal.classList.remove("hidden");
+  elements.manualEntryModal.classList.add("flex");
+}
+
+function closeManualEntryModal() {
+  if (!elements.manualEntryModal) return;
+  elements.manualEntryModal.classList.add("hidden");
+  elements.manualEntryModal.classList.remove("flex");
+  elements.formManualEntry?.reset();
+}
+
+function updateManualCost() {
+  const workerId = elements.manualWorkerSelect?.value;
+  const hours = parseFloat(elements.manualHours?.value || 0);
+  const worker = state.workers.find(w => w.id === workerId);
+  const rate = worker ? Number(worker.tarifaHora || 0) : 0;
+  const cost = (hours > 0 && rate > 0) ? hours * rate : 0;
+  if (elements.manualCalculatedCost) {
+    elements.manualCalculatedCost.textContent = `$${cost.toFixed(2)}`;
+  }
+}
+
+async function handleSaveManualEntry(e) {
+  e.preventDefault();
+  const workerId = elements.manualWorkerSelect.value || state.userProfile?.trabajadorId;
+  const date = elements.manualDate.value;
+  const hours = parseFloat(elements.manualHours.value);
+  const description = elements.manualDescription.value.trim();
+
+  if (!workerId) {
+    showToast("Selecciona el trabajador.", "warning");
+    return;
+  }
+  if (isNaN(hours) || hours <= 0) {
+    showToast("Ingresa una cantidad válida de horas.", "warning");
+    return;
+  }
+  if (!description) {
+    showToast("Ingresa la descripción de la tarea.", "warning");
+    return;
+  }
+
+  const worker = state.workers.find(w => w.id === workerId);
+  const workerName = worker ? worker.nombre : "Colaborador";
+  const rate = worker ? Number(worker.tarifaHora || 0) : 0;
+  const cost = Number((hours * rate).toFixed(2));
+  const seconds = Math.round(hours * 3600);
+
+  const taskData = {
+    fecha: date || new Date().toISOString().split("T")[0],
+    trabajadorId: workerId,
+    trabajadorNombre: workerName,
+    descripcion: description,
+    segundos: seconds,
+    horas: Number(hours.toFixed(2)),
+    tarifaHora: rate,
+    costoTotal: cost,
+    esManual: true,
+    createdAt: db ? serverTimestamp() : new Date().toISOString()
+  };
+
+  try {
+    if (db) {
+      await addDoc(collection(db, "tareas"), taskData);
+    } else {
+      taskData.id = "local_task_" + Date.now();
+      state.tasks.unshift(taskData);
+      updateTasksUI();
+      updateFinancialDashboard();
+    }
+    showToast(`Tarea manual de ${hours}h guardada para ${workerName} ($${cost.toFixed(2)}).`, "success");
+    closeManualEntryModal();
+  } catch (err) {
+    console.error("Error guardando tarea manual:", err);
+    showToast("Error al guardar: " + err.message, "error");
+  }
+}
+
+window.openStatementModal = function(workerId) {
+  const worker = state.workers.find(w => w.id === workerId);
+  if (!worker) return;
+
+  const filteredTasks = state.tasks.filter(t => 
+    (t.trabajadorId === worker.id || (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase())) &&
+    isDateInPeriod(t.fecha, state.filterPeriod)
+  );
+
+  const filteredPayments = state.payments.filter(p =>
+    (p.trabajadorId === worker.id || (p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase())) &&
+    isDateInPeriod(p.fecha, state.filterPeriod)
+  );
+
+  const totalSeconds = filteredTasks.reduce((acc, t) => acc + (Number(t.segundos) || 0), 0);
+  const totalHours = filteredTasks.reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
+  const totalEarned = filteredTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
+  const totalPaid = filteredPayments.reduce((acc, p) => acc + (Number(p.monto) || 0), 0);
+  const netBalance = Number((totalEarned - totalPaid).toFixed(2));
+
+  if (elements.statementWorkerName) elements.statementWorkerName.textContent = worker.nombre;
+  if (elements.statementWorkerRate) elements.statementWorkerRate.textContent = `$${Number(worker.tarifaHora || 0).toFixed(2)}/h`;
+  if (elements.statementTotalHours) elements.statementTotalHours.textContent = `${totalHours.toFixed(2)} hrs (${formatSecondsToTime(totalSeconds)})`;
+  if (elements.statementTotalEarned) elements.statementTotalEarned.textContent = `$${totalEarned.toFixed(2)}`;
+  if (elements.statementTotalPaid) elements.statementTotalPaid.textContent = `$${totalPaid.toFixed(2)}`;
+  if (elements.statementNetBalance) {
+    elements.statementNetBalance.textContent = (netBalance >= 0 ? "+$" : "-$") + Math.abs(netBalance).toFixed(2);
+    elements.statementNetBalance.className = netBalance > 0 ? "text-base sm:text-lg font-bold font-mono text-rose-600 dark:text-rose-400" : "text-base sm:text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400";
+  }
+
+  const periodLabels = {
+    all: "Todo el Histórico",
+    this_month: "Mes en Curso",
+    current_fortnight: "Quincena en Curso",
+    last_month: "Mes Anterior"
+  };
+  if (elements.statementPeriodTag) elements.statementPeriodTag.textContent = periodLabels[state.filterPeriod] || "Período Seleccionado";
+  if (elements.statementDate) elements.statementDate.textContent = `Emisión: ${new Date().toLocaleDateString()}`;
+
+  if (elements.statementTasksBody) {
+    if (filteredTasks.length === 0) {
+      elements.statementTasksBody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400 text-xs">No hay actividades en este período.</td></tr>`;
+    } else {
+      elements.statementTasksBody.innerHTML = filteredTasks.map(t => `
+        <tr class="text-xs">
+          <td class="py-2 px-3 font-mono text-slate-500">${t.fecha || '-'}</td>
+          <td class="py-2 px-3 text-slate-800 dark:text-slate-200">${escapeHtml(t.descripcion || 'Tarea')}</td>
+          <td class="py-2 px-2 text-right font-mono text-slate-500">${Number(t.horas || 0).toFixed(2)}h</td>
+          <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 dark:text-cyan-400">$${Number(t.costoTotal || 0).toFixed(2)}</td>
+        </tr>
+      `).join("");
+    }
+  }
+
+  elements.statementModal?.classList.remove("hidden");
+  elements.statementModal?.classList.add("flex");
+};
+
+function closeStatementModal() {
+  elements.statementModal?.classList.add("hidden");
+  elements.statementModal?.classList.remove("flex");
+}
+
+/* ============================================================================
    12. EVENT LISTENERS Y UTILIDADES
    ============================================================================ */
 function setupEventListeners() {
@@ -1551,6 +1935,15 @@ function setupEventListeners() {
   elements.tabTasks.addEventListener("click", () => switchTab("tasks"));
   elements.tabPayments.addEventListener("click", () => switchTab("payments"));
 
+  // Filtros de Período
+  const periodButtons = document.querySelectorAll(".btn-period-filter");
+  periodButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const period = btn.dataset.period || "all";
+      setFilterPeriod(period);
+    });
+  });
+
   // Modal Borrado
   elements.btnCancelDelete.addEventListener("click", closeDeleteModal);
   elements.btnConfirmDelete.addEventListener("click", confirmDelete);
@@ -1565,14 +1958,31 @@ function setupEventListeners() {
     if (e.target === elements.editRateModal) closeEditRateModal();
   });
 
+  // Modal Registro Manual de Horas
+  elements.btnOpenManualEntry?.addEventListener("click", openManualEntryModal);
+  elements.btnCancelManualEntry?.addEventListener("click", closeManualEntryModal);
+  elements.btnCloseManualModal?.addEventListener("click", closeManualEntryModal);
+  elements.formManualEntry?.addEventListener("submit", handleSaveManualEntry);
+  elements.manualWorkerSelect?.addEventListener("change", updateManualCost);
+  elements.manualHours?.addEventListener("input", updateManualCost);
+  elements.manualEntryModal?.addEventListener("click", (e) => {
+    if (e.target === elements.manualEntryModal) closeManualEntryModal();
+  });
+
+  // Modal Comprobante de Liquidación
+  elements.btnCloseStatement?.addEventListener("click", closeStatementModal);
+  elements.btnPrintStatement?.addEventListener("click", () => window.print());
+  elements.statementModal?.addEventListener("click", (e) => {
+    if (e.target === elements.statementModal) closeStatementModal();
+  });
+
   // Autenticación & Perfiles
   elements.btnLogout?.addEventListener("click", handleLogout);
   elements.authTabLogin?.addEventListener("click", () => switchAuthTab("login"));
   elements.authTabRegister?.addEventListener("click", () => switchAuthTab("register"));
   elements.formAuthLogin?.addEventListener("submit", handleLogin);
+  elements.btnForgotPassword?.addEventListener("click", handleForgotPassword);
   elements.formAuthRegister?.addEventListener("submit", handleRegister);
-  elements.btnQuickAdmin?.addEventListener("click", () => loginMockUser("admin"));
-  elements.btnQuickWorker?.addEventListener("click", () => loginMockUser("worker"));
   elements.btnGoogleAuth?.addEventListener("click", handleGoogleAuth);
 }
 

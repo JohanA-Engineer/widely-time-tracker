@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="widelyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#2563eb" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="#090d16"/>
+  <rect x="32" y="32" width="448" height="448" rx="112" fill="url(#widelyGrad)" filter="url(#shadow)"/>
+  <!-- Cronómetro Icono en Blanco -->
+  <g fill="none" stroke="#ffffff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" transform="translate(16, 16)">
+    <!-- Botón superior -->
+    <line x1="240" y1="90" x2="240" y2="130" stroke-width="32" />
+    <line x1="200" y1="90" x2="280" y2="90" stroke-width="32" />
+    <!-- Botón derecho -->
+    <line x1="335" y1="145" x2="365" y2="115" stroke-width="26" />
+    <!-- Círculo principal -->
+    <circle cx="240" cy="275" r="140" stroke-width="28" />
+    <!-- Agujas del reloj -->
+    <line x1="240" y1="275" x2="240" y2="195" stroke-width="26" />
+    <line x1="240" y1="275" x2="310" y2="275" stroke-width="26" />
+    <circle cx="240" cy="275" r="14" fill="#ffffff" />
+  </g>
+</svg>

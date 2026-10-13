@@ -392,3 +392,42 @@ html.has-user-session #mainAppDashboard {
   display: block !important;
 }
 
+/* Estilos de Botones de Filtro por Período */
+.btn-period-filter.active-period {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3) !important;
+}
+
+/* Estilos para Impresión y Generación de PDF Limpio */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+  }
+
+  header, #firebaseWarning, #authScreen, #mainAppDashboard, #toastContainer, #deleteModal, #editRateModal, #manualEntryModal {
+    display: none !important;
+  }
+
+  #statementModal {
+    display: flex !important;
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    inset: auto !important;
+  }
+
+  #statementModal > div {
+    border: none !important;
+    box-shadow: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}
+
+

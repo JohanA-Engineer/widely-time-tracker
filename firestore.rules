@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Función auxiliar para determinar si el usuario autenticado es la administradora maestra
+    function isMasterAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == "linadelae@gmail.com" ||
+        request.auth.token.email == "linadeae@gmail.com"
+      );
+    }
+
+    // Función auxiliar para verificar si el usuario está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // 1. Colección de Usuarios:
+    // - Cualquier usuario autenticado puede leer y crear su propio documento.
+    // - Solo el administrador puede modificar el rol de otros.
+    match /usuarios/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && (request.auth.uid == userId || isMasterAdmin());
+      allow delete: if isMasterAdmin();
+    }
+
+    // 2. Colección de Trabajadores:
+    // - Todos los autenticados pueden leer la lista de trabajadores para registrar horas.
+    // - Solo el Administrador puede crear, cambiar tarifas (tarifaHora) o borrar trabajadores.
+    match /trabajadores/{workerId} {
+      allow read: if isAuthenticated();
+      allow write: if isMasterAdmin() || (
+        isAuthenticated() && request.resource.data.nombre != null
+      );
+    }
+
+    // 3. Colección de Tareas (Horas Registradas):
+    // - Cualquier usuario autenticado puede leer las tareas y registrar sus propias horas.
+    // - El Administrador puede ver, editar y borrar cualquier tarea.
+    match /tareas/{taskId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isMasterAdmin();
+    }
+
+    // 4. Colección de Pagos:
+    // - Todos los autenticados pueden ver el registro de pagos correspondiente.
+    // - Solo la Administradora Maestra puede registrar, editar o borrar pagos.
+    match /pagos/{paymentId} {
+      allow read: if isAuthenticated();
+      allow write: if isMasterAdmin();
+    }
+  }
+}
