@@ -257,11 +257,11 @@
     <div id="sidebarBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden hidden transition-opacity"></div>
 
     <!-- 1. SIDEBAR VERTICAL (Modelo 1 - SaaS Pro) -->
-    <aside id="appSidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0d121f] text-slate-300 border-r border-slate-800 flex flex-col justify-between transition-transform duration-300 -translate-x-full lg:translate-x-0 lg:static lg:min-h-screen shrink-0 shadow-2xl lg:shadow-none">
+    <aside id="appSidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0d121f] text-slate-300 border-r border-slate-800 flex flex-col justify-between transition-transform duration-300 -translate-x-full lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen shrink-0 shadow-2xl lg:shadow-none">
       
-      <div>
+      <div class="flex flex-col flex-1 min-h-0">
         <!-- Brand & Logo -->
-        <div class="p-5 flex items-center justify-between border-b border-slate-800/80">
+        <div class="p-5 flex items-center justify-between border-b border-slate-800/80 shrink-0">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-blue-600 text-white flex items-center justify-center text-lg font-black shadow-lg shadow-emerald-500/20 shrink-0">
               <i class="fa-solid fa-stopwatch"></i>
@@ -278,7 +278,7 @@
         </div>
 
         <!-- Enlaces de Navegación del Sidebar -->
-        <nav class="p-3.5 space-y-1.5 overflow-y-auto text-xs">
+        <nav class="p-3.5 space-y-1.5 overflow-y-auto flex-1 text-xs">
           <a href="javascript:void(0)" class="sidebar-nav-link active" data-nav="dashboard">
             <i class="fa-solid fa-gauge-high text-sm w-5 text-center"></i>
             <span>Dashboard</span>
@@ -316,13 +316,13 @@
       </div>
 
       <!-- Footer del Sidebar: Perfil de Usuario, Tema y Salir -->
-      <div class="p-3.5 border-t border-slate-800/80 bg-[#090d16] flex items-center justify-between gap-2">
-        <div id="userProfileBar" class="flex items-center gap-2.5 min-w-0">
+      <div class="p-3.5 border-t border-slate-800/80 bg-[#090d16] flex items-center justify-between gap-2 shrink-0">
+        <div id="userProfileBar" class="flex items-center gap-2.5 min-w-0 flex-1">
           <div id="userAvatar" class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
             U
           </div>
-          <div class="min-w-0 leading-tight">
-            <div id="userNameDisplay" class="text-xs font-bold text-white truncate max-w-[90px]">Usuario</div>
+          <div class="min-w-0 leading-tight flex-1">
+            <div id="userNameDisplay" class="text-xs font-bold text-white truncate">Usuario</div>
             <div id="userRoleBadge" class="text-[9px] font-mono text-emerald-400 font-bold uppercase">COLABORADOR</div>
           </div>
         </div>

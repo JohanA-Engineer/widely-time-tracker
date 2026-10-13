@@ -389,7 +389,15 @@ html.has-user-session #authScreen {
 }
 
 html.has-user-session #mainAppDashboard {
-  display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 100vh;
+}
+
+@media (min-width: 1024px) {
+  html.has-user-session #mainAppDashboard {
+    flex-direction: row !important;
+  }
 }
 
 /* Estilos de Botones de Filtro por Período */
