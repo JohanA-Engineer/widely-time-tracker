@@ -661,6 +661,10 @@ async function handleGoogleAuth() {
       showToast("Activa el proveedor 'Google' en Firebase Console > Authentication > Sign-in method.", "warning");
       return;
     }
+    if (error.code === "auth/unauthorized-domain") {
+      showToast("Dominio no autorizado. Agrega 'johana-engineer.github.io' en Firebase Console > Authentication > Configuración > Dominios autorizados.", "error");
+      return;
+    }
     showToast(`Error al iniciar con Google: ${error.message}`, "error");
   }
 }
