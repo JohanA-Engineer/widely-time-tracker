@@ -377,8 +377,7 @@ if (document.readyState === "loading") {
    ============================================================================ */
 // Correo maestro con acceso exclusivo de Administrador
 const MASTER_ADMIN_EMAILS = [
-  "linadelae@gmail.com",
-  "linadeae@gmail.com"
+  "linadelae@gmail.com"
 ];
 
 function isMasterAdmin(email) {
