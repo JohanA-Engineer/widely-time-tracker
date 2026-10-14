@@ -72,13 +72,25 @@ if (isConfigured) {
     db = getFirestore(app);
     auth = getAuth(app);
     console.log("[Firebase] Firestore y Auth inicializados correctamente.");
-    document.getElementById("firebaseWarning")?.classList.add("hidden");
+    const warningEl = document.getElementById("firebaseWarning");
+    if (warningEl) {
+      warningEl.classList.add("hidden");
+      warningEl.classList.remove("is-active");
+      warningEl.style.display = "none";
+      warningEl.hidden = true;
+    }
   } catch (err) {
     console.error("[Firebase] Error al inicializar:", err);
   }
 } else {
   console.warn("[Firebase] API Key no detectada. Operando en modo desconectado.");
-  document.getElementById("firebaseWarning")?.classList.remove("hidden");
+  const warningEl = document.getElementById("firebaseWarning");
+  if (warningEl) {
+    warningEl.classList.remove("hidden");
+    warningEl.classList.add("is-active");
+    warningEl.style.display = "block";
+    warningEl.hidden = false;
+  }
 }
 
 // Handler para botón de ingreso manual si no hay clave detectada

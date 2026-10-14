@@ -41,6 +41,33 @@
   --danger: #EF4444;
 }
 
+/* ==============================================================================
+   REGLAS CRÍTICAS DE RESILIENCIA VISUAL (Fallback si falla conexión móvil)
+   ============================================================================== */
+.hidden, [hidden] {
+  display: none !important;
+}
+
+#firebaseWarning {
+  display: none;
+}
+
+#firebaseWarning.is-active {
+  display: block !important;
+}
+
+svg {
+  max-width: 100%;
+}
+
+#btnGoogleAuth svg {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  max-width: 20px !important;
+  display: inline-block !important;
+}
+
 body, button, input, select, textarea {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: -0.011em;
