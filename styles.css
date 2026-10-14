@@ -68,6 +68,36 @@ svg {
   display: inline-block !important;
 }
 
+/* Centrado robusto vertical de iconos en campos de formulario */
+.input-icon-left {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-size: 0.875rem;
+  line-height: 1;
+  z-index: 5;
+}
+
+.form-input.pl-10,
+input.form-input.pl-10 {
+  padding-left: 2.5rem !important;
+}
+
+/* Caja de isotipo azul protegida contra estilos faltantes */
+.brand-icon-box {
+  background-color: #2563EB !important;
+  color: #ffffff !important;
+}
+
+#authScreen .content-card {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}
+
 body, button, input, select, textarea {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: -0.011em;

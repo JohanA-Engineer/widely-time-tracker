@@ -23,66 +23,8 @@
   <!-- Chart.js CDN para Dashboard Ejecutivo -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Tailwind CSS CDN con Paleta Natural / Sage / Warm Beige y Fallback para Redes Móviles -->
-  <script src="https://cdn.tailwindcss.com" onerror="console.warn('Tailwind CDN no cargó. Cargando fallback...'); var fb=document.createElement('link'); fb.rel='stylesheet'; fb.href='https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css'; document.head.appendChild(fb);"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#EFF6FF',
-              100: '#DBEAFE',
-              200: '#BFDBFE',
-              300: '#93C5FD',
-              400: '#3B82F6',
-              500: '#2563EB',
-              600: '#1D4ED8',
-              700: '#1E40AF',
-              800: '#1E3A8A',
-              900: '#0F172A',
-            },
-            sage: {
-              50: '#EFF6FF',
-              100: '#DBEAFE',
-              200: '#BFDBFE',
-              300: '#93C5FD',
-              400: '#3B82F6',
-              500: '#2563EB',
-              600: '#1D4ED8',
-              700: '#1E40AF',
-              800: '#1E3A8A',
-              900: '#0F172A',
-            },
-            warm: {
-              50: '#F1F5F9',
-              100: '#F8FAFC',
-              200: '#E2E8F0',
-              300: '#BAE6FD',
-              400: '#0284C7',
-              500: '#0369A1',
-              600: '#0284C7',
-            },
-            charcoal: {
-              50: '#F7F8F7',
-              100: '#EBECEB',
-              200: '#D6D8D6',
-              500: '#64748B',
-              700: '#404741',
-              800: '#0F172A',
-              900: '#0F172A',
-              950: '#0B0F19',
-            }
-          },
-          fontFamily: {
-            sans: ['"Inter"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-            mono: ['"Inter"', 'ui-monospace', 'monospace'],
-          }
-        }
-      }
-    }
-  </script>
+  <!-- Tailwind CSS Precompilado para Producción (~37KB, Carga Instantánea en Móviles y Redes Lentas) -->
+  <link rel="stylesheet" href="tailwind.min.css">
 
   <!-- Script Inmediato de Inicialización y Toggle de Tema -->
   <script>
@@ -162,7 +104,7 @@
       
       <!-- Brand & Título -->
       <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
-        <div class="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-[#2563EB] text-white flex items-center justify-center shrink-0 text-sm sm:text-base">
+        <div class="brand-icon-box h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-[#2563EB] text-white flex items-center justify-center shrink-0 text-sm sm:text-base shadow-sm">
           <i class="fa-solid fa-stopwatch"></i>
         </div>
         <div class="min-w-0">
@@ -189,7 +131,7 @@
       
       <!-- Logo y Bienvenida -->
       <div class="text-center space-y-2">
-        <div class="w-12 h-12 rounded-xl bg-[#2563EB] text-white flex items-center justify-center text-xl mx-auto">
+        <div class="brand-icon-box w-12 h-12 rounded-xl bg-[#2563EB] text-white flex items-center justify-center text-xl mx-auto shadow-sm">
           <i class="fa-solid fa-stopwatch"></i>
         </div>
         <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A] dark:text-[#F8FAFC]">
@@ -222,9 +164,9 @@
       </button>
 
       <!-- Divisor "o con correo electrónico" -->
-      <div class="relative">
+      <div class="relative my-2">
         <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-[#E2E8F0] dark:border-[#1E293B]"></div></div>
-        <div class="relative flex justify-center text-[10px] sm:text-xs uppercase font-mono tracking-wider font-semibold">
+        <div class="relative flex justify-center text-[10px] sm:text-xs uppercase font-sans tracking-wider font-semibold">
           <span class="bg-white dark:bg-[#111827] px-3 text-[#64748B]">O con correo electrónico</span>
         </div>
       </div>
@@ -233,15 +175,15 @@
       <form id="formAuthLogin" class="space-y-4">
         <div>
           <label for="authLoginEmail" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">Correo Electrónico</label>
-          <div class="relative">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] text-sm"><i class="fa-regular fa-envelope"></i></span>
+          <div class="relative flex items-center">
+            <span class="input-icon-left text-[#64748B]"><i class="fa-regular fa-envelope"></i></span>
             <input type="email" id="authLoginEmail" placeholder="tu-correo@ejemplo.com" required class="form-input w-full pl-10 text-xs sm:text-sm">
           </div>
         </div>
         <div>
           <label for="authLoginPassword" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">Contraseña</label>
-          <div class="relative">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] text-sm"><i class="fa-solid fa-lock"></i></span>
+          <div class="relative flex items-center">
+            <span class="input-icon-left text-[#64748B]"><i class="fa-solid fa-lock"></i></span>
             <input type="password" id="authLoginPassword" placeholder="••••••••" required class="form-input w-full pl-10 text-xs sm:text-sm">
           </div>
           <div class="flex justify-end pt-1.5">
@@ -250,8 +192,8 @@
             </button>
           </div>
         </div>
-        <button type="submit" id="btnSubmitLogin" class="btn-primary w-full py-2.5 text-xs sm:text-sm font-semibold justify-center active:scale-95 transition-all">
-          <i class="fa-solid fa-right-to-bracket text-xs sm:text-sm"></i>
+        <button type="submit" id="btnSubmitLogin" class="btn-primary w-full py-2.5 sm:py-3 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all rounded-xl shadow-sm cursor-pointer">
+          <i class="fa-solid fa-arrow-right text-xs sm:text-sm"></i>
           <span>Ingresar al Tracker</span>
         </button>
       </form>
@@ -260,27 +202,27 @@
       <form id="formAuthRegister" class="space-y-4 hidden">
         <div>
           <label for="authRegName" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nombre Completo</label>
-          <div class="relative">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"><i class="fa-regular fa-user"></i></span>
+          <div class="relative flex items-center">
+            <span class="input-icon-left text-slate-400"><i class="fa-regular fa-user"></i></span>
             <input type="text" id="authRegName" placeholder="Ej: Johan Santana" required class="form-input w-full pl-10 text-xs sm:text-sm">
           </div>
         </div>
         <div>
           <label for="authRegEmail" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Correo Electrónico</label>
-          <div class="relative">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"><i class="fa-regular fa-envelope"></i></span>
+          <div class="relative flex items-center">
+            <span class="input-icon-left text-slate-400"><i class="fa-regular fa-envelope"></i></span>
             <input type="email" id="authRegEmail" placeholder="colaborador@ejemplo.com" required class="form-input w-full pl-10 text-xs sm:text-sm">
           </div>
         </div>
         <div>
           <label for="authRegPassword" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">Contraseña</label>
-          <div class="relative">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] text-sm"><i class="fa-solid fa-lock"></i></span>
+          <div class="relative flex items-center">
+            <span class="input-icon-left text-[#64748B]"><i class="fa-solid fa-lock"></i></span>
             <input type="password" id="authRegPassword" minlength="6" placeholder="Mínimo 6 caracteres" required class="form-input w-full pl-10 text-xs sm:text-sm">
           </div>
         </div>
 
-        <button type="submit" id="btnSubmitRegister" class="btn-primary w-full py-2.5 text-xs sm:text-sm font-semibold justify-center active:scale-95 transition-all">
+        <button type="submit" id="btnSubmitRegister" class="btn-primary w-full py-2.5 sm:py-3 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all rounded-xl shadow-sm cursor-pointer">
           <i class="fa-solid fa-user-plus text-xs sm:text-sm"></i>
           <span>Crear Cuenta y Comenzar</span>
         </button>
