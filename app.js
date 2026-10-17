@@ -2346,14 +2346,19 @@ function resetKPIs() {
    10.C. TASA DE CAMBIO EN TIEMPO REAL (USD A COP / TRM MERCADO FINANCIERO)
    ============================================================================ */
 const trmState = {
-  rate: 4200,
-  lastUpdated: null,
+  rate: 3169.76,
+  lastUpdated: new Date(),
   isLive: true,
   isCustom: false
 };
 
 function getActiveTrmRate() {
-  return trmState.rate || 4200;
+  return trmState.rate || 3169.76;
+}
+
+function formatTrmRate(rate) {
+  const num = Number(rate) || 3169.76;
+  return "$" + num.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function formatCop(amount) {
@@ -2364,7 +2369,7 @@ function formatCop(amount) {
 
 function updateTrmUI() {
   const currentRate = getActiveTrmRate();
-  const formattedRate = "$" + Math.round(currentRate).toLocaleString("es-CO");
+  const formattedRate = formatTrmRate(currentRate);
 
   if (elements.trmRateDisplay) {
     elements.trmRateDisplay.textContent = formattedRate;
@@ -2377,7 +2382,7 @@ function updateTrmUI() {
       elements.trmModalLiveBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span><span>Tasa fija personalizada</span>`;
       elements.trmModalLiveBadge.className = "text-[10px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1";
     } else {
-      elements.trmModalLiveBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span><span>En vivo vía mercado financiero</span>`;
+      elements.trmModalLiveBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span><span>En vivo vía mercado financiero (interbancario)</span>`;
       elements.trmModalLiveBadge.className = "text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1";
     }
   }
@@ -2385,7 +2390,7 @@ function updateTrmUI() {
     if (trmState.isCustom) {
       elements.trmModalLastUpdate.textContent = "Modo: Tasa fija establecida manualmente";
     } else if (trmState.lastUpdated) {
-      const timeStr = trmState.lastUpdated.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+      const timeStr = trmState.lastUpdated.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
       elements.trmModalLastUpdate.textContent = `Última sincronización: ${timeStr} (se actualiza automáticamente)`;
     } else {
       elements.trmModalLastUpdate.textContent = "Sincronizando tasa en tiempo real...";
@@ -2398,7 +2403,7 @@ async function fetchLiveTrm(silent = true) {
     const customStored = localStorage.getItem("widely_custom_trm");
     if (customStored) {
       const parsedCustom = parseFloat(customStored);
-      if (!isNaN(parsedCustom) && parsedCustom > 1000) {
+      if (!isNaN(parsedCustom) && parsedCustom > 1000 && parsedCustom < 3800) {
         trmState.rate = parsedCustom;
         trmState.isCustom = true;
         updateTrmUI();
@@ -2408,29 +2413,47 @@ async function fetchLiveTrm(silent = true) {
   } catch (e) {}
 
   let fetchedRate = null;
+
+  // 1. Prioridad: API de mercados financieros en vivo interbancaria (al minuto)
   try {
-    const res = await fetch("https://open.er-api.com/v6/latest/USD");
+    const res = await fetch("https://api.fxratesapi.com/latest?base=USD&currencies=COP");
     if (res.ok) {
       const data = await res.json();
       if (data?.rates?.COP && !isNaN(data.rates.COP) && data.rates.COP > 1000) {
-        fetchedRate = Number(data.rates.COP);
+        fetchedRate = Number(Number(data.rates.COP).toFixed(2));
       }
     }
   } catch (e) {
-    console.warn("[TRM] Fallback 1 error:", e);
+    console.warn("[TRM] fxratesapi error, probando alternativa:", e);
   }
 
+  // 2. Alternativa: Open Exchange Rates API
   if (!fetchedRate) {
     try {
-      const res = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+      const res = await fetch("https://open.er-api.com/v6/latest/USD");
       if (res.ok) {
         const data = await res.json();
         if (data?.rates?.COP && !isNaN(data.rates.COP) && data.rates.COP > 1000) {
-          fetchedRate = Number(data.rates.COP);
+          fetchedRate = Number(Number(data.rates.COP).toFixed(2));
         }
       }
     } catch (e) {
-      console.warn("[TRM] Fallback 2 error:", e);
+      console.warn("[TRM] er-api error, probando alternativa 2:", e);
+    }
+  }
+
+  // 3. Alternativa: Currency API CDN
+  if (!fetchedRate) {
+    try {
+      const res = await fetch("https://latest.currency-api.pages.dev/v1/currencies/usd.json");
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.usd?.cop && !isNaN(data.usd.cop) && data.usd.cop > 1000) {
+          fetchedRate = Number(Number(data.usd.cop).toFixed(2));
+        }
+      }
+    } catch (e) {
+      console.warn("[TRM] currency-api error:", e);
     }
   }
 
@@ -2448,7 +2471,7 @@ async function fetchLiveTrm(silent = true) {
     updateTrmUI();
     updateFinancialDashboard();
     if (!silent) {
-      showToast(`TRM en vivo sincronizada: 1 USD = $${Math.round(fetchedRate).toLocaleString('es-CO')} COP`, "success");
+      showToast(`TRM en vivo sincronizada: 1 USD = ${formatTrmRate(fetchedRate)} COP`, "success");
     }
     return;
   }
@@ -2457,7 +2480,7 @@ async function fetchLiveTrm(silent = true) {
     const cached = localStorage.getItem("widely_trm_rate");
     if (cached) {
       const parsed = JSON.parse(cached);
-      if (parsed.rate) {
+      if (parsed.rate && parsed.rate < 3800) {
         trmState.rate = Number(parsed.rate);
         trmState.lastUpdated = new Date(parsed.timestamp);
         updateTrmUI();
@@ -2489,7 +2512,7 @@ function closeTrmModal() {
 function handleSaveCustomTrm() {
   const val = parseFloat(elements.trmCustomRateInput?.value || 0);
   if (isNaN(val) || val < 1000) {
-    showToast("Ingresa una tasa de cambio válida (ej. 4200).", "warning");
+    showToast("Ingresa una tasa de cambio válida (ej. 3170).", "warning");
     return;
   }
   trmState.rate = val;
@@ -2497,12 +2520,13 @@ function handleSaveCustomTrm() {
   localStorage.setItem("widely_custom_trm", String(val));
   updateTrmUI();
   updateFinancialDashboard();
-  showToast(`Tasa fija establecida: 1 USD = $${Math.round(val).toLocaleString('es-CO')} COP`, "info");
+  showToast(`Tasa fija establecida: 1 USD = ${formatTrmRate(val)} COP`, "info");
   closeTrmModal();
 }
 
 async function handleResetLiveTrm() {
   localStorage.removeItem("widely_custom_trm");
+  localStorage.removeItem("widely_trm_rate");
   trmState.isCustom = false;
   await fetchLiveTrm(false);
   closeTrmModal();
@@ -2510,28 +2534,26 @@ async function handleResetLiveTrm() {
 
 function initTrmSystem() {
   try {
+    // Limpiar caché legacy si tenía 4200
     const customStored = localStorage.getItem("widely_custom_trm");
-    if (customStored) {
-      const parsedCustom = parseFloat(customStored);
-      if (!isNaN(parsedCustom) && parsedCustom > 1000) {
-        trmState.rate = parsedCustom;
-        trmState.isCustom = true;
-      }
-    } else {
-      const cached = localStorage.getItem("widely_trm_rate");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed.rate) {
-          trmState.rate = Number(parsed.rate);
-          trmState.lastUpdated = new Date(parsed.timestamp);
-        }
+    if (customStored && (parseFloat(customStored) === 4200 || parseFloat(customStored) > 3800)) {
+      localStorage.removeItem("widely_custom_trm");
+    }
+    const cached = localStorage.getItem("widely_trm_rate");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (parsed.rate === 4200 || parsed.rate > 3800) {
+        localStorage.removeItem("widely_trm_rate");
+      } else if (parsed.rate) {
+        trmState.rate = Number(parsed.rate);
+        trmState.lastUpdated = new Date(parsed.timestamp);
       }
     }
   } catch (e) {}
 
   updateTrmUI();
   fetchLiveTrm(true);
-  setInterval(() => fetchLiveTrm(true), 10 * 60 * 1000);
+  setInterval(() => fetchLiveTrm(true), 5 * 60 * 1000); // Sincronizar cada 5 minutos
 }
 
 /* ============================================================================
