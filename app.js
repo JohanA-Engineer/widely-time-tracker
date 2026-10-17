@@ -2977,7 +2977,18 @@ function openManualEntryModal(preselectedWorkerId = null) {
     elements.manualDate.value = new Date().toISOString().split("T")[0];
   }
 
-  setManualEntryMode(elements.manualEntryMode?.value || "horas");
+  // Si el colaborador solo cobra por arte y no tiene tarifa por hora, abrir directamente en modo artes
+  if (currentWorker) {
+    const hRate = Number(currentWorker.tarifaHora || 0);
+    const aRate = Number(currentWorker.tarifaArte || 0);
+    if (aRate > 0 && hRate === 0) {
+      setManualEntryMode("artes");
+    } else {
+      setManualEntryMode(elements.manualEntryMode?.value || "horas");
+    }
+  } else {
+    setManualEntryMode(elements.manualEntryMode?.value || "horas");
+  }
   updateManualCost();
 
   elements.manualEntryModal.classList.remove("hidden");
@@ -2999,18 +3010,19 @@ function setManualEntryMode(mode) {
     elements.manualEntryMode.value = targetMode;
   }
 
-  const activeBtnClasses = ["bg-primary-600", "text-white", "shadow-sm", "font-semibold"];
-  const inactiveBtnClasses = ["text-slate-600", "dark:text-slate-300", "font-medium"];
+  const hoursIcon = document.getElementById("manualModeHoursIcon") || elements.manualModeHoursBtn?.querySelector("i");
+  const artsIcon = document.getElementById("manualModeArtsIcon") || elements.manualModeArtsBtn?.querySelector("i");
 
   if (targetMode === "artes") {
     if (elements.manualModeArtsBtn) {
-      elements.manualModeArtsBtn.classList.add(...activeBtnClasses);
-      elements.manualModeArtsBtn.classList.remove(...inactiveBtnClasses);
+      elements.manualModeArtsBtn.className = "py-1.5 px-3 rounded-lg bg-[#2563EB] text-white shadow-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer";
     }
     if (elements.manualModeHoursBtn) {
-      elements.manualModeHoursBtn.classList.remove(...activeBtnClasses);
-      elements.manualModeHoursBtn.classList.add(...inactiveBtnClasses);
+      elements.manualModeHoursBtn.className = "py-1.5 px-3 rounded-lg text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer";
     }
+    if (artsIcon) artsIcon.className = "fa-solid fa-palette text-xs text-white";
+    if (hoursIcon) hoursIcon.className = "fa-solid fa-clock text-xs text-[#2563EB] dark:text-[#60A5FA]";
+
     if (elements.manualHoursContainer) elements.manualHoursContainer.classList.add("hidden");
     if (elements.manualArtsContainer) elements.manualArtsContainer.classList.remove("hidden");
 
@@ -3027,13 +3039,14 @@ function setManualEntryMode(mode) {
     }
   } else {
     if (elements.manualModeHoursBtn) {
-      elements.manualModeHoursBtn.classList.add(...activeBtnClasses);
-      elements.manualModeHoursBtn.classList.remove(...inactiveBtnClasses);
+      elements.manualModeHoursBtn.className = "py-1.5 px-3 rounded-lg bg-[#2563EB] text-white shadow-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer";
     }
     if (elements.manualModeArtsBtn) {
-      elements.manualModeArtsBtn.classList.remove(...activeBtnClasses);
-      elements.manualModeArtsBtn.classList.add(...inactiveBtnClasses);
+      elements.manualModeArtsBtn.className = "py-1.5 px-3 rounded-lg text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer";
     }
+    if (hoursIcon) hoursIcon.className = "fa-solid fa-clock text-xs text-white";
+    if (artsIcon) artsIcon.className = "fa-solid fa-palette text-xs text-purple-600 dark:text-purple-400";
+
     if (elements.manualHoursContainer) elements.manualHoursContainer.classList.remove("hidden");
     if (elements.manualArtsContainer) elements.manualArtsContainer.classList.add("hidden");
   }
@@ -3425,13 +3438,10 @@ function numeroALetras(monto) {
 function saveWorkerBankingPrefs(workerId) {
   if (!workerId) return;
   const data = {
-    idNumber: elements.billWorkerIdNumber?.textContent.trim() || "",
-    phone: elements.billWorkerPhone?.textContent.trim() || "",
     city: elements.billCity?.textContent.trim() || "Bogotá D.C.",
     bank: elements.billBank?.textContent.trim() || "Bancolombia",
     accountType: elements.billAccountType?.textContent.trim() || "Ahorros",
-    accountNumber: elements.billAccountNumber?.textContent.trim() || "",
-    mobile: elements.billAccountMobile?.textContent.trim() || ""
+    accountNumber: elements.billAccountNumber?.textContent.trim() || ""
   };
   try {
     localStorage.setItem(`widely_banking_${workerId}`, JSON.stringify(data));
@@ -3732,9 +3742,15 @@ function setupEventListeners() {
   elements.manualWorkerSelect?.addEventListener("change", () => {
     const workerId = elements.manualWorkerSelect?.value;
     const worker = state.workers.find(w => w.id === workerId);
-    if (worker && elements.manualArtRateInput && !elements.manualArtRateInput.value) {
-      const artR = Number(worker.tarifaArte || 0);
-      if (artR > 0) elements.manualArtRateInput.value = artR.toFixed(2);
+    if (worker) {
+      const hRate = Number(worker.tarifaHora || 0);
+      const aRate = Number(worker.tarifaArte || 0);
+      if (aRate > 0 && hRate === 0) {
+        setManualEntryMode("artes");
+      }
+      if (elements.manualArtRateInput) {
+        elements.manualArtRateInput.value = aRate > 0 ? aRate.toFixed(2) : "";
+      }
     }
     updateManualCost();
   });
@@ -3862,25 +3878,18 @@ function setupEventListeners() {
     }
   });
 
-  // Guardado reactivo en LocalStorage de datos bancarios e identificación al editar
+  // Guardado reactivo en LocalStorage de datos bancarios al editar
   const bankingInputs = [
-    elements.billWorkerIdNumber,
     elements.billCity,
-    elements.billWorkerPhone,
     elements.billBank,
     elements.billAccountType,
-    elements.billAccountNumber,
-    elements.billAccountMobile
+    elements.billAccountNumber
   ];
   bankingInputs.forEach(inputEl => {
     if (!inputEl) return;
     inputEl.addEventListener("blur", () => {
       if (currentStatementWorkerId) {
         saveWorkerBankingPrefs(currentStatementWorkerId);
-        if (elements.billSignWorkerId && elements.billWorkerIdNumber) {
-          const idVal = elements.billWorkerIdNumber.textContent.trim();
-          elements.billSignWorkerId.textContent = (idVal && !idVal.includes("Ingresa C.C.")) ? `C.C. ${idVal}` : "C.C. ________________";
-        }
       }
     });
   });

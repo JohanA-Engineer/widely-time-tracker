@@ -83,9 +83,39 @@ svg {
   z-index: 5;
 }
 
-.form-input.pl-10,
-input.form-input.pl-10 {
-  padding-left: 2.5rem !important;
+/* Padding utilities robustos con !important para inputs con iconos y prefijos */
+.form-input.pl-6, input.form-input.pl-6 { padding-left: 1.75rem !important; }
+.form-input.pl-7, input.form-input.pl-7 { padding-left: 2rem !important; }
+.form-input.pl-8, input.form-input.pl-8 { padding-left: 2.25rem !important; }
+.form-input.pl-10, input.form-input.pl-10 { padding-left: 2.5rem !important; }
+.form-input.pl-12, input.form-input.pl-12 { padding-left: 3rem !important; }
+.form-input.pl-14, input.form-input.pl-14 { padding-left: 3.75rem !important; }
+
+/* Prefijo de moneda ($) para inputs financieros */
+.input-currency-prefix {
+  position: absolute;
+  left: 0.8125rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-family: 'Inter', ui-monospace, monospace;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  z-index: 5;
+}
+
+/* Flechas limpias y discretas en inputs numéricos */
+input[type="number"]::-webkit-inner-spin-button, 
+input[type="number"]::-webkit-outer-spin-button { 
+  opacity: 0.45;
+  cursor: pointer;
+}
+input[type="number"]:hover::-webkit-inner-spin-button, 
+input[type="number"]:hover::-webkit-outer-spin-button { 
+  opacity: 0.9;
 }
 
 /* Caja de isotipo azul protegida contra estilos faltantes */
