@@ -72,9 +72,9 @@ service cloud.firestore {
       // Los usuarios autenticados pueden consultar tareas (el filtrado seguro por trabajador se realiza en las consultas de la app)
       allow read: if isAuthenticated();
       
-      // Los colaboradores autenticados pueden registrar tareas
+      // Los colaboradores autenticados pueden registrar tareas (por horas o por piezas de diseño de artes)
       allow create: if isAuthenticated() && (
-        request.resource.data.horas > 0 &&
+        (request.resource.data.horas > 0 || (request.resource.data.cantidadArtes is number && request.resource.data.cantidadArtes > 0)) &&
         request.resource.data.descripcion is string
       );
       

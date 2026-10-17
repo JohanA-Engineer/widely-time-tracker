@@ -208,7 +208,9 @@ const elements = {
   // Trabajadores
   formWorker: document.getElementById("formWorker"),
   workerName: document.getElementById("workerName"),
+  workerEmail: document.getElementById("workerEmail"),
   workerRate: document.getElementById("workerRate"),
+  workerArtRate: document.getElementById("workerArtRate"),
   workersList: document.getElementById("workersList"),
   workerCount: document.getElementById("workerCount"),
 
@@ -256,18 +258,29 @@ const elements = {
   editRateWorkerId: document.getElementById("editRateWorkerId"),
   editRateModalWorker: document.getElementById("editRateModalWorker"),
   editRateInput: document.getElementById("editRateInput"),
+  editRateArtInput: document.getElementById("editRateArtInput"),
   btnCancelEditRate: document.getElementById("btnCancelEditRate"),
 
-  // Modal Registro Manual de Horas
+  // Modal Registro Manual de Horas y Diseño de Artes
   btnOpenManualEntry: document.getElementById("btnOpenManualEntry"),
   manualEntryModal: document.getElementById("manualEntryModal"),
   formManualEntry: document.getElementById("formManualEntry"),
+  manualModeHoursBtn: document.getElementById("manualModeHoursBtn"),
+  manualModeArtsBtn: document.getElementById("manualModeArtsBtn"),
+  manualEntryMode: document.getElementById("manualEntryMode"),
   manualWorkerSelect: document.getElementById("manualWorkerSelect"),
   manualDate: document.getElementById("manualDate"),
+  manualHoursContainer: document.getElementById("manualHoursContainer"),
+  manualArtsContainer: document.getElementById("manualArtsContainer"),
   manualHours: document.getElementById("manualHours"),
+  manualArtCount: document.getElementById("manualArtCount"),
+  manualArtRateInput: document.getElementById("manualArtRateInput"),
+  manualArtHours: document.getElementById("manualArtHours"),
+  manualHourlyRateHint: document.getElementById("manualHourlyRateHint"),
   manualClientProject: document.getElementById("manualClientProject"),
   manualCategory: document.getElementById("manualCategory"),
   manualDescription: document.getElementById("manualDescription"),
+  manualCalculationDetail: document.getElementById("manualCalculationDetail"),
   manualCalculatedCost: document.getElementById("manualCalculatedCost"),
   btnCancelManualEntry: document.getElementById("btnCancelManualEntry"),
   btnCloseManualModal: document.getElementById("btnCloseManualModal"),
@@ -1422,8 +1435,11 @@ async function handleSaveWorker(e) {
   e.preventDefault();
 
   const name = elements.workerName.value.trim();
+  const email = elements.workerEmail ? elements.workerEmail.value.trim().toLowerCase() : "";
   const rateRaw = elements.workerRate.value.trim();
   const rate = rateRaw === "" ? 0 : parseFloat(rateRaw);
+  const artRateRaw = elements.workerArtRate ? elements.workerArtRate.value.trim() : "";
+  const artRate = artRateRaw === "" ? 0 : parseFloat(artRateRaw);
 
   if (!name) {
     showToast("Por favor ingresa el nombre del trabajador.", "warning");
@@ -1435,9 +1451,16 @@ async function handleSaveWorker(e) {
     return;
   }
 
+  if (isNaN(artRate) || artRate < 0) {
+    showToast("La tarifa por arte debe ser un número igual o mayor a 0.", "warning");
+    return;
+  }
+
   const workerData = {
     nombre: name,
+    email: email || null,
     tarifaHora: Number(rate.toFixed(2)),
+    tarifaArte: Number(artRate.toFixed(2)),
     createdAt: db ? serverTimestamp() : new Date().toISOString()
   };
 
@@ -1451,8 +1474,11 @@ async function handleSaveWorker(e) {
       updateFinancialDashboard();
     }
 
-    const rateMsg = rate > 0 ? ` con tarifa de $${rate.toFixed(2)}/h` : " (sin tarifa inicial)";
-    showToast(`Trabajador "${name}" guardado exitosamente${rateMsg}.`, "success");
+    const ratesSummary = [];
+    if (rate > 0) ratesSummary.push(`$${rate.toFixed(2)}/h`);
+    if (artRate > 0) ratesSummary.push(`$${artRate.toFixed(2)}/arte`);
+    const rateMsg = ratesSummary.length > 0 ? ` con tarifas (${ratesSummary.join(" · ")})` : " (sin tarifas iniciales)";
+    showToast(`Trabajador "${name}" añadido exitosamente${rateMsg}.`, "success");
     elements.formWorker.reset();
   } catch (error) {
     console.error("Error al guardar trabajador:", error);
@@ -1525,9 +1551,14 @@ function updateWorkersUI() {
   elements.timerWorkerSelect.innerHTML = `<option value="">-- Selecciona un trabajador --</option>` +
     state.workers.map(w => {
       const rate = Number(w.tarifaHora || 0);
+      const artRate = Number(w.tarifaArte || 0);
+      let parts = [];
+      if (rate > 0) parts.push(`$${rate.toFixed(2)}/h`);
+      if (artRate > 0) parts.push(`$${artRate.toFixed(2)}/arte`);
+      const tag = parts.length > 0 ? parts.join(" · ") : "Sin tarifa";
       return `
-        <option value="${w.id}" data-rate="${rate}">
-          ${w.nombre} (${rate > 0 ? `$${rate.toFixed(2)}/h` : 'Sin tarifa'})
+        <option value="${w.id}" data-rate="${rate}" data-art-rate="${artRate}">
+          ${escapeHtml(w.nombre)} (${tag})
         </option>
       `;
     }).join("");
@@ -1535,7 +1566,7 @@ function updateWorkersUI() {
   elements.paymentWorkerSelect.innerHTML = `<option value="">-- Selecciona un trabajador --</option>` +
     state.workers.map(w => `
       <option value="${w.id}">
-        ${w.nombre}
+        ${escapeHtml(w.nombre)}
       </option>
     `).join("");
 
@@ -1553,32 +1584,43 @@ function updateWorkersUI() {
   } else {
     elements.workersList.innerHTML = state.workers.map(w => {
       const rate = Number(w.tarifaHora || 0);
-      const hasRate = rate > 0;
+      const artRate = Number(w.tarifaArte || 0);
+      const hasRate = rate > 0 || artRate > 0;
       return `
         <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors text-xs">
           <div class="min-w-0 pr-2">
-            <div class="font-semibold text-slate-800 dark:text-slate-200 truncate">${escapeHtml(w.nombre)}</div>
-            <div class="flex items-center gap-1.5 mt-0.5">
-              ${hasRate 
-                ? `<span class="text-[11px] text-cyan-600 dark:text-cyan-400 font-mono font-medium tabular-nums">$${rate.toFixed(2)}/h</span>` 
-                : `<span class="text-[10px] text-amber-600 dark:text-amber-400 font-mono bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 font-medium">Sin tarifa</span>`
-              }
+            <div class="font-semibold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5">
+              <span>${escapeHtml(w.nombre)}</span>
+              ${w.email ? `<span class="text-[10px] text-slate-400 font-normal">(${escapeHtml(w.email)})</span>` : ''}
+            </div>
+            <div class="flex items-center gap-1.5 mt-1 flex-wrap">
+              ${rate > 0 ? `<span class="text-[11px] text-[#2563EB] dark:text-[#60A5FA] font-mono font-medium tabular-nums bg-[#2563EB]/10 px-1.5 py-0.5 rounded border border-[#2563EB]/20">$${rate.toFixed(2)}/h</span>` : ''}
+              ${artRate > 0 ? `<span class="text-[11px] text-purple-600 dark:text-purple-400 font-mono font-medium tabular-nums bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20"><i class="fa-solid fa-palette text-[9px] mr-1"></i>$${artRate.toFixed(2)}/arte</span>` : ''}
+              ${!hasRate ? `<span class="text-[10px] text-amber-600 dark:text-amber-400 font-mono bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 font-medium">Sin tarifas</span>` : ''}
             </div>
           </div>
           <div class="flex items-center gap-1 shrink-0">
             <button 
               type="button"
-              onclick="window.openEditRateModal('${w.id}', '${escapeHtml(w.nombre)}', ${rate})"
-              title="Asignar o editar tarifa por hora" 
-              class="px-2 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 transition-all active:scale-95 text-xs flex items-center gap-1.5 font-medium">
-              <i class="fa-solid fa-pen-to-square text-[11px]"></i>
-              <span>${hasRate ? 'Editar' : 'Asignar Tarifa'}</span>
+              onclick="window.openManualEntryModal('${w.id}')"
+              title="Cargar horas o diseños de arte para ${escapeHtml(w.nombre)}" 
+              class="px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 transition-all active:scale-95 text-xs flex items-center gap-1 font-medium cursor-pointer">
+              <i class="fa-solid fa-plus text-[10px]"></i>
+              <span class="hidden sm:inline">Cargar</span>
+            </button>
+            <button 
+              type="button"
+              onclick="window.openEditRateModal('${w.id}', '${escapeHtml(w.nombre)}', ${rate}, ${artRate})"
+              title="Asignar o editar tarifas" 
+              class="px-2 py-1 rounded-lg bg-[#2563EB]/10 hover:bg-[#2563EB]/20 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/20 transition-all active:scale-95 text-xs flex items-center gap-1 font-medium cursor-pointer">
+              <i class="fa-solid fa-pen-to-square text-[10px]"></i>
+              <span>Tarifas</span>
             </button>
             <button 
               type="button"
               onclick="window.requestDelete('trabajadores', '${w.id}', '${escapeHtml(w.nombre)}')"
               title="Eliminar trabajador" 
-              class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors active:scale-95 text-xs">
+              class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors active:scale-95 text-xs cursor-pointer">
               <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
           </div>
@@ -1874,6 +1916,23 @@ function updateTasksUI() {
       `;
     }
 
+    const isArtTask = t.tipoCobro === "artes" || (t.cantidadArtes && Number(t.cantidadArtes) > 0);
+    const artBadge = isArtTask 
+      ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/25 shrink-0"><i class="fa-solid fa-palette text-[9px]"></i><span>${t.cantidadArtes} ${t.cantidadArtes === 1 ? 'arte' : 'artes'}</span></span>` 
+      : "";
+
+    let timeColContent = "";
+    if (isArtTask) {
+      timeColContent = `
+        <span class="inline-flex items-center gap-1 font-semibold text-purple-600 dark:text-purple-400 font-mono tabular-nums"><i class="fa-solid fa-palette text-[10px]"></i> ${t.cantidadArtes} ${t.cantidadArtes === 1 ? 'arte' : 'artes'}</span>
+        <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block font-mono">($${Number(t.tarifaArte || 0).toFixed(2)} c/u)</span>
+      `;
+    } else {
+      timeColContent = `
+        ${formattedTime} <span class="text-[10px] text-[#64748B]/80 dark:text-[#94A3B8]/80">(${Number(t.horas || 0).toFixed(2)}h)</span>
+      `;
+    }
+
     return `
       <tr class="hover:bg-[#F1F5F9] dark:hover:bg-[#162032] transition-colors ${taskStatus === 'rechazada' ? 'opacity-75 bg-rose-50/30 dark:bg-rose-950/20' : taskStatus === 'pendiente' ? 'bg-amber-50/30 dark:bg-amber-950/20' : ''}">
         <td class="py-2.5 px-3 text-[#64748B] dark:text-[#94A3B8] font-mono whitespace-nowrap tabular-nums">${t.fecha || '-'}</td>
@@ -1883,6 +1942,7 @@ function updateTasksUI() {
             <span class="font-medium text-[#0F172A] dark:text-[#F8FAFC]" title="${escapeHtml(t.descripcion || '')}">${escapeHtml(t.descripcion || 'Sin descripción')}</span>
             ${clientBadge}
             ${catBadge}
+            ${artBadge}
             ${isManualTag}
             ${statusBadge}
           </div>
@@ -1890,7 +1950,7 @@ function updateTasksUI() {
           ${pendingNotice}
         </td>
         <td class="py-2.5 px-2 text-right font-mono text-[#64748B] dark:text-[#94A3B8] whitespace-nowrap tabular-nums">
-          ${formattedTime} <span class="text-[10px] text-[#64748B]/80 dark:text-[#94A3B8]/80">(${Number(t.horas || 0).toFixed(2)}h)</span>
+          ${timeColContent}
         </td>
         <td class="py-2.5 px-2 text-right font-mono font-medium text-[#0F172A] dark:text-[#F8FAFC] whitespace-nowrap tabular-nums">
           ${costDisplay}
@@ -1998,6 +2058,7 @@ function updateFinancialDashboard() {
     );
     const workerSeconds = workerTasks.reduce((acc, t) => acc + (Number(t.segundos) || 0), 0);
     const workerHours = workerTasks.reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
+    const workerArtes = workerTasks.filter(t => t.cantidadArtes > 0).reduce((acc, t) => acc + (Number(t.cantidadArtes) || 0), 0);
     const workerEarned = workerTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
 
     const workerPayments = allFilteredPayments.filter(p => p.trabajadorId === worker.id || (p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase()));
@@ -2037,16 +2098,27 @@ function updateFinancialDashboard() {
       `;
     }
 
+    const hourlyRate = Number(worker.tarifaHora || 0);
+    const artRate = Number(worker.tarifaArte || 0);
+
     const editRateBtn = !isWorker ? `
       <button 
         type="button" 
-        onclick="window.openEditRateModal('${worker.id}', '${escapeHtml(worker.nombre)}', ${Number(worker.tarifaHora || 0)})"
-        class="hover:text-[#2563EB] dark:hover:text-[#60A5FA] hover:underline transition-colors cursor-pointer inline-flex items-center gap-1 group"
-        title="Clic para cambiar tarifa por hora">
-        <span>$${Number(worker.tarifaHora || 0).toFixed(2)}/h</span>
-        <i class="fa-solid fa-pencil text-[9px] opacity-0 group-hover:opacity-100 transition-opacity text-[#3B82F6]"></i>
+        onclick="window.openEditRateModal('${worker.id}', '${escapeHtml(worker.nombre)}', ${hourlyRate}, ${artRate})"
+        class="hover:text-[#2563EB] dark:hover:text-[#60A5FA] hover:underline transition-colors cursor-pointer inline-flex flex-col items-end group"
+        title="Clic para modificar tarifas">
+        <span class="inline-flex items-center gap-1 font-medium">
+          <span>$${hourlyRate.toFixed(2)}/h</span>
+          <i class="fa-solid fa-pencil text-[9px] opacity-0 group-hover:opacity-100 transition-opacity text-[#3B82F6]"></i>
+        </span>
+        ${artRate > 0 ? `<span class="text-[10px] text-purple-600 dark:text-purple-400 font-mono font-medium">$${artRate.toFixed(2)}/arte</span>` : ''}
       </button>
-    ` : `<span>$${Number(worker.tarifaHora || 0).toFixed(2)}/h</span>`;
+    ` : `
+      <div class="flex flex-col items-end">
+        <span>$${hourlyRate.toFixed(2)}/h</span>
+        ${artRate > 0 ? `<span class="text-[10px] text-purple-600 dark:text-purple-400 font-mono">$${artRate.toFixed(2)}/arte</span>` : ''}
+      </div>
+    `;
 
     const statementBtn = isWorker ? `
       <button 
@@ -2059,6 +2131,14 @@ function updateFinancialDashboard() {
       </button>
     ` : `
       <div class="inline-flex items-center gap-1.5">
+        <button 
+          type="button" 
+          onclick="window.openManualEntryModal('${worker.id}')" 
+          class="px-2 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          title="Cargar horas o diseños de artes a ${escapeHtml(worker.nombre)}">
+          <i class="fa-solid fa-plus text-[10px]"></i>
+          <span class="hidden xl:inline">Cargar</span>
+        </button>
         <button 
           type="button" 
           onclick="window.openStatementModal('${worker.id}', 'receipt')" 
@@ -2092,7 +2172,10 @@ function updateFinancialDashboard() {
             <div class="w-7 h-7 rounded-lg bg-[#2563EB]/10 text-[#2563EB] dark:text-[#60A5FA] flex items-center justify-center text-xs font-semibold border border-[#2563EB]/20">
               ${worker.nombre.charAt(0).toUpperCase()}
             </div>
-            <span>${escapeHtml(worker.nombre)}</span>
+            <div>
+              <span>${escapeHtml(worker.nombre)}</span>
+              ${worker.email ? `<span class="text-[10px] text-slate-400 font-normal block">${escapeHtml(worker.email)}</span>` : ''}
+            </div>
           </div>
         </td>
         <td class="py-3 px-2 text-right font-mono text-[#64748B] dark:text-[#94A3B8] tabular-nums">
@@ -2100,7 +2183,7 @@ function updateFinancialDashboard() {
         </td>
         <td class="py-3 px-2 text-right font-mono text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">
           <span class="font-medium">${workerHours.toFixed(2)}h</span>
-          <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block">${formatSecondsToTime(workerSeconds)}</span>
+          ${workerArtes > 0 ? `<span class="text-[10px] text-purple-600 dark:text-purple-400 font-semibold block">🎨 ${workerArtes} ${workerArtes === 1 ? 'arte' : 'artes'}</span>` : `<span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block">${formatSecondsToTime(workerSeconds)}</span>`}
         </td>
         <td class="py-3 px-2 text-right font-mono font-medium text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">
           $${workerEarned.toFixed(2)}
@@ -2456,21 +2539,29 @@ async function confirmDelete() {
 }
 
 /* ============================================================================
-   11.B. MODAL DE ASIGNACIÓN Y EDICIÓN DE TARIFA POR HORA
+   11.B. MODAL DE ASIGNACIÓN Y EDICIÓN DE TARIFAS (HORA Y ARTE)
    ============================================================================ */
-window.openEditRateModal = function(id, workerName, currentRate) {
+window.openEditRateModal = function(id, workerName, currentRate, currentArtRate) {
   if (state.userProfile?.rol === "worker") {
-    showToast("Solo los administradores pueden modificar las tarifas por hora.", "warning");
+    showToast("Solo los administradores pueden modificar las tarifas.", "warning");
     return;
   }
+  const worker = state.workers.find(w => w.id === id);
+  const name = workerName || (worker ? worker.nombre : "Colaborador");
+  const hourlyRate = (currentRate !== undefined && currentRate !== null) ? Number(currentRate) : (worker ? Number(worker.tarifaHora || 0) : 0);
+  const artRate = (currentArtRate !== undefined && currentArtRate !== null) ? Number(currentArtRate) : (worker ? Number(worker.tarifaArte || 0) : 0);
+
   if (elements.editRateWorkerId) elements.editRateWorkerId.value = id;
   if (elements.editRateModalWorker) {
-    elements.editRateModalWorker.innerHTML = `Configura la tarifa por hora para <strong>${escapeHtml(workerName)}</strong>.`;
+    elements.editRateModalWorker.innerHTML = `Configura las tarifas para <strong>${escapeHtml(name)}</strong>.`;
   }
   if (elements.editRateInput) {
-    elements.editRateInput.value = currentRate > 0 ? Number(currentRate).toFixed(2) : "";
-    setTimeout(() => elements.editRateInput.focus(), 50);
+    elements.editRateInput.value = hourlyRate > 0 ? hourlyRate.toFixed(2) : "";
   }
+  if (elements.editRateArtInput) {
+    elements.editRateArtInput.value = artRate > 0 ? artRate.toFixed(2) : "";
+  }
+  setTimeout(() => elements.editRateInput?.focus(), 50);
   elements.editRateModal?.classList.remove("hidden");
   elements.editRateModal?.classList.add("flex");
 };
@@ -2487,9 +2578,15 @@ async function handleConfirmEditRate(e) {
   const workerId = elements.editRateWorkerId.value;
   const rateRaw = elements.editRateInput.value.trim();
   const newRate = rateRaw === "" ? 0 : parseFloat(rateRaw);
+  const artRateRaw = elements.editRateArtInput ? elements.editRateArtInput.value.trim() : "";
+  const newArtRate = artRateRaw === "" ? 0 : parseFloat(artRateRaw);
 
   if (isNaN(newRate) || newRate < 0) {
-    showToast("Por favor ingresa un número igual o mayor a 0.", "warning");
+    showToast("La tarifa por hora debe ser un número igual o mayor a 0.", "warning");
+    return;
+  }
+  if (isNaN(newArtRate) || newArtRate < 0) {
+    showToast("La tarifa por arte debe ser un número igual o mayor a 0.", "warning");
     return;
   }
 
@@ -2497,23 +2594,30 @@ async function handleConfirmEditRate(e) {
   const workerName = worker ? worker.nombre : "Trabajador";
 
   try {
+    const updatePayload = {
+      tarifaHora: Number(newRate.toFixed(2)),
+      tarifaArte: Number(newArtRate.toFixed(2))
+    };
+
     if (db) {
-      await updateDoc(doc(db, "trabajadores", workerId), {
-        tarifaHora: Number(newRate.toFixed(2))
-      });
+      await updateDoc(doc(db, "trabajadores", workerId), updatePayload);
     } else {
       if (worker) {
-        worker.tarifaHora = Number(newRate.toFixed(2));
+        worker.tarifaHora = updatePayload.tarifaHora;
+        worker.tarifaArte = updatePayload.tarifaArte;
       }
       updateWorkersUI();
       updateFinancialDashboard();
     }
 
-    const rateMsg = newRate > 0 ? `$${newRate.toFixed(2)}/h` : "$0.00/h (sin tarifa)";
-    showToast(`Tarifa de "${workerName}" actualizada a ${rateMsg}.`, "success");
+    const ratesSummary = [];
+    if (newRate > 0) ratesSummary.push(`$${newRate.toFixed(2)}/h`);
+    if (newArtRate > 0) ratesSummary.push(`$${newArtRate.toFixed(2)}/arte`);
+    const rateMsg = ratesSummary.length > 0 ? ratesSummary.join(" · ") : "$0.00 (sin tarifas)";
+    showToast(`Tarifas de "${workerName}" actualizadas a ${rateMsg}.`, "success");
     closeEditRateModal();
   } catch (error) {
-    console.error("Error al actualizar tarifa:", error);
+    console.error("Error al actualizar tarifas:", error);
     showToast("Error al actualizar: " + error.message, "error");
   }
 }
@@ -2557,26 +2661,47 @@ async function handleForgotPassword() {
   }
 }
 
-function openManualEntryModal() {
+function openManualEntryModal(preselectedWorkerId = null) {
   if (!elements.manualEntryModal) return;
 
-  elements.manualWorkerSelect.innerHTML = `<option value="">-- Selecciona trabajador --</option>` +
+  elements.manualWorkerSelect.innerHTML = `<option value="">-- Selecciona colaborador --</option>` +
     state.workers.map(w => {
-      const rate = Number(w.tarifaHora || 0);
-      return `<option value="${w.id}" data-rate="${rate}">${w.nombre} (${rate > 0 ? `$${rate.toFixed(2)}/h` : 'Sin tarifa'})</option>`;
+      const hRate = Number(w.tarifaHora || 0);
+      const aRate = Number(w.tarifaArte || 0);
+      const parts = [];
+      if (hRate > 0) parts.push(`$${hRate.toFixed(2)}/h`);
+      if (aRate > 0) parts.push(`$${aRate.toFixed(2)}/arte`);
+      const label = parts.length > 0 ? parts.join(" · ") : "Sin tarifas fijadas";
+      return `<option value="${w.id}" data-rate="${hRate}" data-art-rate="${aRate}">${escapeHtml(w.nombre)} (${label})</option>`;
     }).join("");
 
-  if (state.userProfile?.rol === "worker" && state.userProfile?.trabajadorId) {
-    elements.manualWorkerSelect.value = state.userProfile.trabajadorId;
+  const isWorkerRole = state.userProfile?.rol === "worker";
+  const userWorkerId = state.userProfile?.trabajadorId;
+
+  if (isWorkerRole && userWorkerId) {
+    elements.manualWorkerSelect.value = userWorkerId;
     elements.manualWorkerSelect.disabled = true;
   } else {
     elements.manualWorkerSelect.disabled = false;
+    if (typeof preselectedWorkerId === "string" && preselectedWorkerId) {
+      elements.manualWorkerSelect.value = preselectedWorkerId;
+    }
   }
 
-  if (elements.manualDate) {
+  // Prellenar tarifa por arte si el colaborador seleccionado ya tiene una
+  const currentWorker = state.workers.find(w => w.id === elements.manualWorkerSelect.value);
+  if (currentWorker && elements.manualArtRateInput) {
+    const artR = Number(currentWorker.tarifaArte || 0);
+    elements.manualArtRateInput.value = artR > 0 ? artR.toFixed(2) : "";
+  }
+
+  if (elements.manualDate && !elements.manualDate.value) {
     elements.manualDate.value = new Date().toISOString().split("T")[0];
   }
+
+  setManualEntryMode(elements.manualEntryMode?.value || "horas");
   updateManualCost();
+
   elements.manualEntryModal.classList.remove("hidden");
   elements.manualEntryModal.classList.add("flex");
 }
@@ -2586,16 +2711,108 @@ function closeManualEntryModal() {
   elements.manualEntryModal.classList.add("hidden");
   elements.manualEntryModal.classList.remove("flex");
   elements.formManualEntry?.reset();
+  if (elements.manualWorkerSelect) elements.manualWorkerSelect.disabled = false;
+  setManualEntryMode("horas");
+}
+
+function setManualEntryMode(mode) {
+  const targetMode = mode === "artes" ? "artes" : "horas";
+  if (elements.manualEntryMode) {
+    elements.manualEntryMode.value = targetMode;
+  }
+
+  const activeBtnClasses = ["bg-primary-600", "text-white", "shadow-sm", "font-semibold"];
+  const inactiveBtnClasses = ["text-slate-600", "dark:text-slate-300", "font-medium"];
+
+  if (targetMode === "artes") {
+    if (elements.manualModeArtsBtn) {
+      elements.manualModeArtsBtn.classList.add(...activeBtnClasses);
+      elements.manualModeArtsBtn.classList.remove(...inactiveBtnClasses);
+    }
+    if (elements.manualModeHoursBtn) {
+      elements.manualModeHoursBtn.classList.remove(...activeBtnClasses);
+      elements.manualModeHoursBtn.classList.add(...inactiveBtnClasses);
+    }
+    if (elements.manualHoursContainer) elements.manualHoursContainer.classList.add("hidden");
+    if (elements.manualArtsContainer) elements.manualArtsContainer.classList.remove("hidden");
+
+    // Auto-ajustar categoría a 'diseno' si está en 'general'
+    if (elements.manualCategory && (elements.manualCategory.value === "general" || !elements.manualCategory.value)) {
+      elements.manualCategory.value = "diseno";
+    }
+
+    // Auto-llenar tarifa por arte si está vacía
+    const currentWorker = state.workers.find(w => w.id === elements.manualWorkerSelect?.value);
+    if (currentWorker && elements.manualArtRateInput && !elements.manualArtRateInput.value) {
+      const artR = Number(currentWorker.tarifaArte || 0);
+      if (artR > 0) elements.manualArtRateInput.value = artR.toFixed(2);
+    }
+  } else {
+    if (elements.manualModeHoursBtn) {
+      elements.manualModeHoursBtn.classList.add(...activeBtnClasses);
+      elements.manualModeHoursBtn.classList.remove(...inactiveBtnClasses);
+    }
+    if (elements.manualModeArtsBtn) {
+      elements.manualModeArtsBtn.classList.remove(...activeBtnClasses);
+      elements.manualModeArtsBtn.classList.add(...inactiveBtnClasses);
+    }
+    if (elements.manualHoursContainer) elements.manualHoursContainer.classList.remove("hidden");
+    if (elements.manualArtsContainer) elements.manualArtsContainer.classList.add("hidden");
+  }
+
+  updateManualCost();
 }
 
 function updateManualCost() {
   const workerId = elements.manualWorkerSelect?.value;
-  const hours = parseFloat(elements.manualHours?.value || 0);
   const worker = state.workers.find(w => w.id === workerId);
-  const rate = worker ? Number(worker.tarifaHora || 0) : 0;
-  const cost = (hours > 0 && rate > 0) ? hours * rate : 0;
-  if (elements.manualCalculatedCost) {
-    elements.manualCalculatedCost.textContent = `$${cost.toFixed(2)}`;
+  const mode = elements.manualEntryMode?.value || "horas";
+
+  if (mode === "artes") {
+    const artCount = parseInt(elements.manualArtCount?.value || 0, 10) || 0;
+    const workerArtRate = worker ? Number(worker.tarifaArte || 0) : 0;
+    const manualArtRateVal = parseFloat(elements.manualArtRateInput?.value || 0);
+    const effectiveArtRate = (!isNaN(manualArtRateVal) && manualArtRateVal > 0) ? manualArtRateVal : workerArtRate;
+    const totalCost = (artCount > 0 && effectiveArtRate > 0) ? (artCount * effectiveArtRate) : 0;
+
+    if (elements.manualCalculatedCost) {
+      elements.manualCalculatedCost.textContent = `$${totalCost.toFixed(2)}`;
+    }
+    if (elements.manualCalculationDetail) {
+      if (artCount > 0 && effectiveArtRate > 0) {
+        elements.manualCalculationDetail.textContent = `${artCount} diseño(s) × $${effectiveArtRate.toFixed(2)} c/u = $${totalCost.toFixed(2)}`;
+      } else if (effectiveArtRate > 0) {
+        elements.manualCalculationDetail.textContent = `Tarifa por arte: $${effectiveArtRate.toFixed(2)} c/u`;
+      } else {
+        elements.manualCalculationDetail.textContent = "Ingresa la cantidad de diseños y la tarifa por arte";
+      }
+    }
+  } else {
+    const hours = parseFloat(elements.manualHours?.value || 0) || 0;
+    const rate = worker ? Number(worker.tarifaHora || 0) : 0;
+    const totalCost = (hours > 0 && rate > 0) ? (hours * rate) : 0;
+
+    if (elements.manualHourlyRateHint) {
+      if (worker) {
+        elements.manualHourlyRateHint.textContent = rate > 0 
+          ? `Tarifa base de ${worker.nombre}: $${rate.toFixed(2)}/h`
+          : `⚠️ ${worker.nombre} no tiene tarifa por hora asignada.`;
+      } else {
+        elements.manualHourlyRateHint.textContent = "La tarifa por hora configurada del colaborador se aplicará automáticamente.";
+      }
+    }
+    if (elements.manualCalculatedCost) {
+      elements.manualCalculatedCost.textContent = `$${totalCost.toFixed(2)}`;
+    }
+    if (elements.manualCalculationDetail) {
+      if (hours > 0 && rate > 0) {
+        elements.manualCalculationDetail.textContent = `${hours.toFixed(2)} hrs × $${rate.toFixed(2)}/h = $${totalCost.toFixed(2)}`;
+      } else if (rate > 0) {
+        elements.manualCalculationDetail.textContent = `Tarifa por hora: $${rate.toFixed(2)}/h`;
+      } else {
+        elements.manualCalculationDetail.textContent = "El costo total se calculará multiplicando el tiempo por la tarifa.";
+      }
+    }
   }
 }
 
@@ -2603,19 +2820,15 @@ async function handleSaveManualEntry(e) {
   e.preventDefault();
   const isWorkerRole = state.userProfile?.rol === "worker";
   const userWorkerId = state.userProfile?.trabajadorId;
-  const workerId = (isWorkerRole && userWorkerId) ? userWorkerId : (elements.manualWorkerSelect.value || userWorkerId);
+  const workerId = (isWorkerRole && userWorkerId) ? userWorkerId : (elements.manualWorkerSelect?.value || userWorkerId);
   const client = elements.manualClientProject?.value.trim() || "";
   const category = elements.manualCategory?.value || "general";
-  const date = elements.manualDate.value;
-  const hours = parseFloat(elements.manualHours.value);
-  const description = elements.manualDescription.value.trim();
+  const date = elements.manualDate?.value || new Date().toISOString().split("T")[0];
+  const description = elements.manualDescription?.value.trim() || "";
+  const mode = elements.manualEntryMode?.value || "horas";
 
   if (!workerId) {
-    showToast("Selecciona el trabajador.", "warning");
-    return;
-  }
-  if (isNaN(hours) || hours <= 0) {
-    showToast("Ingresa una cantidad válida de horas.", "warning");
+    showToast("Selecciona el colaborador.", "warning");
     return;
   }
   if (!description) {
@@ -2625,29 +2838,68 @@ async function handleSaveManualEntry(e) {
 
   const worker = state.workers.find(w => w.id === workerId);
   const workerName = worker ? worker.nombre : "Colaborador";
-  const rate = worker ? Number(worker.tarifaHora || 0) : 0;
-  const cost = Number((hours * rate).toFixed(2));
-  const seconds = Math.round(hours * 3600);
-
   const initialStatus = isWorkerRole ? "pendiente" : "aprobada";
 
-  const taskData = {
-    fecha: date || new Date().toISOString().split("T")[0],
+  let taskData = {
+    fecha: date,
     trabajadorId: workerId,
     trabajadorNombre: workerName,
     userId: state.currentUser?.uid || state.userProfile?.uid || null,
     cliente: client,
     categoria: category,
     descripcion: description,
-    segundos: seconds,
-    horas: Number(hours.toFixed(2)),
-    tarifaHora: rate,
-    costoTotal: cost,
     esManual: true,
     estado: initialStatus,
     creadoPorRol: isWorkerRole ? "worker" : "admin",
     createdAt: db ? serverTimestamp() : new Date().toISOString()
   };
+
+  if (mode === "artes") {
+    const artCount = parseInt(elements.manualArtCount?.value || 0, 10);
+    if (isNaN(artCount) || artCount <= 0) {
+      showToast("Ingresa una cantidad válida de diseños/artes realizados (mínimo 1).", "warning");
+      return;
+    }
+
+    const workerArtRate = worker ? Number(worker.tarifaArte || 0) : 0;
+    const manualArtRateVal = parseFloat(elements.manualArtRateInput?.value || 0);
+    const effectiveArtRate = (!isNaN(manualArtRateVal) && manualArtRateVal > 0) ? manualArtRateVal : workerArtRate;
+
+    const manualHoursVal = parseFloat(elements.manualArtHours?.value || 0);
+    const approxHours = (!isNaN(manualHoursVal) && manualHoursVal > 0) ? manualHoursVal : Number((artCount * 0.5).toFixed(2));
+    const seconds = Math.round(approxHours * 3600);
+    const cost = Number((artCount * effectiveArtRate).toFixed(2));
+
+    taskData = {
+      ...taskData,
+      tipoCobro: "artes",
+      cantidadArtes: artCount,
+      tarifaArte: effectiveArtRate,
+      horas: approxHours,
+      segundos: seconds,
+      tarifaHora: worker ? Number(worker.tarifaHora || 0) : 0,
+      costoTotal: cost
+    };
+  } else {
+    const hours = parseFloat(elements.manualHours?.value || 0);
+    if (isNaN(hours) || hours <= 0) {
+      showToast("Ingresa una cantidad válida de horas trabajadas (ej: 2.5).", "warning");
+      return;
+    }
+
+    const rate = worker ? Number(worker.tarifaHora || 0) : 0;
+    const cost = Number((hours * rate).toFixed(2));
+    const seconds = Math.round(hours * 3600);
+
+    taskData = {
+      ...taskData,
+      tipoCobro: "horas",
+      segundos: seconds,
+      horas: Number(hours.toFixed(2)),
+      tarifaHora: rate,
+      costoTotal: cost
+    };
+  }
 
   try {
     if (db) {
@@ -2658,10 +2910,19 @@ async function handleSaveManualEntry(e) {
       updateTasksUI();
       updateFinancialDashboard();
     }
-    if (isWorkerRole) {
-      showToast(`Tarea manual de ${hours}h enviada a revisión por la administración.`, "info");
+
+    if (mode === "artes") {
+      if (isWorkerRole) {
+        showToast(`Reporte de ${taskData.cantidadArtes} diseño(s) de arte enviado a revisión por la administración.`, "info");
+      } else {
+        showToast(`Registrado: ${taskData.cantidadArtes} diseño(s) de arte para ${workerName} ($${taskData.costoTotal.toFixed(2)}).`, "success");
+      }
     } else {
-      showToast(`Tarea manual de ${hours}h guardada y aprobada para ${workerName} ($${cost.toFixed(2)}).`, "success");
+      if (isWorkerRole) {
+        showToast(`Tarea manual de ${taskData.horas}h enviada a revisión por la administración.`, "info");
+      } else {
+        showToast(`Tarea manual de ${taskData.horas}h guardada y aprobada para ${workerName} ($${taskData.costoTotal.toFixed(2)}).`, "success");
+      }
     }
     closeManualEntryModal();
   } catch (err) {
@@ -2669,6 +2930,10 @@ async function handleSaveManualEntry(e) {
     showToast("Error al guardar: " + err.message, "error");
   }
 }
+
+window.openManualEntryModal = openManualEntryModal;
+window.closeManualEntryModal = closeManualEntryModal;
+window.setManualEntryMode = setManualEntryMode;
 
 /* ============================================================================
    11.C. GESTIÓN DE APROBACIÓN Y RECHAZO DE HORAS MANUALES
@@ -2989,15 +3254,22 @@ window.openStatementModal = function(workerId, preferredType) {
     } else {
       elements.billTasksBody.innerHTML = filteredTasks.map(t => {
         const cat = getCategoryMeta(t.categoria);
+        const isArtTask = t.cantidadArtes && Number(t.cantidadArtes) > 0;
+        const artPill = isArtTask
+          ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-purple-50 text-purple-700 border border-purple-200/60 ml-1.5"><i class="fa-solid fa-palette text-purple-600"></i> ${t.cantidadArtes} artes @ $${Number(t.tarifaArte || 0).toFixed(2)}</span>`
+          : "";
+        const volText = isArtTask ? `${t.cantidadArtes} artes` : `${Number(t.horas || 0).toFixed(2)}h`;
+
         return `
           <tr class="text-xs">
             <td class="py-2.5 px-3 font-medium text-slate-600 tabular-nums whitespace-nowrap">${t.fecha || '-'}</td>
             <td class="py-2.5 px-3 font-semibold text-slate-800">${escapeHtml(t.cliente || 'General')}</td>
             <td class="py-2.5 px-3 text-slate-700">
               <span class="font-medium">${escapeHtml(t.descripcion || 'Servicio')}</span>
+              ${artPill}
               <span class="text-[10px] text-slate-500 block">${cat.label}</span>
             </td>
-            <td class="py-2.5 px-2 text-right font-medium text-slate-600 tabular-nums whitespace-nowrap">${Number(t.horas || 0).toFixed(2)}h</td>
+            <td class="py-2.5 px-2 text-right font-medium text-slate-600 tabular-nums whitespace-nowrap">${volText}</td>
             <td class="py-2.5 px-3 text-right font-bold text-slate-900 tabular-nums whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
           </tr>
         `;
@@ -3010,8 +3282,19 @@ window.openStatementModal = function(workerId, preferredType) {
   if (elements.receiptDate) elements.receiptDate.textContent = dateStr;
   if (elements.receiptPeriodTag) elements.receiptPeriodTag.textContent = periodLabel;
   if (elements.receiptWorkerName) elements.receiptWorkerName.textContent = worker.nombre;
-  if (elements.receiptWorkerRate) elements.receiptWorkerRate.textContent = `$${Number(worker.tarifaHora || 0).toFixed(2)}/h`;
-  if (elements.receiptTotalHours) elements.receiptTotalHours.textContent = `${totalHours.toFixed(2)} hrs (${formatSecondsToTime(totalSeconds)})`;
+
+  const rateParts = [];
+  if (Number(worker.tarifaHora || 0) > 0) rateParts.push(`$${Number(worker.tarifaHora).toFixed(2)}/h`);
+  if (Number(worker.tarifaArte || 0) > 0) rateParts.push(`$${Number(worker.tarifaArte).toFixed(2)}/arte`);
+  if (elements.receiptWorkerRate) elements.receiptWorkerRate.textContent = rateParts.length > 0 ? rateParts.join(" · ") : "$0.00";
+
+  const totalArtesCount = filteredTasks.reduce((acc, t) => acc + (Number(t.cantidadArtes) || 0), 0);
+  let volSummary = `${totalHours.toFixed(2)} hrs (${formatSecondsToTime(totalSeconds)})`;
+  if (totalArtesCount > 0) {
+    volSummary += ` · ${totalArtesCount} artes`;
+  }
+  if (elements.receiptTotalHours) elements.receiptTotalHours.textContent = volSummary;
+
   if (elements.receiptTotalEarned) elements.receiptTotalEarned.textContent = `$${totalEarned.toFixed(2)}`;
   if (elements.receiptTotalPaid) elements.receiptTotalPaid.textContent = `$${totalPaid.toFixed(2)}`;
   if (elements.receiptNetBalance) {
@@ -3026,8 +3309,13 @@ window.openStatementModal = function(workerId, preferredType) {
     } else {
       elements.receiptTasksBody.innerHTML = filteredTasks.map(t => {
         const cat = getCategoryMeta(t.categoria);
+        const isArtTask = t.cantidadArtes && Number(t.cantidadArtes) > 0;
         const catPill = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 text-slate-700 border border-slate-200"><i class="fa-solid ${cat.icon}"></i> ${cat.label}</span>`;
         const clientPill = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 text-slate-700 border border-slate-200"><i class="fa-solid fa-briefcase text-blue-600"></i> ${escapeHtml(t.cliente)}</span>` : "";
+        const artPill = isArtTask
+          ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-purple-50 text-purple-700 border border-purple-200/60"><i class="fa-solid fa-palette text-purple-600"></i> ${t.cantidadArtes} artes @ $${Number(t.tarifaArte || 0).toFixed(2)}</span>`
+          : "";
+        const volText = isArtTask ? `${t.cantidadArtes} artes` : `${Number(t.horas || 0).toFixed(2)}h`;
 
         return `
           <tr class="text-xs">
@@ -3037,9 +3325,10 @@ window.openStatementModal = function(workerId, preferredType) {
                 <span class="font-medium">${escapeHtml(t.descripcion || 'Tarea')}</span>
                 ${clientPill}
                 ${catPill}
+                ${artPill}
               </div>
             </td>
-            <td class="py-2.5 px-2 text-right font-medium text-slate-600 tabular-nums whitespace-nowrap">${Number(t.horas || 0).toFixed(2)}h</td>
+            <td class="py-2.5 px-2 text-right font-medium text-slate-600 tabular-nums whitespace-nowrap">${volText}</td>
             <td class="py-2.5 px-3 text-right font-bold text-slate-900 tabular-nums whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
           </tr>
         `;
@@ -3140,13 +3429,26 @@ function setupEventListeners() {
     if (e.target === elements.editRateModal) closeEditRateModal();
   });
 
-  // Modal Registro Manual de Horas
-  elements.btnOpenManualEntry?.addEventListener("click", openManualEntryModal);
+  // Modal Registro Manual de Horas & Diseños de Artes
+  elements.btnOpenManualEntry?.addEventListener("click", () => openManualEntryModal());
   elements.btnCancelManualEntry?.addEventListener("click", closeManualEntryModal);
   elements.btnCloseManualModal?.addEventListener("click", closeManualEntryModal);
   elements.formManualEntry?.addEventListener("submit", handleSaveManualEntry);
-  elements.manualWorkerSelect?.addEventListener("change", updateManualCost);
+  elements.manualModeHoursBtn?.addEventListener("click", () => setManualEntryMode("horas"));
+  elements.manualModeArtsBtn?.addEventListener("click", () => setManualEntryMode("artes"));
+  elements.manualWorkerSelect?.addEventListener("change", () => {
+    const workerId = elements.manualWorkerSelect?.value;
+    const worker = state.workers.find(w => w.id === workerId);
+    if (worker && elements.manualArtRateInput && !elements.manualArtRateInput.value) {
+      const artR = Number(worker.tarifaArte || 0);
+      if (artR > 0) elements.manualArtRateInput.value = artR.toFixed(2);
+    }
+    updateManualCost();
+  });
   elements.manualHours?.addEventListener("input", updateManualCost);
+  elements.manualArtCount?.addEventListener("input", updateManualCost);
+  elements.manualArtRateInput?.addEventListener("input", updateManualCost);
+  elements.manualArtHours?.addEventListener("input", updateManualCost);
   elements.manualEntryModal?.addEventListener("click", (e) => {
     if (e.target === elements.manualEntryModal) closeManualEntryModal();
   });
