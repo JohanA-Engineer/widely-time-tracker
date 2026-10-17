@@ -238,8 +238,11 @@ const elements = {
   kpiTotalHoras: document.getElementById("kpiTotalHoras"),
   kpiTotalHorasFormatted: document.getElementById("kpiTotalHorasFormatted"),
   kpiTotalGenerado: document.getElementById("kpiTotalGenerado"),
+  kpiTotalGeneradoCop: document.getElementById("kpiTotalGeneradoCop"),
   kpiTotalPagado: document.getElementById("kpiTotalPagado"),
+  kpiTotalPagadoCop: document.getElementById("kpiTotalPagadoCop"),
   kpiSaldoPendiente: document.getElementById("kpiSaldoPendiente"),
+  kpiSaldoPendienteCop: document.getElementById("kpiSaldoPendienteCop"),
   kpiSaldoDesc: document.getElementById("kpiSaldoDesc"),
 
   // Filtros de Período
@@ -329,6 +332,7 @@ const elements = {
   billWorkerPhone: document.getElementById("billWorkerPhone"),
   billConceptPeriod: document.getElementById("billConceptPeriod"),
   billTotalAmount: document.getElementById("billTotalAmount"),
+  billTotalAmountCop: document.getElementById("billTotalAmountCop"),
   billAmountInWords: document.getElementById("billAmountInWords"),
   billTasksBody: document.getElementById("billTasksBody"),
   billGrossEarned: document.getElementById("billGrossEarned"),
@@ -351,6 +355,7 @@ const elements = {
   receiptTotalEarned: document.getElementById("receiptTotalEarned"),
   receiptTotalPaid: document.getElementById("receiptTotalPaid"),
   receiptNetBalance: document.getElementById("receiptNetBalance"),
+  receiptNetBalanceCop: document.getElementById("receiptNetBalanceCop"),
   receiptTasksBody: document.getElementById("receiptTasksBody"),
   receiptPaymentsBody: document.getElementById("receiptPaymentsBody"),
   receiptSignWorkerName: document.getElementById("receiptSignWorkerName"),
@@ -378,8 +383,11 @@ const elements = {
   btnWorkerOpenManualEntry: document.getElementById("btnWorkerOpenManualEntry"),
   workerKpiHours: document.getElementById("workerKpiHours"),
   workerKpiEarned: document.getElementById("workerKpiEarned"),
+  workerKpiEarnedCop: document.getElementById("workerKpiEarnedCop"),
   workerKpiPaid: document.getElementById("workerKpiPaid"),
+  workerKpiPaidCop: document.getElementById("workerKpiPaidCop"),
   workerKpiBalance: document.getElementById("workerKpiBalance"),
+  workerKpiBalanceCop: document.getElementById("workerKpiBalanceCop"),
   workerTimerSlot: document.getElementById("workerTimerSlot"),
   adminTimerSlot: document.getElementById("adminTimerSlot"),
   workerTasksSlot: document.getElementById("workerTasksSlot"),
@@ -392,6 +400,19 @@ const elements = {
   btnAdminScrollToWorker: document.getElementById("btnAdminScrollToWorker"),
   tabTasksLabel: document.getElementById("tabTasksLabel"),
   tasksWorkerColHeader: document.getElementById("tasksWorkerColHeader"),
+
+  // TRM USD a COP en tiempo real
+  trmBadgeContainer: document.getElementById("trmBadgeContainer"),
+  trmRateDisplay: document.getElementById("trmRateDisplay"),
+  trmModal: document.getElementById("trmModal"),
+  trmModalLiveBadge: document.getElementById("trmModalLiveBadge"),
+  btnCloseTrmModal: document.getElementById("btnCloseTrmModal"),
+  trmModalCurrentRate: document.getElementById("trmModalCurrentRate"),
+  trmModalLastUpdate: document.getElementById("trmModalLastUpdate"),
+  trmCustomRateInput: document.getElementById("trmCustomRateInput"),
+  btnSaveCustomTrm: document.getElementById("btnSaveCustomTrm"),
+  btnResetLiveTrm: document.getElementById("btnResetLiveTrm"),
+  btnRefreshTrmNow: document.getElementById("btnRefreshTrmNow"),
 
   authTabLogin: document.getElementById("authTabLogin"),
   authTabRegister: document.getElementById("authTabRegister"),
@@ -412,6 +433,7 @@ const elements = {
 function init() {
   initClock();
   initDefaultDate();
+  initTrmSystem();
   initCachedSession();
   restoreActiveTimer();
   setupEventListeners();
@@ -2186,13 +2208,16 @@ function updateFinancialDashboard() {
           ${workerArtes > 0 ? `<span class="text-[10px] text-purple-600 dark:text-purple-400 font-semibold block">🎨 ${workerArtes} ${workerArtes === 1 ? 'arte' : 'artes'}</span>` : `<span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block">${formatSecondsToTime(workerSeconds)}</span>`}
         </td>
         <td class="py-3 px-2 text-right font-mono font-medium text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">
-          $${workerEarned.toFixed(2)}
+          <div>$${workerEarned.toFixed(2)}</div>
+          <div class="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">≈ ${formatCop(workerEarned * currentTrm)}</div>
         </td>
         <td class="py-3 px-2 text-right font-mono font-medium text-[#2563EB] tabular-nums">
-          $${workerPaid.toFixed(2)}
+          <div>$${workerPaid.toFixed(2)}</div>
+          <div class="text-[10px] text-blue-600 dark:text-blue-400 font-normal">≈ ${formatCop(workerPaid * currentTrm)}</div>
         </td>
         <td class="py-3 px-3 text-right">
           ${balanceBadge}
+          <div class="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-mono mt-0.5">≈ ${formatCop(workerBalance * currentTrm)}</div>
         </td>
         <td class="py-3 px-2 text-center whitespace-nowrap">
           ${statementBtn}
@@ -2208,19 +2233,36 @@ function updateFinancialDashboard() {
   elements.kpiTotalHoras.textContent = totalHorasGlobal.toFixed(2);
   elements.kpiTotalHorasFormatted.textContent = `${formatSecondsToTime(totalSegundosGlobal)} ${isWorker ? 'tuyas' : 'en total'}`;
   elements.kpiTotalGenerado.textContent = `$${totalGeneradoGlobal.toFixed(2)}`;
+  if (elements.kpiTotalGeneradoCop) elements.kpiTotalGeneradoCop.textContent = `≈ ${formatCop(totalGeneradoGlobal * currentTrm)}`;
+
   elements.kpiTotalPagado.textContent = `$${totalPagadoGlobal.toFixed(2)}`;
+  if (elements.kpiTotalPagadoCop) elements.kpiTotalPagadoCop.textContent = `≈ ${formatCop(totalPagadoGlobal * currentTrm)}`;
+
+  const copBalance = balance * currentTrm;
 
   if (balance > 0.005) {
     elements.kpiSaldoPendiente.className = "text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#BF6863] tabular-nums";
     elements.kpiSaldoPendiente.textContent = `$${balance.toFixed(2)}`;
+    if (elements.kpiSaldoPendienteCop) {
+      elements.kpiSaldoPendienteCop.className = "block text-xs font-mono font-medium text-[#BF6863] tabular-nums truncate mt-0.5";
+      elements.kpiSaldoPendienteCop.textContent = `≈ ${formatCop(copBalance)}`;
+    }
     elements.kpiSaldoDesc.textContent = isWorker ? "Tu saldo pendiente por cobrar" : "Deuda total por liquidar a trabajadores";
   } else if (balance === 0) {
     elements.kpiSaldoPendiente.className = "text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#2563EB] tabular-nums";
     elements.kpiSaldoPendiente.textContent = "$0.00";
+    if (elements.kpiSaldoPendienteCop) {
+      elements.kpiSaldoPendienteCop.className = "block text-xs font-mono font-medium text-[#2563EB] tabular-nums truncate mt-0.5";
+      elements.kpiSaldoPendienteCop.textContent = "≈ $0 COP";
+    }
     elements.kpiSaldoDesc.textContent = isWorker ? "Tus pagos están al día" : "Todos los pagos están al día";
   } else {
     elements.kpiSaldoPendiente.className = "text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#2563EB] dark:text-[#60A5FA] tabular-nums";
     elements.kpiSaldoPendiente.textContent = `+$${Math.abs(balance).toFixed(2)}`;
+    if (elements.kpiSaldoPendienteCop) {
+      elements.kpiSaldoPendienteCop.className = "block text-xs font-mono font-medium text-[#2563EB] dark:text-[#60A5FA] tabular-nums truncate mt-0.5";
+      elements.kpiSaldoPendienteCop.textContent = `≈ +${formatCop(Math.abs(copBalance))}`;
+    }
     elements.kpiSaldoDesc.textContent = isWorker ? "Anticipo recibido a tu favor" : "Saldo a favor de la empresa";
   }
 
@@ -2228,17 +2270,31 @@ function updateFinancialDashboard() {
   if (isWorker) {
     if (elements.workerKpiHours) elements.workerKpiHours.textContent = totalHorasGlobal.toFixed(2);
     if (elements.workerKpiEarned) elements.workerKpiEarned.textContent = `$${totalGeneradoGlobal.toFixed(2)}`;
+    if (elements.workerKpiEarnedCop) elements.workerKpiEarnedCop.textContent = `≈ ${formatCop(totalGeneradoGlobal * currentTrm)}`;
     if (elements.workerKpiPaid) elements.workerKpiPaid.textContent = `$${totalPagadoGlobal.toFixed(2)}`;
+    if (elements.workerKpiPaidCop) elements.workerKpiPaidCop.textContent = `≈ ${formatCop(totalPagadoGlobal * currentTrm)}`;
     if (elements.workerKpiBalance) {
       if (balance > 0.005) {
         elements.workerKpiBalance.textContent = `$${balance.toFixed(2)}`;
         elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-[#BF6863] tabular-nums";
+        if (elements.workerKpiBalanceCop) {
+          elements.workerKpiBalanceCop.className = "block text-xs font-mono font-medium text-[#BF6863] tabular-nums truncate mt-0.5";
+          elements.workerKpiBalanceCop.textContent = `≈ ${formatCop(copBalance)}`;
+        }
       } else if (balance === 0) {
         elements.workerKpiBalance.textContent = "$0.00";
         elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-[#2563EB] tabular-nums";
+        if (elements.workerKpiBalanceCop) {
+          elements.workerKpiBalanceCop.className = "block text-xs font-mono font-medium text-[#2563EB] tabular-nums truncate mt-0.5";
+          elements.workerKpiBalanceCop.textContent = "≈ $0 COP";
+        }
       } else {
         elements.workerKpiBalance.textContent = `+$${Math.abs(balance).toFixed(2)}`;
         elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-[#2563EB] dark:text-[#60A5FA] tabular-nums";
+        if (elements.workerKpiBalanceCop) {
+          elements.workerKpiBalanceCop.className = "block text-xs font-mono font-medium text-[#2563EB] dark:text-[#60A5FA] tabular-nums truncate mt-0.5";
+          elements.workerKpiBalanceCop.textContent = `≈ +${formatCop(Math.abs(copBalance))}`;
+        }
       }
     }
 
@@ -2273,10 +2329,209 @@ function resetKPIs() {
   elements.kpiTotalHoras.textContent = "0.00";
   elements.kpiTotalHorasFormatted.textContent = "0h 0m 0s en total";
   elements.kpiTotalGenerado.textContent = "$0.00";
+  if (elements.kpiTotalGeneradoCop) elements.kpiTotalGeneradoCop.textContent = "≈ $0 COP";
   elements.kpiTotalPagado.textContent = "$0.00";
+  if (elements.kpiTotalPagadoCop) elements.kpiTotalPagadoCop.textContent = "≈ $0 COP";
   elements.kpiSaldoPendiente.textContent = "$0.00";
+  if (elements.kpiSaldoPendienteCop) elements.kpiSaldoPendienteCop.textContent = "≈ $0 COP";
   elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono text-rose-600 dark:text-rose-400 tabular-nums";
+
+  if (elements.workerKpiEarnedCop) elements.workerKpiEarnedCop.textContent = "≈ $0 COP";
+  if (elements.workerKpiPaidCop) elements.workerKpiPaidCop.textContent = "≈ $0 COP";
+  if (elements.workerKpiBalanceCop) elements.workerKpiBalanceCop.textContent = "≈ $0 COP";
   renderProductivityCharts();
+}
+
+/* ============================================================================
+   10.C. TASA DE CAMBIO EN TIEMPO REAL (USD A COP / TRM MERCADO FINANCIERO)
+   ============================================================================ */
+const trmState = {
+  rate: 4200,
+  lastUpdated: null,
+  isLive: true,
+  isCustom: false
+};
+
+function getActiveTrmRate() {
+  return trmState.rate || 4200;
+}
+
+function formatCop(amount) {
+  if (isNaN(amount) || amount === null || amount === undefined) amount = 0;
+  const rounded = Math.round(amount);
+  return "$" + rounded.toLocaleString("es-CO") + " COP";
+}
+
+function updateTrmUI() {
+  const currentRate = getActiveTrmRate();
+  const formattedRate = "$" + Math.round(currentRate).toLocaleString("es-CO");
+
+  if (elements.trmRateDisplay) {
+    elements.trmRateDisplay.textContent = formattedRate;
+  }
+  if (elements.trmModalCurrentRate) {
+    elements.trmModalCurrentRate.textContent = `1 USD = ${formattedRate} COP`;
+  }
+  if (elements.trmModalLiveBadge) {
+    if (trmState.isCustom) {
+      elements.trmModalLiveBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span><span>Tasa fija personalizada</span>`;
+      elements.trmModalLiveBadge.className = "text-[10px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1";
+    } else {
+      elements.trmModalLiveBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span><span>En vivo vía mercado financiero</span>`;
+      elements.trmModalLiveBadge.className = "text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1";
+    }
+  }
+  if (elements.trmModalLastUpdate) {
+    if (trmState.isCustom) {
+      elements.trmModalLastUpdate.textContent = "Modo: Tasa fija establecida manualmente";
+    } else if (trmState.lastUpdated) {
+      const timeStr = trmState.lastUpdated.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+      elements.trmModalLastUpdate.textContent = `Última sincronización: ${timeStr} (se actualiza automáticamente)`;
+    } else {
+      elements.trmModalLastUpdate.textContent = "Sincronizando tasa en tiempo real...";
+    }
+  }
+}
+
+async function fetchLiveTrm(silent = true) {
+  try {
+    const customStored = localStorage.getItem("widely_custom_trm");
+    if (customStored) {
+      const parsedCustom = parseFloat(customStored);
+      if (!isNaN(parsedCustom) && parsedCustom > 1000) {
+        trmState.rate = parsedCustom;
+        trmState.isCustom = true;
+        updateTrmUI();
+        return;
+      }
+    }
+  } catch (e) {}
+
+  let fetchedRate = null;
+  try {
+    const res = await fetch("https://open.er-api.com/v6/latest/USD");
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.rates?.COP && !isNaN(data.rates.COP) && data.rates.COP > 1000) {
+        fetchedRate = Number(data.rates.COP);
+      }
+    }
+  } catch (e) {
+    console.warn("[TRM] Fallback 1 error:", e);
+  }
+
+  if (!fetchedRate) {
+    try {
+      const res = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.rates?.COP && !isNaN(data.rates.COP) && data.rates.COP > 1000) {
+          fetchedRate = Number(data.rates.COP);
+        }
+      }
+    } catch (e) {
+      console.warn("[TRM] Fallback 2 error:", e);
+    }
+  }
+
+  if (fetchedRate) {
+    trmState.rate = fetchedRate;
+    trmState.lastUpdated = new Date();
+    trmState.isLive = true;
+    trmState.isCustom = false;
+    try {
+      localStorage.setItem("widely_trm_rate", JSON.stringify({
+        rate: fetchedRate,
+        timestamp: Date.now()
+      }));
+    } catch (e) {}
+    updateTrmUI();
+    updateFinancialDashboard();
+    if (!silent) {
+      showToast(`TRM en vivo sincronizada: 1 USD = $${Math.round(fetchedRate).toLocaleString('es-CO')} COP`, "success");
+    }
+    return;
+  }
+
+  try {
+    const cached = localStorage.getItem("widely_trm_rate");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (parsed.rate) {
+        trmState.rate = Number(parsed.rate);
+        trmState.lastUpdated = new Date(parsed.timestamp);
+        updateTrmUI();
+        updateFinancialDashboard();
+        return;
+      }
+    }
+  } catch (e) {}
+
+  updateTrmUI();
+}
+
+function openTrmModal() {
+  if (!elements.trmModal) return;
+  updateTrmUI();
+  if (elements.trmCustomRateInput) {
+    elements.trmCustomRateInput.value = trmState.isCustom ? trmState.rate : "";
+  }
+  elements.trmModal.classList.remove("hidden");
+  elements.trmModal.classList.add("flex");
+}
+
+function closeTrmModal() {
+  if (!elements.trmModal) return;
+  elements.trmModal.classList.add("hidden");
+  elements.trmModal.classList.remove("flex");
+}
+
+function handleSaveCustomTrm() {
+  const val = parseFloat(elements.trmCustomRateInput?.value || 0);
+  if (isNaN(val) || val < 1000) {
+    showToast("Ingresa una tasa de cambio válida (ej. 4200).", "warning");
+    return;
+  }
+  trmState.rate = val;
+  trmState.isCustom = true;
+  localStorage.setItem("widely_custom_trm", String(val));
+  updateTrmUI();
+  updateFinancialDashboard();
+  showToast(`Tasa fija establecida: 1 USD = $${Math.round(val).toLocaleString('es-CO')} COP`, "info");
+  closeTrmModal();
+}
+
+async function handleResetLiveTrm() {
+  localStorage.removeItem("widely_custom_trm");
+  trmState.isCustom = false;
+  await fetchLiveTrm(false);
+  closeTrmModal();
+}
+
+function initTrmSystem() {
+  try {
+    const customStored = localStorage.getItem("widely_custom_trm");
+    if (customStored) {
+      const parsedCustom = parseFloat(customStored);
+      if (!isNaN(parsedCustom) && parsedCustom > 1000) {
+        trmState.rate = parsedCustom;
+        trmState.isCustom = true;
+      }
+    } else {
+      const cached = localStorage.getItem("widely_trm_rate");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.rate) {
+          trmState.rate = Number(parsed.rate);
+          trmState.lastUpdated = new Date(parsed.timestamp);
+        }
+      }
+    }
+  } catch (e) {}
+
+  updateTrmUI();
+  fetchLiveTrm(true);
+  setInterval(() => fetchLiveTrm(true), 10 * 60 * 1000);
 }
 
 /* ============================================================================
@@ -3232,6 +3487,8 @@ window.openStatementModal = function(workerId, preferredType) {
 
   const payableAmount = netBalance > 0 ? netBalance : totalEarned;
   if (elements.billTotalAmount) elements.billTotalAmount.textContent = `$${payableAmount.toFixed(2)}`;
+  const currentTrm = getActiveTrmRate();
+  if (elements.billTotalAmountCop) elements.billTotalAmountCop.textContent = `≈ ${formatCop(payableAmount * currentTrm)}`;
   if (elements.billAmountInWords) elements.billAmountInWords.textContent = numeroALetras(payableAmount);
 
   if (elements.billGrossEarned) elements.billGrossEarned.textContent = `$${totalEarned.toFixed(2)}`;
@@ -3300,6 +3557,9 @@ window.openStatementModal = function(workerId, preferredType) {
   if (elements.receiptNetBalance) {
     elements.receiptNetBalance.textContent = (netBalance >= 0 ? "+$" : "-$") + Math.abs(netBalance).toFixed(2);
     elements.receiptNetBalance.className = netBalance > 0 ? "text-base sm:text-lg font-bold tabular-nums text-rose-600" : "text-base sm:text-lg font-bold tabular-nums text-emerald-600";
+  }
+  if (elements.receiptNetBalanceCop) {
+    elements.receiptNetBalanceCop.textContent = `≈ ${formatCop(netBalance * currentTrm)}`;
   }
   if (elements.receiptSignWorkerName) elements.receiptSignWorkerName.textContent = worker.nombre;
 
@@ -3420,6 +3680,16 @@ function setupEventListeners() {
   elements.btnConfirmDelete.addEventListener("click", confirmDelete);
   elements.deleteModal.addEventListener("click", (e) => {
     if (e.target === elements.deleteModal) closeDeleteModal();
+  });
+
+  // Modal TRM Tasa de Cambio (USD a COP)
+  elements.trmBadgeContainer?.addEventListener("click", openTrmModal);
+  elements.btnCloseTrmModal?.addEventListener("click", closeTrmModal);
+  elements.btnSaveCustomTrm?.addEventListener("click", handleSaveCustomTrm);
+  elements.btnResetLiveTrm?.addEventListener("click", handleResetLiveTrm);
+  elements.btnRefreshTrmNow?.addEventListener("click", () => fetchLiveTrm(false));
+  elements.trmModal?.addEventListener("click", (e) => {
+    if (e.target === elements.trmModal) closeTrmModal();
   });
 
   // Modal Asignar / Editar Tarifa

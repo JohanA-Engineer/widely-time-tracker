@@ -359,6 +359,14 @@
 
           <span id="periodFilterLabel" class="text-[11px] font-mono text-[#64748B] dark:text-[#94A3B8] hidden md:inline"></span>
 
+          <!-- Indicador TRM USD a COP en tiempo real -->
+          <button type="button" id="trmBadgeContainer" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100/80 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-mono font-medium shadow-none cursor-pointer transition-all active:scale-95" title="Tasa de cambio en tiempo real USD a COP. Clic para refrescar o personalizar">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+            <span class="font-semibold text-[11px] hidden md:inline">1 USD ≈</span>
+            <span id="trmRateDisplay" class="font-bold tabular-nums">$4.200</span>
+            <span class="text-[10px] text-emerald-600 dark:text-emerald-400">COP</span>
+          </button>
+
           <!-- Reloj Digital -->
           <div id="currentTime" class="hidden sm:block text-xs font-mono text-[#64748B] dark:text-[#94A3B8] tabular-nums font-medium px-2.5 py-1 rounded-lg bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
             --:--:--
@@ -433,18 +441,21 @@
             <span class="text-[10px] font-mono font-medium text-[#64748B] uppercase block">Total Generado</span>
             <div class="mt-1">
               <span id="workerKpiEarned" class="text-2xl font-bold font-mono text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">$0.00</span>
+              <span id="workerKpiEarnedCop" class="block text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 tabular-nums truncate mt-0.5">≈ $0 COP</span>
             </div>
           </div>
           <div class="p-4 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
             <span class="text-[10px] font-mono font-medium text-[#2563EB] uppercase block">Anticipos Recibidos</span>
             <div class="mt-1">
               <span id="workerKpiPaid" class="text-2xl font-bold font-mono text-[#2563EB] tabular-nums">$0.00</span>
+              <span id="workerKpiPaidCop" class="block text-xs font-mono font-medium text-blue-600 dark:text-blue-400 tabular-nums truncate mt-0.5">≈ $0 COP</span>
             </div>
           </div>
           <div class="p-4 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
             <span class="text-[10px] font-mono font-medium text-[#BF6863] uppercase block">Saldo Neto por Cobrar</span>
             <div class="mt-1">
               <span id="workerKpiBalance" class="text-2xl font-bold font-mono text-[#BF6863] tabular-nums">$0.00</span>
+              <span id="workerKpiBalanceCop" class="block text-xs font-mono font-medium text-[#BF6863] tabular-nums truncate mt-0.5">≈ $0 COP</span>
             </div>
           </div>
         </div>
@@ -738,6 +749,7 @@
           </div>
           <div class="mt-2 sm:mt-3">
             <span id="kpiTotalGenerado" class="text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#0F172A] dark:text-[#F8FAFC] tabular-nums truncate">$0.00</span>
+            <span id="kpiTotalGeneradoCop" class="block text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 tabular-nums truncate mt-0.5">≈ $0 COP</span>
           </div>
           <div class="mt-1 text-[10px] sm:text-xs text-[#64748B] truncate">Total honorarios causados</div>
         </div>
@@ -752,6 +764,7 @@
           </div>
           <div class="mt-2 sm:mt-3">
             <span id="kpiTotalPagado" class="text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#2563EB] tabular-nums truncate">$0.00</span>
+            <span id="kpiTotalPagadoCop" class="block text-xs font-mono font-medium text-blue-600 dark:text-blue-400 tabular-nums truncate mt-0.5">≈ $0 COP</span>
           </div>
           <div class="mt-1 text-[10px] sm:text-xs text-[#64748B] truncate">Pagos aplicados</div>
         </div>
@@ -766,6 +779,7 @@
           </div>
           <div class="mt-2 sm:mt-3">
             <span id="kpiSaldoPendiente" class="text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#BF6863] tabular-nums truncate">$0.00</span>
+            <span id="kpiSaldoPendienteCop" class="block text-xs font-mono font-medium text-[#BF6863] tabular-nums truncate mt-0.5">≈ $0 COP</span>
           </div>
           <div class="mt-1 text-[10px] sm:text-xs text-[#64748B] truncate" id="kpiSaldoDesc">Pasivo pendiente por liquidar</div>
         </div>
@@ -995,6 +1009,64 @@
 
   <!-- Contenedor Flotante de Toasts Adaptativo -->
   <div id="toastContainer" class="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 left-4 sm:left-auto z-50 flex flex-col gap-2 pointer-events-none items-center sm:items-end"></div>
+
+  <!-- Modal de Configuración y Tasa de Cambio (TRM en Vivo USD a COP) -->
+  <div id="trmModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-opacity duration-200">
+    <div class="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] rounded-2xl max-w-sm w-full p-5 sm:p-6 space-y-4 shadow-xl mx-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-[#E2E8F0] dark:border-[#1E293B]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/20">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+          </div>
+          <div>
+            <h3 class="text-xs sm:text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC]">Tasa de Cambio (USD ⇄ COP)</h3>
+            <span id="trmModalLiveBadge" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>En vivo vía mercado financiero</span>
+            </span>
+          </div>
+        </div>
+        <button type="button" id="btnCloseTrmModal" class="text-[#64748B] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] text-sm cursor-pointer p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] text-center space-y-1">
+        <span class="text-[10px] uppercase font-mono text-[#64748B] dark:text-[#94A3B8] block">Tasa Activa Actual</span>
+        <div class="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums" id="trmModalCurrentRate">
+          1 USD = $0.00 COP
+        </div>
+        <span id="trmModalLastUpdate" class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block font-mono">Actualizado hace un momento</span>
+      </div>
+
+      <div class="space-y-2">
+        <label for="trmCustomRateInput" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
+          Fijar Tasa Personalizada (Opcional)
+        </label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B] font-mono text-xs">COP $</span>
+          <input type="number" id="trmCustomRateInput" step="any" min="1000" placeholder="Ej. 4200" class="form-input w-full pl-14 font-mono text-xs">
+        </div>
+        <p class="text-[10px] text-[#64748B] dark:text-[#94A3B8]">
+          Útil si tu empresa acuerda una TRM fija mensual con los colaboradores.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-2 pt-1">
+        <div class="flex gap-2">
+          <button type="button" id="btnSaveCustomTrm" class="flex-1 py-2 text-xs font-medium rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white transition-colors cursor-pointer">
+            Guardar Fija
+          </button>
+          <button type="button" id="btnResetLiveTrm" class="flex-1 py-2 text-xs font-medium rounded-lg border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors cursor-pointer">
+            <i class="fa-solid fa-rotate mr-1"></i> Usar En Vivo
+          </button>
+        </div>
+        <button type="button" id="btnRefreshTrmNow" class="w-full py-1.5 text-xs font-medium text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC] transition-colors cursor-pointer">
+          <i class="fa-solid fa-arrows-rotate mr-1"></i> Forzar actualización de tasa en vivo
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal de Confirmación de Borrado -->
   <div id="deleteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-opacity duration-200">
@@ -1289,7 +1361,10 @@
         <div class="p-3.5 sm:p-4 rounded-xl bg-blue-50/70 border border-blue-200 text-xs">
           <div class="flex flex-col sm:flex-row items-baseline justify-between gap-1">
             <span class="text-xs uppercase font-bold tracking-wider text-[#1E40AF]">VALOR TOTAL A COBRAR:</span>
-            <span id="billTotalAmount" class="text-2xl font-bold text-[#1E40AF] tabular-nums">$0.00</span>
+            <div class="text-right">
+              <span id="billTotalAmount" class="text-2xl font-bold text-[#1E40AF] tabular-nums">$0.00</span>
+              <span id="billTotalAmountCop" class="block text-xs font-mono font-medium text-emerald-700">≈ $0 COP</span>
+            </div>
           </div>
           <div class="mt-1.5 pt-1.5 border-t border-blue-200/80 text-xs text-slate-700">
             <strong class="text-slate-900 font-semibold">SON:</strong> <span id="billAmountInWords" class="italic font-medium text-slate-800">Cero dólares con 00/100</span>
@@ -1430,6 +1505,7 @@
           <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
             <span class="text-[10px] uppercase font-semibold tracking-wider text-slate-500 block">Saldo Pendiente</span>
             <span id="receiptNetBalance" class="text-base sm:text-lg font-bold text-[#BF6863] tabular-nums mt-0.5 block">$0.00</span>
+            <span id="receiptNetBalanceCop" class="text-[10px] font-mono font-medium text-slate-500 block">≈ $0 COP</span>
           </div>
         </div>
 
