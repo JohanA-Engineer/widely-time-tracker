@@ -2040,6 +2040,7 @@ function updatePaymentsUI() {
    ============================================================================ */
 function updateFinancialDashboard() {
   const isWorker = state.userProfile?.rol === "worker";
+  const currentTrm = getActiveTrmRate();
 
   let displayedWorkers = state.workers;
   if (isWorker) {
@@ -2217,7 +2218,7 @@ function updateFinancialDashboard() {
         </td>
         <td class="py-3 px-3 text-right">
           ${balanceBadge}
-          <div class="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-mono mt-0.5">≈ ${formatCop(workerBalance * currentTrm)}</div>
+          <div class="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-mono mt-0.5">≈ ${formatCop(pendingBalance * currentTrm)}</div>
         </td>
         <td class="py-3 px-2 text-center whitespace-nowrap">
           ${statementBtn}
