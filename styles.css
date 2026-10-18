@@ -530,6 +530,7 @@ html.has-user-session #authTopNavbar {
   #editRateModal,
   #manualEntryModal,
   #rejectTaskModal,
+  #upworkBudgetModal,
   #clientsDatalist,
   .print\:hidden {
     display: none !important;

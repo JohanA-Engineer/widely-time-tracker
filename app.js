@@ -156,6 +156,7 @@ let categoryChartInstance = null;
 let workersUnsubscribe = null;
 let tasksUnsubscribe = null;
 let paymentsUnsubscribe = null;
+let upworkConfigUnsubscribe = null;
 
 /* ============================================================================
    2. ESTADO GLOBAL DE LA APLICACIÓN
@@ -169,6 +170,7 @@ let state = {
   filterPeriod: "all", // Filtro de liquidación: 'all', 'this_month', 'current_fortnight', 'last_month'
   taskStatusFilter: "all", // Filtro de estado: 'all', 'pendiente', 'aprobada', 'rechazada'
   rejectTargetId: null,
+  upworkWeeklyRevenue: 0, // Recaudación semanal Upwork en USD
   timer: {
     isRunning: false,
     startTime: 0,
@@ -414,6 +416,31 @@ const elements = {
   btnResetLiveTrm: document.getElementById("btnResetLiveTrm"),
   btnRefreshTrmNow: document.getElementById("btnRefreshTrmNow"),
 
+  // Presupuesto Upwork
+  adminUpworkBudgetSection: document.getElementById("adminUpworkBudgetSection"),
+  upworkRevenueDisplay: document.getElementById("upworkRevenueDisplay"),
+  upworkRevenueCopDisplay: document.getElementById("upworkRevenueCopDisplay"),
+  upworkRevenueSubtitle: document.getElementById("upworkRevenueSubtitle"),
+  upworkPayrollCostDisplay: document.getElementById("upworkPayrollCostDisplay"),
+  upworkPayrollCostCopDisplay: document.getElementById("upworkPayrollCostCopDisplay"),
+  upworkPayrollDetails: document.getElementById("upworkPayrollDetails"),
+  upworkAvailableBudgetDisplay: document.getElementById("upworkAvailableBudgetDisplay"),
+  upworkAvailableBudgetCopDisplay: document.getElementById("upworkAvailableBudgetCopDisplay"),
+  upworkBudgetStatusBadge: document.getElementById("upworkBudgetStatusBadge"),
+  upworkBudgetSubtitle: document.getElementById("upworkBudgetSubtitle"),
+  upworkBudgetPercentLabel: document.getElementById("upworkBudgetPercentLabel"),
+  upworkBudgetHealthDesc: document.getElementById("upworkBudgetHealthDesc"),
+  upworkBudgetProgressBar: document.getElementById("upworkBudgetProgressBar"),
+  btnEditUpworkBudget: document.getElementById("btnEditUpworkBudget"),
+  btnOpenUpworkBudgetModal: document.getElementById("btnOpenUpworkBudgetModal"),
+  upworkBudgetModal: document.getElementById("upworkBudgetModal"),
+  btnCloseUpworkModal: document.getElementById("btnCloseUpworkModal"),
+  btnCancelUpworkBudget: document.getElementById("btnCancelUpworkBudget"),
+  formUpworkBudget: document.getElementById("formUpworkBudget"),
+  upworkRevenueInput: document.getElementById("upworkRevenueInput"),
+  upworkInputCopPreview: document.getElementById("upworkInputCopPreview"),
+  sidebarUpworkLink: document.getElementById("sidebarUpworkLink"),
+
   authTabLogin: document.getElementById("authTabLogin"),
   authTabRegister: document.getElementById("authTabRegister"),
   formAuthLogin: document.getElementById("formAuthLogin"),
@@ -434,6 +461,7 @@ function init() {
   initClock();
   initDefaultDate();
   initTrmSystem();
+  loadUpworkBudget();
   initCachedSession();
   restoreActiveTimer();
   setupEventListeners();
@@ -1106,6 +1134,7 @@ function setupFirestoreListeners(profile) {
     if (workersUnsubscribe) { workersUnsubscribe(); workersUnsubscribe = null; }
     if (tasksUnsubscribe) { tasksUnsubscribe(); tasksUnsubscribe = null; }
     if (paymentsUnsubscribe) { paymentsUnsubscribe(); paymentsUnsubscribe = null; }
+    if (upworkConfigUnsubscribe) { upworkConfigUnsubscribe(); upworkConfigUnsubscribe = null; }
     state.tasks = [];
     state.payments = [];
     updateTasksUI();
@@ -1200,6 +1229,23 @@ function setupFirestoreListeners(profile) {
       updateFinancialDashboard();
     }, (error) => {
       console.warn("[Firestore] Aviso en sincronización de pagos:", error.message);
+    });
+  }
+
+  // 4. PRESUPUESTO UPWORK: Sincronización en tiempo real para Administradora
+  if (isAdmin && !upworkConfigUnsubscribe) {
+    const upworkDocRef = doc(db, "configuracion", "upwork");
+    upworkConfigUnsubscribe = onSnapshot(upworkDocRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        if (typeof data.weeklyRevenue === "number") {
+          state.upworkWeeklyRevenue = data.weeklyRevenue;
+          localStorage.setItem("widely_upwork_weekly_revenue", String(data.weeklyRevenue));
+          updateUpworkBudgetDashboard();
+        }
+      }
+    }, (error) => {
+      console.warn("[Firestore] Aviso en sincronización de Upwork:", error.message);
     });
   }
 }
@@ -2307,6 +2353,7 @@ function updateFinancialDashboard() {
 
   renderProductivityCharts();
   updateClientsDatalist();
+  updateUpworkBudgetDashboard(currentTrm);
 }
 
 window.quickPayWorker = function(workerId, workerName, pendingBalance) {
@@ -2769,6 +2816,257 @@ function renderProductivityCharts() {
     });
   }
 }
+
+/* ============================================================================
+   10.D. GESTIÓN Y CÁLCULO DE PRESUPUESTO SEMANAL UPWORK
+   ============================================================================ */
+function getCurrentWeekRange() {
+  const now = new Date();
+  const day = now.getDay(); // 0 es Domingo, 1 es Lunes, ..., 6 es Sábado
+  // El ciclo de facturación y corte semanal de Upwork va de Lunes a Domingo
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diffToMonday);
+  monday.setHours(0, 0, 0, 0);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+
+  return { start: monday, end: sunday };
+}
+
+function getWeekLabel(range) {
+  const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  const startDay = range.start.getDate();
+  const endDay = range.end.getDate();
+  const startMonth = months[range.start.getMonth()];
+  const endMonth = months[range.end.getMonth()];
+
+  if (startMonth === endMonth) {
+    return `Semana: ${startDay} al ${endDay} ${startMonth.toUpperCase()}`;
+  }
+  return `Semana: ${startDay} ${startMonth.toUpperCase()} al ${endDay} ${endMonth.toUpperCase()}`;
+}
+
+function getWeeklyApprovedTasks() {
+  const { start, end } = getCurrentWeekRange();
+  const startTime = start.getTime();
+  const endTime = end.getTime();
+
+  return state.tasks.filter(t => {
+    if (!t.fecha || !isTaskApproved(t)) return false;
+    const taskDate = new Date(t.fecha + "T00:00:00");
+    const tTime = taskDate.getTime();
+    return tTime >= startTime && tTime <= endTime;
+  });
+}
+
+function updateUpworkBudgetDashboard(currentTrm) {
+  if (!elements.adminUpworkBudgetSection) return;
+  const trm = currentTrm || getActiveTrmRate();
+  const range = getCurrentWeekRange();
+
+  // Actualizar badge del ciclo semanal de Upwork (ej. "Semana: 13 al 19 OCT")
+  const weekBadge = document.getElementById("upworkWeekCycleBadge");
+  if (weekBadge) {
+    weekBadge.textContent = getWeekLabel(range);
+  }
+
+  // Tareas aprobadas de la semana en curso
+  const weeklyTasks = getWeeklyApprovedTasks();
+  const weeklyHours = weeklyTasks.reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
+  const weeklyArts = weeklyTasks.filter(t => t.cantidadArtes > 0).reduce((acc, t) => acc + (Number(t.cantidadArtes) || 0), 0);
+  const weeklyPayrollCost = weeklyTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
+
+  const revenue = Number(state.upworkWeeklyRevenue) || 0;
+  const availableBudget = revenue - weeklyPayrollCost;
+  const payrollCop = weeklyPayrollCost * trm;
+  const revenueCop = revenue * trm;
+  const availableCop = availableBudget * trm;
+
+  // 1. Recaudación Semanal Upwork
+  if (elements.upworkRevenueDisplay) {
+    elements.upworkRevenueDisplay.textContent = `$${revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+  if (elements.upworkRevenueCopDisplay) {
+    elements.upworkRevenueCopDisplay.textContent = `≈ ${formatCop(revenueCop)}`;
+  }
+  if (elements.upworkRevenueSubtitle) {
+    elements.upworkRevenueSubtitle.textContent = revenue > 0 
+      ? "Facturación semanal configurada" 
+      : "Clic en 'Ajustar Recaudo' para ingresar";
+  }
+
+  // 2. Costo Nómina Semanal
+  if (elements.upworkPayrollCostDisplay) {
+    elements.upworkPayrollCostDisplay.textContent = `$${weeklyPayrollCost.toFixed(2)}`;
+  }
+  if (elements.upworkPayrollCostCopDisplay) {
+    elements.upworkPayrollCostCopDisplay.textContent = `≈ ${formatCop(payrollCop)}`;
+  }
+  if (elements.upworkPayrollDetails) {
+    const parts = [];
+    if (weeklyHours > 0 || weeklyArts === 0) parts.push(`${weeklyHours.toFixed(2)}h`);
+    if (weeklyArts > 0) parts.push(`${weeklyArts} ${weeklyArts === 1 ? 'arte' : 'artes'}`);
+    elements.upworkPayrollDetails.textContent = `${parts.join(" • ")} de tareas aprobadas esta semana`;
+  }
+
+  // 3. Presupuesto Disponible (Margen Libre)
+  if (elements.upworkAvailableBudgetDisplay) {
+    if (availableBudget >= 0) {
+      elements.upworkAvailableBudgetDisplay.textContent = `$${availableBudget.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      elements.upworkAvailableBudgetDisplay.className = "text-xl sm:text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums";
+    } else {
+      elements.upworkAvailableBudgetDisplay.textContent = `-$${Math.abs(availableBudget).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      elements.upworkAvailableBudgetDisplay.className = "text-xl sm:text-2xl font-bold font-mono text-[#BF6863] tabular-nums";
+    }
+  }
+
+  if (elements.upworkAvailableBudgetCopDisplay) {
+    if (availableBudget >= 0) {
+      elements.upworkAvailableBudgetCopDisplay.textContent = `≈ +${formatCop(availableCop)}`;
+      elements.upworkAvailableBudgetCopDisplay.className = "block text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5";
+    } else {
+      elements.upworkAvailableBudgetCopDisplay.textContent = `≈ -${formatCop(Math.abs(availableCop))}`;
+      elements.upworkAvailableBudgetCopDisplay.className = "block text-xs font-mono font-medium text-[#BF6863] tabular-nums mt-0.5";
+    }
+  }
+
+  // Porcentaje y estado de presupuesto
+  let usagePercent = 0;
+  if (revenue > 0) {
+    usagePercent = Math.min(Math.round((weeklyPayrollCost / revenue) * 100), 999);
+  }
+
+  if (elements.upworkBudgetPercentLabel) {
+    elements.upworkBudgetPercentLabel.textContent = revenue > 0 ? `${usagePercent}% consumido` : "Sin meta definida";
+  }
+
+  if (elements.upworkBudgetProgressBar) {
+    const barWidth = revenue > 0 ? Math.min(usagePercent, 100) : 0;
+    elements.upworkBudgetProgressBar.style.width = `${barWidth}%`;
+    if (usagePercent > 100) {
+      elements.upworkBudgetProgressBar.className = "h-2 rounded-full bg-[#BF6863] transition-all duration-500";
+    } else if (usagePercent > 80) {
+      elements.upworkBudgetProgressBar.className = "h-2 rounded-full bg-amber-500 transition-all duration-500";
+    } else {
+      elements.upworkBudgetProgressBar.className = "h-2 rounded-full bg-emerald-500 transition-all duration-500";
+    }
+  }
+
+  if (elements.upworkBudgetStatusBadge) {
+    if (revenue === 0) {
+      elements.upworkBudgetStatusBadge.textContent = "Pendiente Meta";
+      elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-slate-500/10 text-slate-600 dark:text-slate-400";
+    } else if (availableBudget < 0) {
+      elements.upworkBudgetStatusBadge.textContent = "Excedido";
+      elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-[#BF6863]/15 text-[#BF6863]";
+    } else {
+      const freePercent = 100 - usagePercent;
+      elements.upworkBudgetStatusBadge.textContent = `${freePercent}% Libre`;
+      elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+    }
+  }
+
+  if (elements.upworkBudgetHealthDesc) {
+    if (revenue === 0) {
+      elements.upworkBudgetHealthDesc.textContent = "Ingresa tu recaudación semanal estimada";
+      elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-slate-500 dark:text-slate-400";
+    } else if (usagePercent > 100) {
+      elements.upworkBudgetHealthDesc.textContent = "⚠️ Nómina semanal supera el recaudo de Upwork";
+      elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-[#BF6863]";
+    } else if (usagePercent > 80) {
+      elements.upworkBudgetHealthDesc.textContent = "Alerta: nómina cercana al límite (80%+)";
+      elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-amber-600 dark:text-amber-400";
+    } else {
+      elements.upworkBudgetHealthDesc.textContent = "Presupuesto saludable y disponible";
+      elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-emerald-600 dark:text-emerald-400";
+    }
+  }
+
+  if (elements.upworkBudgetSubtitle) {
+    if (revenue === 0) {
+      elements.upworkBudgetSubtitle.textContent = "Define tu recaudo semanal para monitorear margen";
+    } else if (availableBudget >= 0) {
+      elements.upworkBudgetSubtitle.textContent = "Margen de ganancia neto disponible";
+    } else {
+      elements.upworkBudgetSubtitle.textContent = "Déficit proyectado para esta semana";
+    }
+  }
+}
+
+function openUpworkBudgetModal() {
+  if (!elements.upworkBudgetModal) return;
+  if (elements.upworkRevenueInput) {
+    elements.upworkRevenueInput.value = state.upworkWeeklyRevenue > 0 ? state.upworkWeeklyRevenue : "";
+    updateUpworkInputPreview();
+  }
+  elements.upworkBudgetModal.classList.remove("hidden");
+  elements.upworkBudgetModal.classList.add("flex");
+  setTimeout(() => elements.upworkRevenueInput?.focus(), 50);
+}
+
+function closeUpworkBudgetModal() {
+  if (!elements.upworkBudgetModal) return;
+  elements.upworkBudgetModal.classList.add("hidden");
+  elements.upworkBudgetModal.classList.remove("flex");
+}
+
+function updateUpworkInputPreview() {
+  if (!elements.upworkInputCopPreview || !elements.upworkRevenueInput) return;
+  const val = parseFloat(elements.upworkRevenueInput.value) || 0;
+  const trm = getActiveTrmRate();
+  elements.upworkInputCopPreview.textContent = `≈ ${formatCop(val * trm)}`;
+}
+
+async function saveUpworkBudget(amount) {
+  state.upworkWeeklyRevenue = amount;
+  localStorage.setItem("widely_upwork_weekly_revenue", String(amount));
+  updateUpworkBudgetDashboard();
+
+  if (db) {
+    try {
+      await setDoc(doc(db, "configuracion", "upwork"), {
+        weeklyRevenue: amount,
+        updatedAt: serverTimestamp(),
+        updatedBy: state.currentUser?.email || "admin"
+      }, { merge: true });
+      showToast(`Presupuesto Upwork actualizado a $${amount.toFixed(2)} USD`, "success");
+      return;
+    } catch (err) {
+      console.warn("[Upwork Budget] Guardado localmente, error en Firestore:", err);
+    }
+  }
+  showToast(`Guardado en este navegador ($${amount.toFixed(2)} USD)`, "info");
+}
+
+async function loadUpworkBudget() {
+  const cached = localStorage.getItem("widely_upwork_weekly_revenue");
+  if (cached !== null && !isNaN(Number(cached))) {
+    state.upworkWeeklyRevenue = Number(cached);
+    updateUpworkBudgetDashboard();
+  }
+
+  if (db) {
+    try {
+      const cfgDoc = await getDoc(doc(db, "configuracion", "upwork"));
+      if (cfgDoc.exists()) {
+        const data = cfgDoc.data();
+        if (typeof data.weeklyRevenue === "number") {
+          state.upworkWeeklyRevenue = data.weeklyRevenue;
+          localStorage.setItem("widely_upwork_weekly_revenue", String(data.weeklyRevenue));
+          updateUpworkBudgetDashboard();
+        }
+      }
+    } catch (err) {
+      console.warn("[Upwork Budget] Usando caché local:", err);
+    }
+  }
+}
+
+window.openUpworkBudgetModal = openUpworkBudgetModal;
 
 /* ============================================================================
    11. GESTIÓN DE ELIMINACIONES CON MODAL
@@ -3903,6 +4201,35 @@ function setupEventListeners() {
   elements.formAuthRegister?.addEventListener("submit", handleRegister);
   elements.btnGoogleAuth?.addEventListener("click", handleGoogleAuth);
 
+  // Control Presupuestal Upwork
+  elements.btnEditUpworkBudget?.addEventListener("click", openUpworkBudgetModal);
+  elements.btnOpenUpworkBudgetModal?.addEventListener("click", openUpworkBudgetModal);
+  elements.btnCloseUpworkModal?.addEventListener("click", closeUpworkBudgetModal);
+  elements.btnCancelUpworkBudget?.addEventListener("click", closeUpworkBudgetModal);
+  elements.upworkBudgetModal?.addEventListener("click", (e) => {
+    if (e.target === elements.upworkBudgetModal) closeUpworkBudgetModal();
+  });
+  elements.upworkRevenueInput?.addEventListener("input", updateUpworkInputPreview);
+  document.querySelectorAll(".btn-upwork-preset").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const amount = parseFloat(btn.dataset.amount);
+      if (!isNaN(amount) && elements.upworkRevenueInput) {
+        elements.upworkRevenueInput.value = amount;
+        updateUpworkInputPreview();
+      }
+    });
+  });
+  elements.formUpworkBudget?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const amount = parseFloat(elements.upworkRevenueInput?.value);
+    if (isNaN(amount) || amount < 0) {
+      showToast("Ingresa un monto válido en dólares", "warning");
+      return;
+    }
+    saveUpworkBudget(amount);
+    closeUpworkBudgetModal();
+  });
+
   // Inicializar Navegación Lateral (Modelo 1 - Sidebar SaaS Pro)
   setupSidebarNavigation();
 }
@@ -3958,6 +4285,8 @@ function setupSidebarNavigation() {
         targetId = isWorker ? "workerDashboardSection" : "adminReportsSection";
       } else if (navKey === "team") {
         targetId = "formWorker";
+      } else if (navKey === "upwork") {
+        targetId = "adminUpworkBudgetSection";
       } else if (navKey === "payments") {
         targetId = "adminPaymentCard";
       }

@@ -91,5 +91,14 @@ service cloud.firestore {
       // Ningún colaborador puede crear o alterar comprobantes de pago bajo ninguna circunstancia
       allow create, update, delete: if isMasterAdmin();
     }
+
+    // 5. Colección de Configuración Administrativa (/configuracion/{docId})
+    match /configuracion/{docId} {
+      // Los usuarios autenticados pueden leer configuraciones públicas
+      allow read: if isAuthenticated();
+      
+      // ÚNICAMENTE la Administradora Maestra (Lina) puede modificar configuraciones como el presupuesto Upwork
+      allow write: if isMasterAdmin();
+    }
   }
 }
