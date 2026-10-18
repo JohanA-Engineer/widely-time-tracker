@@ -289,6 +289,10 @@
               <i class="fa-solid fa-users text-sm w-5 text-center"></i>
               <span>Equipo & Tarifas</span>
             </a>
+            <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="clients" id="sidebarClientsLink">
+              <i class="fa-solid fa-briefcase text-sm w-5 text-center text-amber-500"></i>
+              <span>Clientes & Margen</span>
+            </a>
             <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="upwork" id="sidebarUpworkLink">
               <i class="fa-brands fa-upwork text-sm w-5 text-center text-[#14A800]"></i>
               <span>Presupuesto Upwork</span>
@@ -465,6 +469,33 @@
         </div>
       </div>
 
+      <!-- Meta Semanal de Rendimiento del Colaborador -->
+      <div id="workerGoalCard" class="p-4 rounded-xl bg-gradient-to-r from-blue-500/[0.04] to-indigo-500/[0.03] border border-blue-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-blue-600/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-base shrink-0 border border-blue-600/20">
+            <i class="fa-solid fa-bullseye"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-[#0F172A] dark:text-[#F8FAFC]">Meta Semanal de Trabajo</span>
+              <span id="workerGoalStatusBadge" class="text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">En progreso</span>
+            </div>
+            <div class="text-[11px] text-[#64748B] dark:text-[#94A3B8] mt-0.5" id="workerGoalText">
+              Llevas 0.00h de 20.00h objetivo esta semana
+            </div>
+          </div>
+        </div>
+        <div class="w-full sm:w-64 flex flex-col items-end gap-1.5">
+          <div class="w-full bg-[#E2E8F0] dark:bg-[#1E293B] rounded-full h-2 overflow-hidden">
+            <div id="workerGoalProgressBar" class="h-2 rounded-full bg-blue-600 transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <div class="flex items-center justify-between w-full text-[10px] text-[#64748B] dark:text-[#94A3B8]">
+            <span id="workerGoalPercent" class="font-mono">0% cumplido</span>
+            <button type="button" id="btnEditWorkerGoal" class="hover:underline text-blue-600 dark:text-blue-400 font-medium cursor-pointer">Ajustar meta</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Slot para el Cronómetro en Vivo -->
       <div id="workerTimerSlot" class="w-full">
         <!-- Tracker de Tareas (Cronómetro en Vivo) -->
@@ -475,9 +506,16 @@
                 <span class="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></span>
                 <h2 class="text-xs sm:text-sm font-semibold tracking-tight text-[#0F172A] dark:text-[#F8FAFC] uppercase">Tracker de Tareas en Vivo</h2>
               </div>
-              <span id="timerStatusBadge" class="text-[11px] sm:text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-[#F1F5F9] dark:bg-[#162032] text-[#64748B] dark:text-[#94A3B8] border border-[#E2E8F0] dark:border-[#1E293B]">
-                Detenido
-              </span>
+              <div class="flex items-center gap-2">
+                <!-- Selector Modo: Cronómetro Libre vs Pomodoro -->
+                <div class="inline-flex p-0.5 rounded-lg bg-[#E2E8F0] dark:bg-[#1E293B] text-[10px] font-semibold">
+                  <button type="button" id="btnModeStandard" class="px-2 py-0.5 rounded-md bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] shadow-xs transition-all cursor-pointer">Libre</button>
+                  <button type="button" id="btnModePomodoro" class="px-2 py-0.5 rounded-md text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white transition-all cursor-pointer flex items-center gap-1">🍅 Pomodoro</button>
+                </div>
+                <span id="timerStatusBadge" class="text-[11px] sm:text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-[#F1F5F9] dark:bg-[#162032] text-[#64748B] dark:text-[#94A3B8] border border-[#E2E8F0] dark:border-[#1E293B]">
+                  Detenido
+                </span>
+              </div>
             </div>
 
             <div class="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
@@ -543,6 +581,12 @@
                   </button>
                 </div>
 
+                <!-- Banner de Fase Pomodoro -->
+                <div id="pomodoroBanner" class="hidden mb-2 items-center justify-center gap-2 py-1 px-3 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[11px] font-medium border border-rose-500/20 max-w-fit mx-auto">
+                  <span class="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                  <span id="pomodoroPhaseLabel">🍅 Enfoque (25:00)</span>
+                </div>
+
                 <div class="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-[#64748B] dark:text-[#94A3B8] mb-1">Tiempo Transcurrido</div>
                 
                 <div id="timerDisplay" class="font-mono text-4xl xs:text-5xl sm:text-6xl 3xl:text-7xl font-bold tracking-wider text-[#0F172A] dark:text-[#F8FAFC] tabular-nums py-1 sm:py-2 select-none">
@@ -603,6 +647,11 @@
             </div>
 
             <div class="flex items-center gap-2">
+              <button type="button" id="btnExportTasksCsv" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-white hover:bg-[#F1F5F9] dark:bg-[#111827] dark:hover:bg-[#162032] text-[#0F172A] dark:text-[#F8FAFC] text-xs font-medium transition-all active:scale-95 shadow-none cursor-pointer" title="Exportar actividades a Excel (CSV)">
+                <i class="fa-solid fa-file-excel text-emerald-600 text-xs"></i>
+                <span class="hidden sm:inline">Exportar Excel</span>
+                <span class="sm:hidden">Excel</span>
+              </button>
               <button type="button" id="btnOpenManualEntry" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-[#162032] dark:hover:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] text-xs font-medium transition-all active:scale-95 shadow-none cursor-pointer">
                 <i class="fa-solid fa-clock-rotate-left text-xs"></i>
                 <span class="hidden sm:inline">+ Registrar Horas / Artes</span>
@@ -667,6 +716,13 @@
 
           <!-- Pestaña 2: Historial de Pagos -->
           <div id="paymentsView" class="mt-3 sm:mt-4 hidden">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#E2E8F0] dark:border-[#1E293B]">
+              <span class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Comprobantes de anticipos y liquidaciones registrados</span>
+              <button type="button" id="btnExportPaymentsCsv" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-white hover:bg-[#F1F5F9] dark:bg-[#111827] dark:hover:bg-[#162032] text-[#0F172A] dark:text-[#F8FAFC] text-[11px] font-medium transition-all active:scale-95 shadow-none cursor-pointer" title="Exportar pagos a Excel / CSV">
+                <i class="fa-solid fa-file-excel text-emerald-600 text-xs"></i>
+                <span>Exportar Pagos Excel</span>
+              </button>
+            </div>
             <div class="overflow-x-auto max-h-96 overflow-y-auto -mx-2 sm:mx-0 px-2 sm:px-0">
               <table class="w-full text-left text-xs min-w-[560px]">
                 <thead class="text-xs font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider bg-[#F1F5F9] dark:bg-[#162032] border-b border-[#E2E8F0] dark:border-[#1E293B] sticky top-0">
@@ -893,9 +949,16 @@
               <p class="text-[11px] sm:text-xs text-[#64748B] dark:text-[#94A3B8]">Genera recibos de pago oficiales, audita cuentas de cobro y gestiona tarifas</p>
             </div>
           </div>
-          <div class="text-[11px] sm:text-xs text-[#64748B] dark:text-[#94A3B8] flex items-center gap-1.5 font-mono">
-            <span class="w-2 h-2 rounded-full bg-[#2563EB]"></span>
-            <span>Liquidaciones en vivo</span>
+          <div class="flex items-center gap-2">
+            <button type="button" id="btnExportFinancialCsv" class="px-2.5 py-1 text-xs font-medium rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-white hover:bg-[#F1F5F9] dark:bg-[#111827] dark:hover:bg-[#162032] text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-none" title="Exportar consolidado de nómina a Excel">
+              <i class="fa-solid fa-file-excel text-emerald-600 text-xs"></i>
+              <span class="hidden sm:inline">Exportar Nómina</span>
+              <span class="sm:hidden">Excel</span>
+            </button>
+            <div class="text-[11px] sm:text-xs text-[#64748B] dark:text-[#94A3B8] flex items-center gap-1.5 font-mono">
+              <span class="w-2 h-2 rounded-full bg-[#2563EB]"></span>
+              <span>Liquidaciones en vivo</span>
+            </div>
           </div>
         </div>
 
@@ -918,6 +981,60 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- 3.B. Gestión de Clientes & Rentabilidad de Proyectos -->
+      <section id="adminClientsSection" class="section-anchor content-card">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-4 border-b border-[#E2E8F0] dark:border-[#1E293B] gap-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm shrink-0 border border-amber-500/20">
+              <i class="fa-solid fa-briefcase"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-xs sm:text-sm font-semibold tracking-tight text-[#0F172A] dark:text-[#F8FAFC] uppercase">Clientes & Rentabilidad de Proyectos</h2>
+                <span class="text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">Margen de Venta</span>
+              </div>
+              <p class="text-[11px] sm:text-xs text-[#64748B] dark:text-[#94A3B8]">Supervisa paquetes de horas contratados, facturación estimada y margen neto por cliente</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button type="button" id="btnSyncClientsFromTasks" class="px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-[#162032] dark:hover:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] text-xs font-medium transition-all active:scale-95 cursor-pointer flex items-center gap-1.5" title="Importar automáticamente nombres de clientes desde tareas registradas">
+              <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
+              <span class="hidden sm:inline">Detectar Clientes</span>
+            </button>
+            <button type="button" id="btnOpenClientModal" class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-plus text-xs"></i>
+              <span>+ Nuevo Cliente</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4" id="clientsListContainer">
+          <div id="clientsTableWrapper" class="overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
+            <table class="w-full text-left text-xs min-w-[650px]">
+              <thead class="text-xs font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider bg-[#F1F5F9] dark:bg-[#162032] border-b border-[#E2E8F0] dark:border-[#1E293B]">
+                <tr>
+                  <th class="py-2.5 px-3">Cliente / Cuenta</th>
+                  <th class="py-2.5 px-2 text-right">Tarifa Cobro</th>
+                  <th class="py-2.5 px-3">Horas / Paquete Mes</th>
+                  <th class="py-2.5 px-2 text-right">Facturación</th>
+                  <th class="py-2.5 px-2 text-right">Costo Nómina</th>
+                  <th class="py-2.5 px-3 text-right">Margen Agencia</th>
+                  <th class="py-2.5 px-2 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="clientsTableBody" class="divide-y divide-[#E2E8F0] dark:divide-[#1E293B]">
+                <tr>
+                  <td colspan="7" class="py-8 text-center text-[#64748B] dark:text-[#94A3B8] text-xs">
+                    No tienes clientes registrados aún. Haz clic en <strong>+ Nuevo Cliente</strong> o <strong>Detectar Clientes</strong>.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -982,6 +1099,14 @@
                   <span class="text-[11px] text-[#64748B] dark:text-[#94A3B8] font-normal">Opcional para vincular</span>
                 </label>
                 <input type="email" id="workerEmail" placeholder="colaborador@widely.com" class="form-input w-full">
+              </div>
+
+              <div>
+                <label for="workerPhone" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5 flex items-center justify-between">
+                  <span>Teléfono / WhatsApp</span>
+                  <span class="text-[11px] text-[#64748B] dark:text-[#94A3B8] font-normal">Para envío de recibos</span>
+                </label>
+                <input type="tel" id="workerPhone" placeholder="Ej. 3001234567 o +573001234567" class="form-input w-full">
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1209,6 +1334,48 @@
           </div>
         </div>
 
+        <!-- Comisión de Upwork y Costo de Retiro -->
+        <div class="grid grid-cols-2 gap-3 pt-1">
+          <div>
+            <label for="upworkFeePercentInput" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
+              Comisión Upwork (%)
+            </label>
+            <div class="relative">
+              <input type="number" id="upworkFeePercentInput" step="0.1" min="0" max="50" value="10" placeholder="10.0" class="form-input w-full pr-7 font-mono text-xs">
+              <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono">%</span>
+            </div>
+          </div>
+          <div>
+            <label for="upworkPayoutCostInput" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
+              Costo Retiro (USD)
+            </label>
+            <div class="relative">
+              <span class="input-currency-prefix text-xs">$</span>
+              <input type="number" id="upworkPayoutCostInput" step="0.01" min="0" value="0.99" placeholder="0.99" class="form-input w-full pl-7 font-mono text-xs">
+            </div>
+          </div>
+        </div>
+
+        <!-- Desglose en vivo de deducciones de plataforma -->
+        <div class="p-3 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] space-y-1.5 text-xs font-mono">
+          <div class="flex items-center justify-between text-[#64748B] dark:text-[#94A3B8]">
+            <span>Recaudo Bruto:</span>
+            <span id="upworkBreakdownGross">$0.00 USD</span>
+          </div>
+          <div class="flex items-center justify-between text-[#BF6863]">
+            <span>Comisión Upwork:</span>
+            <span id="upworkBreakdownFee">-$0.00 USD</span>
+          </div>
+          <div class="flex items-center justify-between text-[#BF6863]">
+            <span>Costo Retiro:</span>
+            <span id="upworkBreakdownPayout">-$0.99 USD</span>
+          </div>
+          <div class="pt-1.5 border-t border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-between font-bold text-emerald-600 dark:text-emerald-400">
+            <span>Ingreso Neto Real:</span>
+            <span id="upworkBreakdownNet">$0.00 USD</span>
+          </div>
+        </div>
+
         <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">
           <i class="fa-solid fa-circle-info mr-1"></i>
           Este valor se guardará en tu cuenta y se actualizará automáticamente contra la nómina que genere el equipo cada semana para mostrarte el presupuesto y margen restante.
@@ -1221,6 +1388,65 @@
           <button type="submit" id="btnSaveUpworkBudget" class="w-1/2 py-2 text-xs font-medium rounded-lg bg-[#14A800] hover:bg-[#118d00] text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm font-semibold">
             <i class="fa-solid fa-check text-xs"></i>
             <span>Guardar Presupuesto</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para Crear / Editar Cliente y Proyecto -->
+  <div id="clientModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-opacity duration-200">
+    <div class="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] rounded-2xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-xl mx-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-[#E2E8F0] dark:border-[#1E293B]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg border border-amber-500/20">
+            <i class="fa-solid fa-briefcase"></i>
+          </div>
+          <div>
+            <h3 id="clientModalTitle" class="text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC]">Cliente / Proyecto</h3>
+            <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Configura tarifas de cobro y bolsas de horas</p>
+          </div>
+        </div>
+        <button type="button" id="btnCloseClientModal" class="text-[#64748B] hover:text-[#0F172A] dark:hover:text-white text-sm cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="formClient" class="space-y-3.5">
+        <input type="hidden" id="clientIdInput" value="">
+        <div>
+          <label for="clientNameInput" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">Nombre del Cliente / Cuenta</label>
+          <input type="text" id="clientNameInput" required placeholder="Ej. StartupX, Nike, Proyecto Alpha..." class="form-input w-full text-xs">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="clientRateInput" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">Tarifa Cobrada ($/h)</label>
+            <div class="relative">
+              <span class="input-currency-prefix text-xs">$</span>
+              <input type="number" id="clientRateInput" step="any" min="0" placeholder="Ej. 35.00" class="form-input w-full pl-7 font-mono text-xs">
+            </div>
+            <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block mt-1">Precio hora facturado</span>
+          </div>
+          <div>
+            <label for="clientHourBudgetInput" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">Paquete Horas (Mes)</label>
+            <input type="number" id="clientHourBudgetInput" step="any" min="0" placeholder="Ej. 20 (0 = libre)" class="form-input w-full font-mono text-xs">
+            <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block mt-1">Límite mensual pactado</span>
+          </div>
+        </div>
+
+        <div>
+          <label for="clientNotesInput" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">Notas del Proyecto (Opcional)</label>
+          <textarea id="clientNotesInput" rows="2" placeholder="Detalles de facturación, condiciones del contrato o especificaciones..." class="form-input w-full text-xs"></textarea>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" id="btnCancelClientModal" class="w-1/2 py-2 text-xs font-medium rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-[#F1F5F9] dark:bg-[#162032] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B] transition-colors cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSaveClient" class="w-1/2 py-2 text-xs font-medium rounded-lg bg-amber-600 hover:bg-amber-700 text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm font-semibold">
+            <i class="fa-solid fa-check text-xs"></i>
+            <span>Guardar Cliente</span>
           </button>
         </div>
       </form>
@@ -1459,6 +1685,10 @@
         </div>
 
         <div class="flex items-center gap-2">
+          <button type="button" id="btnShareWhatsAppStatement" class="py-1.5 px-3 text-xs font-medium rounded-lg flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white transition-all active:scale-95 cursor-pointer shadow-sm" title="Compartir comprobante formal por WhatsApp">
+            <i class="fa-brands fa-whatsapp text-sm"></i>
+            <span>Compartir WhatsApp</span>
+          </button>
           <button type="button" id="btnCloseStatement" class="py-1.5 px-3 text-xs font-medium rounded-lg border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
             Cerrar
           </button>

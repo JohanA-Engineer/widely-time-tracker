@@ -157,6 +157,7 @@ let workersUnsubscribe = null;
 let tasksUnsubscribe = null;
 let paymentsUnsubscribe = null;
 let upworkConfigUnsubscribe = null;
+let clientsUnsubscribe = null;
 
 /* ============================================================================
    2. ESTADO GLOBAL DE LA APLICACIÓN
@@ -165,12 +166,24 @@ let state = {
   workers: [],      // Colección 'trabajadores'
   tasks: [],        // Colección 'tareas'
   payments: [],     // Colección 'pagos'
+  clients: [],      // Colección 'clientes'
   currentUser: null, // Firebase Auth user
   userProfile: null, // Perfil activo { uid, nombre, email, rol, trabajadorId }
   filterPeriod: "all", // Filtro de liquidación: 'all', 'this_month', 'current_fortnight', 'last_month'
   taskStatusFilter: "all", // Filtro de estado: 'all', 'pendiente', 'aprobada', 'rechazada'
   rejectTargetId: null,
   upworkWeeklyRevenue: 0, // Recaudación semanal Upwork en USD
+  upworkFeePercent: 10,   // Comisión Upwork % (default 10%)
+  upworkPayoutCost: 0.99, // Costo Retiro USD (default $0.99)
+  workerWeeklyGoal: 20,   // Meta semanal en horas
+  pomodoro: {
+    enabled: false,
+    phase: "focus", // 'focus' o 'break'
+    focusMinutes: 25,
+    breakMinutes: 5,
+    remainingSeconds: 25 * 60,
+    intervalId: null
+  },
   timer: {
     isRunning: false,
     startTime: 0,
@@ -440,6 +453,53 @@ const elements = {
   upworkRevenueInput: document.getElementById("upworkRevenueInput"),
   upworkInputCopPreview: document.getElementById("upworkInputCopPreview"),
   sidebarUpworkLink: document.getElementById("sidebarUpworkLink"),
+
+  // Clientes & Margen
+  adminClientsSection: document.getElementById("adminClientsSection"),
+  sidebarClientsLink: document.getElementById("sidebarClientsLink"),
+  btnSyncClientsFromTasks: document.getElementById("btnSyncClientsFromTasks"),
+  btnOpenClientModal: document.getElementById("btnOpenClientModal"),
+  clientsTableBody: document.getElementById("clientsTableBody"),
+  clientModal: document.getElementById("clientModal"),
+  clientModalTitle: document.getElementById("clientModalTitle"),
+  btnCloseClientModal: document.getElementById("btnCloseClientModal"),
+  btnCancelClientModal: document.getElementById("btnCancelClientModal"),
+  formClient: document.getElementById("formClient"),
+  clientIdInput: document.getElementById("clientIdInput"),
+  clientNameInput: document.getElementById("clientNameInput"),
+  clientRateInput: document.getElementById("clientRateInput"),
+  clientHourBudgetInput: document.getElementById("clientHourBudgetInput"),
+  clientNotesInput: document.getElementById("clientNotesInput"),
+  btnSaveClient: document.getElementById("btnSaveClient"),
+
+  // Exportación Excel / CSV
+  btnExportTasksCsv: document.getElementById("btnExportTasksCsv"),
+  btnExportPaymentsCsv: document.getElementById("btnExportPaymentsCsv"),
+  btnExportFinancialCsv: document.getElementById("btnExportFinancialCsv"),
+
+  // Pomodoro & Metas de Colaborador
+  btnModeStandard: document.getElementById("btnModeStandard"),
+  btnModePomodoro: document.getElementById("btnModePomodoro"),
+  pomodoroBanner: document.getElementById("pomodoroBanner"),
+  pomodoroPhaseLabel: document.getElementById("pomodoroPhaseLabel"),
+  workerGoalCard: document.getElementById("workerGoalCard"),
+  workerGoalStatusBadge: document.getElementById("workerGoalStatusBadge"),
+  workerGoalText: document.getElementById("workerGoalText"),
+  workerGoalProgressBar: document.getElementById("workerGoalProgressBar"),
+  workerGoalPercent: document.getElementById("workerGoalPercent"),
+  btnEditWorkerGoal: document.getElementById("btnEditWorkerGoal"),
+
+  // Deducción comisiones Upwork
+  upworkFeePercentInput: document.getElementById("upworkFeePercentInput"),
+  upworkPayoutCostInput: document.getElementById("upworkPayoutCostInput"),
+  upworkBreakdownGross: document.getElementById("upworkBreakdownGross"),
+  upworkBreakdownFee: document.getElementById("upworkBreakdownFee"),
+  upworkBreakdownPayout: document.getElementById("upworkBreakdownPayout"),
+  upworkBreakdownNet: document.getElementById("upworkBreakdownNet"),
+
+  // WhatsApp Sharing & Teléfono
+  btnShareWhatsAppStatement: document.getElementById("btnShareWhatsAppStatement"),
+  workerPhone: document.getElementById("workerPhone"),
 
   authTabLogin: document.getElementById("authTabLogin"),
   authTabRegister: document.getElementById("authTabRegister"),
@@ -1135,6 +1195,7 @@ function setupFirestoreListeners(profile) {
     if (tasksUnsubscribe) { tasksUnsubscribe(); tasksUnsubscribe = null; }
     if (paymentsUnsubscribe) { paymentsUnsubscribe(); paymentsUnsubscribe = null; }
     if (upworkConfigUnsubscribe) { upworkConfigUnsubscribe(); upworkConfigUnsubscribe = null; }
+    if (clientsUnsubscribe) { clientsUnsubscribe(); clientsUnsubscribe = null; }
     state.tasks = [];
     state.payments = [];
     updateTasksUI();
@@ -1241,11 +1302,34 @@ function setupFirestoreListeners(profile) {
         if (typeof data.weeklyRevenue === "number") {
           state.upworkWeeklyRevenue = data.weeklyRevenue;
           localStorage.setItem("widely_upwork_weekly_revenue", String(data.weeklyRevenue));
-          updateUpworkBudgetDashboard();
         }
+        if (typeof data.feePercent === "number") {
+          state.upworkFeePercent = data.feePercent;
+          localStorage.setItem("widely_upwork_fee_percent", String(data.feePercent));
+        }
+        if (typeof data.payoutCost === "number") {
+          state.upworkPayoutCost = data.payoutCost;
+          localStorage.setItem("widely_upwork_payout_cost", String(data.payoutCost));
+        }
+        updateUpworkBudgetDashboard();
       }
     }, (error) => {
       console.warn("[Firestore] Aviso en sincronización de Upwork:", error.message);
+    });
+  }
+
+  // 5. CLIENTES & PROYECTOS: Sincronización en tiempo real
+  if (!clientsUnsubscribe) {
+    const clientsCol = collection(db, "clientes");
+    clientsUnsubscribe = onSnapshot(clientsCol, (snapshot) => {
+      state.clients = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })).sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
+      updateClientsUI();
+      updateClientsDatalist();
+    }, (error) => {
+      console.warn("[Firestore] Aviso en sincronización de clientes:", error.message);
     });
   }
 }
@@ -1338,6 +1422,7 @@ function startTimer() {
     state.timer.elapsedSeconds = Math.floor((Date.now() - state.timer.startTime) / 1000);
     renderTimerDisplay();
     updateLiveCost();
+    handlePomodoroTick();
 
     // Alerta de Cronómetro Olvidado (> 4 horas = 14,400 segundos)
     if (state.timer.elapsedSeconds >= 14400 && !state.timer.overtimeAlertDismissed) {
@@ -1389,6 +1474,13 @@ function resetTimer() {
   elements.timerOvertimeAlert?.classList.add("hidden");
   elements.timerOvertimeAlert?.classList.remove("flex");
   clearTimerState();
+  if (state.pomodoro.enabled) {
+    state.pomodoro.remainingSeconds = state.pomodoro.focusMinutes * 60;
+    state.pomodoro.phase = "focus";
+    if (elements.pomodoroPhaseLabel) {
+      elements.pomodoroPhaseLabel.textContent = `🍅 Enfoque (${state.pomodoro.focusMinutes}:00)`;
+    }
+  }
   renderTimerDisplay();
   updateLiveCost();
 
@@ -1524,9 +1616,11 @@ async function handleSaveWorker(e) {
     return;
   }
 
+  const phone = elements.workerPhone ? elements.workerPhone.value.trim() : "";
   const workerData = {
     nombre: name,
     email: email || null,
+    telefono: phone || null,
     tarifaHora: Number(rate.toFixed(2)),
     tarifaArte: Number(artRate.toFixed(2)),
     createdAt: db ? serverTimestamp() : new Date().toISOString()
@@ -2353,6 +2447,8 @@ function updateFinancialDashboard() {
 
   renderProductivityCharts();
   updateClientsDatalist();
+  updateClientsUI();
+  updateWorkerGoalUI();
   updateUpworkBudgetDashboard(currentTrm);
 }
 
@@ -2608,7 +2704,9 @@ function initTrmSystem() {
    10.B. DASHBOARD EJECUTIVO: GRÁFICOS DE PRODUCTIVIDAD (Chart.js)
    ============================================================================ */
 function updateClientsDatalist() {
-  const clients = Array.from(new Set(state.tasks.map(t => (t.cliente || "").trim()).filter(Boolean))).sort();
+  const fromTasks = state.tasks.map(t => (t.cliente || "").trim()).filter(Boolean);
+  const fromClients = state.clients.map(c => (c.nombre || "").trim()).filter(Boolean);
+  const clients = Array.from(new Set([...fromTasks, ...fromClients])).sort((a, b) => a.localeCompare(b));
   if (elements.clientsDatalist) {
     elements.clientsDatalist.innerHTML = clients.map(c => `<option value="${escapeHtml(c)}"></option>`).join("");
   }
@@ -2863,6 +2961,9 @@ function getWeeklyApprovedTasks() {
   });
 }
 
+/* ============================================================================
+   10.D CONTROL PRESUPUESTAL UPWORK & MARGEN NETO DE AGENCIA
+   ============================================================================ */
 function updateUpworkBudgetDashboard(currentTrm) {
   if (!elements.adminUpworkBudgetSection) return;
   const trm = currentTrm || getActiveTrmRate();
@@ -2880,23 +2981,34 @@ function updateUpworkBudgetDashboard(currentTrm) {
   const weeklyArts = weeklyTasks.filter(t => t.cantidadArtes > 0).reduce((acc, t) => acc + (Number(t.cantidadArtes) || 0), 0);
   const weeklyPayrollCost = weeklyTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
 
-  const revenue = Number(state.upworkWeeklyRevenue) || 0;
-  const availableBudget = revenue - weeklyPayrollCost;
-  const payrollCop = weeklyPayrollCost * trm;
-  const revenueCop = revenue * trm;
-  const availableCop = availableBudget * trm;
+  const grossRevenue = Number(state.upworkWeeklyRevenue) || 0;
+  const feePercent = typeof state.upworkFeePercent === "number" ? state.upworkFeePercent : 10;
+  const payoutCost = typeof state.upworkPayoutCost === "number" ? state.upworkPayoutCost : 0.99;
 
-  // 1. Recaudación Semanal Upwork
+  const upworkFeeAmount = grossRevenue > 0 ? (grossRevenue * (feePercent / 100)) : 0;
+  const upworkPayoutAmount = grossRevenue > 0 ? payoutCost : 0;
+  const netUpworkRevenue = Math.max(0, grossRevenue - upworkFeeAmount - upworkPayoutAmount);
+
+  // Margen Real Neto disponible para la agencia = Lo que entra a cuenta colombiana menos nómina
+  const realNetMargin = netUpworkRevenue - weeklyPayrollCost;
+
+  const grossRevenueCop = grossRevenue * trm;
+  const payrollCop = weeklyPayrollCost * trm;
+  const realNetMarginCop = realNetMargin * trm;
+
+  // 1. Recaudación Semanal Upwork (Bruto y Neto estimado)
   if (elements.upworkRevenueDisplay) {
-    elements.upworkRevenueDisplay.textContent = `$${revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    elements.upworkRevenueDisplay.textContent = `$${grossRevenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
   if (elements.upworkRevenueCopDisplay) {
-    elements.upworkRevenueCopDisplay.textContent = `≈ ${formatCop(revenueCop)}`;
+    elements.upworkRevenueCopDisplay.textContent = `≈ ${formatCop(grossRevenueCop)}`;
   }
   if (elements.upworkRevenueSubtitle) {
-    elements.upworkRevenueSubtitle.textContent = revenue > 0 
-      ? "Facturación semanal configurada" 
-      : "Clic en 'Ajustar Recaudo' para ingresar";
+    if (grossRevenue > 0) {
+      elements.upworkRevenueSubtitle.textContent = `Neto tras Upwork: $${netUpworkRevenue.toFixed(2)} (-${feePercent}% fee & -$${payoutCost})`;
+    } else {
+      elements.upworkRevenueSubtitle.textContent = "Clic en 'Ajustar Recaudo' para ingresar";
+    }
   }
 
   // 2. Costo Nómina Semanal
@@ -2913,39 +3025,41 @@ function updateUpworkBudgetDashboard(currentTrm) {
     elements.upworkPayrollDetails.textContent = `${parts.join(" • ")} de tareas aprobadas esta semana`;
   }
 
-  // 3. Presupuesto Disponible (Margen Libre)
+  // 3. Presupuesto / Margen Real Disponible
   if (elements.upworkAvailableBudgetDisplay) {
-    if (availableBudget >= 0) {
-      elements.upworkAvailableBudgetDisplay.textContent = `$${availableBudget.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (realNetMargin >= 0) {
+      elements.upworkAvailableBudgetDisplay.textContent = `$${realNetMargin.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       elements.upworkAvailableBudgetDisplay.className = "text-xl sm:text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums";
     } else {
-      elements.upworkAvailableBudgetDisplay.textContent = `-$${Math.abs(availableBudget).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      elements.upworkAvailableBudgetDisplay.textContent = `-$${Math.abs(realNetMargin).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       elements.upworkAvailableBudgetDisplay.className = "text-xl sm:text-2xl font-bold font-mono text-[#BF6863] tabular-nums";
     }
   }
 
   if (elements.upworkAvailableBudgetCopDisplay) {
-    if (availableBudget >= 0) {
-      elements.upworkAvailableBudgetCopDisplay.textContent = `≈ +${formatCop(availableCop)}`;
+    if (realNetMargin >= 0) {
+      elements.upworkAvailableBudgetCopDisplay.textContent = `≈ +${formatCop(realNetMarginCop)}`;
       elements.upworkAvailableBudgetCopDisplay.className = "block text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5";
     } else {
-      elements.upworkAvailableBudgetCopDisplay.textContent = `≈ -${formatCop(Math.abs(availableCop))}`;
+      elements.upworkAvailableBudgetCopDisplay.textContent = `≈ -${formatCop(Math.abs(realNetMarginCop))}`;
       elements.upworkAvailableBudgetCopDisplay.className = "block text-xs font-mono font-medium text-[#BF6863] tabular-nums mt-0.5";
     }
   }
 
-  // Porcentaje y estado de presupuesto
+  // Porcentaje y estado de presupuesto sobre el neto recaudado
   let usagePercent = 0;
-  if (revenue > 0) {
-    usagePercent = Math.min(Math.round((weeklyPayrollCost / revenue) * 100), 999);
+  if (netUpworkRevenue > 0) {
+    usagePercent = Math.min(Math.round((weeklyPayrollCost / netUpworkRevenue) * 100), 999);
+  } else if (grossRevenue > 0) {
+    usagePercent = 100;
   }
 
   if (elements.upworkBudgetPercentLabel) {
-    elements.upworkBudgetPercentLabel.textContent = revenue > 0 ? `${usagePercent}% consumido` : "Sin meta definida";
+    elements.upworkBudgetPercentLabel.textContent = netUpworkRevenue > 0 ? `${usagePercent}% consumido` : "Sin meta definida";
   }
 
   if (elements.upworkBudgetProgressBar) {
-    const barWidth = revenue > 0 ? Math.min(usagePercent, 100) : 0;
+    const barWidth = netUpworkRevenue > 0 ? Math.min(usagePercent, 100) : 0;
     elements.upworkBudgetProgressBar.style.width = `${barWidth}%`;
     if (usagePercent > 100) {
       elements.upworkBudgetProgressBar.className = "h-2 rounded-full bg-[#BF6863] transition-all duration-500";
@@ -2957,40 +3071,40 @@ function updateUpworkBudgetDashboard(currentTrm) {
   }
 
   if (elements.upworkBudgetStatusBadge) {
-    if (revenue === 0) {
+    if (grossRevenue === 0) {
       elements.upworkBudgetStatusBadge.textContent = "Pendiente Meta";
       elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-slate-500/10 text-slate-600 dark:text-slate-400";
-    } else if (availableBudget < 0) {
+    } else if (realNetMargin < 0) {
       elements.upworkBudgetStatusBadge.textContent = "Excedido";
       elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-[#BF6863]/15 text-[#BF6863]";
     } else {
-      const freePercent = 100 - usagePercent;
+      const freePercent = Math.max(0, 100 - usagePercent);
       elements.upworkBudgetStatusBadge.textContent = `${freePercent}% Libre`;
       elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
     }
   }
 
   if (elements.upworkBudgetHealthDesc) {
-    if (revenue === 0) {
+    if (grossRevenue === 0) {
       elements.upworkBudgetHealthDesc.textContent = "Ingresa tu recaudación semanal estimada";
       elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-slate-500 dark:text-slate-400";
     } else if (usagePercent > 100) {
-      elements.upworkBudgetHealthDesc.textContent = "⚠️ Nómina semanal supera el recaudo de Upwork";
+      elements.upworkBudgetHealthDesc.textContent = "⚠️ Nómina semanal supera el recaudo neto tras comisiones";
       elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-[#BF6863]";
     } else if (usagePercent > 80) {
-      elements.upworkBudgetHealthDesc.textContent = "Alerta: nómina cercana al límite (80%+)";
+      elements.upworkBudgetHealthDesc.textContent = "Alerta: nómina cercana al límite disponible (80%+)";
       elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-amber-600 dark:text-amber-400";
     } else {
-      elements.upworkBudgetHealthDesc.textContent = "Presupuesto saludable y disponible";
+      elements.upworkBudgetHealthDesc.textContent = "Presupuesto saludable con margen real positivo";
       elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-emerald-600 dark:text-emerald-400";
     }
   }
 
   if (elements.upworkBudgetSubtitle) {
-    if (revenue === 0) {
+    if (grossRevenue === 0) {
       elements.upworkBudgetSubtitle.textContent = "Define tu recaudo semanal para monitorear margen";
-    } else if (availableBudget >= 0) {
-      elements.upworkBudgetSubtitle.textContent = "Margen de ganancia neto disponible";
+    } else if (realNetMargin >= 0) {
+      elements.upworkBudgetSubtitle.textContent = "Margen real neto de ganancia (post-comisiones y nómina)";
     } else {
       elements.upworkBudgetSubtitle.textContent = "Déficit proyectado para esta semana";
     }
@@ -3001,8 +3115,14 @@ function openUpworkBudgetModal() {
   if (!elements.upworkBudgetModal) return;
   if (elements.upworkRevenueInput) {
     elements.upworkRevenueInput.value = state.upworkWeeklyRevenue > 0 ? state.upworkWeeklyRevenue : "";
-    updateUpworkInputPreview();
   }
+  if (elements.upworkFeePercentInput) {
+    elements.upworkFeePercentInput.value = state.upworkFeePercent !== undefined ? state.upworkFeePercent : 10;
+  }
+  if (elements.upworkPayoutCostInput) {
+    elements.upworkPayoutCostInput.value = state.upworkPayoutCost !== undefined ? state.upworkPayoutCost : 0.99;
+  }
+  updateUpworkInputPreview();
   elements.upworkBudgetModal.classList.remove("hidden");
   elements.upworkBudgetModal.classList.add("flex");
   setTimeout(() => elements.upworkRevenueInput?.focus(), 50);
@@ -3015,25 +3135,53 @@ function closeUpworkBudgetModal() {
 }
 
 function updateUpworkInputPreview() {
-  if (!elements.upworkInputCopPreview || !elements.upworkRevenueInput) return;
-  const val = parseFloat(elements.upworkRevenueInput.value) || 0;
+  const val = parseFloat(elements.upworkRevenueInput?.value) || 0;
+  const feePercent = parseFloat(elements.upworkFeePercentInput?.value) || 0;
+  const payoutCost = parseFloat(elements.upworkPayoutCostInput?.value) || 0;
   const trm = getActiveTrmRate();
-  elements.upworkInputCopPreview.textContent = `≈ ${formatCop(val * trm)}`;
+
+  if (elements.upworkInputCopPreview) {
+    elements.upworkInputCopPreview.textContent = `≈ ${formatCop(val * trm)}`;
+  }
+
+  const feeAmount = val > 0 ? (val * (feePercent / 100)) : 0;
+  const payoutAmount = val > 0 ? payoutCost : 0;
+  const net = Math.max(0, val - feeAmount - payoutAmount);
+
+  if (elements.upworkBreakdownGross) {
+    elements.upworkBreakdownGross.textContent = `$${val.toFixed(2)} USD`;
+  }
+  if (elements.upworkBreakdownFee) {
+    elements.upworkBreakdownFee.textContent = `-$${feeAmount.toFixed(2)} USD (${feePercent}%)`;
+  }
+  if (elements.upworkBreakdownPayout) {
+    elements.upworkBreakdownPayout.textContent = `-$${payoutAmount.toFixed(2)} USD`;
+  }
+  if (elements.upworkBreakdownNet) {
+    elements.upworkBreakdownNet.textContent = `$${net.toFixed(2)} USD (≈ ${formatCop(net * trm)})`;
+  }
 }
 
-async function saveUpworkBudget(amount) {
+async function saveUpworkBudget(amount, feePercent = 10, payoutCost = 0.99) {
   state.upworkWeeklyRevenue = amount;
+  state.upworkFeePercent = feePercent;
+  state.upworkPayoutCost = payoutCost;
+
   localStorage.setItem("widely_upwork_weekly_revenue", String(amount));
+  localStorage.setItem("widely_upwork_fee_percent", String(feePercent));
+  localStorage.setItem("widely_upwork_payout_cost", String(payoutCost));
   updateUpworkBudgetDashboard();
 
   if (db) {
     try {
       await setDoc(doc(db, "configuracion", "upwork"), {
         weeklyRevenue: amount,
+        feePercent: feePercent,
+        payoutCost: payoutCost,
         updatedAt: serverTimestamp(),
         updatedBy: state.currentUser?.email || "admin"
       }, { merge: true });
-      showToast(`Presupuesto Upwork actualizado a $${amount.toFixed(2)} USD`, "success");
+      showToast(`Presupuesto Upwork actualizado ($${amount.toFixed(2)} USD, -${feePercent}% com., -$${payoutCost} retiro)`, "success");
       return;
     } catch (err) {
       console.warn("[Upwork Budget] Guardado localmente, error en Firestore:", err);
@@ -3043,11 +3191,19 @@ async function saveUpworkBudget(amount) {
 }
 
 async function loadUpworkBudget() {
-  const cached = localStorage.getItem("widely_upwork_weekly_revenue");
-  if (cached !== null && !isNaN(Number(cached))) {
-    state.upworkWeeklyRevenue = Number(cached);
-    updateUpworkBudgetDashboard();
+  const cachedRevenue = localStorage.getItem("widely_upwork_weekly_revenue");
+  if (cachedRevenue !== null && !isNaN(Number(cachedRevenue))) {
+    state.upworkWeeklyRevenue = Number(cachedRevenue);
   }
+  const cachedFee = localStorage.getItem("widely_upwork_fee_percent");
+  if (cachedFee !== null && !isNaN(Number(cachedFee))) {
+    state.upworkFeePercent = Number(cachedFee);
+  }
+  const cachedPayout = localStorage.getItem("widely_upwork_payout_cost");
+  if (cachedPayout !== null && !isNaN(Number(cachedPayout))) {
+    state.upworkPayoutCost = Number(cachedPayout);
+  }
+  updateUpworkBudgetDashboard();
 
   if (db) {
     try {
@@ -3057,8 +3213,16 @@ async function loadUpworkBudget() {
         if (typeof data.weeklyRevenue === "number") {
           state.upworkWeeklyRevenue = data.weeklyRevenue;
           localStorage.setItem("widely_upwork_weekly_revenue", String(data.weeklyRevenue));
-          updateUpworkBudgetDashboard();
         }
+        if (typeof data.feePercent === "number") {
+          state.upworkFeePercent = data.feePercent;
+          localStorage.setItem("widely_upwork_fee_percent", String(data.feePercent));
+        }
+        if (typeof data.payoutCost === "number") {
+          state.upworkPayoutCost = data.payoutCost;
+          localStorage.setItem("widely_upwork_payout_cost", String(data.payoutCost));
+        }
+        updateUpworkBudgetDashboard();
       }
     } catch (err) {
       console.warn("[Upwork Budget] Usando caché local:", err);
@@ -3067,6 +3231,728 @@ async function loadUpworkBudget() {
 }
 
 window.openUpworkBudgetModal = openUpworkBudgetModal;
+
+/* ============================================================================
+   10.E GESTIÓN DE CLIENTES & RENTABILIDAD DE PROYECTOS
+   ============================================================================ */
+function openClientModal(clientId = null) {
+  if (!elements.clientModal) return;
+
+  if (clientId) {
+    const client = state.clients.find(c => c.id === clientId);
+    if (client) {
+      if (elements.clientIdInput) elements.clientIdInput.value = client.id;
+      if (elements.clientNameInput) elements.clientNameInput.value = client.nombre || "";
+      if (elements.clientRateInput) elements.clientRateInput.value = client.tarifaPorHora > 0 ? client.tarifaPorHora : "";
+      if (elements.clientHourBudgetInput) elements.clientHourBudgetInput.value = client.limiteHoras > 0 ? client.limiteHoras : "";
+      if (elements.clientNotesInput) elements.clientNotesInput.value = client.notas || "";
+      if (elements.clientModalTitle) elements.clientModalTitle.textContent = `Editar: ${client.nombre}`;
+    }
+  } else {
+    if (elements.formClient) elements.formClient.reset();
+    if (elements.clientIdInput) elements.clientIdInput.value = "";
+    if (elements.clientModalTitle) elements.clientModalTitle.textContent = "Nuevo Cliente / Proyecto";
+  }
+
+  elements.clientModal.classList.remove("hidden");
+  elements.clientModal.classList.add("flex");
+  setTimeout(() => elements.clientNameInput?.focus(), 50);
+}
+
+function closeClientModal() {
+  if (!elements.clientModal) return;
+  elements.clientModal.classList.add("hidden");
+  elements.clientModal.classList.remove("flex");
+  if (elements.formClient) elements.formClient.reset();
+}
+
+async function handleSaveClient(e) {
+  e.preventDefault();
+  const name = elements.clientNameInput?.value.trim();
+  if (!name) {
+    showToast("Ingresa el nombre del cliente.", "warning");
+    return;
+  }
+
+  const clientId = elements.clientIdInput?.value.trim();
+  const rateRaw = elements.clientRateInput?.value.trim();
+  const rate = rateRaw === "" ? 0 : parseFloat(rateRaw);
+  const budgetRaw = elements.clientHourBudgetInput?.value.trim();
+  const limitHours = budgetRaw === "" ? 0 : parseFloat(budgetRaw);
+  const notes = elements.clientNotesInput?.value.trim() || "";
+
+  if (isNaN(rate) || rate < 0) {
+    showToast("La tarifa debe ser un número igual o mayor a 0.", "warning");
+    return;
+  }
+  if (isNaN(limitHours) || limitHours < 0) {
+    showToast("El paquete de horas debe ser igual o mayor a 0.", "warning");
+    return;
+  }
+
+  const clientData = {
+    nombre: name,
+    tarifaPorHora: Number(rate.toFixed(2)),
+    limiteHoras: Number(limitHours.toFixed(2)),
+    notas: notes,
+    updatedAt: db ? serverTimestamp() : new Date().toISOString()
+  };
+
+  try {
+    if (clientId) {
+      if (db) {
+        await setDoc(doc(db, "clientes", clientId), clientData, { merge: true });
+      } else {
+        const idx = state.clients.findIndex(c => c.id === clientId);
+        if (idx !== -1) state.clients[idx] = { id: clientId, ...clientData };
+      }
+      showToast(`Cliente "${name}" actualizado con éxito.`, "success");
+    } else {
+      clientData.createdAt = db ? serverTimestamp() : new Date().toISOString();
+      if (db) {
+        await addDoc(collection(db, "clientes"), clientData);
+      } else {
+        clientData.id = "local_client_" + Date.now();
+        state.clients.push(clientData);
+      }
+      showToast(`Cliente "${name}" creado exitosamente.`, "success");
+    }
+
+    closeClientModal();
+    updateClientsUI();
+    updateClientsDatalist();
+  } catch (err) {
+    console.error("[Clientes] Error guardando cliente:", err);
+    showToast("Error al guardar cliente: " + err.message, "error");
+  }
+}
+
+async function deleteClient(clientId, clientName) {
+  window.requestDelete("clientes", clientId, `el cliente "${clientName}"`);
+}
+
+async function syncClientsFromTasks() {
+  const existingNames = new Set(state.clients.map(c => (c.nombre || "").trim().toLowerCase()));
+  const taskClientNames = new Set();
+
+  state.tasks.forEach(t => {
+    if (t.cliente && typeof t.cliente === "string") {
+      const clean = t.cliente.trim();
+      if (clean && !existingNames.has(clean.toLowerCase())) {
+        taskClientNames.add(clean);
+      }
+    }
+  });
+
+  if (taskClientNames.size === 0) {
+    showToast("Todos los clientes encontrados en las tareas ya están registrados.", "info");
+    return;
+  }
+
+  let count = 0;
+  for (const clientName of taskClientNames) {
+    const clientData = {
+      nombre: clientName,
+      tarifaPorHora: 0,
+      limiteHoras: 0,
+      notas: "Detectado automáticamente desde actividades",
+      createdAt: db ? serverTimestamp() : new Date().toISOString()
+    };
+    try {
+      if (db) {
+        await addDoc(collection(db, "clientes"), clientData);
+      } else {
+        clientData.id = "local_client_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4);
+        state.clients.push(clientData);
+      }
+      count++;
+    } catch (err) {
+      console.warn("[Clientes] Error al auto-registrar:", clientName, err);
+    }
+  }
+
+  showToast(`Se agregaron ${count} clientes detectados automáticamente.`, "success");
+  updateClientsUI();
+  updateClientsDatalist();
+}
+
+function updateClientsUI() {
+  if (!elements.clientsTableBody) return;
+  const currentTrm = getActiveTrmRate();
+
+  if (state.clients.length === 0) {
+    elements.clientsTableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="py-8 text-center text-[#64748B] dark:text-[#94A3B8] text-xs">
+          No tienes clientes registrados aún. Haz clic en <strong>+ Nuevo Cliente</strong> o <strong>Detectar Clientes</strong>.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  const rows = state.clients.map(client => {
+    const clientNameNorm = (client.nombre || "").trim().toLowerCase();
+    const clientTasks = state.tasks.filter(t => (t.cliente || "").trim().toLowerCase() === clientNameNorm && isTaskApproved(t));
+
+    const totalHours = clientTasks.reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
+    const totalPayrollCost = clientTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
+    const hourlyRate = Number(client.tarifaPorHora || 0);
+    const limitHours = Number(client.limiteHoras || 0);
+
+    const billableRevenue = totalHours * hourlyRate;
+    const grossMargin = billableRevenue - totalPayrollCost;
+
+    const billableCop = billableRevenue * currentTrm;
+    const payrollCop = totalPayrollCost * currentTrm;
+    const marginCop = grossMargin * currentTrm;
+
+    // Barra de consumo de horas vs paquete
+    let progressHtml = "";
+    if (limitHours > 0) {
+      const pct = Math.min(Math.round((totalHours / limitHours) * 100), 999);
+      const barColor = pct > 100 ? "bg-[#BF6863]" : pct > 80 ? "bg-amber-500" : "bg-emerald-500";
+      progressHtml = `
+        <div class="mt-1">
+          <div class="flex items-center justify-between text-[10px] font-mono text-[#64748B] dark:text-[#94A3B8]">
+            <span>${totalHours.toFixed(1)}h / ${limitHours.toFixed(1)}h</span>
+            <span class="${pct > 100 ? 'text-[#BF6863] font-bold' : ''}">${pct}%</span>
+          </div>
+          <div class="w-full bg-[#E2E8F0] dark:bg-[#1E293B] rounded-full h-1.5 mt-0.5 overflow-hidden">
+            <div class="${barColor} h-1.5 rounded-full" style="width: ${Math.min(pct, 100)}%"></div>
+          </div>
+        </div>
+      `;
+    } else {
+      progressHtml = `
+        <span class="text-xs font-mono font-medium text-[#0F172A] dark:text-[#F8FAFC]">${totalHours.toFixed(2)}h registradas</span>
+        <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block">Sin límite pactado</span>
+      `;
+    }
+
+    const marginColor = grossMargin >= 0 
+      ? "text-emerald-600 dark:text-emerald-400 font-semibold" 
+      : "text-[#BF6863] font-semibold";
+
+    return `
+      <tr class="hover:bg-[#F1F5F9] dark:hover:bg-[#162032] transition-colors">
+        <td class="py-3 px-3">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-semibold shrink-0 border border-amber-500/20">
+              <i class="fa-solid fa-briefcase text-[11px]"></i>
+            </div>
+            <div>
+              <span class="font-semibold text-[#0F172A] dark:text-[#F8FAFC] block text-xs">${escapeHtml(client.nombre)}</span>
+              ${client.notas ? `<span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] truncate block max-w-xs" title="${escapeHtml(client.notas)}">${escapeHtml(client.notas)}</span>` : ""}
+            </div>
+          </div>
+        </td>
+        <td class="py-3 px-2 text-right font-mono text-xs">
+          ${hourlyRate > 0 ? `<span class="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">$${hourlyRate.toFixed(2)}/h</span>` : `<span class="text-[#64748B] dark:text-[#94A3B8]">Sin tarifa</span>`}
+        </td>
+        <td class="py-3 px-3 min-w-[150px]">
+          ${progressHtml}
+        </td>
+        <td class="py-3 px-2 text-right font-mono text-xs tabular-nums">
+          <span class="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">$${billableRevenue.toFixed(2)}</span>
+          <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block">≈ ${formatCop(billableCop)}</span>
+        </td>
+        <td class="py-3 px-2 text-right font-mono text-xs tabular-nums">
+          <span class="font-medium text-[#2563EB]">$${totalPayrollCost.toFixed(2)}</span>
+          <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block">≈ ${formatCop(payrollCop)}</span>
+        </td>
+        <td class="py-3 px-3 text-right font-mono text-xs tabular-nums">
+          <span class="${marginColor}">${grossMargin >= 0 ? '+' : ''}$${grossMargin.toFixed(2)}</span>
+          <span class="text-[10px] ${grossMargin >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#BF6863]'} block">≈ ${formatCop(marginCop)}</span>
+        </td>
+        <td class="py-3 px-2 text-center whitespace-nowrap">
+          <div class="inline-flex items-center gap-1">
+            <button type="button" onclick="window.openClientModal('${client.id}')" class="p-1 rounded-md text-[#64748B] hover:text-[#2563EB] hover:bg-[#2563EB]/10 transition-colors" title="Editar cliente">
+              <i class="fa-regular fa-pen-to-square text-xs"></i>
+            </button>
+            <button type="button" onclick="window.deleteClient('${client.id}', '${escapeHtml(client.nombre)}')" class="p-1 rounded-md text-[#64748B] hover:text-[#BF6863] hover:bg-[#BF6863]/10 transition-colors" title="Eliminar cliente">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  elements.clientsTableBody.innerHTML = rows;
+}
+
+window.openClientModal = openClientModal;
+window.deleteClient = deleteClient;
+window.syncClientsFromTasks = syncClientsFromTasks;
+
+/* ============================================================================
+   10.F SISTEMA UNIVERSAL DE EXPORTACIÓN EXCEL / CSV
+   ============================================================================ */
+function exportToCsv(filename, headers, rows) {
+  if (!rows || rows.length === 0) {
+    showToast("No hay registros para exportar en el período seleccionado.", "warning");
+    return;
+  }
+
+  const escapeCell = (val) => {
+    if (val === null || val === undefined) return '""';
+    const str = String(val).replace(/"/g, '""');
+    return `"${str}"`;
+  };
+
+  const csvContent = "\uFEFF" + [
+    headers.map(escapeCell).join(","),
+    ...rows.map(row => row.map(escapeCell).join(","))
+  ].join("\r\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  showToast(`Archivo "${filename}" descargado con éxito.`, "success");
+}
+
+function handleExportTasksCsv() {
+  const currentTrm = getActiveTrmRate();
+  const tasks = getFilteredTasks();
+  const periodLabel = elements.periodFilterLabel?.textContent.trim() || "Periodo";
+
+  const headers = [
+    "ID Tarea",
+    "Fecha",
+    "Colaborador",
+    "Cliente / Cuenta",
+    "Descripción de Actividad",
+    "Categoría",
+    "Modalidad",
+    "Horas Registradas",
+    "Cantidad Artes",
+    "Costo USD",
+    "Costo COP (TRM " + Math.round(currentTrm) + ")",
+    "Estado Aprobación",
+    "Motivo Rechazo"
+  ];
+
+  const rows = tasks.map(t => {
+    const isArt = (Number(t.cantidadArtes) || 0) > 0;
+    const usd = Number(t.costoTotal || 0);
+    const cop = usd * currentTrm;
+    const cat = getCategoryInfo(t.categoria);
+    const status = t.aprobada === false ? "Rechazada" : (t.aprobada === true ? "Aprobada" : "Pendiente");
+
+    return [
+      t.id || "",
+      t.fecha || "",
+      t.trabajadorNombre || "Anónimo",
+      t.cliente || "General",
+      t.descripcion || "",
+      cat.label,
+      isArt ? "Diseño de Artes" : "Por Horas",
+      Number(t.horas || 0).toFixed(4),
+      t.cantidadArtes || 0,
+      usd.toFixed(2),
+      Math.round(cop),
+      status,
+      t.motivoRechazo || ""
+    ];
+  });
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  exportToCsv(`Widely_Actividades_${periodLabel.replace(/[^a-zA-Z0-9]/g, "_")}_${todayStr}.csv`, headers, rows);
+}
+
+function handleExportPaymentsCsv() {
+  const currentTrm = getActiveTrmRate();
+  const payments = getFilteredPayments();
+  const periodLabel = elements.periodFilterLabel?.textContent.trim() || "Periodo";
+
+  const headers = [
+    "ID Pago",
+    "Fecha Desembolso",
+    "Colaborador",
+    "Referencia / Concepto",
+    "Monto USD",
+    "Monto COP (TRM " + Math.round(currentTrm) + ")"
+  ];
+
+  const rows = payments.map(p => {
+    const usd = Number(p.monto || 0);
+    const cop = usd * currentTrm;
+    return [
+      p.id || "",
+      p.fecha || "",
+      p.trabajadorNombre || "",
+      p.referencia || "Pago registrado",
+      usd.toFixed(2),
+      Math.round(cop)
+    ];
+  });
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  exportToCsv(`Widely_Pagos_${periodLabel.replace(/[^a-zA-Z0-9]/g, "_")}_${todayStr}.csv`, headers, rows);
+}
+
+function handleExportFinancialCsv() {
+  const currentTrm = getActiveTrmRate();
+  const periodLabel = elements.periodFilterLabel?.textContent.trim() || "Periodo";
+  const filteredTasks = getFilteredTasks();
+  const filteredPayments = getFilteredPayments();
+
+  const headers = [
+    "Colaborador",
+    "Correo Electrónico",
+    "Teléfono / WhatsApp",
+    "Tarifa Hora ($/h)",
+    "Tarifa Arte ($/arte)",
+    "Horas Período",
+    "Artes Período",
+    "Total Causado USD",
+    "Total Causado COP",
+    "Total Pagado USD",
+    "Total Pagado COP",
+    "Saldo Pendiente USD",
+    "Saldo Pendiente COP",
+    "Estado de Nómina"
+  ];
+
+  const rows = state.workers.map(worker => {
+    const workerTasks = filteredTasks.filter(t => t.trabajadorId === worker.id && isTaskApproved(t));
+    const workerPayments = filteredPayments.filter(p => p.trabajadorId === worker.id);
+
+    const totalHours = workerTasks.reduce((sum, t) => sum + (Number(t.horas) || 0), 0);
+    const totalArts = workerTasks.filter(t => t.cantidadArtes > 0).reduce((sum, t) => sum + (Number(t.cantidadArtes) || 0), 0);
+    const totalEarned = workerTasks.reduce((sum, t) => sum + (Number(t.costoTotal) || 0), 0);
+    const totalPaid = workerPayments.reduce((sum, p) => sum + (Number(p.monto) || 0), 0);
+    const balance = totalEarned - totalPaid;
+
+    const earnedCop = totalEarned * currentTrm;
+    const paidCop = totalPaid * currentTrm;
+    const balanceCop = balance * currentTrm;
+
+    let status = "Al Día";
+    if (balance > 0.005) status = "Saldo Pendiente";
+    else if (balance < -0.005) status = "Anticipo a Favor";
+
+    return [
+      worker.nombre || "",
+      worker.email || "",
+      worker.telefono || "",
+      Number(worker.tarifaHora || 0).toFixed(2),
+      Number(worker.tarifaArte || 0).toFixed(2),
+      totalHours.toFixed(2),
+      totalArts,
+      totalEarned.toFixed(2),
+      Math.round(earnedCop),
+      totalPaid.toFixed(2),
+      Math.round(paidCop),
+      balance.toFixed(2),
+      Math.round(balanceCop),
+      status
+    ];
+  });
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  exportToCsv(`Widely_Nomina_Consolidada_${periodLabel.replace(/[^a-zA-Z0-9]/g, "_")}_${todayStr}.csv`, headers, rows);
+}
+
+window.exportTasksCsv = handleExportTasksCsv;
+window.exportPaymentsCsv = handleExportPaymentsCsv;
+window.exportFinancialCsv = handleExportFinancialCsv;
+
+/* ============================================================================
+   10.G COMPARTIR COMPROBANTES POR WHATSAPP EN 1 CLIC
+   ============================================================================ */
+function handleShareWhatsAppStatement() {
+  if (!currentStatementWorkerId) {
+    showToast("No se ha seleccionado ningún colaborador.", "warning");
+    return;
+  }
+
+  const worker = state.workers.find(w => w.id === currentStatementWorkerId);
+  if (!worker) {
+    showToast("Colaborador no encontrado.", "error");
+    return;
+  }
+
+  let phone = (worker.telefono || "").replace(/[^0-9+]/g, "");
+  if (!phone) {
+    const entered = prompt(`Ingresa el número de WhatsApp para ${worker.nombre} (ej: +57 300 123 4567):`, "");
+    if (!entered) {
+      showToast("Envío cancelado: no se especificó número de WhatsApp.", "info");
+      return;
+    }
+    phone = entered.replace(/[^0-9+]/g, "");
+    worker.telefono = phone;
+    if (db) {
+      setDoc(doc(db, "trabajadores", worker.id), { telefono: phone }, { merge: true }).catch(() => {});
+    }
+  }
+
+  // Si tiene 10 dígitos y empieza por 3 (móvil estándar Colombia), agregar prefijo 57
+  if (phone.length === 10 && phone.startsWith("3")) {
+    phone = "57" + phone;
+  } else if (phone.startsWith("+")) {
+    phone = phone.replace("+", "");
+  }
+
+  const currentTrm = getActiveTrmRate();
+  const periodLabel = elements.periodFilterLabel?.textContent.trim() || "Período actual";
+  const filteredTasks = getFilteredTasks().filter(t => t.trabajadorId === worker.id && isTaskApproved(t));
+  const filteredPayments = getFilteredPayments().filter(p => p.trabajadorId === worker.id);
+
+  const totalHours = filteredTasks.reduce((sum, t) => sum + (Number(t.horas) || 0), 0);
+  const totalArts = filteredTasks.filter(t => t.cantidadArtes > 0).reduce((sum, t) => sum + (Number(t.cantidadArtes) || 0), 0);
+  const totalEarned = filteredTasks.reduce((sum, t) => sum + (Number(t.costoTotal) || 0), 0);
+  const totalPaid = filteredPayments.reduce((sum, p) => sum + (Number(p.monto) || 0), 0);
+  const balance = totalEarned - totalPaid;
+
+  const earnedCop = formatCop(totalEarned * currentTrm);
+  const paidCop = formatCop(totalPaid * currentTrm);
+  const balanceCop = formatCop(balance * currentTrm);
+
+  let msg = "";
+  if (currentStatementDocType === "bill") {
+    // Formato Cuenta de Cobro
+    msg = `📄 *CUENTA DE COBRO | WIDELY SOCIAL*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 *Colaborador:* ${worker.nombre}\n` +
+      `📅 *Período:* ${periodLabel}\n` +
+      `⏱️ *Actividad:* ${totalHours.toFixed(2)}h registradas` + (totalArts > 0 ? ` (${totalArts} artes)` : ``) + `\n\n` +
+      `💵 *Total Causado:* $${totalEarned.toFixed(2)} USD (≈ ${earnedCop})\n` +
+      `💳 *Anticipos Recibidos:* -$${totalPaid.toFixed(2)} USD\n` +
+      `📌 *VALOR NETO A COBRAR:* $${balance.toFixed(2)} USD (≈ ${balanceCop})\n\n` +
+      `🏦 *Datos Bancarios:* ${elements.billBank?.textContent || 'Consignación'} | ${elements.billAccountNumber?.textContent || 'Registrada'}\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `Generado formalmente desde Widely Social Time Tracker.`;
+  } else {
+    // Formato Recibo de Pago Oficial
+    msg = `🧾 *COMPROBANTE DE PAGO OFICIAL | WIDELY SOCIAL*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 *Colaborador:* ${worker.nombre}\n` +
+      `📅 *Período Liquidado:* ${periodLabel}\n` +
+      `⏱️ *Horas Aprobadas:* ${totalHours.toFixed(2)} hrs` + (totalArts > 0 ? ` + ${totalArts} artes` : ``) + `\n\n` +
+      `💰 *Total Devengado:* $${totalEarned.toFixed(2)} USD (≈ ${earnedCop})\n` +
+      `✅ *Total Desembolsado:* $${totalPaid.toFixed(2)} USD (≈ ${paidCop})\n` +
+      `📊 *Saldo Actual:* $${balance.toFixed(2)} USD (≈ ${balanceCop})\n\n` +
+      `✍️ *Certificado por:* Lina De La Espriella (Administración)\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `Comprobante oficial emitido en Widely Social.`;
+  }
+
+  const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
+  window.open(whatsappUrl, "_blank");
+  showToast(`Abriendo WhatsApp con comprobante para ${worker.nombre}...`, "success");
+}
+
+window.shareWhatsAppStatement = handleShareWhatsAppStatement;
+
+/* ============================================================================
+   10.H POMODORO TIMER, CHIMES & METAS DE RENDIMIENTO DE COLABORADOR
+   ============================================================================ */
+function playChime(type = "focus") {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+
+    if (type === "focus") {
+      // Tono brillante de 2 campanas armónicas al iniciar enfoque (C5 -> E5)
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
+      osc2.type = "triangle";
+      osc2.frequency.setValueAtTime(659.25, ctx.currentTime + 0.15);
+
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc1.start();
+      osc2.start(ctx.currentTime + 0.15);
+      osc1.stop(ctx.currentTime + 0.7);
+      osc2.stop(ctx.currentTime + 0.7);
+    } else if (type === "break") {
+      // Tono relajante y suave para inicio de descanso (G4 -> C5)
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(392.00, ctx.currentTime);
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime + 0.2);
+
+      gain.gain.setValueAtTime(0.10, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.8);
+    }
+  } catch (err) {
+    // Si la política de autoplay del navegador previene el audio, continuar silencioso
+  }
+}
+
+function setTimerMode(mode) {
+  if (mode === "pomodoro") {
+    state.pomodoro.enabled = true;
+    state.pomodoro.phase = "focus";
+    state.pomodoro.remainingSeconds = state.pomodoro.focusMinutes * 60;
+
+    if (elements.btnModePomodoro) {
+      elements.btnModePomodoro.className = "px-2.5 py-1 text-xs font-semibold rounded-md bg-[#2563EB] text-white shadow-sm transition-all";
+    }
+    if (elements.btnModeStandard) {
+      elements.btnModeStandard.className = "px-2.5 py-1 text-xs font-medium rounded-md text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white transition-all";
+    }
+    if (elements.pomodoroBanner) {
+      elements.pomodoroBanner.classList.remove("hidden");
+    }
+    if (elements.pomodoroPhaseLabel) {
+      elements.pomodoroPhaseLabel.textContent = `🍅 Enfoque (${state.pomodoro.focusMinutes}:00)`;
+    }
+    playChime("focus");
+    showToast("Modo Pomodoro activo: 25 min de enfoque + 5 min de descanso.", "info");
+  } else {
+    state.pomodoro.enabled = false;
+    if (elements.btnModeStandard) {
+      elements.btnModeStandard.className = "px-2.5 py-1 text-xs font-semibold rounded-md bg-[#2563EB] text-white shadow-sm transition-all";
+    }
+    if (elements.btnModePomodoro) {
+      elements.btnModePomodoro.className = "px-2.5 py-1 text-xs font-medium rounded-md text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white transition-all";
+    }
+    if (elements.pomodoroBanner) {
+      elements.pomodoroBanner.classList.add("hidden");
+    }
+    showToast("Modo libre de cronómetro activo.", "info");
+  }
+}
+
+function handlePomodoroTick() {
+  if (!state.pomodoro.enabled || !state.timer.isRunning) return;
+
+  if (state.pomodoro.remainingSeconds > 0) {
+    state.pomodoro.remainingSeconds--;
+  }
+
+  const mins = Math.floor(state.pomodoro.remainingSeconds / 60);
+  const secs = state.pomodoro.remainingSeconds % 60;
+  const timeFormatted = `${mins}:${String(secs).padStart(2, "0")}`;
+
+  if (state.pomodoro.remainingSeconds <= 0) {
+    if (state.pomodoro.phase === "focus") {
+      state.pomodoro.phase = "break";
+      state.pomodoro.remainingSeconds = state.pomodoro.breakMinutes * 60;
+      playChime("break");
+      showToast("🔔 ¡Tiempo de enfoque cumplido! Tómate 5 minutos de descanso.", "info");
+    } else {
+      state.pomodoro.phase = "focus";
+      state.pomodoro.remainingSeconds = state.pomodoro.focusMinutes * 60;
+      playChime("focus");
+      showToast("🎯 ¡Descanso finalizado! Retomando 25 min de enfoque.", "success");
+    }
+  }
+
+  if (elements.pomodoroPhaseLabel) {
+    if (state.pomodoro.phase === "focus") {
+      elements.pomodoroPhaseLabel.textContent = `🍅 Enfoque (${timeFormatted})`;
+    } else {
+      elements.pomodoroPhaseLabel.textContent = `☕ Descanso (${timeFormatted})`;
+    }
+  }
+}
+
+function updateWorkerGoalUI() {
+  if (!elements.workerGoalCard) return;
+
+  const { start, end } = getCurrentWeekRange();
+  const startTime = start.getTime();
+  const endTime = end.getTime();
+
+  let targetWorkerId = null;
+  if (state.userProfile?.rol === "worker") {
+    targetWorkerId = state.userProfile.trabajadorId || state.workers.find(w => (w.email || "").toLowerCase() === (state.userProfile.email || "").toLowerCase())?.id;
+  }
+  if (!targetWorkerId && state.workers.length > 0) {
+    targetWorkerId = state.workers[0].id;
+  }
+
+  const weeklyTasks = state.tasks.filter(t => {
+    if (targetWorkerId && t.trabajadorId !== targetWorkerId) return false;
+    if (!t.fecha || !isTaskApproved(t)) return false;
+    const taskDate = new Date(t.fecha + "T00:00:00");
+    const tTime = taskDate.getTime();
+    return tTime >= startTime && tTime <= endTime;
+  });
+
+  const weeklyHours = weeklyTasks.reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
+  const weeklyArts = weeklyTasks.filter(t => t.cantidadArtes > 0).reduce((acc, t) => acc + (Number(t.cantidadArtes) || 0), 0);
+  const goal = Number(state.workerWeeklyGoal) || 20;
+  const pct = Math.min(Math.round((weeklyHours / goal) * 100), 999);
+
+  if (elements.workerGoalText) {
+    const artText = weeklyArts > 0 ? ` • ${weeklyArts} ${weeklyArts === 1 ? 'arte' : 'artes'}` : '';
+    elements.workerGoalText.textContent = `${weeklyHours.toFixed(1)}h de ${goal}h meta semanal${artText}`;
+  }
+
+  if (elements.workerGoalPercent) {
+    elements.workerGoalPercent.textContent = `${pct}%`;
+  }
+
+  if (elements.workerGoalProgressBar) {
+    elements.workerGoalProgressBar.style.width = `${Math.min(pct, 100)}%`;
+    if (pct >= 100) {
+      elements.workerGoalProgressBar.className = "bg-emerald-500 h-2 rounded-full transition-all duration-500";
+    } else if (pct >= 50) {
+      elements.workerGoalProgressBar.className = "bg-[#2563EB] h-2 rounded-full transition-all duration-500";
+    } else {
+      elements.workerGoalProgressBar.className = "bg-amber-500 h-2 rounded-full transition-all duration-500";
+    }
+  }
+
+  if (elements.workerGoalStatusBadge) {
+    if (pct >= 100) {
+      elements.workerGoalStatusBadge.textContent = "¡Meta Superada!";
+      elements.workerGoalStatusBadge.className = "text-[9px] font-mono px-2 py-0.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20";
+    } else {
+      elements.workerGoalStatusBadge.textContent = `${pct}% Logrado`;
+      elements.workerGoalStatusBadge.className = "text-[9px] font-mono px-2 py-0.5 rounded-full font-semibold bg-[#2563EB]/10 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/20";
+    }
+  }
+}
+
+function handleEditWorkerGoal() {
+  const current = state.workerWeeklyGoal || 20;
+  const entered = prompt("Ingresa tu meta semanal en horas (ej: 20, 30, 40):", current);
+  if (!entered) return;
+  const val = parseFloat(entered);
+  if (isNaN(val) || val <= 0) {
+    showToast("Por favor ingresa un número de horas válido mayor a 0.", "warning");
+    return;
+  }
+  state.workerWeeklyGoal = val;
+  localStorage.setItem("widely_worker_weekly_goal", String(val));
+  updateWorkerGoalUI();
+  showToast(`Meta semanal ajustada a ${val} horas.`, "success");
+}
+
+window.setTimerMode = setTimerMode;
+window.editWorkerGoal = handleEditWorkerGoal;
 
 /* ============================================================================
    11. GESTIÓN DE ELIMINACIONES CON MODAL
@@ -3099,6 +3985,11 @@ async function confirmDelete() {
       if (colName === "trabajadores") state.workers = state.workers.filter(w => w.id !== id);
       if (colName === "tareas") state.tasks = state.tasks.filter(t => t.id !== id);
       if (colName === "pagos") state.payments = state.payments.filter(p => p.id !== id);
+      if (colName === "clientes") {
+        state.clients = state.clients.filter(c => c.id !== id);
+        updateClientsUI();
+        updateClientsDatalist();
+      }
       updateWorkersUI();
       updateTasksUI();
       updatePaymentsUI();
@@ -4210,6 +5101,8 @@ function setupEventListeners() {
     if (e.target === elements.upworkBudgetModal) closeUpworkBudgetModal();
   });
   elements.upworkRevenueInput?.addEventListener("input", updateUpworkInputPreview);
+  elements.upworkFeePercentInput?.addEventListener("input", updateUpworkInputPreview);
+  elements.upworkPayoutCostInput?.addEventListener("input", updateUpworkInputPreview);
   document.querySelectorAll(".btn-upwork-preset").forEach(btn => {
     btn.addEventListener("click", () => {
       const amount = parseFloat(btn.dataset.amount);
@@ -4222,13 +5115,38 @@ function setupEventListeners() {
   elements.formUpworkBudget?.addEventListener("submit", (e) => {
     e.preventDefault();
     const amount = parseFloat(elements.upworkRevenueInput?.value);
+    const fee = parseFloat(elements.upworkFeePercentInput?.value);
+    const payout = parseFloat(elements.upworkPayoutCostInput?.value);
     if (isNaN(amount) || amount < 0) {
       showToast("Ingresa un monto válido en dólares", "warning");
       return;
     }
-    saveUpworkBudget(amount);
+    saveUpworkBudget(amount, isNaN(fee) ? 10 : fee, isNaN(payout) ? 0.99 : payout);
     closeUpworkBudgetModal();
   });
+
+  // Clientes & Rentabilidad de Proyectos
+  elements.btnOpenClientModal?.addEventListener("click", () => openClientModal());
+  elements.btnCloseClientModal?.addEventListener("click", closeClientModal);
+  elements.btnCancelClientModal?.addEventListener("click", closeClientModal);
+  elements.btnSyncClientsFromTasks?.addEventListener("click", syncClientsFromTasks);
+  elements.formClient?.addEventListener("submit", handleSaveClient);
+  elements.clientModal?.addEventListener("click", (e) => {
+    if (e.target === elements.clientModal) closeClientModal();
+  });
+
+  // Exportación Excel / CSV Universal
+  elements.btnExportTasksCsv?.addEventListener("click", handleExportTasksCsv);
+  elements.btnExportPaymentsCsv?.addEventListener("click", handleExportPaymentsCsv);
+  elements.btnExportFinancialCsv?.addEventListener("click", handleExportFinancialCsv);
+
+  // Compartir Comprobante por WhatsApp
+  elements.btnShareWhatsAppStatement?.addEventListener("click", handleShareWhatsAppStatement);
+
+  // Pomodoro & Metas de Colaborador
+  elements.btnModeStandard?.addEventListener("click", () => setTimerMode("standard"));
+  elements.btnModePomodoro?.addEventListener("click", () => setTimerMode("pomodoro"));
+  elements.btnEditWorkerGoal?.addEventListener("click", handleEditWorkerGoal);
 
   // Inicializar Navegación Lateral (Modelo 1 - Sidebar SaaS Pro)
   setupSidebarNavigation();
@@ -4285,6 +5203,8 @@ function setupSidebarNavigation() {
         targetId = isWorker ? "workerDashboardSection" : "adminReportsSection";
       } else if (navKey === "team") {
         targetId = "formWorker";
+      } else if (navKey === "clients") {
+        targetId = "adminClientsSection";
       } else if (navKey === "upwork") {
         targetId = "adminUpworkBudgetSection";
       } else if (navKey === "payments") {
@@ -4411,9 +5331,14 @@ function loadLocalFallbackData() {
     }
   ];
 
+  state.clients = [
+    { id: "mock_c1", nombre: "Proyecto General", tarifaPorHora: 35.00, limiteHoras: 20, notas: "Cliente corporativo" }
+  ];
+
   updateWorkersUI();
   updateTasksUI();
   updatePaymentsUI();
+  updateClientsUI();
   updateFinancialDashboard();
 }
 

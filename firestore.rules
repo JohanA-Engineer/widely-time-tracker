@@ -100,5 +100,11 @@ service cloud.firestore {
       // ÚNICAMENTE la Administradora Maestra (Lina) puede modificar configuraciones como el presupuesto Upwork
       allow write: if isMasterAdmin();
     }
+
+    // 6. Colección de Clientes y Presupuestos (/clientes/{clientId})
+    match /clientes/{clientId} {
+      allow read: if isAuthenticated();
+      allow write: if isMasterAdmin();
+    }
   }
 }
