@@ -471,6 +471,27 @@ html.has-user-session #authTopNavbar {
   transform: translate(-50%, -2px) !important;
 }
 
+/* Píldora Dynamic Island (Concepto 3 - Bordes Iridescentes y Glowing Rings) */
+.island-pill-wrapper {
+  position: relative;
+  background: #05070E;
+  border-radius: 9999px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(6, 182, 212, 0.15);
+}
+
+.island-pill-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: 9999px;
+  padding: 1.5px;
+  background: linear-gradient(90deg, #06B6D4 0%, #38BDF8 25%, #8B5CF6 65%, #F43F5E 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
 /* Estado activo del botón Picture-in-Picture Flotante */
 #btnTogglePipTimer.pip-active,
 #islandBtnPip.pip-active {

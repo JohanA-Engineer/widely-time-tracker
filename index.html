@@ -1957,47 +1957,43 @@
        MINI-DOCK FLOTANTE DEL CRONÓMETRO (DYNAMIC ISLAND — CONCEPTO 3)
        ========================================================================= -->
   <aside id="dynamicIslandTimer" class="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 transition-all duration-300 ease-out transform translate-y-28 opacity-0 pointer-events-none max-w-[95vw] sm:max-w-xl w-auto select-none print:hidden" aria-label="Control flotante de tiempo activo">
-    <div class="flex items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-2 rounded-full bg-slate-900/90 dark:bg-black/90 text-white backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/40 hover:border-white/30 transition-all">
-      <!-- Pulso de Actividad / Indicador Pomodoro -->
-      <div id="islandStatusDot" class="flex items-center justify-center shrink-0 cursor-pointer" title="Cronómetro Activo">
-        <span class="relative flex h-2.5 w-2.5">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-        </span>
+    <div class="island-pill-wrapper flex items-center gap-2.5 sm:gap-3.5 px-3 sm:px-4 py-2 rounded-full bg-[#05070E] text-white shadow-2xl relative select-none">
+      <!-- Icono morado de tarea/marca (Concepto 3 Mockup) -->
+      <div id="islandStatusDot" class="w-8 h-8 rounded-xl bg-[#2D1537] border border-[#C084FC]/40 text-[#E9D5FF] flex items-center justify-center shrink-0 cursor-pointer shadow-sm" title="Cronómetro Activo">
+        <i class="fa-regular fa-clock text-xs"></i>
       </div>
 
-      <!-- Información: Tiempo, Costo, Cliente -->
-      <button type="button" id="islandScrollToTimer" class="flex items-center gap-2.5 text-left group cursor-pointer border-none bg-transparent p-0 text-white" title="Clic para volver al cronómetro principal">
-        <div class="flex flex-col">
-          <div class="flex items-center gap-2">
-            <span id="islandTimerDisplay" class="font-mono text-xs sm:text-sm font-bold tracking-wider tabular-nums text-white group-hover:text-blue-300 transition-colors">00:00:00</span>
-            <span id="islandCostBadge" class="text-[10px] sm:text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 tabular-nums">$0.00</span>
-            <span id="islandPomodoroBadge" class="hidden text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">🍅 25m</span>
-          </div>
-          <div class="flex items-center gap-1.5 text-[10px] text-slate-300 truncate max-w-[130px] sm:max-w-[200px]">
-            <span id="islandClientBadge" class="font-medium text-amber-300 truncate">General</span>
-            <span class="text-slate-500">•</span>
-            <span id="islandTaskDesc" class="truncate text-slate-300">Actividad activa</span>
-          </div>
+      <!-- Información: Tarea, Tiempo y Costo acumulado -->
+      <button type="button" id="islandScrollToTimer" class="flex flex-col text-left group cursor-pointer border-none bg-transparent p-0 text-white min-w-0" title="Clic para volver al cronómetro principal">
+        <div class="flex items-center gap-1.5 truncate max-w-[140px] sm:max-w-[220px]">
+          <span id="islandTaskDesc" class="font-bold text-xs sm:text-[13px] text-white truncate group-hover:text-cyan-300 transition-colors">Actividad activa</span>
+        </div>
+        <div class="flex items-center gap-1.5 text-[11px] font-mono text-slate-400 mt-0.5">
+          <span id="islandTimerDisplay" class="font-bold tabular-nums text-slate-200">00:00:00</span>
+          <span class="text-slate-600">•</span>
+          <span id="islandCostBadge" class="tabular-nums text-slate-300">$0.00</span>
+          <span id="islandClientBadge" class="hidden">General</span>
+          <span id="islandPomodoroBadge" class="hidden text-[10px] font-mono font-semibold px-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">🍅 25m</span>
         </div>
       </button>
 
-      <!-- Separador -->
-      <div class="h-6 w-px bg-white/20 hidden xs:block"></div>
+      <!-- Separador sutil -->
+      <div class="h-6 w-px bg-white/10 hidden xs:block"></div>
 
-      <!-- Acciones Rápidas -->
-      <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
-        <button type="button" id="islandBtnPip" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs active:scale-95 transition-all cursor-pointer" title="Flotar sobre otras aplicaciones del PC (Picture-in-Picture)">
+      <!-- Acciones Rápidas (Píldora: Botón PiP, Botón Cian Pausa/Play y Botón Rojo Guardar) -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <button type="button" id="islandBtnPip" class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs active:scale-95 transition-all cursor-pointer" title="Flotar sobre otras aplicaciones del PC (Picture-in-Picture)">
           <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
         </button>
-        <button type="button" id="islandBtnPlayPause" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs active:scale-95 transition-all cursor-pointer" title="Pausar / Reanudar">
+        <!-- Botón Cian Pausa/Play (Exacto como la propuesta) -->
+        <button type="button" id="islandBtnPlayPause" class="w-8 h-8 rounded-full border-[1.8px] border-[#06B6D4] bg-[#06B6D4]/15 hover:bg-[#06B6D4]/25 text-[#22D3EE] flex items-center justify-center text-xs active:scale-95 transition-all shadow-[0_0_12px_rgba(6,182,212,0.4)] cursor-pointer" title="Pausar / Reanudar">
           <i class="fa-solid fa-pause text-[11px]" id="islandPlayPauseIcon"></i>
         </button>
-        <button type="button" id="islandBtnRegister" class="px-2.5 sm:px-3 py-1.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[11px] font-semibold flex items-center gap-1 active:scale-95 transition-all shadow-sm cursor-pointer" title="Guardar y registrar tarea">
-          <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
-          <span class="hidden sm:inline">Guardar</span>
+        <!-- Botón Rojo Stop/Guardar (Exacto como la propuesta) -->
+        <button type="button" id="islandBtnRegister" class="w-8 h-8 rounded-full border-[1.8px] border-[#EF4444] bg-[#EF4444]/15 hover:bg-[#EF4444]/25 text-[#F87171] flex items-center justify-center text-xs active:scale-95 transition-all shadow-[0_0_12px_rgba(239,68,68,0.4)] cursor-pointer" title="Guardar y registrar tarea">
+          <i class="fa-solid fa-square text-[10px]"></i>
         </button>
-        <button type="button" id="islandBtnDismiss" class="w-6 h-6 rounded-full text-slate-400 hover:text-white hover:bg-white/10 flex items-center justify-center text-xs transition-colors cursor-pointer" title="Ocultar dock temporalmente">
+        <button type="button" id="islandBtnDismiss" class="w-6 h-6 rounded-full text-slate-500 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer" title="Ocultar dock temporalmente">
           <i class="fa-solid fa-xmark text-[10px]"></i>
         </button>
       </div>
@@ -2007,9 +2003,9 @@
   <!-- Datalist Dinámico para Autocompletado de Clientes y Cuentas -->
   <datalist id="clientsDatalist"></datalist>
 
-  <!-- Elementos de Respaldo para Picture-in-Picture Flotante Nativo -->
+  <!-- Elementos de Respaldo para Picture-in-Picture Flotante Nativo (Slim 460x80 Aspect Ratio) -->
   <video id="pipHiddenVideo" class="hidden" muted playsinline style="position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></video>
-  <canvas id="pipHiddenCanvas" width="340" height="150" class="hidden" style="display: none;"></canvas>
+  <canvas id="pipHiddenCanvas" width="460" height="80" class="hidden" style="display: none;"></canvas>
 
   <!-- Script de entorno local o inyectado por GitHub Actions -->
   <script src="env.js" onerror="console.info('[Time Tracker Env] env.js no encontrado, usando configuración inyectada o almacenada.')"></script>

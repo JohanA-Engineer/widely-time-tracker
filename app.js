@@ -1555,19 +1555,23 @@ function updateDynamicIslandUI() {
   }
 
   // Cliente y descripción activa
-  const client = elements.timerClientProject?.value.trim() || "General";
-  const desc = elements.timerTaskDescription?.value.trim() || "Actividad activa";
-  if (elements.islandClientBadge) elements.islandClientBadge.textContent = client;
-  if (elements.islandTaskDesc) elements.islandTaskDesc.textContent = desc;
+  const client = elements.timerClientProject?.value.trim() || "";
+  const desc = elements.timerTaskDescription?.value.trim() || "";
+  const displayTitle = desc || client || "Widely Social";
+  if (elements.islandClientBadge) elements.islandClientBadge.textContent = client || "General";
+  if (elements.islandTaskDesc) elements.islandTaskDesc.textContent = displayTitle;
 
   // Estado del pulso e icono de play/pause
   if (state.timer.isRunning) {
     if (elements.islandStatusDot) {
       elements.islandStatusDot.innerHTML = `
-        <span class="relative flex h-2.5 w-2.5">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-        </span>
+        <div class="relative flex items-center justify-center w-full h-full">
+          <i class="fa-regular fa-clock text-xs text-[#E9D5FF]"></i>
+          <span class="absolute -top-1 -right-1 flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+          </span>
+        </div>
       `;
     }
     if (elements.islandPlayPauseIcon) {
@@ -1576,7 +1580,7 @@ function updateDynamicIslandUI() {
   } else {
     if (elements.islandStatusDot) {
       elements.islandStatusDot.innerHTML = `
-        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+        <i class="fa-regular fa-clock text-xs text-slate-400"></i>
       `;
     }
     if (elements.islandPlayPauseIcon) {
@@ -1677,25 +1681,8 @@ async function togglePictureInPictureWindow() {
   if ("documentPictureInPicture" in window) {
     try {
       pipWindowInstance = await window.documentPictureInPicture.requestWindow({
-        width: 330,
-        height: 155
-      });
-
-      // Cargar estilos y fuentes en la ventana flotante
-      [...document.styleSheets].forEach((styleSheet) => {
-        try {
-          const cssRules = [...styleSheet.cssRules].map((rule) => rule.cssText).join('');
-          const style = document.createElement('style');
-          style.textContent = cssRules;
-          pipWindowInstance.document.head.appendChild(style);
-        } catch (e) {
-          const link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.type = styleSheet.type;
-          link.media = styleSheet.media;
-          link.href = styleSheet.href;
-          pipWindowInstance.document.head.appendChild(link);
-        }
+        width: 440,
+        height: 76
       });
 
       const faLink = document.createElement("link");
@@ -1703,42 +1690,151 @@ async function togglePictureInPictureWindow() {
       faLink.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css";
       pipWindowInstance.document.head.appendChild(faLink);
 
-      pipWindowInstance.document.body.className = "bg-[#0F172A] text-white m-0 p-3.5 flex flex-col justify-between h-full font-sans select-none overflow-hidden";
+      // Estilos CSS exactos al Concepto 3 (Píldora Flotante con Borde Iridescente)
+      const styleEl = document.createElement("style");
+      styleEl.textContent = `
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+          width: 100%;
+          height: 100%;
+          background: #000000;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          user-select: none;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .pip-pill-dock {
+          width: calc(100% - 8px);
+          height: calc(100% - 8px);
+          max-height: 64px;
+          background: #05070E;
+          border-radius: 9999px;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 14px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.8), 0 0 15px rgba(6,182,212,0.15);
+        }
+        .pip-pill-dock::before {
+          content: "";
+          position: absolute;
+          inset: -1.5px;
+          border-radius: 9999px;
+          padding: 1.5px;
+          background: linear-gradient(90deg, #06B6D4 0%, #38BDF8 25%, #8B5CF6 65%, #F43F5E 100%);
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          pointer-events: none;
+        }
+        .pip-badge {
+          width: 34px;
+          height: 34px;
+          border-radius: 10px;
+          background: #2D1537;
+          border: 1px solid rgba(192, 132, 252, 0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #E9D5FF;
+          flex-shrink: 0;
+          cursor: pointer;
+        }
+        .pip-text-box {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          flex: 1;
+          min-width: 0;
+          margin: 0 12px;
+          cursor: pointer;
+        }
+        .pip-title {
+          color: #FFFFFF;
+          font-size: 13px;
+          font-weight: 700;
+          line-height: 1.2;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .pip-sub {
+          color: #94A3B8;
+          font-size: 11px;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+          font-weight: 500;
+          margin-top: 2px;
+          white-space: nowrap;
+        }
+        .pip-buttons {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+        .pip-btn {
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          border: none;
+          outline: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .pip-btn:active {
+          transform: scale(0.92);
+        }
+        .pip-btn-pause {
+          background: rgba(6, 182, 212, 0.15);
+          border: 1.8px solid #06B6D4;
+          color: #22D3EE;
+          box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+        }
+        .pip-btn-stop {
+          background: rgba(239, 68, 68, 0.15);
+          border: 1.8px solid #EF4444;
+          color: #F87171;
+          box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+        }
+      `;
+      pipWindowInstance.document.head.appendChild(styleEl);
+
+      const rawDesc = elements.timerTaskDescription?.value.trim() || "";
+      const rawClient = elements.timerClientProject?.value.trim() || "Widely Social";
+      const titleDisplay = rawDesc || rawClient;
+      const timeFormatted = formatSecondsToTime(state.timer.elapsedSeconds);
+      const cost = elements.liveCostBadge?.textContent || "$0.00";
+
       pipWindowInstance.document.body.innerHTML = `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-          <!-- Header: Cliente & Costo -->
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-            <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
-              <span id="pipDot" style="width: 8px; height: 8px; border-radius: 50%; background: ${state.timer.isRunning ? '#10B981' : '#F59E0B'}; display: inline-block; flex-shrink: 0;"></span>
-              <span id="pipClient" style="font-size: 11px; font-weight: 700; color: #F59E0B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">
-                ${escapeHtml(elements.timerClientProject?.value.trim() || "Widely Social")}
-              </span>
-            </div>
-            <span id="pipCost" style="font-family: monospace; font-size: 11px; font-weight: 700; background: rgba(16,185,129,0.2); color: #6EE7B7; border: 1px solid rgba(16,185,129,0.3); padding: 1px 6px; border-radius: 999px;">
-              ${elements.liveCostBadge?.textContent || "$0.00"}
-            </span>
+        <div class="pip-pill-dock" id="pipPillContainer">
+          <!-- Icono Morado -->
+          <div class="pip-badge" id="pipBadgeFocus" title="Volver a Widely Tracker">
+            <i class="fa-regular fa-clock" style="font-size: 13px;"></i>
           </div>
 
-          <!-- Cronómetro Central -->
-          <div style="text-align: center; margin: 4px 0;">
-            <div id="pipTimer" style="font-family: monospace; font-size: 32px; font-weight: 800; letter-spacing: 0.05em; color: #FFFFFF; line-height: 1.1;">
-              ${formatSecondsToTime(state.timer.elapsedSeconds)}
-            </div>
-            <div id="pipDesc" style="font-size: 10px; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px;">
-              ${escapeHtml(elements.timerTaskDescription?.value.trim() || "Actividad activa")}
+          <!-- Información: Tarea, Tiempo y Costo -->
+          <div class="pip-text-box" id="pipTextFocus" title="Volver a Widely Tracker">
+            <div class="pip-title" id="pipTaskTitle">${escapeHtml(titleDisplay)}</div>
+            <div class="pip-sub">
+              <span id="pipTimer" style="color: #F8FAFC; font-weight: 700;">${timeFormatted}</span>
+              <span style="color: #64748B;"> • </span>
+              <span id="pipCost" style="color: #94A3B8;">${cost} USD</span>
             </div>
           </div>
 
-          <!-- Controles Rápidos -->
-          <div style="display: flex; align-items: center; justify-content: center; gap: 6px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);">
-            <button id="pipBtnToggle" style="background: ${state.timer.isRunning ? '#D97706' : '#10B981'}; color: white; border: none; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s;">
-              ${state.timer.isRunning ? 'Pausar' : 'Reanudar'}
+          <!-- Botones de Acción: Cian Pausa + Rojo Guardar -->
+          <div class="pip-buttons">
+            <button id="pipBtnToggle" class="pip-btn pip-btn-pause" title="Pausar / Reanudar">
+              <i class="${state.timer.isRunning ? 'fa-solid fa-pause' : 'fa-solid fa-play'}" id="pipToggleIcon" style="font-size: 12px; margin-left: ${state.timer.isRunning ? '0' : '2px'};"></i>
             </button>
-            <button id="pipBtnSave" style="background: #2563EB; color: white; border: none; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s;">
-              Guardar Tarea
-            </button>
-            <button id="pipBtnFocus" style="background: rgba(255,255,255,0.1); color: #CBD5E1; border: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; cursor: pointer;" title="Ir a la pestaña de Widely">
-              ↗ App
+            <button id="pipBtnSave" class="pip-btn pip-btn-stop" title="Guardar y registrar tarea">
+              <i class="fa-solid fa-square" style="font-size: 11px;"></i>
             </button>
           </div>
         </div>
@@ -1751,11 +1847,15 @@ async function togglePictureInPictureWindow() {
         } else {
           startTimer();
         }
+        updatePipDisplay();
       });
       pipDoc.getElementById("pipBtnSave")?.addEventListener("click", () => {
         handleRegisterTask();
       });
-      pipDoc.getElementById("pipBtnFocus")?.addEventListener("click", () => {
+      pipDoc.getElementById("pipBadgeFocus")?.addEventListener("click", () => {
+        window.focus();
+      });
+      pipDoc.getElementById("pipTextFocus")?.addEventListener("click", () => {
         window.focus();
       });
 
@@ -1765,7 +1865,7 @@ async function togglePictureInPictureWindow() {
       });
 
       updatePipButtonsState(true);
-      showToast("Ventana flotante activa. Se mantendrá visible sobre otras apps del PC.", "success");
+      showToast("Píldora flotante activa sobre tu pantalla.", "success");
       return;
     } catch (err) {
       console.warn("[PiP] Error abriendo Document PiP:", err);
@@ -1776,6 +1876,20 @@ async function togglePictureInPictureWindow() {
   openCanvasVideoPip();
 }
 
+function drawCanvasRoundedRect(ctx, x, y, width, height, radius) {
+  if (ctx.roundRect) {
+    ctx.roundRect(x, y, width, height, radius);
+  } else {
+    const r = Math.min(radius, width / 2, height / 2);
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + width, y, x + width, y + height, r);
+    ctx.arcTo(x + width, y + height, x, y + height, r);
+    ctx.arcTo(x, y + height, x, y, r);
+    ctx.arcTo(x, y, x + width, y, r);
+    ctx.closePath();
+  }
+}
+
 async function openCanvasVideoPip() {
   const video = elements.pipHiddenVideo || document.getElementById("pipHiddenVideo");
   const canvas = elements.pipHiddenCanvas || document.getElementById("pipHiddenCanvas");
@@ -1784,59 +1898,210 @@ async function openCanvasVideoPip() {
     return;
   }
 
+  // Dimensiones Ultra-Slim formato Píldora (Ratio 5.75:1)
+  canvas.width = 460;
+  canvas.height = 80;
+
   try {
     const ctx = canvas.getContext("2d");
 
-    function drawCanvasFrame() {
-      ctx.fillStyle = "#0F172A";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    function renderCanvasPill() {
+      const w = canvas.width;
+      const h = canvas.height;
 
-      ctx.fillStyle = "#F59E0B";
-      ctx.font = "bold 13px sans-serif";
-      const client = elements.timerClientProject?.value.trim() || "Widely Social";
-      ctx.fillText(client.substring(0, 20), 16, 26);
+      // 1. Fondo negro general
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, w, h);
 
-      ctx.fillStyle = "#10B981";
-      ctx.font = "bold 13px monospace";
+      // 2. Cápsula exterior Píldora
+      const marginX = 4;
+      const marginY = 4;
+      const pillW = w - marginX * 2;
+      const pillH = h - marginY * 2;
+      const pillRadius = pillH / 2;
+
+      // Borde degradado iridiscente (Cian -> Azul Claro -> Púrpura -> Coral)
+      const grad = ctx.createLinearGradient(0, 0, w, 0);
+      grad.addColorStop(0, "#06B6D4");
+      grad.addColorStop(0.25, "#38BDF8");
+      grad.addColorStop(0.65, "#8B5CF6");
+      grad.addColorStop(1, "#F43F5E");
+
+      ctx.beginPath();
+      drawCanvasRoundedRect(ctx, marginX, marginY, pillW, pillH, pillRadius);
+      ctx.fillStyle = "#05070E";
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = grad;
+      ctx.stroke();
+
+      // 3. Icono Morado Izquierdo (Concepto 3 Mockup)
+      const iconSize = 36;
+      const iconX = 18;
+      const iconY = (h - iconSize) / 2;
+      ctx.beginPath();
+      drawCanvasRoundedRect(ctx, iconX, iconY, iconSize, iconSize, 10);
+      ctx.fillStyle = "#2D1537";
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(192, 132, 252, 0.4)";
+      ctx.stroke();
+
+      // Glifo reloj en el icono morado
+      const cx = iconX + iconSize / 2;
+      const cy = iconY + iconSize / 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+      ctx.strokeStyle = "#E9D5FF";
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx, cy - 4);
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + 3, cy);
+      ctx.strokeStyle = "#E9D5FF";
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+
+      // 4. Tipografía Central (Título de Tarea + Tiempo y Costo)
+      const rawDesc = elements.timerTaskDescription?.value.trim() || "";
+      const rawClient = elements.timerClientProject?.value.trim() || "Widely Social";
+      const displayTitle = rawDesc || rawClient;
+
+      const timeFormatted = formatSecondsToTime(state.timer.elapsedSeconds);
       const cost = elements.liveCostBadge?.textContent || "$0.00";
-      ctx.fillText(cost, canvas.width - 70, 26);
-
-      ctx.fillStyle = "#FFFFFF";
-      ctx.font = "bold 38px monospace";
-      ctx.textAlign = "center";
-      ctx.fillText(formatSecondsToTime(state.timer.elapsedSeconds), canvas.width / 2, 78);
-
-      ctx.fillStyle = "#94A3B8";
-      ctx.font = "11px sans-serif";
-      const desc = elements.timerTaskDescription?.value.trim() || "Actividad activa";
-      ctx.fillText(desc.substring(0, 35), canvas.width / 2, 104);
+      const subText = `${timeFormatted} • ${cost} USD`;
 
       ctx.textAlign = "left";
-      ctx.fillStyle = state.timer.isRunning ? "#10B981" : "#F59E0B";
+      ctx.font = "bold 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillStyle = "#FFFFFF";
+
+      // Truncar texto si es muy largo
+      let truncatedTitle = displayTitle;
+      const maxTitleW = 230;
+      if (ctx.measureText(truncatedTitle).width > maxTitleW) {
+        while (truncatedTitle.length > 3 && ctx.measureText(truncatedTitle + "…").width > maxTitleW) {
+          truncatedTitle = truncatedTitle.slice(0, -1);
+        }
+        truncatedTitle += "…";
+      }
+      ctx.fillText(truncatedTitle, 68, 36);
+
+      ctx.font = "500 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace";
+      ctx.fillStyle = "#94A3B8";
+      ctx.fillText(subText, 68, 54);
+
+      // 5. Botones de Acción Derecha (Cian Pausa + Rojo Guardar)
+      const isRunning = state.timer.isRunning;
+      const btnSize = 34;
+      const btnY = (h - btnSize) / 2;
+      const btnRadius = btnSize / 2;
+
+      // Botón 1: Cian Pausa / Play
+      const btn1X = w - 88;
+      const btn1CX = btn1X + btnRadius;
+      const btn1CY = btnY + btnRadius;
+
       ctx.beginPath();
-      ctx.arc(20, 130, 4, 0, Math.PI * 2);
+      ctx.arc(btn1CX, btn1CY, btnRadius, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(6, 182, 212, 0.15)";
+      ctx.fill();
+      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = "#06B6D4";
+      ctx.shadowColor = "rgba(6, 182, 212, 0.6)";
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Icono Pausa (dos barras) o Play
+      if (isRunning) {
+        ctx.fillStyle = "#22D3EE";
+        const barW = 3;
+        const barH = 12;
+        const barY = btn1CY - barH / 2;
+        ctx.beginPath();
+        drawCanvasRoundedRect(ctx, btn1CX - 5, barY, barW, barH, 1.5);
+        ctx.fill();
+        ctx.beginPath();
+        drawCanvasRoundedRect(ctx, btn1CX + 2, barY, barW, barH, 1.5);
+        ctx.fill();
+      } else {
+        ctx.fillStyle = "#22D3EE";
+        ctx.beginPath();
+        ctx.moveTo(btn1CX - 4, btn1CY - 6);
+        ctx.lineTo(btn1CX + 6, btn1CY);
+        ctx.lineTo(btn1CX - 4, btn1CY + 6);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Botón 2: Rojo Guardar / Stop
+      const btn2X = w - 44;
+      const btn2CX = btn2X + btnRadius;
+      const btn2CY = btnY + btnRadius;
+
+      ctx.beginPath();
+      ctx.arc(btn2CX, btn2CY, btnRadius, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(239, 68, 68, 0.15)";
+      ctx.fill();
+      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = "#EF4444";
+      ctx.shadowColor = "rgba(239, 68, 68, 0.6)";
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Icono cuadrado stop
+      ctx.fillStyle = "#F87171";
+      const sqSize = 10;
+      ctx.beginPath();
+      drawCanvasRoundedRect(ctx, btn2CX - sqSize / 2, btn2CY - sqSize / 2, sqSize, sqSize, 2);
       ctx.fill();
 
-      ctx.font = "11px sans-serif";
-      ctx.fillText(state.timer.isRunning ? "En curso..." : "Pausado", 30, 134);
+      // Sincronizar MediaSession nativo del sistema
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: displayTitle,
+          artist: subText,
+          album: "Widely Social Tracker"
+        });
+      }
 
-      canvasPipAnimationId = requestAnimationFrame(drawCanvasFrame);
+      canvasPipAnimationId = requestAnimationFrame(renderCanvasPill);
     }
 
-    drawCanvasFrame();
+    renderCanvasPill();
 
-    canvasPipStream = canvas.captureStream(12);
+    // Configurar controladores de MediaSession para acciones desde el PiP
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.setActionHandler("play", () => {
+        if (!state.timer.isRunning) startTimer();
+      });
+      navigator.mediaSession.setActionHandler("pause", () => {
+        if (state.timer.isRunning) pauseTimer();
+      });
+      navigator.mediaSession.setActionHandler("stop", () => {
+        handleRegisterTask();
+      });
+    }
+
+    canvasPipStream = canvas.captureStream(15);
     video.srcObject = canvasPipStream;
     await video.play();
     await video.requestPictureInPicture();
 
     video.addEventListener("leavepictureinpicture", () => {
       cancelAnimationFrame(canvasPipAnimationId);
+      if (canvasPipStream) {
+        canvasPipStream.getTracks().forEach(track => track.stop());
+      }
       updatePipButtonsState(false);
     }, { once: true });
 
     updatePipButtonsState(true);
-    showToast("Ventana flotante de video activa sobre tu pantalla.", "success");
+    showToast("Píldora flotante activa sobre tu pantalla.", "success");
   } catch (err) {
     console.error("[Canvas PiP] Error:", err);
     showToast("No se pudo iniciar la ventana flotante en este navegador.", "warning");
@@ -1849,30 +2114,23 @@ function updatePipDisplay() {
   const pipDoc = pipWindowInstance.document;
   const timeFormatted = formatSecondsToTime(state.timer.elapsedSeconds);
   const cost = elements.liveCostBadge?.textContent || "$0.00";
-  const client = elements.timerClientProject?.value.trim() || "Widely Social";
-  const desc = elements.timerTaskDescription?.value.trim() || "Actividad activa";
+  const rawDesc = elements.timerTaskDescription?.value.trim() || "";
+  const rawClient = elements.timerClientProject?.value.trim() || "Widely Social";
+  const displayTitle = rawDesc || rawClient;
 
   const pipTimer = pipDoc.getElementById("pipTimer");
   if (pipTimer) pipTimer.textContent = timeFormatted;
 
   const pipCost = pipDoc.getElementById("pipCost");
-  if (pipCost) pipCost.textContent = cost;
+  if (pipCost) pipCost.textContent = `${cost} USD`;
 
-  const pipClient = pipDoc.getElementById("pipClient");
-  if (pipClient) pipClient.textContent = client;
+  const pipTaskTitle = pipDoc.getElementById("pipTaskTitle");
+  if (pipTaskTitle) pipTaskTitle.textContent = displayTitle;
 
-  const pipDesc = pipDoc.getElementById("pipDesc");
-  if (pipDesc) pipDesc.textContent = desc;
-
-  const pipBtnToggle = pipDoc.getElementById("pipBtnToggle");
-  if (pipBtnToggle) {
-    pipBtnToggle.textContent = state.timer.isRunning ? "Pausar" : "Reanudar";
-    pipBtnToggle.style.background = state.timer.isRunning ? "#D97706" : "#10B981";
-  }
-
-  const pipDot = pipDoc.getElementById("pipDot");
-  if (pipDot) {
-    pipDot.style.background = state.timer.isRunning ? "#10B981" : "#F59E0B";
+  const pipToggleIcon = pipDoc.getElementById("pipToggleIcon");
+  if (pipToggleIcon) {
+    pipToggleIcon.className = state.timer.isRunning ? "fa-solid fa-pause" : "fa-solid fa-play";
+    pipToggleIcon.style.marginLeft = state.timer.isRunning ? "0" : "2px";
   }
 }
 
