@@ -517,10 +517,8 @@ const elements = {
   islandBtnDismiss: document.getElementById("islandBtnDismiss"),
   islandBtnPip: document.getElementById("islandBtnPip"),
 
-  // Picture-in-Picture Flotante Nativo (Always-On-Top sobre el PC)
+  // Control Flotante Interactivo
   btnTogglePipTimer: document.getElementById("btnTogglePipTimer"),
-  pipHiddenVideo: document.getElementById("pipHiddenVideo"),
-  pipHiddenCanvas: document.getElementById("pipHiddenCanvas"),
 
   authTabLogin: document.getElementById("authTabLogin"),
   authTabRegister: document.getElementById("authTabRegister"),
@@ -1635,9 +1633,11 @@ function checkDynamicIslandVisibility() {
    PICTURE-IN-PICTURE NATIVO & CONTROL FLOTANTE ALWAYS-ON-TOP
    Permite que el cronómetro flote sobre Windows (Figma, Excel, Photoshop, etc.)
    ============================================================================ */
+/* ============================================================================
+   MINI-VENTANA FLOTANTE INTERACTIVA (100% REAL HTML — CERO VIDEOS)
+   Permite controlar el cronómetro sobre Figma, Excel, Photoshop o cualquier app.
+   ============================================================================ */
 let pipWindowInstance = null;
-let canvasPipStream = null;
-let canvasPipAnimationId = null;
 const ORIGINAL_DOCUMENT_TITLE = "Widely Social | Time Tracker & Liquidaciones";
 
 function updatePipButtonsState(isActive) {
@@ -1659,8 +1659,199 @@ function updatePipButtonsState(isActive) {
   }
 }
 
+function setupMiniWindowContent(doc, win) {
+  doc.title = "Widely Social | Mini Tracker";
+  doc.head.innerHTML = `
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        width: 100%;
+        height: 100%;
+        background: #000000;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      .pip-pill-dock {
+        width: calc(100% - 10px);
+        height: calc(100% - 10px);
+        max-height: 64px;
+        background: #05070E;
+        border-radius: 9999px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 14px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.8), 0 0 15px rgba(6,182,212,0.15);
+      }
+      .pip-pill-dock::before {
+        content: "";
+        position: absolute;
+        inset: -1.5px;
+        border-radius: 9999px;
+        padding: 1.5px;
+        background: linear-gradient(90deg, #06B6D4 0%, #38BDF8 25%, #8B5CF6 65%, #F43F5E 100%);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+      .pip-badge {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: #2D1537;
+        border: 1px solid rgba(192, 132, 252, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #E9D5FF;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition: transform 0.15s;
+      }
+      .pip-badge:hover {
+        transform: scale(1.05);
+      }
+      .pip-text-box {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        flex: 1;
+        min-width: 0;
+        margin: 0 12px;
+        cursor: pointer;
+      }
+      .pip-title {
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .pip-sub {
+        color: #94A3B8;
+        font-size: 11px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+        font-weight: 500;
+        margin-top: 2px;
+        white-space: nowrap;
+      }
+      .pip-buttons {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .pip-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: none;
+        outline: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s;
+      }
+      .pip-btn:hover {
+        transform: scale(1.08);
+      }
+      .pip-btn:active {
+        transform: scale(0.92);
+      }
+      .pip-btn-pause {
+        background: rgba(6, 182, 212, 0.15);
+        border: 1.8px solid #06B6D4;
+        color: #22D3EE;
+        box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+      }
+      .pip-btn-stop {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1.8px solid #EF4444;
+        color: #F87171;
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+      }
+    </style>
+  `;
+
+  const rawDesc = elements.timerTaskDescription?.value.trim() || "";
+  const rawClient = elements.timerClientProject?.value.trim() || "Widely Social";
+  const titleDisplay = rawDesc || rawClient;
+  const timeFormatted = formatSecondsToTime(state.timer.elapsedSeconds);
+  const cost = elements.liveCostBadge?.textContent || "$0.00";
+
+  doc.body.innerHTML = `
+    <div class="pip-pill-dock" id="pipPillContainer">
+      <!-- Icono Morado -->
+      <div class="pip-badge" id="pipBadgeFocus" title="Volver a la pestaña principal">
+        <i class="fa-regular fa-clock" style="font-size: 13px;"></i>
+      </div>
+
+      <!-- Información: Tarea, Tiempo y Costo -->
+      <div class="pip-text-box" id="pipTextFocus" title="Volver a la pestaña principal">
+        <div class="pip-title" id="pipTaskTitle">${escapeHtml(titleDisplay)}</div>
+        <div class="pip-sub">
+          <span id="pipTimer" style="color: #F8FAFC; font-weight: 700;">${timeFormatted}</span>
+          <span style="color: #64748B;"> • </span>
+          <span id="pipCost" style="color: #94A3B8;">${cost} USD</span>
+        </div>
+      </div>
+
+      <!-- Botones Reales de Interacción -->
+      <div class="pip-buttons">
+        <button type="button" id="pipBtnToggle" class="pip-btn pip-btn-pause" title="Pausar / Reanudar">
+          <i class="${state.timer.isRunning ? 'fa-solid fa-pause' : 'fa-solid fa-play'}" id="pipToggleIcon" style="font-size: 12px; margin-left: ${state.timer.isRunning ? '0' : '2px'};"></i>
+        </button>
+        <button type="button" id="pipBtnSave" class="pip-btn pip-btn-stop" title="Guardar y registrar tarea">
+          <i class="fa-solid fa-square" style="font-size: 11px;"></i>
+        </button>
+      </div>
+    </div>
+  `;
+
+  // Asignar eventos de interacción directa
+  doc.getElementById("pipBtnToggle")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (state.timer.isRunning) {
+      pauseTimer();
+    } else {
+      startTimer();
+    }
+    updatePipDisplay();
+  });
+
+  doc.getElementById("pipBtnSave")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    handleRegisterTask();
+  });
+
+  doc.getElementById("pipBadgeFocus")?.addEventListener("click", () => {
+    window.focus();
+  });
+
+  doc.getElementById("pipTextFocus")?.addEventListener("click", () => {
+    window.focus();
+  });
+
+  win.addEventListener("beforeunload", () => {
+    pipWindowInstance = null;
+    updatePipButtonsState(false);
+  });
+}
+
 async function togglePictureInPictureWindow() {
-  // 1. Si ya hay una ventana Document PiP abierta, cerrarla
+  // 1. Si ya hay una ventana abierta, cerrarla
   if (pipWindowInstance && !pipWindowInstance.closed) {
     pipWindowInstance.close();
     pipWindowInstance = null;
@@ -1668,443 +1859,46 @@ async function togglePictureInPictureWindow() {
     return;
   }
 
-  // 2. Si ya hay una ventana Video PiP abierta, cerrarla
-  if (document.pictureInPictureElement) {
-    try {
-      await document.exitPictureInPicture();
-    } catch (e) {}
-    updatePipButtonsState(false);
-    return;
-  }
-
-  // 3. Document Picture-in-Picture API (Chrome/Edge en Windows)
-  if ("documentPictureInPicture" in window) {
+  // 2. Intentar Document Picture-in-Picture nativo (Always-On-Top interactivo en Chromium con HTTPS)
+  if ("documentPictureInPicture" in window && window.isSecureContext) {
     try {
       pipWindowInstance = await window.documentPictureInPicture.requestWindow({
         width: 440,
         height: 76
       });
-
-      const faLink = document.createElement("link");
-      faLink.rel = "stylesheet";
-      faLink.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css";
-      pipWindowInstance.document.head.appendChild(faLink);
-
-      // Estilos CSS exactos al Concepto 3 (Píldora Flotante con Borde Iridescente)
-      const styleEl = document.createElement("style");
-      styleEl.textContent = `
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body {
-          width: 100%;
-          height: 100%;
-          background: #000000;
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          user-select: none;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        .pip-pill-dock {
-          width: calc(100% - 8px);
-          height: calc(100% - 8px);
-          max-height: 64px;
-          background: #05070E;
-          border-radius: 9999px;
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 14px;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.8), 0 0 15px rgba(6,182,212,0.15);
-        }
-        .pip-pill-dock::before {
-          content: "";
-          position: absolute;
-          inset: -1.5px;
-          border-radius: 9999px;
-          padding: 1.5px;
-          background: linear-gradient(90deg, #06B6D4 0%, #38BDF8 25%, #8B5CF6 65%, #F43F5E 100%);
-          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          pointer-events: none;
-        }
-        .pip-badge {
-          width: 34px;
-          height: 34px;
-          border-radius: 10px;
-          background: #2D1537;
-          border: 1px solid rgba(192, 132, 252, 0.4);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #E9D5FF;
-          flex-shrink: 0;
-          cursor: pointer;
-        }
-        .pip-text-box {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          flex: 1;
-          min-width: 0;
-          margin: 0 12px;
-          cursor: pointer;
-        }
-        .pip-title {
-          color: #FFFFFF;
-          font-size: 13px;
-          font-weight: 700;
-          line-height: 1.2;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-        .pip-sub {
-          color: #94A3B8;
-          font-size: 11px;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
-          font-weight: 500;
-          margin-top: 2px;
-          white-space: nowrap;
-        }
-        .pip-buttons {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex-shrink: 0;
-        }
-        .pip-btn {
-          width: 34px;
-          height: 34px;
-          border-radius: 50%;
-          border: none;
-          outline: none;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: transform 0.15s, box-shadow 0.15s;
-        }
-        .pip-btn:active {
-          transform: scale(0.92);
-        }
-        .pip-btn-pause {
-          background: rgba(6, 182, 212, 0.15);
-          border: 1.8px solid #06B6D4;
-          color: #22D3EE;
-          box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
-        }
-        .pip-btn-stop {
-          background: rgba(239, 68, 68, 0.15);
-          border: 1.8px solid #EF4444;
-          color: #F87171;
-          box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
-        }
-      `;
-      pipWindowInstance.document.head.appendChild(styleEl);
-
-      const rawDesc = elements.timerTaskDescription?.value.trim() || "";
-      const rawClient = elements.timerClientProject?.value.trim() || "Widely Social";
-      const titleDisplay = rawDesc || rawClient;
-      const timeFormatted = formatSecondsToTime(state.timer.elapsedSeconds);
-      const cost = elements.liveCostBadge?.textContent || "$0.00";
-
-      pipWindowInstance.document.body.innerHTML = `
-        <div class="pip-pill-dock" id="pipPillContainer">
-          <!-- Icono Morado -->
-          <div class="pip-badge" id="pipBadgeFocus" title="Volver a Widely Tracker">
-            <i class="fa-regular fa-clock" style="font-size: 13px;"></i>
-          </div>
-
-          <!-- Información: Tarea, Tiempo y Costo -->
-          <div class="pip-text-box" id="pipTextFocus" title="Volver a Widely Tracker">
-            <div class="pip-title" id="pipTaskTitle">${escapeHtml(titleDisplay)}</div>
-            <div class="pip-sub">
-              <span id="pipTimer" style="color: #F8FAFC; font-weight: 700;">${timeFormatted}</span>
-              <span style="color: #64748B;"> • </span>
-              <span id="pipCost" style="color: #94A3B8;">${cost} USD</span>
-            </div>
-          </div>
-
-          <!-- Botones de Acción: Cian Pausa + Rojo Guardar -->
-          <div class="pip-buttons">
-            <button id="pipBtnToggle" class="pip-btn pip-btn-pause" title="Pausar / Reanudar">
-              <i class="${state.timer.isRunning ? 'fa-solid fa-pause' : 'fa-solid fa-play'}" id="pipToggleIcon" style="font-size: 12px; margin-left: ${state.timer.isRunning ? '0' : '2px'};"></i>
-            </button>
-            <button id="pipBtnSave" class="pip-btn pip-btn-stop" title="Guardar y registrar tarea">
-              <i class="fa-solid fa-square" style="font-size: 11px;"></i>
-            </button>
-          </div>
-        </div>
-      `;
-
-      const pipDoc = pipWindowInstance.document;
-      pipDoc.getElementById("pipBtnToggle")?.addEventListener("click", () => {
-        if (state.timer.isRunning) {
-          pauseTimer();
-        } else {
-          startTimer();
-        }
-        updatePipDisplay();
-      });
-      pipDoc.getElementById("pipBtnSave")?.addEventListener("click", () => {
-        handleRegisterTask();
-      });
-      pipDoc.getElementById("pipBadgeFocus")?.addEventListener("click", () => {
-        window.focus();
-      });
-      pipDoc.getElementById("pipTextFocus")?.addEventListener("click", () => {
-        window.focus();
-      });
-
-      pipWindowInstance.addEventListener("pagehide", () => {
-        pipWindowInstance = null;
-        updatePipButtonsState(false);
-      });
-
+      setupMiniWindowContent(pipWindowInstance.document, pipWindowInstance);
       updatePipButtonsState(true);
-      showToast("Píldora flotante activa sobre tu pantalla.", "success");
+      showToast("Mini-ventana interactiva activa sobre tu pantalla.", "success");
       return;
     } catch (err) {
-      console.warn("[PiP] Error abriendo Document PiP:", err);
+      console.warn("[Floating Window] Error con Document PiP, abriendo ventana Pop-out:", err);
     }
   }
 
-  // Fallback a Canvas Video PiP
-  openCanvasVideoPip();
-}
-
-function drawCanvasRoundedRect(ctx, x, y, width, height, radius) {
-  if (ctx.roundRect) {
-    ctx.roundRect(x, y, width, height, radius);
-  } else {
-    const r = Math.min(radius, width / 2, height / 2);
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + width, y, x + width, y + height, r);
-    ctx.arcTo(x + width, y + height, x, y + height, r);
-    ctx.arcTo(x, y + height, x, y, r);
-    ctx.arcTo(x, y, x + width, y, r);
-    ctx.closePath();
-  }
-}
-
-async function openCanvasVideoPip() {
-  const video = elements.pipHiddenVideo || document.getElementById("pipHiddenVideo");
-  const canvas = elements.pipHiddenCanvas || document.getElementById("pipHiddenCanvas");
-  if (!video || !canvas) {
-    showToast("Tu navegador no soporta ventana flotante.", "warning");
-    return;
-  }
-
-  // Dimensiones Ultra-Slim formato Píldora (Ratio 5.75:1)
-  canvas.width = 460;
-  canvas.height = 80;
-
+  // 3. Mini-Ventana Popup Nativa (100% interactiva, sin video, funciona en cualquier navegador)
   try {
-    const ctx = canvas.getContext("2d");
+    const w = 440;
+    const h = 88;
+    const left = Math.max(20, (window.screen?.width || 1200) - w - 30);
+    const top = Math.max(20, (window.screen?.height || 800) - h - 80);
 
-    function renderCanvasPill() {
-      const w = canvas.width;
-      const h = canvas.height;
+    pipWindowInstance = window.open(
+      "",
+      "WidelyFloatingTracker",
+      `width=${w},height=${h},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no,resizable=no,scrollbars=no`
+    );
 
-      // 1. Fondo negro general
-      ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = "#000000";
-      ctx.fillRect(0, 0, w, h);
-
-      // 2. Cápsula exterior Píldora
-      const marginX = 4;
-      const marginY = 4;
-      const pillW = w - marginX * 2;
-      const pillH = h - marginY * 2;
-      const pillRadius = pillH / 2;
-
-      // Borde degradado iridiscente (Cian -> Azul Claro -> Púrpura -> Coral)
-      const grad = ctx.createLinearGradient(0, 0, w, 0);
-      grad.addColorStop(0, "#06B6D4");
-      grad.addColorStop(0.25, "#38BDF8");
-      grad.addColorStop(0.65, "#8B5CF6");
-      grad.addColorStop(1, "#F43F5E");
-
-      ctx.beginPath();
-      drawCanvasRoundedRect(ctx, marginX, marginY, pillW, pillH, pillRadius);
-      ctx.fillStyle = "#05070E";
-      ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = grad;
-      ctx.stroke();
-
-      // 3. Icono Morado Izquierdo (Concepto 3 Mockup)
-      const iconSize = 36;
-      const iconX = 18;
-      const iconY = (h - iconSize) / 2;
-      ctx.beginPath();
-      drawCanvasRoundedRect(ctx, iconX, iconY, iconSize, iconSize, 10);
-      ctx.fillStyle = "#2D1537";
-      ctx.fill();
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = "rgba(192, 132, 252, 0.4)";
-      ctx.stroke();
-
-      // Glifo reloj en el icono morado
-      const cx = iconX + iconSize / 2;
-      const cy = iconY + iconSize / 2;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 7, 0, Math.PI * 2);
-      ctx.strokeStyle = "#E9D5FF";
-      ctx.lineWidth = 1.6;
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(cx, cy - 4);
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(cx + 3, cy);
-      ctx.strokeStyle = "#E9D5FF";
-      ctx.lineWidth = 1.6;
-      ctx.stroke();
-
-      // 4. Tipografía Central (Título de Tarea + Tiempo y Costo)
-      const rawDesc = elements.timerTaskDescription?.value.trim() || "";
-      const rawClient = elements.timerClientProject?.value.trim() || "Widely Social";
-      const displayTitle = rawDesc || rawClient;
-
-      const timeFormatted = formatSecondsToTime(state.timer.elapsedSeconds);
-      const cost = elements.liveCostBadge?.textContent || "$0.00";
-      const subText = `${timeFormatted} • ${cost} USD`;
-
-      ctx.textAlign = "left";
-      ctx.font = "bold 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.fillStyle = "#FFFFFF";
-
-      // Truncar texto si es muy largo
-      let truncatedTitle = displayTitle;
-      const maxTitleW = 230;
-      if (ctx.measureText(truncatedTitle).width > maxTitleW) {
-        while (truncatedTitle.length > 3 && ctx.measureText(truncatedTitle + "…").width > maxTitleW) {
-          truncatedTitle = truncatedTitle.slice(0, -1);
-        }
-        truncatedTitle += "…";
-      }
-      ctx.fillText(truncatedTitle, 68, 36);
-
-      ctx.font = "500 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace";
-      ctx.fillStyle = "#94A3B8";
-      ctx.fillText(subText, 68, 54);
-
-      // 5. Botones de Acción Derecha (Cian Pausa + Rojo Guardar)
-      const isRunning = state.timer.isRunning;
-      const btnSize = 34;
-      const btnY = (h - btnSize) / 2;
-      const btnRadius = btnSize / 2;
-
-      // Botón 1: Cian Pausa / Play
-      const btn1X = w - 88;
-      const btn1CX = btn1X + btnRadius;
-      const btn1CY = btnY + btnRadius;
-
-      ctx.beginPath();
-      ctx.arc(btn1CX, btn1CY, btnRadius, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(6, 182, 212, 0.15)";
-      ctx.fill();
-      ctx.lineWidth = 1.8;
-      ctx.strokeStyle = "#06B6D4";
-      ctx.shadowColor = "rgba(6, 182, 212, 0.6)";
-      ctx.shadowBlur = 8;
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-
-      // Icono Pausa (dos barras) o Play
-      if (isRunning) {
-        ctx.fillStyle = "#22D3EE";
-        const barW = 3;
-        const barH = 12;
-        const barY = btn1CY - barH / 2;
-        ctx.beginPath();
-        drawCanvasRoundedRect(ctx, btn1CX - 5, barY, barW, barH, 1.5);
-        ctx.fill();
-        ctx.beginPath();
-        drawCanvasRoundedRect(ctx, btn1CX + 2, barY, barW, barH, 1.5);
-        ctx.fill();
-      } else {
-        ctx.fillStyle = "#22D3EE";
-        ctx.beginPath();
-        ctx.moveTo(btn1CX - 4, btn1CY - 6);
-        ctx.lineTo(btn1CX + 6, btn1CY);
-        ctx.lineTo(btn1CX - 4, btn1CY + 6);
-        ctx.closePath();
-        ctx.fill();
-      }
-
-      // Botón 2: Rojo Guardar / Stop
-      const btn2X = w - 44;
-      const btn2CX = btn2X + btnRadius;
-      const btn2CY = btnY + btnRadius;
-
-      ctx.beginPath();
-      ctx.arc(btn2CX, btn2CY, btnRadius, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(239, 68, 68, 0.15)";
-      ctx.fill();
-      ctx.lineWidth = 1.8;
-      ctx.strokeStyle = "#EF4444";
-      ctx.shadowColor = "rgba(239, 68, 68, 0.6)";
-      ctx.shadowBlur = 8;
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-
-      // Icono cuadrado stop
-      ctx.fillStyle = "#F87171";
-      const sqSize = 10;
-      ctx.beginPath();
-      drawCanvasRoundedRect(ctx, btn2CX - sqSize / 2, btn2CY - sqSize / 2, sqSize, sqSize, 2);
-      ctx.fill();
-
-      // Sincronizar MediaSession nativo del sistema
-      if ("mediaSession" in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: displayTitle,
-          artist: subText,
-          album: "Widely Social Tracker"
-        });
-      }
-
-      canvasPipAnimationId = requestAnimationFrame(renderCanvasPill);
+    if (!pipWindowInstance) {
+      showToast("Por favor permite ventanas emergentes (pop-ups) en tu navegador.", "warning");
+      return;
     }
 
-    renderCanvasPill();
-
-    // Configurar controladores de MediaSession para acciones desde el PiP
-    if ("mediaSession" in navigator) {
-      navigator.mediaSession.setActionHandler("play", () => {
-        if (!state.timer.isRunning) startTimer();
-      });
-      navigator.mediaSession.setActionHandler("pause", () => {
-        if (state.timer.isRunning) pauseTimer();
-      });
-      navigator.mediaSession.setActionHandler("stop", () => {
-        handleRegisterTask();
-      });
-    }
-
-    canvasPipStream = canvas.captureStream(15);
-    video.srcObject = canvasPipStream;
-    await video.play();
-    await video.requestPictureInPicture();
-
-    video.addEventListener("leavepictureinpicture", () => {
-      cancelAnimationFrame(canvasPipAnimationId);
-      if (canvasPipStream) {
-        canvasPipStream.getTracks().forEach(track => track.stop());
-      }
-      updatePipButtonsState(false);
-    }, { once: true });
-
+    setupMiniWindowContent(pipWindowInstance.document, pipWindowInstance);
     updatePipButtonsState(true);
-    showToast("Píldora flotante activa sobre tu pantalla.", "success");
+    showToast("Mini-ventana interactiva abierta en tu pantalla.", "success");
   } catch (err) {
-    console.error("[Canvas PiP] Error:", err);
-    showToast("No se pudo iniciar la ventana flotante en este navegador.", "warning");
+    console.error("[Floating Window] Error:", err);
+    showToast("No se pudo abrir la mini-ventana.", "warning");
   }
 }
 
@@ -2112,6 +1906,8 @@ function updatePipDisplay() {
   if (!pipWindowInstance || pipWindowInstance.closed) return;
 
   const pipDoc = pipWindowInstance.document;
+  if (!pipDoc) return;
+
   const timeFormatted = formatSecondsToTime(state.timer.elapsedSeconds);
   const cost = elements.liveCostBadge?.textContent || "$0.00";
   const rawDesc = elements.timerTaskDescription?.value.trim() || "";
