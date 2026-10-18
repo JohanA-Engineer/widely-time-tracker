@@ -471,6 +471,15 @@ html.has-user-session #authTopNavbar {
   transform: translate(-50%, -2px) !important;
 }
 
+/* Estado activo del botón Picture-in-Picture Flotante */
+#btnTogglePipTimer.pip-active,
+#islandBtnPip.pip-active {
+  background-color: #2563EB !important;
+  color: #FFFFFF !important;
+  border-color: #1D4ED8 !important;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4) !important;
+}
+
 /* ============================================================================
    ESTILOS SIDEBAR SAAS: SLATE NAVY (#0F172A) & SAPPHIRE BLUE (#2563EB)
    ============================================================================ */

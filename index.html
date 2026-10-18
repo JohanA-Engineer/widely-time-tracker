@@ -506,7 +506,13 @@
                 <span class="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></span>
                 <h2 class="text-xs sm:text-sm font-semibold tracking-tight text-[#0F172A] dark:text-[#F8FAFC] uppercase">Tracker de Tareas en Vivo</h2>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1.5 sm:gap-2">
+                <!-- Botón Flotante PiP (Siempre visible sobre otras apps del PC) -->
+                <button type="button" id="btnTogglePipTimer" class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-semibold border border-[#2563EB]/30 bg-[#2563EB]/10 hover:bg-[#2563EB]/20 text-[#2563EB] dark:text-[#60A5FA] flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs" title="Abrir mini-ventana flotante fija sobre todas las aplicaciones del PC (Photoshop, Figma, Excel, otras pestañas)">
+                  <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                  <span class="hidden sm:inline">Flotar sobre Apps</span>
+                  <span class="sm:hidden">Flotar</span>
+                </button>
                 <!-- Selector Modo: Cronómetro Libre vs Pomodoro -->
                 <div class="inline-flex p-0.5 rounded-lg bg-[#E2E8F0] dark:bg-[#1E293B] text-[10px] font-semibold">
                   <button type="button" id="btnModeStandard" class="px-2 py-0.5 rounded-md bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] shadow-xs transition-all cursor-pointer">Libre</button>
@@ -1981,6 +1987,9 @@
 
       <!-- Acciones Rápidas -->
       <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <button type="button" id="islandBtnPip" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs active:scale-95 transition-all cursor-pointer" title="Flotar sobre otras aplicaciones del PC (Picture-in-Picture)">
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+        </button>
         <button type="button" id="islandBtnPlayPause" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs active:scale-95 transition-all cursor-pointer" title="Pausar / Reanudar">
           <i class="fa-solid fa-pause text-[11px]" id="islandPlayPauseIcon"></i>
         </button>
@@ -1997,6 +2006,10 @@
 
   <!-- Datalist Dinámico para Autocompletado de Clientes y Cuentas -->
   <datalist id="clientsDatalist"></datalist>
+
+  <!-- Elementos de Respaldo para Picture-in-Picture Flotante Nativo -->
+  <video id="pipHiddenVideo" class="hidden" muted playsinline style="position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></video>
+  <canvas id="pipHiddenCanvas" width="340" height="150" class="hidden" style="display: none;"></canvas>
 
   <!-- Script de entorno local o inyectado por GitHub Actions -->
   <script src="env.js" onerror="console.info('[Time Tracker Env] env.js no encontrado, usando configuración inyectada o almacenada.')"></script>

@@ -515,6 +515,12 @@ const elements = {
   islandPlayPauseIcon: document.getElementById("islandPlayPauseIcon"),
   islandBtnRegister: document.getElementById("islandBtnRegister"),
   islandBtnDismiss: document.getElementById("islandBtnDismiss"),
+  islandBtnPip: document.getElementById("islandBtnPip"),
+
+  // Picture-in-Picture Flotante Nativo (Always-On-Top sobre el PC)
+  btnTogglePipTimer: document.getElementById("btnTogglePipTimer"),
+  pipHiddenVideo: document.getElementById("pipHiddenVideo"),
+  pipHiddenCanvas: document.getElementById("pipHiddenCanvas"),
 
   authTabLogin: document.getElementById("authTabLogin"),
   authTabRegister: document.getElementById("authTabRegister"),
@@ -1518,6 +1524,8 @@ function resetTimer() {
 function renderTimerDisplay() {
   elements.timerDisplay.textContent = formatSecondsToTime(state.timer.elapsedSeconds);
   updateDynamicIslandUI();
+  updatePipDisplay();
+  updateBackgroundTabTitle();
 }
 
 function updateLiveCost() {
@@ -1529,6 +1537,7 @@ function updateLiveCost() {
 
   elements.liveCostBadge.textContent = `$${cost.toFixed(2)}`;
   if (elements.islandCostBadge) elements.islandCostBadge.textContent = `$${cost.toFixed(2)}`;
+  updatePipDisplay();
 }
 
 function updateDynamicIslandUI() {
@@ -1617,6 +1626,289 @@ function checkDynamicIslandVisibility() {
     elements.dynamicIslandTimer.classList.remove("island-visible");
   }
 }
+
+/* ============================================================================
+   PICTURE-IN-PICTURE NATIVO & CONTROL FLOTANTE ALWAYS-ON-TOP
+   Permite que el cronómetro flote sobre Windows (Figma, Excel, Photoshop, etc.)
+   ============================================================================ */
+let pipWindowInstance = null;
+let canvasPipStream = null;
+let canvasPipAnimationId = null;
+const ORIGINAL_DOCUMENT_TITLE = "Widely Social | Time Tracker & Liquidaciones";
+
+function updatePipButtonsState(isActive) {
+  if (elements.btnTogglePipTimer) {
+    if (isActive) {
+      elements.btnTogglePipTimer.classList.add("pip-active");
+      elements.btnTogglePipTimer.innerHTML = '<i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-[10px] text-white"></i><span class="hidden sm:inline">Cerrar Flotante</span><span class="sm:hidden">Cerrar</span>';
+    } else {
+      elements.btnTogglePipTimer.classList.remove("pip-active");
+      elements.btnTogglePipTimer.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-[#2563EB] dark:text-[#60A5FA]"></i><span class="hidden sm:inline">Flotar sobre Apps</span><span class="sm:hidden">Flotar</span>';
+    }
+  }
+  if (elements.islandBtnPip) {
+    if (isActive) {
+      elements.islandBtnPip.classList.add("pip-active");
+    } else {
+      elements.islandBtnPip.classList.remove("pip-active");
+    }
+  }
+}
+
+async function togglePictureInPictureWindow() {
+  // 1. Si ya hay una ventana Document PiP abierta, cerrarla
+  if (pipWindowInstance && !pipWindowInstance.closed) {
+    pipWindowInstance.close();
+    pipWindowInstance = null;
+    updatePipButtonsState(false);
+    return;
+  }
+
+  // 2. Si ya hay una ventana Video PiP abierta, cerrarla
+  if (document.pictureInPictureElement) {
+    try {
+      await document.exitPictureInPicture();
+    } catch (e) {}
+    updatePipButtonsState(false);
+    return;
+  }
+
+  // 3. Document Picture-in-Picture API (Chrome/Edge en Windows)
+  if ("documentPictureInPicture" in window) {
+    try {
+      pipWindowInstance = await window.documentPictureInPicture.requestWindow({
+        width: 330,
+        height: 155
+      });
+
+      // Cargar estilos y fuentes en la ventana flotante
+      [...document.styleSheets].forEach((styleSheet) => {
+        try {
+          const cssRules = [...styleSheet.cssRules].map((rule) => rule.cssText).join('');
+          const style = document.createElement('style');
+          style.textContent = cssRules;
+          pipWindowInstance.document.head.appendChild(style);
+        } catch (e) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.type = styleSheet.type;
+          link.media = styleSheet.media;
+          link.href = styleSheet.href;
+          pipWindowInstance.document.head.appendChild(link);
+        }
+      });
+
+      const faLink = document.createElement("link");
+      faLink.rel = "stylesheet";
+      faLink.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css";
+      pipWindowInstance.document.head.appendChild(faLink);
+
+      pipWindowInstance.document.body.className = "bg-[#0F172A] text-white m-0 p-3.5 flex flex-col justify-between h-full font-sans select-none overflow-hidden";
+      pipWindowInstance.document.body.innerHTML = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
+          <!-- Header: Cliente & Costo -->
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
+              <span id="pipDot" style="width: 8px; height: 8px; border-radius: 50%; background: ${state.timer.isRunning ? '#10B981' : '#F59E0B'}; display: inline-block; flex-shrink: 0;"></span>
+              <span id="pipClient" style="font-size: 11px; font-weight: 700; color: #F59E0B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">
+                ${escapeHtml(elements.timerClientProject?.value.trim() || "Widely Social")}
+              </span>
+            </div>
+            <span id="pipCost" style="font-family: monospace; font-size: 11px; font-weight: 700; background: rgba(16,185,129,0.2); color: #6EE7B7; border: 1px solid rgba(16,185,129,0.3); padding: 1px 6px; border-radius: 999px;">
+              ${elements.liveCostBadge?.textContent || "$0.00"}
+            </span>
+          </div>
+
+          <!-- Cronómetro Central -->
+          <div style="text-align: center; margin: 4px 0;">
+            <div id="pipTimer" style="font-family: monospace; font-size: 32px; font-weight: 800; letter-spacing: 0.05em; color: #FFFFFF; line-height: 1.1;">
+              ${formatSecondsToTime(state.timer.elapsedSeconds)}
+            </div>
+            <div id="pipDesc" style="font-size: 10px; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px;">
+              ${escapeHtml(elements.timerTaskDescription?.value.trim() || "Actividad activa")}
+            </div>
+          </div>
+
+          <!-- Controles Rápidos -->
+          <div style="display: flex; align-items: center; justify-content: center; gap: 6px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <button id="pipBtnToggle" style="background: ${state.timer.isRunning ? '#D97706' : '#10B981'}; color: white; border: none; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s;">
+              ${state.timer.isRunning ? 'Pausar' : 'Reanudar'}
+            </button>
+            <button id="pipBtnSave" style="background: #2563EB; color: white; border: none; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s;">
+              Guardar Tarea
+            </button>
+            <button id="pipBtnFocus" style="background: rgba(255,255,255,0.1); color: #CBD5E1; border: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; cursor: pointer;" title="Ir a la pestaña de Widely">
+              ↗ App
+            </button>
+          </div>
+        </div>
+      `;
+
+      const pipDoc = pipWindowInstance.document;
+      pipDoc.getElementById("pipBtnToggle")?.addEventListener("click", () => {
+        if (state.timer.isRunning) {
+          pauseTimer();
+        } else {
+          startTimer();
+        }
+      });
+      pipDoc.getElementById("pipBtnSave")?.addEventListener("click", () => {
+        handleRegisterTask();
+      });
+      pipDoc.getElementById("pipBtnFocus")?.addEventListener("click", () => {
+        window.focus();
+      });
+
+      pipWindowInstance.addEventListener("pagehide", () => {
+        pipWindowInstance = null;
+        updatePipButtonsState(false);
+      });
+
+      updatePipButtonsState(true);
+      showToast("Ventana flotante activa. Se mantendrá visible sobre otras apps del PC.", "success");
+      return;
+    } catch (err) {
+      console.warn("[PiP] Error abriendo Document PiP:", err);
+    }
+  }
+
+  // Fallback a Canvas Video PiP
+  openCanvasVideoPip();
+}
+
+async function openCanvasVideoPip() {
+  const video = elements.pipHiddenVideo || document.getElementById("pipHiddenVideo");
+  const canvas = elements.pipHiddenCanvas || document.getElementById("pipHiddenCanvas");
+  if (!video || !canvas) {
+    showToast("Tu navegador no soporta ventana flotante.", "warning");
+    return;
+  }
+
+  try {
+    const ctx = canvas.getContext("2d");
+
+    function drawCanvasFrame() {
+      ctx.fillStyle = "#0F172A";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#F59E0B";
+      ctx.font = "bold 13px sans-serif";
+      const client = elements.timerClientProject?.value.trim() || "Widely Social";
+      ctx.fillText(client.substring(0, 20), 16, 26);
+
+      ctx.fillStyle = "#10B981";
+      ctx.font = "bold 13px monospace";
+      const cost = elements.liveCostBadge?.textContent || "$0.00";
+      ctx.fillText(cost, canvas.width - 70, 26);
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "bold 38px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(formatSecondsToTime(state.timer.elapsedSeconds), canvas.width / 2, 78);
+
+      ctx.fillStyle = "#94A3B8";
+      ctx.font = "11px sans-serif";
+      const desc = elements.timerTaskDescription?.value.trim() || "Actividad activa";
+      ctx.fillText(desc.substring(0, 35), canvas.width / 2, 104);
+
+      ctx.textAlign = "left";
+      ctx.fillStyle = state.timer.isRunning ? "#10B981" : "#F59E0B";
+      ctx.beginPath();
+      ctx.arc(20, 130, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.font = "11px sans-serif";
+      ctx.fillText(state.timer.isRunning ? "En curso..." : "Pausado", 30, 134);
+
+      canvasPipAnimationId = requestAnimationFrame(drawCanvasFrame);
+    }
+
+    drawCanvasFrame();
+
+    canvasPipStream = canvas.captureStream(12);
+    video.srcObject = canvasPipStream;
+    await video.play();
+    await video.requestPictureInPicture();
+
+    video.addEventListener("leavepictureinpicture", () => {
+      cancelAnimationFrame(canvasPipAnimationId);
+      updatePipButtonsState(false);
+    }, { once: true });
+
+    updatePipButtonsState(true);
+    showToast("Ventana flotante de video activa sobre tu pantalla.", "success");
+  } catch (err) {
+    console.error("[Canvas PiP] Error:", err);
+    showToast("No se pudo iniciar la ventana flotante en este navegador.", "warning");
+  }
+}
+
+function updatePipDisplay() {
+  if (!pipWindowInstance || pipWindowInstance.closed) return;
+
+  const pipDoc = pipWindowInstance.document;
+  const timeFormatted = formatSecondsToTime(state.timer.elapsedSeconds);
+  const cost = elements.liveCostBadge?.textContent || "$0.00";
+  const client = elements.timerClientProject?.value.trim() || "Widely Social";
+  const desc = elements.timerTaskDescription?.value.trim() || "Actividad activa";
+
+  const pipTimer = pipDoc.getElementById("pipTimer");
+  if (pipTimer) pipTimer.textContent = timeFormatted;
+
+  const pipCost = pipDoc.getElementById("pipCost");
+  if (pipCost) pipCost.textContent = cost;
+
+  const pipClient = pipDoc.getElementById("pipClient");
+  if (pipClient) pipClient.textContent = client;
+
+  const pipDesc = pipDoc.getElementById("pipDesc");
+  if (pipDesc) pipDesc.textContent = desc;
+
+  const pipBtnToggle = pipDoc.getElementById("pipBtnToggle");
+  if (pipBtnToggle) {
+    pipBtnToggle.textContent = state.timer.isRunning ? "Pausar" : "Reanudar";
+    pipBtnToggle.style.background = state.timer.isRunning ? "#D97706" : "#10B981";
+  }
+
+  const pipDot = pipDoc.getElementById("pipDot");
+  if (pipDot) {
+    pipDot.style.background = state.timer.isRunning ? "#10B981" : "#F59E0B";
+  }
+}
+
+function handleVisibilityChange() {
+  if (document.hidden) {
+    updateBackgroundTabTitle();
+  } else {
+    document.title = ORIGINAL_DOCUMENT_TITLE;
+  }
+}
+
+function updateBackgroundTabTitle() {
+  if (!document.hidden) return;
+  const time = formatSecondsToTime(state.timer.elapsedSeconds);
+  const cost = elements.liveCostBadge?.textContent || "$0.00";
+  const client = elements.timerClientProject?.value.trim() || "Widely";
+
+  if (state.timer.isRunning) {
+    if (state.pomodoro.enabled) {
+      const mins = Math.floor(state.pomodoro.remainingSeconds / 60);
+      const secs = state.pomodoro.remainingSeconds % 60;
+      const pomTag = state.pomodoro.phase === "focus" 
+        ? `🍅 ${mins}:${String(secs).padStart(2, "0")}` 
+        : `☕ ${mins}:${String(secs).padStart(2, "0")}`;
+      document.title = `${pomTag} [${time}] ${client}`;
+    } else {
+      document.title = `▶ ${time} (${cost}) • ${client}`;
+    }
+  } else if (state.timer.elapsedSeconds > 0) {
+    document.title = `⏸ [${time}] Pausado • ${client}`;
+  } else {
+    document.title = ORIGINAL_DOCUMENT_TITLE;
+  }
+}
+
+window.togglePictureInPictureWindow = togglePictureInPictureWindow;
 
 // Registrar tarea finalizada en Firebase
 async function handleRegisterTask() {
@@ -5284,6 +5576,11 @@ function setupEventListeners() {
   window.addEventListener("scroll", checkDynamicIslandVisibility, { passive: true });
   elements.timerClientProject?.addEventListener("input", updateDynamicIslandUI);
   elements.timerTaskDescription?.addEventListener("input", updateDynamicIslandUI);
+
+  // Control Picture-in-Picture Always-On-Top (Flotar sobre Apps del PC)
+  elements.btnTogglePipTimer?.addEventListener("click", togglePictureInPictureWindow);
+  elements.islandBtnPip?.addEventListener("click", togglePictureInPictureWindow);
+  document.addEventListener("visibilitychange", handleVisibilityChange);
 
   // Inicializar Navegación Lateral (Modelo 1 - Sidebar SaaS Pro)
   setupSidebarNavigation();
