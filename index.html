@@ -1947,6 +1947,54 @@
     </div>
   </div>
 
+  <!-- =========================================================================
+       MINI-DOCK FLOTANTE DEL CRONÓMETRO (DYNAMIC ISLAND — CONCEPTO 3)
+       ========================================================================= -->
+  <aside id="dynamicIslandTimer" class="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 transition-all duration-300 ease-out transform translate-y-28 opacity-0 pointer-events-none max-w-[95vw] sm:max-w-xl w-auto select-none print:hidden" aria-label="Control flotante de tiempo activo">
+    <div class="flex items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-2 rounded-full bg-slate-900/90 dark:bg-black/90 text-white backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/40 hover:border-white/30 transition-all">
+      <!-- Pulso de Actividad / Indicador Pomodoro -->
+      <div id="islandStatusDot" class="flex items-center justify-center shrink-0 cursor-pointer" title="Cronómetro Activo">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        </span>
+      </div>
+
+      <!-- Información: Tiempo, Costo, Cliente -->
+      <button type="button" id="islandScrollToTimer" class="flex items-center gap-2.5 text-left group cursor-pointer border-none bg-transparent p-0 text-white" title="Clic para volver al cronómetro principal">
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2">
+            <span id="islandTimerDisplay" class="font-mono text-xs sm:text-sm font-bold tracking-wider tabular-nums text-white group-hover:text-blue-300 transition-colors">00:00:00</span>
+            <span id="islandCostBadge" class="text-[10px] sm:text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 tabular-nums">$0.00</span>
+            <span id="islandPomodoroBadge" class="hidden text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">🍅 25m</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-[10px] text-slate-300 truncate max-w-[130px] sm:max-w-[200px]">
+            <span id="islandClientBadge" class="font-medium text-amber-300 truncate">General</span>
+            <span class="text-slate-500">•</span>
+            <span id="islandTaskDesc" class="truncate text-slate-300">Actividad activa</span>
+          </div>
+        </div>
+      </button>
+
+      <!-- Separador -->
+      <div class="h-6 w-px bg-white/20 hidden xs:block"></div>
+
+      <!-- Acciones Rápidas -->
+      <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <button type="button" id="islandBtnPlayPause" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs active:scale-95 transition-all cursor-pointer" title="Pausar / Reanudar">
+          <i class="fa-solid fa-pause text-[11px]" id="islandPlayPauseIcon"></i>
+        </button>
+        <button type="button" id="islandBtnRegister" class="px-2.5 sm:px-3 py-1.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[11px] font-semibold flex items-center gap-1 active:scale-95 transition-all shadow-sm cursor-pointer" title="Guardar y registrar tarea">
+          <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
+          <span class="hidden sm:inline">Guardar</span>
+        </button>
+        <button type="button" id="islandBtnDismiss" class="w-6 h-6 rounded-full text-slate-400 hover:text-white hover:bg-white/10 flex items-center justify-center text-xs transition-colors cursor-pointer" title="Ocultar dock temporalmente">
+          <i class="fa-solid fa-xmark text-[10px]"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
   <!-- Datalist Dinámico para Autocompletado de Clientes y Cuentas -->
   <datalist id="clientsDatalist"></datalist>
 

@@ -191,7 +191,8 @@ let state = {
     intervalId: null,
     overtimeAlertDismissed: false
   },
-  deleteTarget: null
+  deleteTarget: null,
+  islandDismissed: false
 };
 
 /* ============================================================================
@@ -500,6 +501,20 @@ const elements = {
   // WhatsApp Sharing & Teléfono
   btnShareWhatsAppStatement: document.getElementById("btnShareWhatsAppStatement"),
   workerPhone: document.getElementById("workerPhone"),
+
+  // Mini-Dock Flotante Dynamic Island (Concepto 3)
+  dynamicIslandTimer: document.getElementById("dynamicIslandTimer"),
+  islandStatusDot: document.getElementById("islandStatusDot"),
+  islandScrollToTimer: document.getElementById("islandScrollToTimer"),
+  islandTimerDisplay: document.getElementById("islandTimerDisplay"),
+  islandCostBadge: document.getElementById("islandCostBadge"),
+  islandPomodoroBadge: document.getElementById("islandPomodoroBadge"),
+  islandClientBadge: document.getElementById("islandClientBadge"),
+  islandTaskDesc: document.getElementById("islandTaskDesc"),
+  islandBtnPlayPause: document.getElementById("islandBtnPlayPause"),
+  islandPlayPauseIcon: document.getElementById("islandPlayPauseIcon"),
+  islandBtnRegister: document.getElementById("islandBtnRegister"),
+  islandBtnDismiss: document.getElementById("islandBtnDismiss"),
 
   authTabLogin: document.getElementById("authTabLogin"),
   authTabRegister: document.getElementById("authTabRegister"),
@@ -1441,6 +1456,9 @@ function startTimer() {
 
   elements.timerStatusBadge.className = "text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 flex items-center gap-1.5";
   elements.timerStatusBadge.innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Activo`;
+
+  state.islandDismissed = false;
+  updateDynamicIslandUI();
 }
 
 function dismissOvertimeAlert() {
@@ -1463,6 +1481,8 @@ function pauseTimer() {
 
   elements.timerStatusBadge.className = "text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30";
   elements.timerStatusBadge.textContent = "Pausado";
+
+  updateDynamicIslandUI();
 }
 
 function resetTimer() {
@@ -1471,8 +1491,10 @@ function resetTimer() {
   pauseTimer();
   state.timer.elapsedSeconds = 0;
   state.timer.overtimeAlertDismissed = false;
+  state.islandDismissed = false;
   elements.timerOvertimeAlert?.classList.add("hidden");
   elements.timerOvertimeAlert?.classList.remove("flex");
+  elements.dynamicIslandTimer?.classList.remove("island-visible");
   clearTimerState();
   if (state.pomodoro.enabled) {
     state.pomodoro.remainingSeconds = state.pomodoro.focusMinutes * 60;
@@ -1483,6 +1505,7 @@ function resetTimer() {
   }
   renderTimerDisplay();
   updateLiveCost();
+  updateDynamicIslandUI();
 
   elements.btnStart.disabled = false;
   elements.btnPause.disabled = true;
@@ -1494,6 +1517,7 @@ function resetTimer() {
 
 function renderTimerDisplay() {
   elements.timerDisplay.textContent = formatSecondsToTime(state.timer.elapsedSeconds);
+  updateDynamicIslandUI();
 }
 
 function updateLiveCost() {
@@ -1504,6 +1528,94 @@ function updateLiveCost() {
   const cost = hours * rate;
 
   elements.liveCostBadge.textContent = `$${cost.toFixed(2)}`;
+  if (elements.islandCostBadge) elements.islandCostBadge.textContent = `$${cost.toFixed(2)}`;
+}
+
+function updateDynamicIslandUI() {
+  if (!elements.dynamicIslandTimer) return;
+
+  const seconds = state.timer.elapsedSeconds;
+  const timeFormatted = formatSecondsToTime(seconds);
+
+  if (elements.islandTimerDisplay) {
+    elements.islandTimerDisplay.textContent = timeFormatted;
+  }
+
+  if (elements.islandCostBadge && elements.liveCostBadge) {
+    elements.islandCostBadge.textContent = elements.liveCostBadge.textContent;
+  }
+
+  // Cliente y descripción activa
+  const client = elements.timerClientProject?.value.trim() || "General";
+  const desc = elements.timerTaskDescription?.value.trim() || "Actividad activa";
+  if (elements.islandClientBadge) elements.islandClientBadge.textContent = client;
+  if (elements.islandTaskDesc) elements.islandTaskDesc.textContent = desc;
+
+  // Estado del pulso e icono de play/pause
+  if (state.timer.isRunning) {
+    if (elements.islandStatusDot) {
+      elements.islandStatusDot.innerHTML = `
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        </span>
+      `;
+    }
+    if (elements.islandPlayPauseIcon) {
+      elements.islandPlayPauseIcon.className = "fa-solid fa-pause text-[11px]";
+    }
+  } else {
+    if (elements.islandStatusDot) {
+      elements.islandStatusDot.innerHTML = `
+        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+      `;
+    }
+    if (elements.islandPlayPauseIcon) {
+      elements.islandPlayPauseIcon.className = "fa-solid fa-play text-[11px] ml-0.5";
+    }
+  }
+
+  // Indicador de Fase Pomodoro en la Isla
+  if (elements.islandPomodoroBadge) {
+    if (state.pomodoro.enabled) {
+      elements.islandPomodoroBadge.classList.remove("hidden");
+      const mins = Math.floor(state.pomodoro.remainingSeconds / 60);
+      const secs = state.pomodoro.remainingSeconds % 60;
+      const tag = state.pomodoro.phase === "focus" 
+        ? `🍅 ${mins}:${String(secs).padStart(2, "0")}` 
+        : `☕ ${mins}:${String(secs).padStart(2, "0")}`;
+      elements.islandPomodoroBadge.textContent = tag;
+    } else {
+      elements.islandPomodoroBadge.classList.add("hidden");
+    }
+  }
+
+  checkDynamicIslandVisibility();
+}
+
+function checkDynamicIslandVisibility() {
+  if (!elements.dynamicIslandTimer) return;
+
+  if (state.islandDismissed || state.timer.elapsedSeconds === 0) {
+    elements.dynamicIslandTimer.classList.remove("island-visible");
+    return;
+  }
+
+  // Verificar si el cronómetro principal está fuera de la pantalla por scroll
+  let timerOutOfView = false;
+  const timerCard = elements.timerMainCard || document.getElementById("timerMainCard");
+  if (timerCard) {
+    const rect = timerCard.getBoundingClientRect();
+    timerOutOfView = rect.bottom < 80;
+  } else {
+    timerOutOfView = window.scrollY > 300;
+  }
+
+  if (timerOutOfView) {
+    elements.dynamicIslandTimer.classList.add("island-visible");
+  } else {
+    elements.dynamicIslandTimer.classList.remove("island-visible");
+  }
 }
 
 // Registrar tarea finalizada en Firebase
@@ -5147,6 +5259,31 @@ function setupEventListeners() {
   elements.btnModeStandard?.addEventListener("click", () => setTimerMode("standard"));
   elements.btnModePomodoro?.addEventListener("click", () => setTimerMode("pomodoro"));
   elements.btnEditWorkerGoal?.addEventListener("click", handleEditWorkerGoal);
+
+  // Mini-Dock Flotante Dynamic Island (Concepto 3)
+  elements.islandBtnPlayPause?.addEventListener("click", () => {
+    if (state.timer.isRunning) {
+      pauseTimer();
+    } else {
+      startTimer();
+    }
+  });
+  elements.islandBtnRegister?.addEventListener("click", () => handleRegisterTask());
+  elements.islandScrollToTimer?.addEventListener("click", () => {
+    const card = elements.timerMainCard || document.getElementById("timerMainCard");
+    if (card) {
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      card.classList.add("highlight-pulse");
+      setTimeout(() => card.classList.remove("highlight-pulse"), 1600);
+    }
+  });
+  elements.islandBtnDismiss?.addEventListener("click", () => {
+    state.islandDismissed = true;
+    elements.dynamicIslandTimer?.classList.remove("island-visible");
+  });
+  window.addEventListener("scroll", checkDynamicIslandVisibility, { passive: true });
+  elements.timerClientProject?.addEventListener("input", updateDynamicIslandUI);
+  elements.timerTaskDescription?.addEventListener("input", updateDynamicIslandUI);
 
   // Inicializar Navegación Lateral (Modelo 1 - Sidebar SaaS Pro)
   setupSidebarNavigation();
