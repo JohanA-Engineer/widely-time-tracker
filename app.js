@@ -178,7 +178,8 @@ let state = {
     w2: 0,
     w3: 0,
     w4: 0,
-    w5: 0
+    w5: 0,
+    w6: 0
   },
   upworkFeePercent: 15,   // Tarifa servicio Upwork % (default 15% según factura oficial)
   upworkIncludeVat: true, // IVA Colombia (19%) sobre tarifa de servicio de Upwork
@@ -534,17 +535,31 @@ const elements = {
   upworkWeek3Input: document.getElementById("upworkWeek3Input"),
   upworkWeek4Input: document.getElementById("upworkWeek4Input"),
   upworkWeek5Input: document.getElementById("upworkWeek5Input"),
+  upworkWeek6Input: document.getElementById("upworkWeek6Input"),
+  containerWeek1: document.getElementById("containerWeek1"),
+  containerWeek2: document.getElementById("containerWeek2"),
+  containerWeek3: document.getElementById("containerWeek3"),
+  containerWeek4: document.getElementById("containerWeek4"),
   containerWeek5: document.getElementById("containerWeek5"),
+  containerWeek6: document.getElementById("containerWeek6"),
   labelWeek1: document.getElementById("labelWeek1"),
   labelWeek2: document.getElementById("labelWeek2"),
   labelWeek3: document.getElementById("labelWeek3"),
   labelWeek4: document.getElementById("labelWeek4"),
   labelWeek5: document.getElementById("labelWeek5"),
+  labelWeek6: document.getElementById("labelWeek6"),
+  dateWeek1: document.getElementById("dateWeek1"),
+  dateWeek2: document.getElementById("dateWeek2"),
+  dateWeek3: document.getElementById("dateWeek3"),
+  dateWeek4: document.getElementById("dateWeek4"),
+  dateWeek5: document.getElementById("dateWeek5"),
+  dateWeek6: document.getElementById("dateWeek6"),
   badgeWeek1: document.getElementById("badgeWeek1"),
   badgeWeek2: document.getElementById("badgeWeek2"),
   badgeWeek3: document.getElementById("badgeWeek3"),
   badgeWeek4: document.getElementById("badgeWeek4"),
   badgeWeek5: document.getElementById("badgeWeek5"),
+  badgeWeek6: document.getElementById("badgeWeek6"),
 
   // WhatsApp Sharing & Teléfono
   btnShareWhatsAppStatement: document.getElementById("btnShareWhatsAppStatement"),
@@ -1392,14 +1407,16 @@ function setupFirestoreListeners(profile) {
             w2: Number(data.monthlyWeeks.w2) || 0,
             w3: Number(data.monthlyWeeks.w3) || 0,
             w4: Number(data.monthlyWeeks.w4) || 0,
-            w5: Number(data.monthlyWeeks.w5) || 0
+            w5: Number(data.monthlyWeeks.w5) || 0,
+            w6: Number(data.monthlyWeeks.w6) || 0
           };
           localStorage.setItem("widely_upwork_monthly_weeks", JSON.stringify(state.upworkMonthlyWeeks));
           state.upworkWeeklyRevenue = (Number(state.upworkMonthlyWeeks.w1) || 0) +
             (Number(state.upworkMonthlyWeeks.w2) || 0) +
             (Number(state.upworkMonthlyWeeks.w3) || 0) +
             (Number(state.upworkMonthlyWeeks.w4) || 0) +
-            (Number(state.upworkMonthlyWeeks.w5) || 0);
+            (Number(state.upworkMonthlyWeeks.w5) || 0) +
+            (Number(state.upworkMonthlyWeeks.w6) || 0);
           localStorage.setItem("widely_upwork_weekly_revenue", String(state.upworkWeeklyRevenue));
         }
         updateUpworkBudgetDashboard();
@@ -3476,29 +3493,91 @@ function getMonthLabel() {
   return `${months[now.getMonth()]} ${now.getFullYear()}`;
 }
 
+function getUpworkWeeksForMonth(year, month) {
+  if (year === undefined || month === undefined) {
+    const now = new Date();
+    year = now.getFullYear();
+    month = now.getMonth();
+  }
+  const lastDay = new Date(year, month + 1, 0);
+  const monthsShort = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  
+  let d = new Date(year, month, 1);
+  const day = d.getDay();
+  // En JS 0=Domingo, 1=Lunes. Ajustar al Lunes de inicio de la primera semana
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  let currentMonday = new Date(d);
+  currentMonday.setDate(d.getDate() + diffToMonday);
+  currentMonday.setHours(0, 0, 0, 0);
+
+  const nowTime = new Date().getTime();
+  const weeks = [];
+  let weekNum = 1;
+
+  while (currentMonday <= lastDay && weekNum <= 6) {
+    const currentSunday = new Date(currentMonday);
+    currentSunday.setDate(currentMonday.getDate() + 6);
+    currentSunday.setHours(23, 59, 59, 999);
+
+    const mDay = currentMonday.getDate();
+    const sDay = currentSunday.getDate();
+    const mMonth = currentMonday.getMonth();
+    const sMonth = currentSunday.getMonth();
+
+    // Formato exacto Upwork: "12-18 Oct", "19-25 Oct", o "28 Sep-4 Oct" si cruza mes
+    let shortDateLabel;
+    if (mMonth === sMonth) {
+      shortDateLabel = `${mDay}-${sDay} ${monthsShort[mMonth]}`;
+    } else {
+      shortDateLabel = `${mDay} ${monthsShort[mMonth]}-${sDay} ${monthsShort[sMonth]}`;
+    }
+
+    const startTime = currentMonday.getTime();
+    const endTime = currentSunday.getTime();
+    const isCurrent = (nowTime >= startTime && nowTime <= endTime);
+
+    weeks.push({
+      num: weekNum,
+      key: `w${weekNum}`,
+      shortDateLabel,
+      cardTitle: `Sem ${weekNum}`,
+      fullLabel: `Semana ${weekNum} (${shortDateLabel})`,
+      pillLabel: `S${weekNum}: ${shortDateLabel}`,
+      isCurrent,
+      startDay: mDay,
+      endDay: sDay
+    });
+
+    weekNum++;
+    currentMonday = new Date(currentMonday);
+    currentMonday.setDate(currentMonday.getDate() + 7);
+    currentMonday.setHours(0, 0, 0, 0);
+  }
+
+  return weeks;
+}
+
+function getCurrentUpworkWeek() {
+  const weeks = getUpworkWeeksForMonth();
+  const found = weeks.find(w => w.isCurrent);
+  return found ? found.num : 1;
+}
+
 function getCurrentWeekOfMonth() {
-  const day = new Date().getDate();
-  if (day <= 7) return 1;
-  if (day <= 14) return 2;
-  if (day <= 21) return 3;
-  if (day <= 28) return 4;
-  return 5;
+  return getCurrentUpworkWeek();
 }
 
 function getMonthWeeksConfig() {
+  const weeks = getUpworkWeeksForMonth();
+  const currentWeek = getCurrentUpworkWeek();
   const { daysInMonth } = getCurrentMonthRange();
-  const currentWeek = getCurrentWeekOfMonth();
   return {
     daysInMonth,
     currentWeek,
-    hasWeek5: daysInMonth > 28,
-    weeks: [
-      { num: 1, key: "w1", label: "Semana 1 (1 al 7)", shortLabel: "S1 (1-7)", startDay: 1, endDay: 7, isCurrent: currentWeek === 1 },
-      { num: 2, key: "w2", label: "Semana 2 (8 al 14)", shortLabel: "S2 (8-14)", startDay: 8, endDay: 14, isCurrent: currentWeek === 2 },
-      { num: 3, key: "w3", label: "Semana 3 (15 al 21)", shortLabel: "S3 (15-21)", startDay: 15, endDay: 21, isCurrent: currentWeek === 3 },
-      { num: 4, key: "w4", label: "Semana 4 (22 al 28)", shortLabel: "S4 (22-28)", startDay: 22, endDay: 28, isCurrent: currentWeek === 4 },
-      { num: 5, key: "w5", label: `Semana 5 (29 al ${daysInMonth})`, shortLabel: `S5 (29-${daysInMonth})`, startDay: 29, endDay: daysInMonth, isCurrent: currentWeek === 5, active: daysInMonth > 28 }
-    ]
+    weeksCount: weeks.length,
+    hasWeek5: weeks.length >= 5,
+    hasWeek6: weeks.length >= 6,
+    weeks
   };
 }
 
@@ -3508,7 +3587,8 @@ function getMonthlyWeeksGross(weeks = state.upworkMonthlyWeeks) {
          (Number(weeks.w2) || 0) +
          (Number(weeks.w3) || 0) +
          (Number(weeks.w4) || 0) +
-         (Number(weeks.w5) || 0);
+         (Number(weeks.w5) || 0) +
+         (Number(weeks.w6) || 0);
 }
 
 function getWeeklyApprovedTasks() {
@@ -3608,8 +3688,8 @@ function updateUpworkBudgetDashboard(currentTrm) {
   const monthlyArts = monthlyTasks.filter(t => t.cantidadArtes > 0).reduce((acc, t) => acc + (Number(t.cantidadArtes) || 0), 0);
   const monthlyPayrollCost = monthlyTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
 
-  // Recaudación mensual acumulada sumando las semanas (S1 + S2 + S3 + S4 + S5)
-  const weeks = state.upworkMonthlyWeeks || { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0 };
+  // Recaudación mensual acumulada sumando las semanas (S1 + S2 + S3 + S4 + S5 + S6)
+  const weeks = state.upworkMonthlyWeeks || { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0, w6: 0 };
   const grossRevenue = getMonthlyWeeksGross(weeks);
   state.upworkWeeklyRevenue = grossRevenue; // Mantener total sincronizado
 
@@ -3661,19 +3741,17 @@ function updateUpworkBudgetDashboard(currentTrm) {
 
   // Barra de pastillas dinámicas por cada semana del mes
   if (elements.upworkWeeksPillsBar) {
-    const pillsHtml = monthConfig.weeks
-      .filter(w => w.num <= 4 || monthConfig.hasWeek5)
-      .map(w => {
-        const val = Number(weeks[w.key]) || 0;
-        const isCurrent = w.isCurrent;
-        const currentDot = isCurrent ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mr-1"></span>' : '';
-        const bgClass = isCurrent
-          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/35 shadow-xs"
-          : "bg-slate-100 dark:bg-[#1E293B] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60";
-        return `<span class="inline-flex items-center px-2 py-0.5 rounded-md ${bgClass} transition-colors" title="${w.label}">
-          ${currentDot}${w.shortLabel}: <strong class="ml-1 font-mono text-slate-800 dark:text-slate-200">$${val.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</strong>
-        </span>`;
-      }).join("");
+    const pillsHtml = (monthConfig.weeks || []).map(w => {
+      const val = Number(weeks[w.key]) || 0;
+      const isCurrent = w.isCurrent;
+      const currentDot = isCurrent ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mr-1"></span>' : '';
+      const bgClass = isCurrent
+        ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/35 shadow-xs"
+        : "bg-slate-100 dark:bg-[#1E293B] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60";
+      return `<span class="inline-flex items-center px-2 py-0.5 rounded-md ${bgClass} transition-colors" title="${w.fullLabel}">
+        ${currentDot}${w.pillLabel}: <strong class="ml-1 font-mono text-slate-800 dark:text-slate-200">$${val.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</strong>
+      </span>`;
+    }).join("");
     elements.upworkWeeksPillsBar.innerHTML = pillsHtml;
   }
 
@@ -3800,49 +3878,47 @@ function updateUpworkBudgetDashboard(currentTrm) {
 function openUpworkBudgetModal() {
   if (!elements.upworkBudgetModal) return;
 
-  const monthConfig = getMonthWeeksConfig();
+  const upworkWeeks = getUpworkWeeksForMonth();
+  const currentWeekNum = getCurrentUpworkWeek();
 
   // Configurar badge del mes en el modal
   if (elements.modalMonthBadge) {
     elements.modalMonthBadge.textContent = getMonthLabel();
   }
 
-  // Configurar etiquetas de fechas de las semanas (formato compacto)
-  if (elements.labelWeek1) elements.labelWeek1.textContent = "Sem 1 (1-7)";
-  if (elements.labelWeek2) elements.labelWeek2.textContent = "Sem 2 (8-14)";
-  if (elements.labelWeek3) elements.labelWeek3.textContent = "Sem 3 (15-21)";
-  if (elements.labelWeek4) elements.labelWeek4.textContent = "Sem 4 (22-28)";
-  if (elements.labelWeek5) elements.labelWeek5.textContent = `Sem 5 (29-${monthConfig.daysInMonth})`;
-
-  // Visibilidad de Semana 5 (solo si el mes tiene más de 28 días)
-  if (elements.containerWeek5) {
-    if (monthConfig.hasWeek5) {
-      elements.containerWeek5.classList.remove("hidden");
-    } else {
-      elements.containerWeek5.classList.add("hidden");
-    }
-  }
-
-  // Resaltar badge 'Actual' en la semana correspondiente al día de hoy
-  const currentWeek = monthConfig.currentWeek;
-  [1, 2, 3, 4, 5].forEach(wNum => {
+  // Configurar cada una de las semanas (1 a 6) con las fechas reales del ciclo Upwork
+  [1, 2, 3, 4, 5, 6].forEach(wNum => {
+    const wInfo = upworkWeeks.find(w => w.num === wNum);
+    const container = elements[`containerWeek${wNum}`];
+    const label = elements[`labelWeek${wNum}`];
+    const dateLabel = elements[`dateWeek${wNum}`];
     const badge = elements[`badgeWeek${wNum}`];
-    if (badge) {
-      if (wNum === currentWeek) {
-        badge.classList.remove("hidden");
-      } else {
-        badge.classList.add("hidden");
+
+    if (wInfo) {
+      if (container) container.classList.remove("hidden");
+      if (label) label.textContent = wInfo.cardTitle;
+      if (dateLabel) dateLabel.textContent = wInfo.shortDateLabel;
+      if (badge) {
+        if (wInfo.isCurrent) {
+          badge.classList.remove("hidden");
+        } else {
+          badge.classList.add("hidden");
+        }
       }
+    } else {
+      // Ocultar si el mes no abarca esta semana
+      if (container) container.classList.add("hidden");
     }
   });
 
   // Cargar valores de las semanas guardadas
-  const weeks = state.upworkMonthlyWeeks || { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0 };
+  const weeks = state.upworkMonthlyWeeks || { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0, w6: 0 };
   if (elements.upworkWeek1Input) elements.upworkWeek1Input.value = Number(weeks.w1) > 0 ? Number(weeks.w1) : "";
   if (elements.upworkWeek2Input) elements.upworkWeek2Input.value = Number(weeks.w2) > 0 ? Number(weeks.w2) : "";
   if (elements.upworkWeek3Input) elements.upworkWeek3Input.value = Number(weeks.w3) > 0 ? Number(weeks.w3) : "";
   if (elements.upworkWeek4Input) elements.upworkWeek4Input.value = Number(weeks.w4) > 0 ? Number(weeks.w4) : "";
   if (elements.upworkWeek5Input) elements.upworkWeek5Input.value = Number(weeks.w5) > 0 ? Number(weeks.w5) : "";
+  if (elements.upworkWeek6Input) elements.upworkWeek6Input.value = Number(weeks.w6) > 0 ? Number(weeks.w6) : "";
 
   if (elements.upworkFeePercentInput) {
     elements.upworkFeePercentInput.value = state.upworkFeePercent !== undefined ? state.upworkFeePercent : 15;
@@ -3863,8 +3939,8 @@ function openUpworkBudgetModal() {
 
   // Focus en el input de la semana en curso
   setTimeout(() => {
-    const currentInput = elements[`upworkWeek${currentWeek}Input`];
-    if (currentInput) {
+    const currentInput = elements[`upworkWeek${currentWeekNum}Input`];
+    if (currentInput && !currentInput.closest('.hidden')) {
       currentInput.focus();
     } else {
       elements.upworkWeek1Input?.focus();
@@ -3884,8 +3960,9 @@ function updateUpworkInputPreview() {
   const w3 = parseFloat(elements.upworkWeek3Input?.value) || 0;
   const w4 = parseFloat(elements.upworkWeek4Input?.value) || 0;
   const w5 = parseFloat(elements.upworkWeek5Input?.value) || 0;
+  const w6 = parseFloat(elements.upworkWeek6Input?.value) || 0;
 
-  const totalGross = w1 + w2 + w3 + w4 + w5;
+  const totalGross = w1 + w2 + w3 + w4 + w5 + w6;
 
   if (elements.upworkRevenueInput) {
     elements.upworkRevenueInput.value = totalGross;
@@ -4003,21 +4080,22 @@ function updateUpworkInputPreview() {
 }
 
 async function saveUpworkBudget(weeksOrAmount, feePercent = 15, payoutCost = 1.0, nequiIncludeFee = true, upworkIncludeVat = true) {
-  let cleanWeeks = { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0 };
+  let cleanWeeks = { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0, w6: 0 };
   if (typeof weeksOrAmount === "object" && weeksOrAmount !== null) {
     cleanWeeks = {
       w1: Math.max(0, parseFloat(weeksOrAmount.w1) || 0),
       w2: Math.max(0, parseFloat(weeksOrAmount.w2) || 0),
       w3: Math.max(0, parseFloat(weeksOrAmount.w3) || 0),
       w4: Math.max(0, parseFloat(weeksOrAmount.w4) || 0),
-      w5: Math.max(0, parseFloat(weeksOrAmount.w5) || 0)
+      w5: Math.max(0, parseFloat(weeksOrAmount.w5) || 0),
+      w6: Math.max(0, parseFloat(weeksOrAmount.w6) || 0)
     };
   } else if (typeof weeksOrAmount === "number" || typeof weeksOrAmount === "string") {
-    const curW = getCurrentWeekOfMonth();
+    const curW = getCurrentUpworkWeek();
     cleanWeeks[`w${curW}`] = Math.max(0, parseFloat(weeksOrAmount) || 0);
   }
 
-  const totalAmount = cleanWeeks.w1 + cleanWeeks.w2 + cleanWeeks.w3 + cleanWeeks.w4 + cleanWeeks.w5;
+  const totalAmount = cleanWeeks.w1 + cleanWeeks.w2 + cleanWeeks.w3 + cleanWeeks.w4 + cleanWeeks.w5 + cleanWeeks.w6;
 
   state.upworkMonthlyWeeks = cleanWeeks;
   state.upworkWeeklyRevenue = totalAmount;
@@ -4068,7 +4146,8 @@ async function loadUpworkBudget() {
           w2: Number(parsed.w2) || 0,
           w3: Number(parsed.w3) || 0,
           w4: Number(parsed.w4) || 0,
-          w5: Number(parsed.w5) || 0
+          w5: Number(parsed.w5) || 0,
+          w6: Number(parsed.w6) || 0
         };
       }
     } catch (e) {
@@ -4079,7 +4158,7 @@ async function loadUpworkBudget() {
     const cachedRevenue = localStorage.getItem("widely_upwork_weekly_revenue");
     if (cachedRevenue !== null && !isNaN(Number(cachedRevenue))) {
       const rev = Number(cachedRevenue);
-      const curW = getCurrentWeekOfMonth();
+      const curW = getCurrentUpworkWeek();
       state.upworkMonthlyWeeks[`w${curW}`] = rev;
     }
   }
@@ -4115,11 +4194,12 @@ async function loadUpworkBudget() {
             w2: Number(data.monthlyWeeks.w2) || 0,
             w3: Number(data.monthlyWeeks.w3) || 0,
             w4: Number(data.monthlyWeeks.w4) || 0,
-            w5: Number(data.monthlyWeeks.w5) || 0
+            w5: Number(data.monthlyWeeks.w5) || 0,
+            w6: Number(data.monthlyWeeks.w6) || 0
           };
           localStorage.setItem("widely_upwork_monthly_weeks", JSON.stringify(state.upworkMonthlyWeeks));
         } else if (typeof data.weeklyRevenue === "number") {
-          const curW = getCurrentWeekOfMonth();
+          const curW = getCurrentUpworkWeek();
           state.upworkMonthlyWeeks[`w${curW}`] = data.weeklyRevenue;
           localStorage.setItem("widely_upwork_monthly_weeks", JSON.stringify(state.upworkMonthlyWeeks));
         }
@@ -6024,6 +6104,7 @@ function setupEventListeners() {
   elements.upworkWeek3Input?.addEventListener("input", updateUpworkInputPreview);
   elements.upworkWeek4Input?.addEventListener("input", updateUpworkInputPreview);
   elements.upworkWeek5Input?.addEventListener("input", updateUpworkInputPreview);
+  elements.upworkWeek6Input?.addEventListener("input", updateUpworkInputPreview);
   elements.upworkRevenueInput?.addEventListener("input", updateUpworkInputPreview);
   elements.upworkFeePercentInput?.addEventListener("input", updateUpworkInputPreview);
   elements.upworkIncludeVatInput?.addEventListener("change", updateUpworkInputPreview);
@@ -6033,7 +6114,7 @@ function setupEventListeners() {
     btn.addEventListener("click", () => {
       const amount = parseFloat(btn.dataset.amount);
       if (!isNaN(amount)) {
-        const curW = getCurrentWeekOfMonth();
+        const curW = getCurrentUpworkWeek();
         const input = elements[`upworkWeek${curW}Input`];
         if (input) input.value = amount;
         updateUpworkInputPreview();
@@ -6047,8 +6128,9 @@ function setupEventListeners() {
     const w3 = parseFloat(elements.upworkWeek3Input?.value) || 0;
     const w4 = parseFloat(elements.upworkWeek4Input?.value) || 0;
     const w5 = parseFloat(elements.upworkWeek5Input?.value) || 0;
+    const w6 = parseFloat(elements.upworkWeek6Input?.value) || 0;
 
-    if (w1 < 0 || w2 < 0 || w3 < 0 || w4 < 0 || w5 < 0) {
+    if (w1 < 0 || w2 < 0 || w3 < 0 || w4 < 0 || w5 < 0 || w6 < 0) {
       showToast("Los montos de las semanas no pueden ser negativos", "warning");
       return;
     }
@@ -6059,7 +6141,7 @@ function setupEventListeners() {
     const includeVat = elements.upworkIncludeVatInput ? elements.upworkIncludeVatInput.checked : true;
 
     saveUpworkBudget(
-      { w1, w2, w3, w4, w5 },
+      { w1, w2, w3, w4, w5, w6 },
       isNaN(fee) ? 15 : fee,
       isNaN(payout) ? 1.0 : payout,
       nequiInclude,

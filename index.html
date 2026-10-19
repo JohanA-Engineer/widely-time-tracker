@@ -1323,7 +1323,7 @@
 
   <!-- Modal para Configurar Recaudación Semanal en Upwork -->
   <div id="upworkBudgetModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4 transition-opacity duration-200">
-    <div class="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] rounded-2xl max-w-lg sm:max-w-xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden mx-auto">
+    <div class="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] rounded-2xl upwork-modal-container max-h-[92vh] flex flex-col shadow-2xl overflow-hidden mx-auto">
       
       <!-- Cabecera Fija del Modal -->
       <div class="px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-between bg-slate-50/70 dark:bg-[#162032]/60 shrink-0">
@@ -1333,7 +1333,7 @@
           </div>
           <div>
             <h3 class="text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC]">Control Presupuestal Upwork</h3>
-            <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Recaudo por semanas y balance de nómina mensual</p>
+            <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Semanas de facturación oficial Upwork (Lunes a Domingo)</p>
           </div>
         </div>
         <button type="button" id="btnCloseUpworkModal" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#64748B] hover:text-[#0F172A] dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer">
@@ -1363,23 +1363,24 @@
             </div>
           </div>
 
-          <!-- 2. Inputs de Recaudación por Semanas (5 columnas elegantes) -->
+          <!-- 2. Inputs de Recaudación por Semanas Upwork (Lunes a Domingo) -->
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <label class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1.5">
                 <i class="fa-solid fa-calendar-week text-emerald-600"></i>
-                <span>Recaudo por Semanas (USD):</span>
+                <span>Semanas Upwork (USD):</span>
               </label>
-              <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8]">Edita cualquier semana</span>
+              <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8]">Ciclos de facturación Lunes a Domingo</span>
             </div>
             
-            <div class="grid-cols-5-weeks">
+            <div class="grid-upwork-weeks">
               <!-- Semana 1 -->
-              <div class="p-2 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek1">Sem 1 (1-7)</span>
+              <div id="containerWeek1" class="p-2 sm:p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-[11px] font-bold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek1">Sem 1</span>
                   <span id="badgeWeek1" class="hidden text-[8px] font-mono px-1 py-0.2 rounded bg-emerald-500/15 text-emerald-600 font-bold">Hoy</span>
                 </div>
+                <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-mono block mb-1.5 truncate" id="dateWeek1">28 Sep-4 Oct</span>
                 <div class="relative">
                   <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">$</span>
                   <input type="number" id="upworkWeek1Input" step="any" min="0" placeholder="0" class="form-input w-full pl-5 pr-1 py-1 font-mono text-xs text-right no-spinners bg-white dark:bg-[#111827]">
@@ -1387,11 +1388,12 @@
               </div>
 
               <!-- Semana 2 -->
-              <div class="p-2 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek2">Sem 2 (8-14)</span>
+              <div id="containerWeek2" class="p-2 sm:p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-[11px] font-bold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek2">Sem 2</span>
                   <span id="badgeWeek2" class="hidden text-[8px] font-mono px-1 py-0.2 rounded bg-emerald-500/15 text-emerald-600 font-bold">Hoy</span>
                 </div>
+                <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-mono block mb-1.5 truncate" id="dateWeek2">5-11 Oct</span>
                 <div class="relative">
                   <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">$</span>
                   <input type="number" id="upworkWeek2Input" step="any" min="0" placeholder="0" class="form-input w-full pl-5 pr-1 py-1 font-mono text-xs text-right no-spinners bg-white dark:bg-[#111827]">
@@ -1399,11 +1401,12 @@
               </div>
 
               <!-- Semana 3 -->
-              <div class="p-2 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek3">Sem 3 (15-21)</span>
+              <div id="containerWeek3" class="p-2 sm:p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-[11px] font-bold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek3">Sem 3</span>
                   <span id="badgeWeek3" class="hidden text-[8px] font-mono px-1 py-0.2 rounded bg-emerald-500/15 text-emerald-600 font-bold">Hoy</span>
                 </div>
+                <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-mono block mb-1.5 truncate" id="dateWeek3">12-18 Oct</span>
                 <div class="relative">
                   <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">$</span>
                   <input type="number" id="upworkWeek3Input" step="any" min="0" placeholder="0" class="form-input w-full pl-5 pr-1 py-1 font-mono text-xs text-right no-spinners bg-white dark:bg-[#111827]">
@@ -1411,11 +1414,12 @@
               </div>
 
               <!-- Semana 4 -->
-              <div class="p-2 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek4">Sem 4 (22-28)</span>
+              <div id="containerWeek4" class="p-2 sm:p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-[11px] font-bold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek4">Sem 4</span>
                   <span id="badgeWeek4" class="hidden text-[8px] font-mono px-1 py-0.2 rounded bg-emerald-500/15 text-emerald-600 font-bold">Hoy</span>
                 </div>
+                <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-mono block mb-1.5 truncate" id="dateWeek4">19-25 Oct</span>
                 <div class="relative">
                   <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">$</span>
                   <input type="number" id="upworkWeek4Input" step="any" min="0" placeholder="0" class="form-input w-full pl-5 pr-1 py-1 font-mono text-xs text-right no-spinners bg-white dark:bg-[#111827]">
@@ -1423,14 +1427,28 @@
               </div>
 
               <!-- Semana 5 -->
-              <div id="containerWeek5" class="p-2 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between col-span-full-mobile">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek5">Sem 5 (29-31)</span>
+              <div id="containerWeek5" class="p-2 sm:p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-[11px] font-bold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek5">Sem 5</span>
                   <span id="badgeWeek5" class="hidden text-[8px] font-mono px-1 py-0.2 rounded bg-emerald-500/15 text-emerald-600 font-bold">Hoy</span>
                 </div>
+                <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-mono block mb-1.5 truncate" id="dateWeek5">26 Oct-1 Nov</span>
                 <div class="relative">
                   <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">$</span>
                   <input type="number" id="upworkWeek5Input" step="any" min="0" placeholder="0" class="form-input w-full pl-5 pr-1 py-1 font-mono text-xs text-right no-spinners bg-white dark:bg-[#111827]">
+                </div>
+              </div>
+
+              <!-- Semana 6 (Opcional para meses de 6 semanas) -->
+              <div id="containerWeek6" class="p-2 sm:p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between hidden">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-[11px] font-bold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek6">Sem 6</span>
+                  <span id="badgeWeek6" class="hidden text-[8px] font-mono px-1 py-0.2 rounded bg-emerald-500/15 text-emerald-600 font-bold">Hoy</span>
+                </div>
+                <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-mono block mb-1.5 truncate" id="dateWeek6"></span>
+                <div class="relative">
+                  <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">$</span>
+                  <input type="number" id="upworkWeek6Input" step="any" min="0" placeholder="0" class="form-input w-full pl-5 pr-1 py-1 font-mono text-xs text-right no-spinners bg-white dark:bg-[#111827]">
                 </div>
               </div>
             </div>
@@ -1566,7 +1584,7 @@
           <button type="button" id="btnCancelUpworkBudget" class="px-4 py-2 text-xs font-semibold rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer">
             Cancelar
           </button>
-          <button type="submit" id="btnSaveUpworkBudget" class="px-5 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white transition-all shadow-sm cursor-pointer flex items-center gap-1.5">
+          <button type="submit" id="btnSaveUpworkBudget" class="btn-upwork-save px-5 py-2 text-xs font-bold rounded-xl active:scale-95 transition-all shadow-sm cursor-pointer flex items-center gap-1.5">
             <i class="fa-solid fa-check text-xs"></i>
             <span>Guardar Presupuesto</span>
           </button>

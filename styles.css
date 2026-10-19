@@ -128,15 +128,32 @@ input[type="number"]:hover::-webkit-outer-spin-button {
   -moz-appearance: textfield !important;
 }
 
-/* Grilla responsive ultra-limpia para las 5 semanas del mes */
-.grid-cols-5-weeks {
+/* Contenedor del Modal Upwork con ancho máximo protegido */
+.upwork-modal-container {
+  width: 100% !important;
+  max-width: 660px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Botón Guardar Upwork con color verde oficial */
+.btn-upwork-save {
+  background-color: #14A800 !important;
+  color: #ffffff !important;
+}
+.btn-upwork-save:hover {
+  background-color: #118D00 !important;
+}
+
+/* Grilla responsive ultra-limpia para las semanas Upwork (auto-ajustable a 4, 5 o 6 semanas) */
+.grid-upwork-weeks {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
 }
 @media (min-width: 640px) {
-  .grid-cols-5-weeks {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+  .grid-upwork-weeks {
+    grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
   }
 }
 .col-span-full-mobile {
