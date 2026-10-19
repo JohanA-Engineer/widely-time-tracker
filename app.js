@@ -1859,47 +1859,30 @@ async function togglePictureInPictureWindow() {
     return;
   }
 
-  // 2. Intentar Document Picture-in-Picture nativo (Always-On-Top interactivo en Chromium con HTTPS)
+  // 2. Document Picture-in-Picture nativo (Always-On-Top sin barras ni pestañas en Chromium)
   if ("documentPictureInPicture" in window && window.isSecureContext) {
     try {
       pipWindowInstance = await window.documentPictureInPicture.requestWindow({
         width: 440,
-        height: 76
+        height: 80
       });
       setupMiniWindowContent(pipWindowInstance.document, pipWindowInstance);
       updatePipButtonsState(true);
-      showToast("Mini-ventana interactiva activa sobre tu pantalla.", "success");
+      showToast("Píldora flotante del sistema activa (Always-On-Top).", "success");
       return;
     } catch (err) {
-      console.warn("[Floating Window] Error con Document PiP, abriendo ventana Pop-out:", err);
-    }
-  }
-
-  // 3. Mini-Ventana Popup Nativa (100% interactiva, sin video, funciona en cualquier navegador)
-  try {
-    const w = 440;
-    const h = 88;
-    const left = Math.max(20, (window.screen?.width || 1200) - w - 30);
-    const top = Math.max(20, (window.screen?.height || 800) - h - 80);
-
-    pipWindowInstance = window.open(
-      "",
-      "WidelyFloatingTracker",
-      `width=${w},height=${h},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no,resizable=no,scrollbars=no`
-    );
-
-    if (!pipWindowInstance) {
-      showToast("Por favor permite ventanas emergentes (pop-ups) en tu navegador.", "warning");
+      console.warn("[Floating Window] Error con Document PiP:", err);
+      showToast("No se pudo iniciar la ventana flotante del sistema.", "warning");
       return;
     }
-
-    setupMiniWindowContent(pipWindowInstance.document, pipWindowInstance);
-    updatePipButtonsState(true);
-    showToast("Mini-ventana interactiva abierta en tu pantalla.", "success");
-  } catch (err) {
-    console.error("[Floating Window] Error:", err);
-    showToast("No se pudo abrir la mini-ventana.", "warning");
   }
+
+  // 3. Si se abre desde file:/// o navegador sin Document PiP, guiar al usuario al entorno seguro
+  showToast(
+    "Para usar la píldora flotante pura sin barras de navegador, abre la app en su enlace web seguro: https://johana-engineer.github.io/widely-time-tracker/ o usa el widget de escritorio.",
+    "info",
+    8000
+  );
 }
 
 function updatePipDisplay() {
