@@ -172,7 +172,14 @@ let state = {
   filterPeriod: "all", // Filtro de liquidación: 'all', 'this_month', 'current_fortnight', 'last_month'
   taskStatusFilter: "all", // Filtro de estado: 'all', 'pendiente', 'aprobada', 'rechazada'
   rejectTargetId: null,
-  upworkWeeklyRevenue: 0, // Recaudación semanal Upwork en USD
+  upworkWeeklyRevenue: 0, // Recaudación mensual acumulada Upwork en USD
+  upworkMonthlyWeeks: {
+    w1: 0,
+    w2: 0,
+    w3: 0,
+    w4: 0,
+    w5: 0
+  },
   upworkFeePercent: 15,   // Tarifa servicio Upwork % (default 15% según factura oficial)
   upworkIncludeVat: true, // IVA Colombia (19%) sobre tarifa de servicio de Upwork
   upworkPayoutCost: 1.0,  // Costo Retiro Upwork USD (1 USD por cada retiro)
@@ -512,11 +519,32 @@ const elements = {
   upworkBreakdownPayPal: document.getElementById("upworkBreakdownPayPal"),
   upworkBreakdownNequi: document.getElementById("upworkBreakdownNequi"),
   upworkBreakdownNet: document.getElementById("upworkBreakdownNet"),
+  upworkBreakdownMonthlyPayroll: document.getElementById("upworkBreakdownMonthlyPayroll"),
+  upworkBreakdownNetMargin: document.getElementById("upworkBreakdownNetMargin"),
   upworkNequiRouteSummary: document.getElementById("upworkNequiRouteSummary"),
   routeUpworkNetLabel: document.getElementById("routeUpworkNetLabel"),
   routeNequiTierLabel: document.getElementById("routeNequiTierLabel"),
   routeNetNequiUsd: document.getElementById("routeNetNequiUsd"),
   routeNetNequiCop: document.getElementById("routeNetNequiCop"),
+  upworkWeeksPillsBar: document.getElementById("upworkWeeksPillsBar"),
+  upworkTotalMonthlyRevenueLabel: document.getElementById("upworkTotalMonthlyRevenueLabel"),
+  modalMonthBadge: document.getElementById("modalMonthBadge"),
+  upworkWeek1Input: document.getElementById("upworkWeek1Input"),
+  upworkWeek2Input: document.getElementById("upworkWeek2Input"),
+  upworkWeek3Input: document.getElementById("upworkWeek3Input"),
+  upworkWeek4Input: document.getElementById("upworkWeek4Input"),
+  upworkWeek5Input: document.getElementById("upworkWeek5Input"),
+  containerWeek5: document.getElementById("containerWeek5"),
+  labelWeek1: document.getElementById("labelWeek1"),
+  labelWeek2: document.getElementById("labelWeek2"),
+  labelWeek3: document.getElementById("labelWeek3"),
+  labelWeek4: document.getElementById("labelWeek4"),
+  labelWeek5: document.getElementById("labelWeek5"),
+  badgeWeek1: document.getElementById("badgeWeek1"),
+  badgeWeek2: document.getElementById("badgeWeek2"),
+  badgeWeek3: document.getElementById("badgeWeek3"),
+  badgeWeek4: document.getElementById("badgeWeek4"),
+  badgeWeek5: document.getElementById("badgeWeek5"),
 
   // WhatsApp Sharing & Teléfono
   btnShareWhatsAppStatement: document.getElementById("btnShareWhatsAppStatement"),
@@ -1357,6 +1385,22 @@ function setupFirestoreListeners(profile) {
         if (typeof data.includeVat === "boolean") {
           state.upworkIncludeVat = data.includeVat;
           localStorage.setItem("widely_upwork_include_vat", String(data.includeVat));
+        }
+        if (data.monthlyWeeks && typeof data.monthlyWeeks === "object") {
+          state.upworkMonthlyWeeks = {
+            w1: Number(data.monthlyWeeks.w1) || 0,
+            w2: Number(data.monthlyWeeks.w2) || 0,
+            w3: Number(data.monthlyWeeks.w3) || 0,
+            w4: Number(data.monthlyWeeks.w4) || 0,
+            w5: Number(data.monthlyWeeks.w5) || 0
+          };
+          localStorage.setItem("widely_upwork_monthly_weeks", JSON.stringify(state.upworkMonthlyWeeks));
+          state.upworkWeeklyRevenue = (Number(state.upworkMonthlyWeeks.w1) || 0) +
+            (Number(state.upworkMonthlyWeeks.w2) || 0) +
+            (Number(state.upworkMonthlyWeeks.w3) || 0) +
+            (Number(state.upworkMonthlyWeeks.w4) || 0) +
+            (Number(state.upworkMonthlyWeeks.w5) || 0);
+          localStorage.setItem("widely_upwork_weekly_revenue", String(state.upworkWeeklyRevenue));
         }
         updateUpworkBudgetDashboard();
       }
@@ -3385,7 +3429,7 @@ function renderProductivityCharts() {
 }
 
 /* ============================================================================
-   10.D. GESTIÓN Y CÁLCULO DE PRESUPUESTO SEMANAL UPWORK
+   10.D CONTROL PRESUPUESTAL UPWORK & NÓMINA MENSUAL
    ============================================================================ */
 function getCurrentWeekRange() {
   const now = new Date();
@@ -3417,6 +3461,56 @@ function getWeekLabel(range) {
   return `Semana: ${startDay} ${startMonth.toUpperCase()} al ${endDay} ${endMonth.toUpperCase()}`;
 }
 
+function getCurrentMonthRange() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const start = new Date(year, month, 1, 0, 0, 0, 0);
+  const end = new Date(year, month + 1, 0, 23, 59, 59, 999);
+  return { start, end, year, month, daysInMonth: end.getDate() };
+}
+
+function getMonthLabel() {
+  const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const now = new Date();
+  return `${months[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+function getCurrentWeekOfMonth() {
+  const day = new Date().getDate();
+  if (day <= 7) return 1;
+  if (day <= 14) return 2;
+  if (day <= 21) return 3;
+  if (day <= 28) return 4;
+  return 5;
+}
+
+function getMonthWeeksConfig() {
+  const { daysInMonth } = getCurrentMonthRange();
+  const currentWeek = getCurrentWeekOfMonth();
+  return {
+    daysInMonth,
+    currentWeek,
+    hasWeek5: daysInMonth > 28,
+    weeks: [
+      { num: 1, key: "w1", label: "Semana 1 (1 al 7)", shortLabel: "S1 (1-7)", startDay: 1, endDay: 7, isCurrent: currentWeek === 1 },
+      { num: 2, key: "w2", label: "Semana 2 (8 al 14)", shortLabel: "S2 (8-14)", startDay: 8, endDay: 14, isCurrent: currentWeek === 2 },
+      { num: 3, key: "w3", label: "Semana 3 (15 al 21)", shortLabel: "S3 (15-21)", startDay: 15, endDay: 21, isCurrent: currentWeek === 3 },
+      { num: 4, key: "w4", label: "Semana 4 (22 al 28)", shortLabel: "S4 (22-28)", startDay: 22, endDay: 28, isCurrent: currentWeek === 4 },
+      { num: 5, key: "w5", label: `Semana 5 (29 al ${daysInMonth})`, shortLabel: `S5 (29-${daysInMonth})`, startDay: 29, endDay: daysInMonth, isCurrent: currentWeek === 5, active: daysInMonth > 28 }
+    ]
+  };
+}
+
+function getMonthlyWeeksGross(weeks = state.upworkMonthlyWeeks) {
+  if (!weeks) return 0;
+  return (Number(weeks.w1) || 0) +
+         (Number(weeks.w2) || 0) +
+         (Number(weeks.w3) || 0) +
+         (Number(weeks.w4) || 0) +
+         (Number(weeks.w5) || 0);
+}
+
 function getWeeklyApprovedTasks() {
   const { start, end } = getCurrentWeekRange();
   const startTime = start.getTime();
@@ -3430,9 +3524,19 @@ function getWeeklyApprovedTasks() {
   });
 }
 
-/* ============================================================================
-   10.D CONTROL PRESUPUESTAL UPWORK & MARGEN NETO DE AGENCIA
-   ============================================================================ */
+function getMonthlyApprovedTasks() {
+  const { start, end } = getCurrentMonthRange();
+  const startTime = start.getTime();
+  const endTime = end.getTime();
+
+  return state.tasks.filter(t => {
+    if (!t.fecha || !isTaskApproved(t)) return false;
+    const taskDate = new Date(t.fecha + "T00:00:00");
+    const tTime = taskDate.getTime();
+    return tTime >= startTime && tTime <= endTime;
+  });
+}
+
 // Helper para calcular comisiones del tramo PayPal -> Nequi Colombia (con 19% IVA)
 function calculateNequiFee(usdAmount) {
   const amount = Number(usdAmount) || 0;
@@ -3490,51 +3594,55 @@ function updateUpworkBudgetDashboard(currentTrm) {
   if (!elements.adminUpworkBudgetSection) return;
 
   const trm = currentTrm || getActiveTrmRate();
-  const range = getCurrentWeekRange();
+  const monthConfig = getMonthWeeksConfig();
 
-  // Actualizar badge del ciclo semanal de Upwork (ej. "Semana: 13 al 19 OCT")
+  // Actualizar badge del mes en curso (ej. "Octubre 2026")
   const weekBadge = document.getElementById("upworkWeekCycleBadge");
   if (weekBadge) {
-    weekBadge.textContent = getWeekLabel(range);
+    weekBadge.textContent = getMonthLabel();
   }
 
-  // Tareas aprobadas de la semana en curso
-  const weeklyTasks = getWeeklyApprovedTasks();
-  const weeklyHours = weeklyTasks.reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
-  const weeklyArts = weeklyTasks.filter(t => t.cantidadArtes > 0).reduce((acc, t) => acc + (Number(t.cantidadArtes) || 0), 0);
-  const weeklyPayrollCost = weeklyTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
+  // Costo de Nómina Mensual: Tareas aprobadas de todo el mes calendario
+  const monthlyTasks = getMonthlyApprovedTasks();
+  const monthlyHours = monthlyTasks.reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
+  const monthlyArts = monthlyTasks.filter(t => t.cantidadArtes > 0).reduce((acc, t) => acc + (Number(t.cantidadArtes) || 0), 0);
+  const monthlyPayrollCost = monthlyTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
 
-  const grossRevenue = Number(state.upworkWeeklyRevenue) || 0;
+  // Recaudación mensual acumulada sumando las semanas (S1 + S2 + S3 + S4 + S5)
+  const weeks = state.upworkMonthlyWeeks || { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0 };
+  const grossRevenue = getMonthlyWeeksGross(weeks);
+  state.upworkWeeklyRevenue = grossRevenue; // Mantener total sincronizado
+
   const feePercent = typeof state.upworkFeePercent === "number" ? state.upworkFeePercent : 15;
   const includeVat = state.upworkIncludeVat !== false;
   const payoutCost = typeof state.upworkPayoutCost === "number" ? state.upworkPayoutCost : 1.0;
   const includeNequi = state.nequiIncludeFee !== false;
 
-  // Pipeline Financiero Completo: Upwork -> PayPal -> Nequi Colombia
+  // Pipeline Financiero Completo: Upwork -> PayPal -> Colombia (Nequi o Cuenta Directa)
   // 1. Upwork Bruto -> Descuento tarifa de servicio (15% por defecto)
   const upworkFeeAmount = grossRevenue > 0 ? (grossRevenue * (feePercent / 100)) : 0;
   // 2. IVA Colombia (19%) sobre la tarifa de servicio de Upwork (VAT CO)
   const upworkVatAmount = (grossRevenue > 0 && includeVat) ? (upworkFeeAmount * 0.19) : 0;
   // 3. Ganancia neta en Upwork (Net earnings)
   const upworkNetEarnings = Math.max(0, grossRevenue - upworkFeeAmount - upworkVatAmount);
-  // 4. Retiro fijo Upwork -> PayPal ($1.00 USD por retiro)
+  // 4. Retiro a fin de mes Upwork -> PayPal ($1.00 USD)
   const upworkPayoutAmount = grossRevenue > 0 ? payoutCost : 0;
   // 5. Monto acreditado en PayPal
   const paypalAmount = Math.max(0, upworkNetEarnings - upworkPayoutAmount);
-  // 6. Retiro PayPal -> Nequi Colombia (Tramo escalonado con IVA 19%)
-  const nequiCalc = includeNequi ? calculateNequiFee(paypalAmount) : { tier: 0, rate: 0, percentLabel: "0%", feeAmount: 0, netAmount: paypalAmount, tierName: "Desactivado" };
-  // 7. Ingreso Neto Real disponible en cuenta Nequi
+  // 6. Retiro PayPal -> Nequi Colombia (o Cuenta Bancaria Directa al 0%)
+  const nequiCalc = includeNequi ? calculateNequiFee(paypalAmount) : { tier: 0, rate: 0, percentLabel: "0%", feeAmount: 0, netAmount: paypalAmount, tierName: "Cuenta Directa (0%)" };
+  // 7. Ingreso Neto Real disponible en Colombia
   const netRealRevenue = grossRevenue > 0 ? nequiCalc.netAmount : 0;
 
-  // Margen Real Neto disponible para la agencia = Lo que entra a cuenta colombiana menos nómina de colaboradores
-  const realNetMargin = netRealRevenue - weeklyPayrollCost;
+  // Margen Real Neto mensual para la agencia = Saldo disponible en Colombia menos Costo de Nómina Mensual
+  const realNetMargin = netRealRevenue - monthlyPayrollCost;
 
   const grossRevenueCop = grossRevenue * trm;
-  const payrollCop = weeklyPayrollCost * trm;
+  const payrollCop = monthlyPayrollCost * trm;
   const realNetMarginCop = realNetMargin * trm;
   const netRealRevenueCop = netRealRevenue * trm;
 
-  // 1. Recaudación Semanal Upwork (Bruto y desglose)
+  // 1. Recaudación Mes Acumulado Upwork
   if (elements.upworkRevenueDisplay) {
     elements.upworkRevenueDisplay.textContent = `$${grossRevenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
@@ -3544,14 +3652,32 @@ function updateUpworkBudgetDashboard(currentTrm) {
   if (elements.upworkRevenueSubtitle) {
     if (grossRevenue > 0) {
       const vatText = includeVat ? " + IVA CO" : "";
-      const nequiText = includeNequi ? ` • Nequi -${nequiCalc.percentLabel}` : "";
-      elements.upworkRevenueSubtitle.textContent = `Neto en Nequi: $${netRealRevenue.toFixed(2)} (-${feePercent}%${vatText}, -$${payoutCost.toFixed(2)} retiro${nequiText})`;
+      const nequiText = includeNequi ? ` • Nequi -${nequiCalc.percentLabel}` : " • Cuenta Directa (0% com.)";
+      elements.upworkRevenueSubtitle.textContent = `Neto en Colombia: $${netRealRevenue.toFixed(2)} (-${feePercent}%${vatText}, -$${payoutCost.toFixed(2)} retiro${nequiText})`;
     } else {
-      elements.upworkRevenueSubtitle.textContent = "Clic en 'Ajustar Recaudo' para ingresar";
+      elements.upworkRevenueSubtitle.textContent = "Clic en 'Gestionar Semanas' para ingresar recaudo";
     }
   }
 
-  // Resumen de la Ruta Bancaria: Upwork -> PayPal -> Nequi
+  // Barra de pastillas dinámicas por cada semana del mes
+  if (elements.upworkWeeksPillsBar) {
+    const pillsHtml = monthConfig.weeks
+      .filter(w => w.num <= 4 || monthConfig.hasWeek5)
+      .map(w => {
+        const val = Number(weeks[w.key]) || 0;
+        const isCurrent = w.isCurrent;
+        const currentDot = isCurrent ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mr-1"></span>' : '';
+        const bgClass = isCurrent
+          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/35 shadow-xs"
+          : "bg-slate-100 dark:bg-[#1E293B] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60";
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded-md ${bgClass} transition-colors" title="${w.label}">
+          ${currentDot}${w.shortLabel}: <strong class="ml-1 font-mono text-slate-800 dark:text-slate-200">$${val.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</strong>
+        </span>`;
+      }).join("");
+    elements.upworkWeeksPillsBar.innerHTML = pillsHtml;
+  }
+
+  // Resumen de la Ruta Bancaria: Upwork -> PayPal -> Nequi / Cuenta Directa
   if (elements.routeUpworkNetLabel) {
     elements.routeUpworkNetLabel.textContent = `Upwork (-${feePercent}%${includeVat ? " + IVA" : ""})`;
   }
@@ -3561,7 +3687,7 @@ function updateUpworkBudgetDashboard(currentTrm) {
     } else if (includeNequi) {
       elements.routeNequiTierLabel.textContent = `Nequi (-4,76%)`;
     } else {
-      elements.routeNequiTierLabel.textContent = `Nequi (0%)`;
+      elements.routeNequiTierLabel.textContent = `Cuenta Directa (0%)`;
     }
   }
   if (elements.routeNetNequiUsd) {
@@ -3571,21 +3697,21 @@ function updateUpworkBudgetDashboard(currentTrm) {
     elements.routeNetNequiCop.textContent = `≈ ${formatCop(netRealRevenueCop)}`;
   }
 
-  // 2. Costo Nómina Semanal
+  // 2. Costo Nómina Mensual
   if (elements.upworkPayrollCostDisplay) {
-    elements.upworkPayrollCostDisplay.textContent = `$${weeklyPayrollCost.toFixed(2)}`;
+    elements.upworkPayrollCostDisplay.textContent = `$${monthlyPayrollCost.toFixed(2)}`;
   }
   if (elements.upworkPayrollCostCopDisplay) {
     elements.upworkPayrollCostCopDisplay.textContent = `≈ ${formatCop(payrollCop)}`;
   }
   if (elements.upworkPayrollDetails) {
     const parts = [];
-    if (weeklyHours > 0 || weeklyArts === 0) parts.push(`${weeklyHours.toFixed(2)}h`);
-    if (weeklyArts > 0) parts.push(`${weeklyArts} ${weeklyArts === 1 ? 'arte' : 'artes'}`);
-    elements.upworkPayrollDetails.textContent = `${parts.join(" • ")} de tareas aprobadas esta semana`;
+    if (monthlyHours > 0 || monthlyArts === 0) parts.push(`${monthlyHours.toFixed(2)}h`);
+    if (monthlyArts > 0) parts.push(`${monthlyArts} ${monthlyArts === 1 ? 'arte' : 'artes'}`);
+    elements.upworkPayrollDetails.textContent = `${parts.join(" • ")} de tareas aprobadas este mes`;
   }
 
-  // 3. Presupuesto / Margen Real Disponible
+  // 3. Presupuesto Disponible (Mes) / Margen Real
   if (elements.upworkAvailableBudgetDisplay) {
     if (realNetMargin >= 0) {
       elements.upworkAvailableBudgetDisplay.textContent = `$${realNetMargin.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -3606,10 +3732,10 @@ function updateUpworkBudgetDashboard(currentTrm) {
     }
   }
 
-  // Porcentaje y estado de presupuesto sobre el neto recaudado que llega a Nequi
+  // Porcentaje y barra de ejecución del presupuesto del mes
   let usagePercent = 0;
   if (netRealRevenue > 0) {
-    usagePercent = Math.min(Math.round((weeklyPayrollCost / netRealRevenue) * 100), 999);
+    usagePercent = Math.min(Math.round((monthlyPayrollCost / netRealRevenue) * 100), 999);
   } else if (grossRevenue > 0) {
     usagePercent = 100;
   }
@@ -3632,7 +3758,7 @@ function updateUpworkBudgetDashboard(currentTrm) {
 
   if (elements.upworkBudgetStatusBadge) {
     if (grossRevenue === 0) {
-      elements.upworkBudgetStatusBadge.textContent = "Pendiente Meta";
+      elements.upworkBudgetStatusBadge.textContent = "Pendiente Recaudo";
       elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-slate-500/10 text-slate-600 dark:text-slate-400";
     } else if (realNetMargin < 0) {
       elements.upworkBudgetStatusBadge.textContent = "Excedido";
@@ -3646,36 +3772,78 @@ function updateUpworkBudgetDashboard(currentTrm) {
 
   if (elements.upworkBudgetHealthDesc) {
     if (grossRevenue === 0) {
-      elements.upworkBudgetHealthDesc.textContent = "Ingresa tu recaudación semanal estimada";
+      elements.upworkBudgetHealthDesc.textContent = "Ingresa la recaudación de las semanas para monitorear el balance del mes";
       elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-slate-500 dark:text-slate-400";
     } else if (usagePercent > 100) {
-      elements.upworkBudgetHealthDesc.textContent = "⚠️ Nómina semanal supera el recaudo neto en Nequi";
+      elements.upworkBudgetHealthDesc.textContent = "⚠️ Nómina mensual supera el recaudo neto en Colombia";
       elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-[#BF6863]";
     } else if (usagePercent > 80) {
-      elements.upworkBudgetHealthDesc.textContent = "Alerta: nómina cercana al límite disponible (80%+)";
+      elements.upworkBudgetHealthDesc.textContent = "Alerta: nómina mensual cercana al límite del recaudo (80%+)";
       elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-amber-600 dark:text-amber-400";
     } else {
-      elements.upworkBudgetHealthDesc.textContent = "Presupuesto saludable con margen real positivo";
+      elements.upworkBudgetHealthDesc.textContent = "Presupuesto mensual saludable con margen neto positivo";
       elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-emerald-600 dark:text-emerald-400";
     }
   }
 
   if (elements.upworkBudgetSubtitle) {
     if (grossRevenue === 0) {
-      elements.upworkBudgetSubtitle.textContent = "Define tu recaudo semanal para monitorear margen";
+      elements.upworkBudgetSubtitle.textContent = "Ingresa recaudación semanal para monitorear el margen mensual";
     } else if (realNetMargin >= 0) {
-      elements.upworkBudgetSubtitle.textContent = "Margen real neto de ganancia (post-comisiones y nómina)";
+      elements.upworkBudgetSubtitle.textContent = "Margen real neto de ganancia del mes (post-nómina)";
     } else {
-      elements.upworkBudgetSubtitle.textContent = "Déficit proyectado para esta semana";
+      elements.upworkBudgetSubtitle.textContent = "Déficit mensual proyectado post-nómina";
     }
   }
 }
 
 function openUpworkBudgetModal() {
   if (!elements.upworkBudgetModal) return;
-  if (elements.upworkRevenueInput) {
-    elements.upworkRevenueInput.value = state.upworkWeeklyRevenue > 0 ? state.upworkWeeklyRevenue : "";
+
+  const monthConfig = getMonthWeeksConfig();
+
+  // Configurar badge del mes en el modal
+  if (elements.modalMonthBadge) {
+    elements.modalMonthBadge.textContent = getMonthLabel();
   }
+
+  // Configurar etiquetas de fechas de las semanas
+  if (elements.labelWeek1) elements.labelWeek1.textContent = "Semana 1 (1 al 7)";
+  if (elements.labelWeek2) elements.labelWeek2.textContent = "Semana 2 (8 al 14)";
+  if (elements.labelWeek3) elements.labelWeek3.textContent = "Semana 3 (15 al 21)";
+  if (elements.labelWeek4) elements.labelWeek4.textContent = "Semana 4 (22 al 28)";
+  if (elements.labelWeek5) elements.labelWeek5.textContent = `Semana 5 (29 al ${monthConfig.daysInMonth})`;
+
+  // Visibilidad de Semana 5 (solo si el mes tiene más de 28 días)
+  if (elements.containerWeek5) {
+    if (monthConfig.hasWeek5) {
+      elements.containerWeek5.classList.remove("hidden");
+    } else {
+      elements.containerWeek5.classList.add("hidden");
+    }
+  }
+
+  // Resaltar badge 'Actual' en la semana correspondiente al día de hoy
+  const currentWeek = monthConfig.currentWeek;
+  [1, 2, 3, 4, 5].forEach(wNum => {
+    const badge = elements[`badgeWeek${wNum}`];
+    if (badge) {
+      if (wNum === currentWeek) {
+        badge.classList.remove("hidden");
+      } else {
+        badge.classList.add("hidden");
+      }
+    }
+  });
+
+  // Cargar valores de las semanas guardadas
+  const weeks = state.upworkMonthlyWeeks || { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0 };
+  if (elements.upworkWeek1Input) elements.upworkWeek1Input.value = Number(weeks.w1) > 0 ? Number(weeks.w1) : "";
+  if (elements.upworkWeek2Input) elements.upworkWeek2Input.value = Number(weeks.w2) > 0 ? Number(weeks.w2) : "";
+  if (elements.upworkWeek3Input) elements.upworkWeek3Input.value = Number(weeks.w3) > 0 ? Number(weeks.w3) : "";
+  if (elements.upworkWeek4Input) elements.upworkWeek4Input.value = Number(weeks.w4) > 0 ? Number(weeks.w4) : "";
+  if (elements.upworkWeek5Input) elements.upworkWeek5Input.value = Number(weeks.w5) > 0 ? Number(weeks.w5) : "";
+
   if (elements.upworkFeePercentInput) {
     elements.upworkFeePercentInput.value = state.upworkFeePercent !== undefined ? state.upworkFeePercent : 15;
   }
@@ -3688,10 +3856,20 @@ function openUpworkBudgetModal() {
   if (elements.nequiIncludeFeeInput) {
     elements.nequiIncludeFeeInput.checked = state.nequiIncludeFee !== false;
   }
+
   updateUpworkInputPreview();
   elements.upworkBudgetModal.classList.remove("hidden");
   elements.upworkBudgetModal.classList.add("flex");
-  setTimeout(() => elements.upworkRevenueInput?.focus(), 50);
+
+  // Focus en el input de la semana en curso
+  setTimeout(() => {
+    const currentInput = elements[`upworkWeek${currentWeek}Input`];
+    if (currentInput) {
+      currentInput.focus();
+    } else {
+      elements.upworkWeek1Input?.focus();
+    }
+  }, 50);
 }
 
 function closeUpworkBudgetModal() {
@@ -3701,7 +3879,22 @@ function closeUpworkBudgetModal() {
 }
 
 function updateUpworkInputPreview() {
-  const val = parseFloat(elements.upworkRevenueInput?.value) || 0;
+  const w1 = parseFloat(elements.upworkWeek1Input?.value) || 0;
+  const w2 = parseFloat(elements.upworkWeek2Input?.value) || 0;
+  const w3 = parseFloat(elements.upworkWeek3Input?.value) || 0;
+  const w4 = parseFloat(elements.upworkWeek4Input?.value) || 0;
+  const w5 = parseFloat(elements.upworkWeek5Input?.value) || 0;
+
+  const totalGross = w1 + w2 + w3 + w4 + w5;
+
+  if (elements.upworkRevenueInput) {
+    elements.upworkRevenueInput.value = totalGross;
+  }
+
+  if (elements.upworkTotalMonthlyRevenueLabel) {
+    elements.upworkTotalMonthlyRevenueLabel.textContent = `$${totalGross.toFixed(2)} USD (Mes)`;
+  }
+
   const feePercent = parseFloat(elements.upworkFeePercentInput?.value) || 0;
   const includeVat = elements.upworkIncludeVatInput ? elements.upworkIncludeVatInput.checked : true;
   const payoutCost = parseFloat(elements.upworkPayoutCostInput?.value) || 0;
@@ -3709,26 +3902,31 @@ function updateUpworkInputPreview() {
   const trm = getActiveTrmRate();
 
   if (elements.upworkInputCopPreview) {
-    elements.upworkInputCopPreview.textContent = `≈ ${formatCop(val * trm)}`;
+    elements.upworkInputCopPreview.textContent = `≈ ${formatCop(totalGross * trm)}`;
   }
 
   // 1. Tarifa servicio Upwork (15% por defecto)
-  const feeAmount = val > 0 ? (val * (feePercent / 100)) : 0;
+  const feeAmount = totalGross > 0 ? (totalGross * (feePercent / 100)) : 0;
   // 2. IVA Colombia (19%) sobre tarifa de Upwork (VAT CO on service fee)
-  const vatAmount = (val > 0 && includeVat) ? (feeAmount * 0.19) : 0;
+  const vatAmount = (totalGross > 0 && includeVat) ? (feeAmount * 0.19) : 0;
   // 3. Ganancia neta en Upwork (Net earnings)
-  const upworkNetEarnings = Math.max(0, val - feeAmount - vatAmount);
-  // 4. Retiro Upwork a PayPal ($1.00 USD)
-  const payoutAmount = val > 0 ? payoutCost : 0;
-  // 5. PayPal
+  const upworkNetEarnings = Math.max(0, totalGross - feeAmount - vatAmount);
+  // 4. Retiro a fin de mes Upwork a PayPal ($1.00 USD)
+  const payoutAmount = totalGross > 0 ? payoutCost : 0;
+  // 5. Saldo en PayPal
   const paypalAmount = Math.max(0, upworkNetEarnings - payoutAmount);
-  // 6. Nequi Colombia (con IVA 19%)
-  const nequiCalc = includeNequi ? calculateNequiFee(paypalAmount) : { tier: 0, rate: 0, percentLabel: "0%", feeAmount: 0, netAmount: paypalAmount, tierName: "Desactivado" };
-  // 7. Monto neto real que llega a Nequi
-  const netReal = val > 0 ? nequiCalc.netAmount : 0;
+  // 6. Nequi Colombia (o Cuenta Bancaria Directa con 0% comisión)
+  const nequiCalc = includeNequi ? calculateNequiFee(paypalAmount) : { tier: 0, rate: 0, percentLabel: "0%", feeAmount: 0, netAmount: paypalAmount, tierName: "Cuenta Directa (0%)" };
+  // 7. Monto neto real que entra a Colombia
+  const netReal = totalGross > 0 ? nequiCalc.netAmount : 0;
+
+  // Costo Nómina del Mes actual para comparar contra el margen
+  const monthlyTasks = getMonthlyApprovedTasks();
+  const monthlyPayroll = monthlyTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
+  const netMargin = netReal - monthlyPayroll;
 
   if (elements.upworkBreakdownGross) {
-    elements.upworkBreakdownGross.textContent = `$${val.toFixed(2)} USD`;
+    elements.upworkBreakdownGross.textContent = `$${totalGross.toFixed(2)} USD`;
   }
   if (elements.upworkBreakdownFeeLabel) {
     elements.upworkBreakdownFeeLabel.textContent = `2. Tarifa de Servicio Upwork (${feePercent}%):`;
@@ -3757,7 +3955,7 @@ function updateUpworkInputPreview() {
     } else if (includeNequi) {
       elements.upworkBreakdownNequi.textContent = `-$0.00 USD (${nequiCalc.percentLabel})`;
     } else {
-      elements.upworkBreakdownNequi.textContent = `$0.00 USD (Desactivado)`;
+      elements.upworkBreakdownNequi.textContent = `$0.00 USD (Cuenta Directa 0%)`;
     }
   }
   if (elements.nequiBreakdownRow) {
@@ -3771,7 +3969,7 @@ function updateUpworkInputPreview() {
     } else if (includeNequi) {
       elements.nequiActiveTierPill.textContent = "4,76% con IVA";
     } else {
-      elements.nequiActiveTierPill.textContent = "Desactivado";
+      elements.nequiActiveTierPill.textContent = "Cuenta Directa (0% com.)";
     }
   }
 
@@ -3790,16 +3988,46 @@ function updateUpworkInputPreview() {
   if (elements.upworkBreakdownNet) {
     elements.upworkBreakdownNet.textContent = `$${netReal.toFixed(2)} USD (≈ ${formatCop(netReal * trm)})`;
   }
+  if (elements.upworkBreakdownMonthlyPayroll) {
+    elements.upworkBreakdownMonthlyPayroll.textContent = `-$${monthlyPayroll.toFixed(2)} USD (≈ ${formatCop(monthlyPayroll * trm)})`;
+  }
+  if (elements.upworkBreakdownNetMargin) {
+    if (netMargin >= 0) {
+      elements.upworkBreakdownNetMargin.textContent = `+$${netMargin.toFixed(2)} USD (≈ +${formatCop(netMargin * trm)})`;
+      elements.upworkBreakdownNetMargin.className = "font-bold text-emerald-600 dark:text-emerald-400";
+    } else {
+      elements.upworkBreakdownNetMargin.textContent = `-$${Math.abs(netMargin).toFixed(2)} USD (≈ -${formatCop(Math.abs(netMargin * trm))})`;
+      elements.upworkBreakdownNetMargin.className = "font-bold text-[#BF6863]";
+    }
+  }
 }
 
-async function saveUpworkBudget(amount, feePercent = 15, payoutCost = 1.0, nequiIncludeFee = true, upworkIncludeVat = true) {
-  state.upworkWeeklyRevenue = amount;
+async function saveUpworkBudget(weeksOrAmount, feePercent = 15, payoutCost = 1.0, nequiIncludeFee = true, upworkIncludeVat = true) {
+  let cleanWeeks = { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0 };
+  if (typeof weeksOrAmount === "object" && weeksOrAmount !== null) {
+    cleanWeeks = {
+      w1: Math.max(0, parseFloat(weeksOrAmount.w1) || 0),
+      w2: Math.max(0, parseFloat(weeksOrAmount.w2) || 0),
+      w3: Math.max(0, parseFloat(weeksOrAmount.w3) || 0),
+      w4: Math.max(0, parseFloat(weeksOrAmount.w4) || 0),
+      w5: Math.max(0, parseFloat(weeksOrAmount.w5) || 0)
+    };
+  } else if (typeof weeksOrAmount === "number" || typeof weeksOrAmount === "string") {
+    const curW = getCurrentWeekOfMonth();
+    cleanWeeks[`w${curW}`] = Math.max(0, parseFloat(weeksOrAmount) || 0);
+  }
+
+  const totalAmount = cleanWeeks.w1 + cleanWeeks.w2 + cleanWeeks.w3 + cleanWeeks.w4 + cleanWeeks.w5;
+
+  state.upworkMonthlyWeeks = cleanWeeks;
+  state.upworkWeeklyRevenue = totalAmount;
   state.upworkFeePercent = feePercent;
   state.upworkIncludeVat = upworkIncludeVat;
   state.upworkPayoutCost = payoutCost;
   state.nequiIncludeFee = nequiIncludeFee;
 
-  localStorage.setItem("widely_upwork_weekly_revenue", String(amount));
+  localStorage.setItem("widely_upwork_monthly_weeks", JSON.stringify(cleanWeeks));
+  localStorage.setItem("widely_upwork_weekly_revenue", String(totalAmount));
   localStorage.setItem("widely_upwork_fee_percent", String(feePercent));
   localStorage.setItem("widely_upwork_include_vat", String(upworkIncludeVat));
   localStorage.setItem("widely_upwork_payout_cost", String(payoutCost));
@@ -3809,7 +4037,8 @@ async function saveUpworkBudget(amount, feePercent = 15, payoutCost = 1.0, nequi
   if (db) {
     try {
       await setDoc(doc(db, "configuracion", "upwork"), {
-        weeklyRevenue: amount,
+        monthlyWeeks: cleanWeeks,
+        weeklyRevenue: totalAmount,
         feePercent: feePercent,
         includeVat: upworkIncludeVat,
         payoutCost: payoutCost,
@@ -3818,21 +4047,45 @@ async function saveUpworkBudget(amount, feePercent = 15, payoutCost = 1.0, nequi
         updatedBy: state.currentUser?.email || "admin"
       }, { merge: true });
       const vatText = upworkIncludeVat ? "+IVA CO" : "sin IVA";
-      const nequiText = nequiIncludeFee ? "Nequi con IVA activo" : "Sin Nequi";
-      showToast(`Presupuesto Upwork actualizado ($${amount.toFixed(2)} USD, -${feePercent}% Upwork ${vatText}, -$${payoutCost} retiro, ${nequiText})`, "success");
+      const nequiText = nequiIncludeFee ? "Nequi activo" : "Cuenta Directa (0% com.)";
+      showToast(`Presupuesto actualizado: $${totalAmount.toFixed(2)} USD del mes (-${feePercent}% Upwork ${vatText}, -$${payoutCost} retiro, ${nequiText})`, "success");
       return;
     } catch (err) {
       console.warn("[Upwork Budget] Guardado localmente, error en Firestore:", err);
     }
   }
-  showToast(`Guardado en este navegador ($${amount.toFixed(2)} USD)`, "info");
+  showToast(`Guardado en este navegador ($${totalAmount.toFixed(2)} USD del mes)`, "info");
 }
 
 async function loadUpworkBudget() {
-  const cachedRevenue = localStorage.getItem("widely_upwork_weekly_revenue");
-  if (cachedRevenue !== null && !isNaN(Number(cachedRevenue))) {
-    state.upworkWeeklyRevenue = Number(cachedRevenue);
+  const cachedWeeks = localStorage.getItem("widely_upwork_monthly_weeks");
+  if (cachedWeeks) {
+    try {
+      const parsed = JSON.parse(cachedWeeks);
+      if (parsed && typeof parsed === "object") {
+        state.upworkMonthlyWeeks = {
+          w1: Number(parsed.w1) || 0,
+          w2: Number(parsed.w2) || 0,
+          w3: Number(parsed.w3) || 0,
+          w4: Number(parsed.w4) || 0,
+          w5: Number(parsed.w5) || 0
+        };
+      }
+    } catch (e) {
+      console.warn("[Upwork Budget] Error parseando semanas en localStorage", e);
+    }
+  } else {
+    // Si no había semanas guardadas pero sí un weeklyRevenue anterior, asignarlo a la semana en curso
+    const cachedRevenue = localStorage.getItem("widely_upwork_weekly_revenue");
+    if (cachedRevenue !== null && !isNaN(Number(cachedRevenue))) {
+      const rev = Number(cachedRevenue);
+      const curW = getCurrentWeekOfMonth();
+      state.upworkMonthlyWeeks[`w${curW}`] = rev;
+    }
   }
+
+  state.upworkWeeklyRevenue = getMonthlyWeeksGross(state.upworkMonthlyWeeks);
+
   const cachedFee = localStorage.getItem("widely_upwork_fee_percent");
   if (cachedFee !== null && !isNaN(Number(cachedFee))) {
     state.upworkFeePercent = Number(cachedFee);
@@ -3856,10 +4109,22 @@ async function loadUpworkBudget() {
       const cfgDoc = await getDoc(doc(db, "configuracion", "upwork"));
       if (cfgDoc.exists()) {
         const data = cfgDoc.data();
-        if (typeof data.weeklyRevenue === "number") {
-          state.upworkWeeklyRevenue = data.weeklyRevenue;
-          localStorage.setItem("widely_upwork_weekly_revenue", String(data.weeklyRevenue));
+        if (data.monthlyWeeks && typeof data.monthlyWeeks === "object") {
+          state.upworkMonthlyWeeks = {
+            w1: Number(data.monthlyWeeks.w1) || 0,
+            w2: Number(data.monthlyWeeks.w2) || 0,
+            w3: Number(data.monthlyWeeks.w3) || 0,
+            w4: Number(data.monthlyWeeks.w4) || 0,
+            w5: Number(data.monthlyWeeks.w5) || 0
+          };
+          localStorage.setItem("widely_upwork_monthly_weeks", JSON.stringify(state.upworkMonthlyWeeks));
+        } else if (typeof data.weeklyRevenue === "number") {
+          const curW = getCurrentWeekOfMonth();
+          state.upworkMonthlyWeeks[`w${curW}`] = data.weeklyRevenue;
+          localStorage.setItem("widely_upwork_monthly_weeks", JSON.stringify(state.upworkMonthlyWeeks));
         }
+        state.upworkWeeklyRevenue = getMonthlyWeeksGross(state.upworkMonthlyWeeks);
+
         if (typeof data.feePercent === "number") {
           state.upworkFeePercent = data.feePercent;
           localStorage.setItem("widely_upwork_fee_percent", String(data.feePercent));
@@ -5754,6 +6019,11 @@ function setupEventListeners() {
   elements.upworkBudgetModal?.addEventListener("click", (e) => {
     if (e.target === elements.upworkBudgetModal) closeUpworkBudgetModal();
   });
+  elements.upworkWeek1Input?.addEventListener("input", updateUpworkInputPreview);
+  elements.upworkWeek2Input?.addEventListener("input", updateUpworkInputPreview);
+  elements.upworkWeek3Input?.addEventListener("input", updateUpworkInputPreview);
+  elements.upworkWeek4Input?.addEventListener("input", updateUpworkInputPreview);
+  elements.upworkWeek5Input?.addEventListener("input", updateUpworkInputPreview);
   elements.upworkRevenueInput?.addEventListener("input", updateUpworkInputPreview);
   elements.upworkFeePercentInput?.addEventListener("input", updateUpworkInputPreview);
   elements.upworkIncludeVatInput?.addEventListener("change", updateUpworkInputPreview);
@@ -5762,24 +6032,39 @@ function setupEventListeners() {
   document.querySelectorAll(".btn-upwork-preset").forEach(btn => {
     btn.addEventListener("click", () => {
       const amount = parseFloat(btn.dataset.amount);
-      if (!isNaN(amount) && elements.upworkRevenueInput) {
-        elements.upworkRevenueInput.value = amount;
+      if (!isNaN(amount)) {
+        const curW = getCurrentWeekOfMonth();
+        const input = elements[`upworkWeek${curW}Input`];
+        if (input) input.value = amount;
         updateUpworkInputPreview();
       }
     });
   });
   elements.formUpworkBudget?.addEventListener("submit", (e) => {
     e.preventDefault();
-    const amount = parseFloat(elements.upworkRevenueInput?.value);
+    const w1 = parseFloat(elements.upworkWeek1Input?.value) || 0;
+    const w2 = parseFloat(elements.upworkWeek2Input?.value) || 0;
+    const w3 = parseFloat(elements.upworkWeek3Input?.value) || 0;
+    const w4 = parseFloat(elements.upworkWeek4Input?.value) || 0;
+    const w5 = parseFloat(elements.upworkWeek5Input?.value) || 0;
+
+    if (w1 < 0 || w2 < 0 || w3 < 0 || w4 < 0 || w5 < 0) {
+      showToast("Los montos de las semanas no pueden ser negativos", "warning");
+      return;
+    }
+
     const fee = parseFloat(elements.upworkFeePercentInput?.value);
     const payout = parseFloat(elements.upworkPayoutCostInput?.value);
     const nequiInclude = elements.nequiIncludeFeeInput ? elements.nequiIncludeFeeInput.checked : true;
     const includeVat = elements.upworkIncludeVatInput ? elements.upworkIncludeVatInput.checked : true;
-    if (isNaN(amount) || amount < 0) {
-      showToast("Ingresa un monto válido en dólares", "warning");
-      return;
-    }
-    saveUpworkBudget(amount, isNaN(fee) ? 15 : fee, isNaN(payout) ? 1.0 : payout, nequiInclude, includeVat);
+
+    saveUpworkBudget(
+      { w1, w2, w3, w4, w5 },
+      isNaN(fee) ? 15 : fee,
+      isNaN(payout) ? 1.0 : payout,
+      nequiInclude,
+      includeVat
+    );
     closeUpworkBudgetModal();
   });
 
