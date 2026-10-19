@@ -1322,245 +1322,251 @@
   </div>
 
   <!-- Modal para Configurar Recaudación Semanal en Upwork -->
-  <div id="upworkBudgetModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-opacity duration-200">
-    <div class="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] rounded-2xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-xl mx-auto">
-      <div class="flex items-center justify-between pb-3 border-b border-[#E2E8F0] dark:border-[#1E293B]">
+  <div id="upworkBudgetModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4 transition-opacity duration-200">
+    <div class="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] rounded-2xl max-w-lg sm:max-w-xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden mx-auto">
+      
+      <!-- Cabecera Fija del Modal -->
+      <div class="px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-between bg-slate-50/70 dark:bg-[#162032]/60 shrink-0">
         <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-xl bg-[#14A800]/10 text-[#14A800] dark:bg-[#14A800]/20 flex items-center justify-center text-lg border border-[#14A800]/25">
+          <div class="w-9 h-9 rounded-xl bg-[#14A800]/10 text-[#14A800] dark:bg-[#14A800]/20 flex items-center justify-center text-base border border-[#14A800]/25">
             <i class="fa-brands fa-upwork"></i>
           </div>
           <div>
-            <h3 class="text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC]">Recaudación Semanal Upwork</h3>
-            <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Configura tu ingreso semanal para calcular el presupuesto</p>
+            <h3 class="text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC]">Control Presupuestal Upwork</h3>
+            <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Recaudo por semanas y balance de nómina mensual</p>
           </div>
         </div>
-        <button type="button" id="btnCloseUpworkModal" class="text-[#64748B] hover:text-[#0F172A] dark:hover:text-white text-sm cursor-pointer">
-          <i class="fa-solid fa-xmark"></i>
+        <button type="button" id="btnCloseUpworkModal" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#64748B] hover:text-[#0F172A] dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
-      <form id="formUpworkBudget" class="space-y-4">
-        <!-- Banner del Total Acumulado del Mes -->
-        <div class="p-3.5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-blue-500/5 to-transparent border border-emerald-500/25 flex items-center justify-between">
-          <div>
-            <span class="text-[10px] font-mono uppercase font-semibold text-[#64748B] dark:text-[#94A3B8] block">Total Bruto Acumulado del Mes</span>
-            <div class="flex items-baseline gap-1.5 mt-0.5">
-              <span id="upworkTotalMonthlyRevenueLabel" class="text-2xl font-bold font-mono text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">$0.00</span>
-              <span class="text-xs text-[#64748B] font-mono">USD</span>
-            </div>
-            <span id="upworkInputCopPreview" class="text-[11px] font-mono font-medium text-emerald-600 dark:text-emerald-400">≈ $0 COP</span>
-          </div>
-          <div class="text-right">
-            <span id="modalMonthBadge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-              Mes Actual
-            </span>
-            <span class="block text-[10px] text-[#64748B] mt-1">Suma acumulada</span>
-          </div>
-        </div>
+      <!-- Formulario con Body Scrolleable y Footer Fijo -->
+      <form id="formUpworkBudget" class="flex flex-col flex-1 overflow-hidden m-0">
+        <div class="p-4 sm:p-5 overflow-y-auto space-y-3.5 flex-1 custom-scrollbar">
 
-        <!-- Inputs de Recaudación por Semanas (Editables en cualquier momento) -->
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <label class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1.5">
-              <i class="fa-solid fa-calendar-week text-emerald-600"></i>
-              <span>Recaudo por Semanas del Mes:</span>
-            </label>
-            <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8]">Edita o corrige cualquier semana</span>
-          </div>
-          
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <!-- Semana 1 -->
-            <div class="p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek1">Semana 1 (1 al 7)</span>
-                <span id="badgeWeek1" class="hidden text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-600">Actual</span>
+          <!-- 1. Banner del Total Acumulado del Mes -->
+          <div class="p-3.5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-blue-500/5 to-transparent border border-emerald-500/25 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-mono uppercase font-semibold text-[#64748B] dark:text-[#94A3B8] block">Total Bruto Mes Acumulado</span>
+              <div class="flex items-baseline gap-1.5 mt-0.5">
+                <span id="upworkTotalMonthlyRevenueLabel" class="text-2xl font-bold font-mono text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">$0.00</span>
+                <span class="text-xs text-[#64748B] font-mono">USD</span>
               </div>
-              <div class="relative">
-                <span class="input-currency-prefix text-xs">$</span>
-                <input type="number" id="upworkWeek1Input" step="any" min="0" placeholder="0.00" class="form-input w-full pl-6 font-mono text-xs">
-              </div>
+              <span id="upworkInputCopPreview" class="text-[11px] font-mono font-medium text-emerald-600 dark:text-emerald-400">≈ $0 COP</span>
             </div>
-
-            <!-- Semana 2 -->
-            <div class="p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek2">Semana 2 (8 al 14)</span>
-                <span id="badgeWeek2" class="hidden text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-600">Actual</span>
-              </div>
-              <div class="relative">
-                <span class="input-currency-prefix text-xs">$</span>
-                <input type="number" id="upworkWeek2Input" step="any" min="0" placeholder="0.00" class="form-input w-full pl-6 font-mono text-xs">
-              </div>
-            </div>
-
-            <!-- Semana 3 -->
-            <div class="p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek3">Semana 3 (15 al 21)</span>
-                <span id="badgeWeek3" class="hidden text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-600 font-bold">Actual</span>
-              </div>
-              <div class="relative">
-                <span class="input-currency-prefix text-xs">$</span>
-                <input type="number" id="upworkWeek3Input" step="any" min="0" placeholder="0.00" class="form-input w-full pl-6 font-mono text-xs">
-              </div>
-            </div>
-
-            <!-- Semana 4 -->
-            <div class="p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek4">Semana 4 (22 al 28)</span>
-                <span id="badgeWeek4" class="hidden text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-600">Actual</span>
-              </div>
-              <div class="relative">
-                <span class="input-currency-prefix text-xs">$</span>
-                <input type="number" id="upworkWeek4Input" step="any" min="0" placeholder="0.00" class="form-input w-full pl-6 font-mono text-xs">
-              </div>
-            </div>
-
-            <!-- Semana 5 -->
-            <div id="containerWeek5" class="p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] sm:col-span-2">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek5">Semana 5 (29 al 31)</span>
-                <span id="badgeWeek5" class="hidden text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-600">Actual</span>
-              </div>
-              <div class="relative">
-                <span class="input-currency-prefix text-xs">$</span>
-                <input type="number" id="upworkWeek5Input" step="any" min="0" placeholder="0.00" class="form-input w-full pl-6 font-mono text-xs">
-              </div>
-            </div>
-          </div>
-          <!-- Campo oculto para compatibilidad de selector -->
-          <input type="hidden" id="upworkRevenueInput" value="0">
-        </div>
-
-        <!-- Comisión de Upwork y Retiro a Fin de Mes -->
-        <div class="grid grid-cols-2 gap-3 pt-1">
-          <div>
-            <label for="upworkFeePercentInput" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
-              Comisión Upwork (%)
-            </label>
-            <div class="relative">
-              <input type="number" id="upworkFeePercentInput" step="0.1" min="0" max="50" value="15" placeholder="15.0" class="form-input w-full pr-7 font-mono text-xs">
-              <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono">%</span>
-            </div>
-            <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block mt-0.5">15% s/ recaudo semanal</span>
-          </div>
-          <div>
-            <label for="upworkPayoutCostInput" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
-              Retiro a Fin de Mes (USD)
-            </label>
-            <div class="relative">
-              <span class="input-currency-prefix text-xs">$</span>
-              <input type="number" id="upworkPayoutCostInput" step="0.01" min="0" value="1.00" placeholder="1.00" class="form-input w-full pl-7 font-mono text-xs">
-            </div>
-            <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block mt-0.5">$1 USD retiro al final del mes</span>
-          </div>
-        </div>
-
-        <!-- IVA Colombia (19%) sobre comisión de Upwork -->
-        <div class="p-2.5 rounded-xl bg-amber-500/[0.05] border border-amber-500/20 flex items-center justify-between">
-          <label class="flex items-center gap-2 cursor-pointer select-none">
-            <input type="checkbox" id="upworkIncludeVatInput" checked class="rounded border-[#CBD5E1] text-amber-600 focus:ring-amber-500 cursor-pointer">
-            <span class="text-xs font-bold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1.5">
-              <i class="fa-solid fa-receipt text-amber-600 dark:text-amber-400"></i>
-              <span>IVA Colombia (19%) s/ tarifa Upwork</span>
-            </span>
-          </label>
-          <span id="upworkVatPreviewBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold border border-amber-500/30">
-            VAT (CO) 19%
-          </span>
-        </div>
-
-        <!-- Método de Traslado / Cobro en Colombia -->
-        <div class="p-3 rounded-xl bg-purple-500/[0.05] border border-purple-500/20 space-y-2">
-          <div class="flex items-center justify-between">
-            <label class="flex items-center gap-2 cursor-pointer select-none">
-              <input type="checkbox" id="nequiIncludeFeeInput" checked class="rounded border-[#CBD5E1] text-purple-600 focus:ring-purple-500 cursor-pointer">
-              <span class="text-xs font-bold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1.5">
-                <i class="fa-solid fa-building-columns text-purple-600 dark:text-purple-400"></i>
-                <span>Retiro por PayPal a Nequi (con comisiones)</span>
+            <div class="text-right">
+              <span id="modalMonthBadge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 inline-block">
+                Mes Actual
               </span>
-            </label>
-            <span id="nequiActiveTierPill" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-700 dark:text-purple-300 font-semibold border border-purple-500/30">
-              4,76% con IVA
+              <span class="block text-[10px] text-[#64748B] mt-1">Suma acumulativa</span>
+            </div>
+          </div>
+
+          <!-- 2. Inputs de Recaudación por Semanas (5 columnas elegantes) -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1.5">
+                <i class="fa-solid fa-calendar-week text-emerald-600"></i>
+                <span>Recaudo por Semanas (USD):</span>
+              </label>
+              <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8]">Edita cualquier semana</span>
+            </div>
+            
+            <div class="grid-cols-5-weeks">
+              <!-- Semana 1 -->
+              <div class="p-2 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek1">Sem 1 (1-7)</span>
+                  <span id="badgeWeek1" class="hidden text-[8px] font-mono px-1 py-0.2 rounded bg-emerald-500/15 text-emerald-600 font-bold">Hoy</span>
+                </div>
+                <div class="relative">
+                  <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">$</span>
+                  <input type="number" id="upworkWeek1Input" step="any" min="0" placeholder="0" class="form-input w-full pl-5 pr-1 py-1 font-mono text-xs text-right no-spinners bg-white dark:bg-[#111827]">
+                </div>
+              </div>
+
+              <!-- Semana 2 -->
+              <div class="p-2 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek2">Sem 2 (8-14)</span>
+                  <span id="badgeWeek2" class="hidden text-[8px] font-mono px-1 py-0.2 rounded bg-emerald-500/15 text-emerald-600 font-bold">Hoy</span>
+                </div>
+                <div class="relative">
+                  <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">$</span>
+                  <input type="number" id="upworkWeek2Input" step="any" min="0" placeholder="0" class="form-input w-full pl-5 pr-1 py-1 font-mono text-xs text-right no-spinners bg-white dark:bg-[#111827]">
+                </div>
+              </div>
+
+              <!-- Semana 3 -->
+              <div class="p-2 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek3">Sem 3 (15-21)</span>
+                  <span id="badgeWeek3" class="hidden text-[8px] font-mono px-1 py-0.2 rounded bg-emerald-500/15 text-emerald-600 font-bold">Hoy</span>
+                </div>
+                <div class="relative">
+                  <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">$</span>
+                  <input type="number" id="upworkWeek3Input" step="any" min="0" placeholder="0" class="form-input w-full pl-5 pr-1 py-1 font-mono text-xs text-right no-spinners bg-white dark:bg-[#111827]">
+                </div>
+              </div>
+
+              <!-- Semana 4 -->
+              <div class="p-2 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek4">Sem 4 (22-28)</span>
+                  <span id="badgeWeek4" class="hidden text-[8px] font-mono px-1 py-0.2 rounded bg-emerald-500/15 text-emerald-600 font-bold">Hoy</span>
+                </div>
+                <div class="relative">
+                  <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">$</span>
+                  <input type="number" id="upworkWeek4Input" step="any" min="0" placeholder="0" class="form-input w-full pl-5 pr-1 py-1 font-mono text-xs text-right no-spinners bg-white dark:bg-[#111827]">
+                </div>
+              </div>
+
+              <!-- Semana 5 -->
+              <div id="containerWeek5" class="p-2 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all flex flex-col justify-between col-span-full-mobile">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC]" id="labelWeek5">Sem 5 (29-31)</span>
+                  <span id="badgeWeek5" class="hidden text-[8px] font-mono px-1 py-0.2 rounded bg-emerald-500/15 text-emerald-600 font-bold">Hoy</span>
+                </div>
+                <div class="relative">
+                  <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">$</span>
+                  <input type="number" id="upworkWeek5Input" step="any" min="0" placeholder="0" class="form-input w-full pl-5 pr-1 py-1 font-mono text-xs text-right no-spinners bg-white dark:bg-[#111827]">
+                </div>
+              </div>
+            </div>
+            <!-- Campo oculto para compatibilidad -->
+            <input type="hidden" id="upworkRevenueInput" value="0">
+          </div>
+
+          <!-- 3. Parámetros de Retiro & Deducciones (Grid 2 columnas limpio) -->
+          <div class="p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] space-y-2.5">
+            <span class="text-[10px] font-mono uppercase font-semibold text-[#64748B] dark:text-[#94A3B8] block">
+              Configuración de Tarifas & Retiro
             </span>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="upworkFeePercentInput" class="block text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
+                  Comisión Upwork (%)
+                </label>
+                <div class="relative">
+                  <input type="number" id="upworkFeePercentInput" step="0.1" min="0" max="50" value="15" placeholder="15.0" class="form-input w-full pr-6 py-1 font-mono text-xs no-spinners bg-white dark:bg-[#111827]">
+                  <span class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">%</span>
+                </div>
+                <span class="text-[9px] text-[#64748B] dark:text-[#94A3B8] block mt-0.5">15% tarifa servicio</span>
+              </div>
+              <div>
+                <label for="upworkPayoutCostInput" class="block text-[11px] font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
+                  Retiro a Fin de Mes (USD)
+                </label>
+                <div class="relative">
+                  <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[#64748B] font-mono pointer-events-none">$</span>
+                  <input type="number" id="upworkPayoutCostInput" step="0.01" min="0" value="1.00" placeholder="1.00" class="form-input w-full pl-6 py-1 font-mono text-xs no-spinners bg-white dark:bg-[#111827]">
+                </div>
+                <span class="text-[9px] text-[#64748B] dark:text-[#94A3B8] block mt-0.5">$1 USD cobro único al mes</span>
+              </div>
+            </div>
+
+            <!-- Toggles de IVA y Nequi -->
+            <div class="pt-2 border-t border-[#E2E8F0]/60 dark:border-[#1E293B]/60 space-y-2">
+              <label class="flex items-center justify-between p-2 rounded-lg bg-amber-500/[0.04] border border-amber-500/20 cursor-pointer select-none">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" id="upworkIncludeVatInput" checked class="rounded border-[#CBD5E1] text-amber-600 focus:ring-amber-500 cursor-pointer">
+                  <span class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC]">IVA Colombia (19%) sobre tarifa Upwork</span>
+                </div>
+                <span id="upworkVatPreviewBadge" class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30">
+                  19% IVA
+                </span>
+              </label>
+
+              <!-- Nequi vs Cuenta Directa -->
+              <div class="p-2.5 rounded-lg bg-purple-500/[0.04] border border-purple-500/20 space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="nequiIncludeFeeInput" checked class="rounded border-[#CBD5E1] text-purple-600 focus:ring-purple-500 cursor-pointer">
+                    <span class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1.5">
+                      <i class="fa-solid fa-building-columns text-purple-600 dark:text-purple-400"></i>
+                      <span>Retiro por PayPal a Nequi (con comisiones)</span>
+                    </span>
+                  </label>
+                  <span id="nequiActiveTierPill" class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-700 dark:text-purple-300 font-bold border border-purple-500/30">
+                    4,76% con IVA
+                  </span>
+                </div>
+                <p class="text-[9px] text-[#64748B] dark:text-[#94A3B8]">
+                  Desmarca si retiras por cuenta bancaria directa (0% comisiones Nequi) para recibir 100% del saldo de PayPal.
+                </p>
+                <!-- 3 mini cajas de tramo Nequi -->
+                <div class="grid grid-cols-3 gap-1 text-[9px] font-mono text-center pt-1 border-t border-purple-500/15">
+                  <div id="nequiTierBox1" class="p-1 rounded bg-white dark:bg-[#111827] border border-purple-500/10 transition-all">
+                    <span class="block text-[#64748B] text-[8px]">≤ $150</span>
+                    <strong class="text-purple-600 dark:text-purple-400">7,14%</strong>
+                  </div>
+                  <div id="nequiTierBox2" class="p-1 rounded bg-white dark:bg-[#111827] border border-purple-500/10 transition-all">
+                    <span class="block text-[#64748B] text-[8px]">$151–300</span>
+                    <strong class="text-purple-600 dark:text-purple-400">4,76%</strong>
+                  </div>
+                  <div id="nequiTierBox3" class="p-1 rounded bg-white dark:bg-[#111827] border border-purple-500/10 transition-all">
+                    <span class="block text-[#64748B] text-[8px]">$301–2.000</span>
+                    <strong class="text-purple-600 dark:text-purple-400">2,975%</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <p class="text-[10px] text-[#64748B] dark:text-[#94A3B8]">
-            Al conectar cuenta bancaria directa, desmarca esta opción para no pagar comisiones de Nequi y obtener 100% del saldo de PayPal.
-          </p>
-
-          <!-- Tabla de referencia Nequi -->
-          <div class="grid grid-cols-3 gap-1.5 text-[10px] font-mono text-center pt-1 border-t border-purple-500/15">
-            <div id="nequiTierBox1" class="p-1 rounded bg-white dark:bg-[#111827] border border-purple-500/10 transition-all">
-              <span class="block text-[#64748B]">US$ 1–150</span>
-              <strong class="text-purple-600 dark:text-purple-400">7,14%</strong>
+          <!-- 4. Desglose en vivo de la ruta financiera -->
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] space-y-1 text-xs font-mono">
+            <div class="flex items-center justify-between text-[#64748B] dark:text-[#94A3B8]">
+              <span>1. Recaudo Bruto Total:</span>
+              <span id="upworkBreakdownGross" class="font-bold text-slate-900 dark:text-white">$0.00 USD</span>
             </div>
-            <div id="nequiTierBox2" class="p-1 rounded bg-white dark:bg-[#111827] border border-purple-500/10 transition-all">
-              <span class="block text-[#64748B]">US$ 151–300</span>
-              <strong class="text-purple-600 dark:text-purple-400">4,76%</strong>
+            <div class="flex items-center justify-between text-[#BF6863]">
+              <span id="upworkBreakdownFeeLabel">2. Tarifa Upwork (15%):</span>
+              <span id="upworkBreakdownFee">-$0.00 USD</span>
             </div>
-            <div id="nequiTierBox3" class="p-1 rounded bg-white dark:bg-[#111827] border border-purple-500/10 transition-all">
-              <span class="block text-[#64748B]">US$ 301–2.000</span>
-              <strong class="text-purple-600 dark:text-purple-400">2,975%</strong>
+            <div id="upworkVatBreakdownRow" class="flex items-center justify-between text-amber-600 dark:text-amber-400">
+              <span>3. IVA Colombia (19%) s/ tarifa:</span>
+              <span id="upworkBreakdownVat">-$0.00 USD</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-700 dark:text-slate-300 pt-1 border-t border-[#E2E8F0]/60 dark:border-[#1E293B]/60 text-[11px]">
+              <span>Net earnings Upwork:</span>
+              <span id="upworkBreakdownNetEarnings" class="font-semibold">$0.00 USD</span>
+            </div>
+            <div class="flex items-center justify-between text-[#BF6863]">
+              <span>4. Retiro Upwork fin de mes:</span>
+              <span id="upworkBreakdownPayout">-$1.00 USD</span>
+            </div>
+            <div class="flex items-center justify-between text-blue-600 dark:text-blue-400 text-[11px]">
+              <span>5. Saldo en PayPal:</span>
+              <span id="upworkBreakdownPayPal" class="font-semibold">$0.00 USD</span>
+            </div>
+            <div id="nequiBreakdownRow" class="flex items-center justify-between text-purple-600 dark:text-purple-400">
+              <span>6. Comisión Nequi (con IVA):</span>
+              <span id="upworkBreakdownNequi">-$0.00 USD</span>
+            </div>
+            <div class="pt-1.5 border-t border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-between font-bold text-emerald-600 dark:text-emerald-400 text-xs">
+              <span>Neto Real en Colombia:</span>
+              <span id="upworkBreakdownNet">$0.00 USD</span>
+            </div>
+            <div class="flex items-center justify-between text-[#2563EB] pt-1 border-t border-[#E2E8F0]/50 dark:border-[#1E293B]/50 text-xs">
+              <span>Costo Nómina del Mes:</span>
+              <span id="upworkBreakdownMonthlyPayroll">-$0.00 USD</span>
+            </div>
+            <div class="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between font-bold text-slate-900 dark:text-white mt-1 text-xs">
+              <span class="text-emerald-800 dark:text-emerald-300">Margen Real de Ganancia:</span>
+              <span id="upworkBreakdownNetMargin" class="text-sm text-emerald-600 dark:text-emerald-400 font-bold">$0.00 USD</span>
             </div>
           </div>
+
         </div>
 
-        <!-- Desglose en vivo de la ruta completa de dinero para el mes -->
-        <div class="p-3 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] space-y-1.5 text-xs font-mono">
-          <div class="flex items-center justify-between text-[#64748B] dark:text-[#94A3B8]">
-            <span>1. Recaudo Bruto Total del Mes:</span>
-            <span id="upworkBreakdownGross">$0.00 USD</span>
-          </div>
-          <div class="flex items-center justify-between text-[#BF6863]">
-            <span id="upworkBreakdownFeeLabel">2. Tarifa de Servicio Upwork (15%):</span>
-            <span id="upworkBreakdownFee">-$0.00 USD</span>
-          </div>
-          <div id="upworkVatBreakdownRow" class="flex items-center justify-between text-amber-600 dark:text-amber-400">
-            <span>3. IVA Colombia (19%) s/ tarifa:</span>
-            <span id="upworkBreakdownVat">-$0.00 USD</span>
-          </div>
-          <div class="flex items-center justify-between text-slate-800 dark:text-slate-200 pt-1 border-t border-[#E2E8F0]/60 dark:border-[#1E293B]/60 font-semibold">
-            <span>Net earnings en Upwork:</span>
-            <span id="upworkBreakdownNetEarnings">$0.00 USD</span>
-          </div>
-          <div class="flex items-center justify-between text-[#BF6863]">
-            <span>4. Retiro Upwork a fin de mes:</span>
-            <span id="upworkBreakdownPayout">-$1.00 USD</span>
-          </div>
-          <div class="flex items-center justify-between text-blue-600 dark:text-blue-400 pt-1 border-t border-[#E2E8F0]/50 dark:border-[#1E293B]/50 font-medium">
-            <span>5. Monto recibido en PayPal:</span>
-            <span id="upworkBreakdownPayPal">$0.00 USD</span>
-          </div>
-          <div id="nequiBreakdownRow" class="flex items-center justify-between text-purple-600 dark:text-purple-400">
-            <span>6. Comisión Nequi (con IVA):</span>
-            <span id="upworkBreakdownNequi">-$0.00 USD</span>
-          </div>
-          <div class="pt-1.5 border-t border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-between font-bold text-emerald-600 dark:text-emerald-400">
-            <span>Ingreso Neto Real en Colombia:</span>
-            <span id="upworkBreakdownNet">$0.00 USD</span>
-          </div>
-          <div class="flex items-center justify-between text-[#2563EB] pt-1 border-t border-[#E2E8F0]/50 dark:border-[#1E293B]/50">
-            <span>Costo Nómina del Mes:</span>
-            <span id="upworkBreakdownMonthlyPayroll">-$0.00 USD</span>
-          </div>
-          <div class="flex items-center justify-between font-bold text-slate-900 dark:text-white pt-1 border-t border-[#E2E8F0] dark:border-[#1E293B]">
-            <span>Margen Real de Ganancia Agencia:</span>
-            <span id="upworkBreakdownNetMargin">$0.00 USD</span>
-          </div>
-        </div>
-
-        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">
-          <i class="fa-solid fa-circle-info mr-1"></i>
-          La recaudación semanal se acumula para cubrir la nómina mensual al final de mes. Puedes corregir cualquier semana en cualquier momento y los balances se recalcularán automáticamente.
-        </div>
-
-        <div class="flex gap-2 pt-2">
-          <button type="button" id="btnCancelUpworkBudget" class="w-1/2 py-2 text-xs font-medium rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-[#F1F5F9] dark:bg-[#162032] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B] transition-colors cursor-pointer">
+        <!-- Footer Fijo con Botones -->
+        <div class="px-5 py-3 bg-slate-50 dark:bg-[#162032]/80 border-t border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-end gap-2.5 shrink-0">
+          <button type="button" id="btnCancelUpworkBudget" class="px-4 py-2 text-xs font-semibold rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer">
             Cancelar
           </button>
-          <button type="submit" id="btnSaveUpworkBudget" class="w-1/2 py-2 text-xs font-medium rounded-lg bg-[#14A800] hover:bg-[#118d00] text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm font-semibold">
+          <button type="submit" id="btnSaveUpworkBudget" class="px-5 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white transition-all shadow-sm cursor-pointer flex items-center gap-1.5">
             <i class="fa-solid fa-check text-xs"></i>
             <span>Guardar Presupuesto</span>
           </button>

@@ -3807,12 +3807,12 @@ function openUpworkBudgetModal() {
     elements.modalMonthBadge.textContent = getMonthLabel();
   }
 
-  // Configurar etiquetas de fechas de las semanas
-  if (elements.labelWeek1) elements.labelWeek1.textContent = "Semana 1 (1 al 7)";
-  if (elements.labelWeek2) elements.labelWeek2.textContent = "Semana 2 (8 al 14)";
-  if (elements.labelWeek3) elements.labelWeek3.textContent = "Semana 3 (15 al 21)";
-  if (elements.labelWeek4) elements.labelWeek4.textContent = "Semana 4 (22 al 28)";
-  if (elements.labelWeek5) elements.labelWeek5.textContent = `Semana 5 (29 al ${monthConfig.daysInMonth})`;
+  // Configurar etiquetas de fechas de las semanas (formato compacto)
+  if (elements.labelWeek1) elements.labelWeek1.textContent = "Sem 1 (1-7)";
+  if (elements.labelWeek2) elements.labelWeek2.textContent = "Sem 2 (8-14)";
+  if (elements.labelWeek3) elements.labelWeek3.textContent = "Sem 3 (15-21)";
+  if (elements.labelWeek4) elements.labelWeek4.textContent = "Sem 4 (22-28)";
+  if (elements.labelWeek5) elements.labelWeek5.textContent = `Sem 5 (29-${monthConfig.daysInMonth})`;
 
   // Visibilidad de Semana 5 (solo si el mes tiene más de 28 días)
   if (elements.containerWeek5) {
@@ -3892,7 +3892,7 @@ function updateUpworkInputPreview() {
   }
 
   if (elements.upworkTotalMonthlyRevenueLabel) {
-    elements.upworkTotalMonthlyRevenueLabel.textContent = `$${totalGross.toFixed(2)} USD (Mes)`;
+    elements.upworkTotalMonthlyRevenueLabel.textContent = `$${totalGross.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
   const feePercent = parseFloat(elements.upworkFeePercentInput?.value) || 0;

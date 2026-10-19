@@ -107,7 +107,7 @@ svg {
   z-index: 5;
 }
 
-/* Flechas limpias y discretas en inputs numéricos */
+/* Flechas limpias y discretas en inputs numéricos generales */
 input[type="number"]::-webkit-inner-spin-button, 
 input[type="number"]::-webkit-outer-spin-button { 
   opacity: 0.45;
@@ -116,6 +116,36 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"]:hover::-webkit-inner-spin-button, 
 input[type="number"]:hover::-webkit-outer-spin-button { 
   opacity: 0.9;
+}
+
+/* Quitar flechas nativas (spinners) en inputs monetarios y porcentajes */
+.no-spinners::-webkit-inner-spin-button,
+.no-spinners::-webkit-outer-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+.no-spinners {
+  -moz-appearance: textfield !important;
+}
+
+/* Grilla responsive ultra-limpia para las 5 semanas del mes */
+.grid-cols-5-weeks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+@media (min-width: 640px) {
+  .grid-cols-5-weeks {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+.col-span-full-mobile {
+  grid-column: 1 / -1;
+}
+@media (min-width: 640px) {
+  .col-span-full-mobile {
+    grid-column: auto;
+  }
 }
 
 /* Caja de isotipo azul protegida contra estilos faltantes */
