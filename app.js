@@ -173,7 +173,8 @@ let state = {
   taskStatusFilter: "all", // Filtro de estado: 'all', 'pendiente', 'aprobada', 'rechazada'
   rejectTargetId: null,
   upworkWeeklyRevenue: 0, // Recaudación semanal Upwork en USD
-  upworkFeePercent: 10,   // Comisión Upwork % (default 10%)
+  upworkFeePercent: 15,   // Tarifa servicio Upwork % (default 15% según factura oficial)
+  upworkIncludeVat: true, // IVA Colombia (19%) sobre tarifa de servicio de Upwork
   upworkPayoutCost: 1.0,  // Costo Retiro Upwork USD (1 USD por cada retiro)
   nequiIncludeFee: true,  // Deducir comisiones PayPal -> Nequi (+ IVA 19%)
   workerWeeklyGoal: 20,   // Meta semanal en horas
@@ -494,6 +495,7 @@ const elements = {
   // Deducción comisiones Upwork & Nequi
   upworkFeePercentInput: document.getElementById("upworkFeePercentInput"),
   upworkPayoutCostInput: document.getElementById("upworkPayoutCostInput"),
+  upworkIncludeVatInput: document.getElementById("upworkIncludeVatInput"),
   nequiIncludeFeeInput: document.getElementById("nequiIncludeFeeInput"),
   nequiActiveTierPill: document.getElementById("nequiActiveTierPill"),
   nequiTierBox1: document.getElementById("nequiTierBox1"),
@@ -501,12 +503,17 @@ const elements = {
   nequiTierBox3: document.getElementById("nequiTierBox3"),
   nequiBreakdownRow: document.getElementById("nequiBreakdownRow"),
   upworkBreakdownGross: document.getElementById("upworkBreakdownGross"),
+  upworkBreakdownFeeLabel: document.getElementById("upworkBreakdownFeeLabel"),
   upworkBreakdownFee: document.getElementById("upworkBreakdownFee"),
+  upworkBreakdownVat: document.getElementById("upworkBreakdownVat"),
+  upworkVatBreakdownRow: document.getElementById("upworkVatBreakdownRow"),
+  upworkBreakdownNetEarnings: document.getElementById("upworkBreakdownNetEarnings"),
   upworkBreakdownPayout: document.getElementById("upworkBreakdownPayout"),
   upworkBreakdownPayPal: document.getElementById("upworkBreakdownPayPal"),
   upworkBreakdownNequi: document.getElementById("upworkBreakdownNequi"),
   upworkBreakdownNet: document.getElementById("upworkBreakdownNet"),
   upworkNequiRouteSummary: document.getElementById("upworkNequiRouteSummary"),
+  routeUpworkNetLabel: document.getElementById("routeUpworkNetLabel"),
   routeNequiTierLabel: document.getElementById("routeNequiTierLabel"),
   routeNetNequiUsd: document.getElementById("routeNetNequiUsd"),
   routeNetNequiCop: document.getElementById("routeNetNequiCop"),
@@ -1346,6 +1353,10 @@ function setupFirestoreListeners(profile) {
         if (typeof data.nequiIncludeFee === "boolean") {
           state.nequiIncludeFee = data.nequiIncludeFee;
           localStorage.setItem("widely_nequi_include_fee", String(data.nequiIncludeFee));
+        }
+        if (typeof data.includeVat === "boolean") {
+          state.upworkIncludeVat = data.includeVat;
+          localStorage.setItem("widely_upwork_include_vat", String(data.includeVat));
         }
         updateUpworkBudgetDashboard();
       }
@@ -3494,20 +3505,25 @@ function updateUpworkBudgetDashboard(currentTrm) {
   const weeklyPayrollCost = weeklyTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
 
   const grossRevenue = Number(state.upworkWeeklyRevenue) || 0;
-  const feePercent = typeof state.upworkFeePercent === "number" ? state.upworkFeePercent : 10;
+  const feePercent = typeof state.upworkFeePercent === "number" ? state.upworkFeePercent : 15;
+  const includeVat = state.upworkIncludeVat !== false;
   const payoutCost = typeof state.upworkPayoutCost === "number" ? state.upworkPayoutCost : 1.0;
   const includeNequi = state.nequiIncludeFee !== false;
 
   // Pipeline Financiero Completo: Upwork -> PayPal -> Nequi Colombia
-  // 1. Upwork Bruto -> Descuento comisión de Upwork (10%)
+  // 1. Upwork Bruto -> Descuento tarifa de servicio (15% por defecto)
   const upworkFeeAmount = grossRevenue > 0 ? (grossRevenue * (feePercent / 100)) : 0;
-  // 2. Retiro fijo Upwork -> PayPal ($1.00 USD por retiro)
+  // 2. IVA Colombia (19%) sobre la tarifa de servicio de Upwork (VAT CO)
+  const upworkVatAmount = (grossRevenue > 0 && includeVat) ? (upworkFeeAmount * 0.19) : 0;
+  // 3. Ganancia neta en Upwork (Net earnings)
+  const upworkNetEarnings = Math.max(0, grossRevenue - upworkFeeAmount - upworkVatAmount);
+  // 4. Retiro fijo Upwork -> PayPal ($1.00 USD por retiro)
   const upworkPayoutAmount = grossRevenue > 0 ? payoutCost : 0;
-  // 3. Monto acreditado en PayPal
-  const paypalAmount = Math.max(0, grossRevenue - upworkFeeAmount - upworkPayoutAmount);
-  // 4. Retiro PayPal -> Nequi Colombia (Tramo con IVA 19%)
+  // 5. Monto acreditado en PayPal
+  const paypalAmount = Math.max(0, upworkNetEarnings - upworkPayoutAmount);
+  // 6. Retiro PayPal -> Nequi Colombia (Tramo escalonado con IVA 19%)
   const nequiCalc = includeNequi ? calculateNequiFee(paypalAmount) : { tier: 0, rate: 0, percentLabel: "0%", feeAmount: 0, netAmount: paypalAmount, tierName: "Desactivado" };
-  // 5. Ingreso Neto Real disponible en cuenta Nequi
+  // 7. Ingreso Neto Real disponible en cuenta Nequi
   const netRealRevenue = grossRevenue > 0 ? nequiCalc.netAmount : 0;
 
   // Margen Real Neto disponible para la agencia = Lo que entra a cuenta colombiana menos nómina de colaboradores
@@ -3527,19 +3543,23 @@ function updateUpworkBudgetDashboard(currentTrm) {
   }
   if (elements.upworkRevenueSubtitle) {
     if (grossRevenue > 0) {
+      const vatText = includeVat ? " + IVA CO" : "";
       const nequiText = includeNequi ? ` • Nequi -${nequiCalc.percentLabel}` : "";
-      elements.upworkRevenueSubtitle.textContent = `Neto en Nequi: $${netRealRevenue.toFixed(2)} (-${feePercent}% Upwork, -$${payoutCost.toFixed(2)} retiro${nequiText})`;
+      elements.upworkRevenueSubtitle.textContent = `Neto en Nequi: $${netRealRevenue.toFixed(2)} (-${feePercent}%${vatText}, -$${payoutCost.toFixed(2)} retiro${nequiText})`;
     } else {
       elements.upworkRevenueSubtitle.textContent = "Clic en 'Ajustar Recaudo' para ingresar";
     }
   }
 
   // Resumen de la Ruta Bancaria: Upwork -> PayPal -> Nequi
+  if (elements.routeUpworkNetLabel) {
+    elements.routeUpworkNetLabel.textContent = `Upwork (-${feePercent}%${includeVat ? " + IVA" : ""})`;
+  }
   if (elements.routeNequiTierLabel) {
     if (includeNequi && paypalAmount > 0) {
       elements.routeNequiTierLabel.textContent = `Nequi (-${nequiCalc.percentLabel})`;
     } else if (includeNequi) {
-      elements.routeNequiTierLabel.textContent = `Nequi (2,975%)`;
+      elements.routeNequiTierLabel.textContent = `Nequi (-4,76%)`;
     } else {
       elements.routeNequiTierLabel.textContent = `Nequi (0%)`;
     }
@@ -3657,7 +3677,10 @@ function openUpworkBudgetModal() {
     elements.upworkRevenueInput.value = state.upworkWeeklyRevenue > 0 ? state.upworkWeeklyRevenue : "";
   }
   if (elements.upworkFeePercentInput) {
-    elements.upworkFeePercentInput.value = state.upworkFeePercent !== undefined ? state.upworkFeePercent : 10;
+    elements.upworkFeePercentInput.value = state.upworkFeePercent !== undefined ? state.upworkFeePercent : 15;
+  }
+  if (elements.upworkIncludeVatInput) {
+    elements.upworkIncludeVatInput.checked = state.upworkIncludeVat !== false;
   }
   if (elements.upworkPayoutCostInput) {
     elements.upworkPayoutCostInput.value = state.upworkPayoutCost !== undefined ? state.upworkPayoutCost : 1.0;
@@ -3680,6 +3703,7 @@ function closeUpworkBudgetModal() {
 function updateUpworkInputPreview() {
   const val = parseFloat(elements.upworkRevenueInput?.value) || 0;
   const feePercent = parseFloat(elements.upworkFeePercentInput?.value) || 0;
+  const includeVat = elements.upworkIncludeVatInput ? elements.upworkIncludeVatInput.checked : true;
   const payoutCost = parseFloat(elements.upworkPayoutCostInput?.value) || 0;
   const includeNequi = elements.nequiIncludeFeeInput ? elements.nequiIncludeFeeInput.checked : true;
   const trm = getActiveTrmRate();
@@ -3688,21 +3712,38 @@ function updateUpworkInputPreview() {
     elements.upworkInputCopPreview.textContent = `≈ ${formatCop(val * trm)}`;
   }
 
-  // 1. Upwork
+  // 1. Tarifa servicio Upwork (15% por defecto)
   const feeAmount = val > 0 ? (val * (feePercent / 100)) : 0;
+  // 2. IVA Colombia (19%) sobre tarifa de Upwork (VAT CO on service fee)
+  const vatAmount = (val > 0 && includeVat) ? (feeAmount * 0.19) : 0;
+  // 3. Ganancia neta en Upwork (Net earnings)
+  const upworkNetEarnings = Math.max(0, val - feeAmount - vatAmount);
+  // 4. Retiro Upwork a PayPal ($1.00 USD)
   const payoutAmount = val > 0 ? payoutCost : 0;
-  // 2. PayPal
-  const paypalAmount = Math.max(0, val - feeAmount - payoutAmount);
-  // 3. Nequi Colombia (con IVA 19%)
+  // 5. PayPal
+  const paypalAmount = Math.max(0, upworkNetEarnings - payoutAmount);
+  // 6. Nequi Colombia (con IVA 19%)
   const nequiCalc = includeNequi ? calculateNequiFee(paypalAmount) : { tier: 0, rate: 0, percentLabel: "0%", feeAmount: 0, netAmount: paypalAmount, tierName: "Desactivado" };
-  // 4. Monto neto real que llega a Nequi
+  // 7. Monto neto real que llega a Nequi
   const netReal = val > 0 ? nequiCalc.netAmount : 0;
 
   if (elements.upworkBreakdownGross) {
     elements.upworkBreakdownGross.textContent = `$${val.toFixed(2)} USD`;
   }
+  if (elements.upworkBreakdownFeeLabel) {
+    elements.upworkBreakdownFeeLabel.textContent = `2. Tarifa de Servicio Upwork (${feePercent}%):`;
+  }
   if (elements.upworkBreakdownFee) {
-    elements.upworkBreakdownFee.textContent = `-$${feeAmount.toFixed(2)} USD (${feePercent}%)`;
+    elements.upworkBreakdownFee.textContent = `-$${feeAmount.toFixed(2)} USD`;
+  }
+  if (elements.upworkBreakdownVat) {
+    elements.upworkBreakdownVat.textContent = `-$${vatAmount.toFixed(2)} USD (19%)`;
+  }
+  if (elements.upworkVatBreakdownRow) {
+    elements.upworkVatBreakdownRow.style.opacity = includeVat ? "1" : "0.5";
+  }
+  if (elements.upworkBreakdownNetEarnings) {
+    elements.upworkBreakdownNetEarnings.textContent = `$${upworkNetEarnings.toFixed(2)} USD`;
   }
   if (elements.upworkBreakdownPayout) {
     elements.upworkBreakdownPayout.textContent = `-$${payoutAmount.toFixed(2)} USD`;
@@ -3728,7 +3769,7 @@ function updateUpworkInputPreview() {
     if (includeNequi && paypalAmount > 0) {
       elements.nequiActiveTierPill.textContent = `${nequiCalc.percentLabel} con IVA (${nequiCalc.tierName})`;
     } else if (includeNequi) {
-      elements.nequiActiveTierPill.textContent = "2,975% con IVA";
+      elements.nequiActiveTierPill.textContent = "4,76% con IVA";
     } else {
       elements.nequiActiveTierPill.textContent = "Desactivado";
     }
@@ -3751,14 +3792,16 @@ function updateUpworkInputPreview() {
   }
 }
 
-async function saveUpworkBudget(amount, feePercent = 10, payoutCost = 1.0, nequiIncludeFee = true) {
+async function saveUpworkBudget(amount, feePercent = 15, payoutCost = 1.0, nequiIncludeFee = true, upworkIncludeVat = true) {
   state.upworkWeeklyRevenue = amount;
   state.upworkFeePercent = feePercent;
+  state.upworkIncludeVat = upworkIncludeVat;
   state.upworkPayoutCost = payoutCost;
   state.nequiIncludeFee = nequiIncludeFee;
 
   localStorage.setItem("widely_upwork_weekly_revenue", String(amount));
   localStorage.setItem("widely_upwork_fee_percent", String(feePercent));
+  localStorage.setItem("widely_upwork_include_vat", String(upworkIncludeVat));
   localStorage.setItem("widely_upwork_payout_cost", String(payoutCost));
   localStorage.setItem("widely_nequi_include_fee", String(nequiIncludeFee));
   updateUpworkBudgetDashboard();
@@ -3768,13 +3811,15 @@ async function saveUpworkBudget(amount, feePercent = 10, payoutCost = 1.0, nequi
       await setDoc(doc(db, "configuracion", "upwork"), {
         weeklyRevenue: amount,
         feePercent: feePercent,
+        includeVat: upworkIncludeVat,
         payoutCost: payoutCost,
         nequiIncludeFee: nequiIncludeFee,
         updatedAt: serverTimestamp(),
         updatedBy: state.currentUser?.email || "admin"
       }, { merge: true });
+      const vatText = upworkIncludeVat ? "+IVA CO" : "sin IVA";
       const nequiText = nequiIncludeFee ? "Nequi con IVA activo" : "Sin Nequi";
-      showToast(`Presupuesto Upwork actualizado ($${amount.toFixed(2)} USD, -${feePercent}% Upwork, -$${payoutCost} retiro, ${nequiText})`, "success");
+      showToast(`Presupuesto Upwork actualizado ($${amount.toFixed(2)} USD, -${feePercent}% Upwork ${vatText}, -$${payoutCost} retiro, ${nequiText})`, "success");
       return;
     } catch (err) {
       console.warn("[Upwork Budget] Guardado localmente, error en Firestore:", err);
@@ -3791,6 +3836,10 @@ async function loadUpworkBudget() {
   const cachedFee = localStorage.getItem("widely_upwork_fee_percent");
   if (cachedFee !== null && !isNaN(Number(cachedFee))) {
     state.upworkFeePercent = Number(cachedFee);
+  }
+  const cachedVat = localStorage.getItem("widely_upwork_include_vat");
+  if (cachedVat !== null) {
+    state.upworkIncludeVat = cachedVat !== "false";
   }
   const cachedPayout = localStorage.getItem("widely_upwork_payout_cost");
   if (cachedPayout !== null && !isNaN(Number(cachedPayout))) {
@@ -3814,6 +3863,10 @@ async function loadUpworkBudget() {
         if (typeof data.feePercent === "number") {
           state.upworkFeePercent = data.feePercent;
           localStorage.setItem("widely_upwork_fee_percent", String(data.feePercent));
+        }
+        if (typeof data.includeVat === "boolean") {
+          state.upworkIncludeVat = data.includeVat;
+          localStorage.setItem("widely_upwork_include_vat", String(data.includeVat));
         }
         if (typeof data.payoutCost === "number") {
           state.upworkPayoutCost = data.payoutCost;
@@ -5703,6 +5756,7 @@ function setupEventListeners() {
   });
   elements.upworkRevenueInput?.addEventListener("input", updateUpworkInputPreview);
   elements.upworkFeePercentInput?.addEventListener("input", updateUpworkInputPreview);
+  elements.upworkIncludeVatInput?.addEventListener("change", updateUpworkInputPreview);
   elements.upworkPayoutCostInput?.addEventListener("input", updateUpworkInputPreview);
   elements.nequiIncludeFeeInput?.addEventListener("change", updateUpworkInputPreview);
   document.querySelectorAll(".btn-upwork-preset").forEach(btn => {
@@ -5720,11 +5774,12 @@ function setupEventListeners() {
     const fee = parseFloat(elements.upworkFeePercentInput?.value);
     const payout = parseFloat(elements.upworkPayoutCostInput?.value);
     const nequiInclude = elements.nequiIncludeFeeInput ? elements.nequiIncludeFeeInput.checked : true;
+    const includeVat = elements.upworkIncludeVatInput ? elements.upworkIncludeVatInput.checked : true;
     if (isNaN(amount) || amount < 0) {
       showToast("Ingresa un monto válido en dólares", "warning");
       return;
     }
-    saveUpworkBudget(amount, isNaN(fee) ? 10 : fee, isNaN(payout) ? 1.0 : payout, nequiInclude);
+    saveUpworkBudget(amount, isNaN(fee) ? 15 : fee, isNaN(payout) ? 1.0 : payout, nequiInclude, includeVat);
     closeUpworkBudgetModal();
   });
 
