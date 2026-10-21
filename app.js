@@ -840,10 +840,10 @@ function applyRoleView() {
 
       if (elements.userRoleBadge) {
         elements.userRoleBadge.textContent = "ADMIN";
-        elements.userRoleBadge.className = "text-[9px] font-mono text-blue-600 dark:text-blue-400 font-bold uppercase";
+        elements.userRoleBadge.className = "text-[9px] font-mono text-[#0a0a0a] dark:text-[#fafafa] font-bold uppercase";
       }
       if (elements.userAvatar) {
-        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm shadow-blue-500/20";
+        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-[10px] bg-[#0a0a0a] text-[#fafafa] dark:bg-[#fafafa] dark:text-[#0a0a0a] flex items-center justify-center text-xs font-bold font-mono shrink-0";
       }
 
       // Activar Portal de Administrador
@@ -886,10 +886,10 @@ function applyRoleView() {
 
       if (elements.userRoleBadge) {
         elements.userRoleBadge.textContent = "COLABORADOR";
-        elements.userRoleBadge.className = "text-[9px] font-mono text-cyan-600 dark:text-cyan-400 font-bold uppercase";
+        elements.userRoleBadge.className = "text-[9px] font-mono text-[#737373] dark:text-[#a1a1aa] font-bold uppercase";
       }
       if (elements.userAvatar) {
-        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-cyan-600 text-white flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm shadow-cyan-500/20";
+        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-[10px] bg-[#171717] text-[#fafafa] dark:bg-[#27272a] dark:text-[#fafafa] flex items-center justify-center text-xs font-bold font-mono shrink-0";
       }
 
       // Activar Portal de Colaborador
@@ -3343,9 +3343,9 @@ function setFilterPeriod(period) {
   const buttons = document.querySelectorAll(".btn-period-filter");
   buttons.forEach(btn => {
     if (btn.dataset.period === period) {
-      btn.className = "btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 bg-blue-600 text-white shadow-sm";
+      btn.className = "btn-period-filter px-3 py-1.5 rounded-[18px] transition-all active:scale-95 bg-[#0a0a0a] text-[#fafafa] dark:bg-[#fafafa] dark:text-[#0a0a0a] font-medium shadow-none";
     } else {
-      btn.className = "btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800";
+      btn.className = "btn-period-filter px-3 py-1.5 rounded-[18px] transition-all active:scale-95 text-[#737373] dark:text-[#a1a1aa] hover:bg-[#f5f5f5] dark:hover:bg-[#18181b] hover:text-[#0a0a0a] dark:hover:text-white";
     }
   });
 
@@ -3369,9 +3369,9 @@ window.setTaskStatusFilter = function(status) {
   const buttons = document.querySelectorAll(".btn-status-filter");
   buttons.forEach(btn => {
     if (btn.dataset.status === status) {
-      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 bg-[#2563EB] text-white shadow-sm flex items-center gap-1";
+      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-[18px] transition-all active:scale-95 bg-[#0a0a0a] text-[#fafafa] dark:bg-[#fafafa] dark:text-[#0a0a0a] font-medium shadow-none flex items-center gap-1";
     } else {
-      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white flex items-center gap-1.5";
+      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-[18px] transition-all active:scale-95 text-[#737373] dark:text-[#a1a1aa] hover:bg-[#f5f5f5] dark:hover:bg-[#18181b] hover:text-[#0a0a0a] dark:hover:text-white flex items-center gap-1.5";
     }
   });
   updateTasksUI();

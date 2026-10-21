@@ -14,10 +14,10 @@
   <link rel="apple-touch-icon" href="icon-192.svg">
   <link rel="icon" type="image/svg+xml" href="icon-192.svg">
 
-  <!-- Google Fonts: Inter (Tipografía Premium Natural) & Anybody -->
+  <!-- Google Fonts: Geist, Geist Mono & Inter (Design System Tokens) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Anybody:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <!-- Chart.js CDN para Dashboard Ejecutivo -->
@@ -80,7 +80,7 @@
 
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-[#F8FAFC] dark:bg-[#0B0F19] text-[#0F172A] dark:text-[#F8FAFC] font-sans min-h-screen selection:bg-[#2563EB] selection:text-white transition-colors duration-200">
+<body class="min-h-screen selection:bg-[#0a0a0a] selection:text-white dark:selection:bg-[#fafafa] dark:selection:text-black transition-colors duration-200">
 
   <!-- Banner de Advertencia si falta la API Key -->
   <div id="firebaseWarning" hidden style="display: none;" class="hidden bg-[#C58B42]/10 border-b border-[#C58B42]/20 text-[#C58B42] text-xs py-2 px-3 sm:px-4 text-center">
@@ -233,7 +233,7 @@
   <!-- =========================================================================
        MODELO 1: SAAS PRO DASHBOARD SHELL (Sidebar Vertical + Canvas Principal)
        ========================================================================= -->
-  <div id="mainAppDashboard" class="hidden min-h-screen flex flex-col lg:flex-row bg-[#F8FAFC] dark:bg-[#0B0F19] text-[#0F172A] dark:text-[#F8FAFC] selection:bg-[#2563EB] selection:text-white">
+  <div id="mainAppDashboard" class="hidden min-h-screen flex flex-col lg:flex-row bg-[var(--surface-canvas)] text-[var(--color-ink)] selection:bg-[#0a0a0a] selection:text-white dark:selection:bg-[#fafafa] dark:selection:text-black">
     
     <!-- BACKDROP MÓVIL PARA SIDEBAR -->
     <div id="sidebarBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden hidden transition-opacity"></div>
