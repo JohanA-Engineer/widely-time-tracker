@@ -778,12 +778,6 @@ function initFirebaseAuth() {
             rol: isAdmin ? "admin" : "worker",
             createdAt: new Date().toISOString()
           };
-          if (fallbackProfile.rol === "worker") {
-            const matchingWorker = state.workers.find(w => 
-              w.nombre && fallbackProfile.nombre && w.nombre.trim().toLowerCase() === fallbackProfile.nombre.trim().toLowerCase()
-            );
-            if (matchingWorker) fallbackProfile.trabajadorId = matchingWorker.id;
-          }
           await setDoc(userDocRef, fallbackProfile);
           state.userProfile = fallbackProfile;
         }
@@ -953,28 +947,16 @@ function linkAndLockWorkerSelect() {
   if (!state.userProfile || state.userProfile.rol !== "worker") return;
   const profile = state.userProfile;
 
-  const matchingWorker = state.workers.find(w => 
-    (profile.trabajadorId && w.id === profile.trabajadorId) ||
-    (w.nombre && profile.nombre && w.nombre.trim().toLowerCase() === profile.nombre.trim().toLowerCase())
-  );
+  // La vinculación solo se hace por trabajadorId (asignado al registrarse o por la administradora),
+  // nunca por coincidencia de nombre, para evitar que una cuenta tome la ficha de otro colaborador
+  const matchingWorker = profile.trabajadorId
+    ? state.workers.find(w => w.id === profile.trabajadorId)
+    : null;
 
-  if (matchingWorker) {
-    const wasMissing = !profile.trabajadorId || profile.trabajadorId !== matchingWorker.id;
-    if (wasMissing) {
-      profile.trabajadorId = matchingWorker.id;
-      localStorage.setItem("widely_cached_user", JSON.stringify(profile));
-      if (db && state.currentUser) {
-        updateDoc(doc(db, "usuarios", state.currentUser.uid), { trabajadorId: matchingWorker.id }).catch(console.warn);
-      }
-    }
-    if (elements.timerWorkerSelect) {
-      elements.timerWorkerSelect.value = matchingWorker.id;
-      elements.timerWorkerSelect.disabled = true;
-      updateLiveCost();
-    }
-    if (wasMissing) {
-      setupFirestoreListeners(profile);
-    }
+  if (matchingWorker && elements.timerWorkerSelect) {
+    elements.timerWorkerSelect.value = matchingWorker.id;
+    elements.timerWorkerSelect.disabled = true;
+    updateLiveCost();
   }
 }
 
@@ -1043,14 +1025,6 @@ async function handleLogin(e) {
         profile.rol = "admin";
       }
 
-      if (profile.rol === "worker") {
-        const matchingWorker = state.workers.find(w => 
-          (profile.trabajadorId && w.id === profile.trabajadorId) ||
-          (w.nombre && profile.nombre && w.nombre.trim().toLowerCase() === profile.nombre.trim().toLowerCase())
-        );
-        if (matchingWorker) profile.trabajadorId = matchingWorker.id;
-      }
-
       state.currentUser = user;
       state.userProfile = profile;
       localStorage.setItem("widely_cached_user", JSON.stringify(profile));
@@ -1111,19 +1085,15 @@ async function handleRegister(e) {
       }
 
       let workerId = null;
-      if (role === "worker") {
-        const existingWorker = state.workers.find(w => w.nombre.trim().toLowerCase() === name.toLowerCase());
-        if (existingWorker) {
-          workerId = existingWorker.id;
-        } else if (db) {
-          const newWorkerRef = await addDoc(collection(db, "trabajadores"), {
-            nombre: name,
-            tarifaHora: 0,
-            email: email,
-            createdAt: serverTimestamp()
-          });
-          workerId = newWorkerRef.id;
-        }
+      if (role === "worker" && db) {
+        const newWorkerRef = await addDoc(collection(db, "trabajadores"), {
+          nombre: name,
+          tarifaHora: 0,
+          email: email,
+          ownerUid: user.uid,
+          createdAt: serverTimestamp()
+        });
+        workerId = newWorkerRef.id;
       }
 
       const userProfile = {
@@ -1224,23 +1194,17 @@ async function handleGoogleAuth() {
           };
 
           if (role === "worker") {
-            const matchingWorker = state.workers.find(w =>
-              w.nombre && userName && w.nombre.trim().toLowerCase() === userName.trim().toLowerCase()
-            );
-            if (matchingWorker) {
-              profile.trabajadorId = matchingWorker.id;
-            } else {
-              try {
-                const newWorkerRef = await addDoc(collection(db, "trabajadores"), {
-                  nombre: userName,
-                  tarifaHora: 0,
-                  activo: true,
-                  createdAt: serverTimestamp()
-                });
-                profile.trabajadorId = newWorkerRef.id;
-              } catch (e) {
-                console.warn("[Auth] No se pudo crear registro de trabajador automático:", e);
-              }
+            try {
+              const newWorkerRef = await addDoc(collection(db, "trabajadores"), {
+                nombre: userName,
+                tarifaHora: 0,
+                activo: true,
+                ownerUid: user.uid,
+                createdAt: serverTimestamp()
+              });
+              profile.trabajadorId = newWorkerRef.id;
+            } catch (e) {
+              console.warn("[Auth] No se pudo crear registro de trabajador automático:", e);
             }
           }
 
@@ -1328,10 +1292,7 @@ async function loginMockUser(role, customName, customEmail) {
     let workerName = customName || "Colaborador Demo";
     let workerId = null;
 
-    let existingWorker = state.workers.find(w => w.nombre && w.nombre.toLowerCase().trim() === workerName.toLowerCase().trim());
-    if (existingWorker) {
-      workerId = existingWorker.id;
-    } else if (db) {
+    if (db) {
       try {
         const newDoc = await addDoc(collection(db, "trabajadores"), {
           nombre: workerName,
@@ -1346,7 +1307,7 @@ async function loginMockUser(role, customName, customEmail) {
     }
 
     if (!workerId) {
-      workerId = state.workers.length > 0 ? state.workers[0].id : "worker_" + Date.now();
+      workerId = "worker_" + Date.now();
     }
 
     profile = {
@@ -1404,23 +1365,11 @@ function setupFirestoreListeners(profile) {
     return;
   }
 
-  // 1. Escuchar trabajadores (solo cuando el usuario tiene sesión activa confirmada)
-  if (!workersUnsubscribe) {
-    const workersCol = collection(db, "trabajadores");
-    workersUnsubscribe = onSnapshot(workersCol, (snapshot) => {
-      state.workers = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })).sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
-
-      updateWorkersUI();
-      updateFinancialDashboard();
-    }, (error) => {
-      console.warn("[Firestore] Trabajadores snapshot:", error.message);
-    });
+  // Cancelar suscripciones previas de trabajadores, tareas y pagos para evitar mezclas de sesiones
+  if (workersUnsubscribe) {
+    workersUnsubscribe();
+    workersUnsubscribe = null;
   }
-
-  // Cancelar suscripciones previas de tareas y pagos para evitar mezclas de sesiones
   if (tasksUnsubscribe) {
     tasksUnsubscribe();
     tasksUnsubscribe = null;
@@ -1431,6 +1380,32 @@ function setupFirestoreListeners(profile) {
   }
 
   const isAdmin = profile.rol === "admin" || isMasterAdmin(profile.email);
+
+  // 1. TRABAJADORES: La Administradora lee todas las fichas; el Colaborador solo la suya
+  const onWorkersError = (error) => {
+    console.warn("[Firestore] Trabajadores snapshot:", error.message);
+  };
+  if (isAdmin) {
+    workersUnsubscribe = onSnapshot(collection(db, "trabajadores"), (snapshot) => {
+      state.workers = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })).sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
+
+      updateWorkersUI();
+      updateFinancialDashboard();
+    }, onWorkersError);
+  } else if (profile.trabajadorId) {
+    workersUnsubscribe = onSnapshot(doc(db, "trabajadores", profile.trabajadorId), (snap) => {
+      state.workers = snap.exists() ? [{ id: snap.id, ...snap.data() }] : [];
+
+      updateWorkersUI();
+      updateFinancialDashboard();
+    }, onWorkersError);
+  } else {
+    state.workers = [];
+    updateWorkersUI();
+  }
 
   // 2. TAREAS: La Administradora lee todo; el Colaborador solo sus propias tareas
   let tasksQuery = null;
@@ -2233,7 +2208,9 @@ async function handleRegisterTask() {
     tarifaHora: rate,
     costoTotal: totalCost,
     esManual: false,
-    estado: "aprobada",
+    // Las tareas de colaboradores quedan pendientes hasta que la administradora las apruebe
+    estado: isWorkerRole ? "pendiente" : "aprobada",
+    creadoPorRol: isWorkerRole ? "worker" : "admin",
     createdAt: db ? serverTimestamp() : new Date().toISOString()
   };
 
@@ -2250,7 +2227,9 @@ async function handleRegisterTask() {
       updateFinancialDashboard();
     }
 
-    showToast(`¡Tarea registrada con éxito! Costo: $${totalCost.toFixed(2)}`, "success");
+    showToast(isWorkerRole
+      ? `¡Tarea registrada! Costo: $${totalCost.toFixed(2)} — pendiente de aprobación.`
+      : `¡Tarea registrada con éxito! Costo: $${totalCost.toFixed(2)}`, "success");
     elements.timerTaskDescription.value = "";
     if (elements.timerClientProject) elements.timerClientProject.value = "";
     if (elements.timerCategory) elements.timerCategory.value = "general";
@@ -2464,7 +2443,7 @@ function updateWorkersUI() {
             </button>
             <button 
               type="button"
-              onclick="window.openEditRateModal('${w.id}', '${escapeHtml(w.nombre)}', ${rate}, ${artRate})"
+              onclick="window.openEditRateModal(${jsArg(w.id)}, ${jsArg(w.nombre)}, ${rate}, ${artRate})"
               title="Asignar o editar tarifas" 
               class="px-2 py-1 rounded-lg bg-[#2563EB]/10 hover:bg-[#2563EB]/20 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/20 transition-all active:scale-95 text-xs flex items-center gap-1 font-medium cursor-pointer">
               <i class="fa-solid fa-pen-to-square text-[10px]"></i>
@@ -2472,7 +2451,7 @@ function updateWorkersUI() {
             </button>
             <button 
               type="button"
-              onclick="window.requestDelete('trabajadores', '${w.id}', '${escapeHtml(w.nombre)}')"
+              onclick="window.requestDelete('trabajadores', ${jsArg(w.id)}, ${jsArg(w.nombre)})"
               title="Eliminar colaborador" 
               class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors active:scale-95 text-xs cursor-pointer">
               <i class="fa-regular fa-trash-can text-xs"></i>
@@ -2716,7 +2695,7 @@ function populateProfileData() {
   let accountNumber = profile.numeroCuenta || "";
   let accountHolder = profile.titularCuenta || profile.nombre || "";
 
-  const workerId = profile.trabajadorId || state.workers.find(w => w.nombre?.trim().toLowerCase() === profile.nombre?.trim().toLowerCase())?.id;
+  const workerId = profile.trabajadorId;
   if (workerId) {
     const banking = loadWorkerBankingPrefs(workerId);
     if (!bank) bank = banking.bank;
@@ -2833,7 +2812,7 @@ async function handleSaveMyProfile(e) {
       }
 
       // Sincronizar con ficha de trabajador si existe
-      const workerId = profile.trabajadorId || state.workers.find(w => w.nombre?.trim().toLowerCase() === profile.nombre?.trim().toLowerCase())?.id;
+      const workerId = profile.trabajadorId;
       if (workerId) {
         try {
           await setDoc(doc(db, "trabajadores", workerId), {
@@ -3507,7 +3486,7 @@ function updateTasksUI() {
               <i class="fa-solid fa-xmark text-xs"></i>
             </button>
             <button 
-              onclick="window.requestDelete('tareas', '${t.id}', 'Tarea: ${escapeHtml(t.descripcion || '')}')"
+              onclick="window.requestDelete('tareas', ${jsArg(t.id)}, ${jsArg('Tarea: ' + (t.descripcion || ''))})"
               class="text-[#64748B] hover:text-[#BF6863] p-1.5 rounded-lg hover:bg-[#BF6863]/10 transition-colors active:scale-95"
               title="Eliminar registro">
               <i class="fa-regular fa-trash-can text-xs"></i>
@@ -3524,7 +3503,7 @@ function updateTasksUI() {
               <i class="fa-solid fa-check text-xs"></i>
             </button>
             <button 
-              onclick="window.requestDelete('tareas', '${t.id}', 'Tarea: ${escapeHtml(t.descripcion || '')}')"
+              onclick="window.requestDelete('tareas', ${jsArg(t.id)}, ${jsArg('Tarea: ' + (t.descripcion || ''))})"
               class="text-[#64748B] hover:text-[#BF6863] p-1.5 rounded-lg hover:bg-[#BF6863]/10 transition-colors active:scale-95"
               title="Eliminar registro">
               <i class="fa-regular fa-trash-can text-xs"></i>
@@ -3544,7 +3523,7 @@ function updateTasksUI() {
               </button>
             ` : ''}
             <button 
-              onclick="window.requestDelete('tareas', '${t.id}', 'Tarea: ${escapeHtml(t.descripcion || '')}')"
+              onclick="window.requestDelete('tareas', ${jsArg(t.id)}, ${jsArg('Tarea: ' + (t.descripcion || ''))})"
               class="text-[#64748B] hover:text-[#BF6863] p-1.5 rounded-lg hover:bg-[#BF6863]/10 transition-colors active:scale-95"
               title="Eliminar tarea">
               <i class="fa-regular fa-trash-can text-xs"></i>
@@ -3556,7 +3535,7 @@ function updateTasksUI() {
       // Colaborador
       actionButtons = `
         <button 
-          onclick="window.requestDelete('tareas', '${t.id}', 'Tarea: ${escapeHtml(t.descripcion || '')}')"
+          onclick="window.requestDelete('tareas', ${jsArg(t.id)}, ${jsArg('Tarea: ' + (t.descripcion || ''))})"
           class="text-[#64748B] hover:text-[#BF6863] p-1.5 rounded-lg hover:bg-[#BF6863]/10 transition-colors active:scale-95"
           title="Eliminar registro">
           <i class="fa-regular fa-trash-can text-xs"></i>
@@ -3650,7 +3629,7 @@ function updatePaymentsUI() {
       <td class="py-2.5 px-2 text-center whitespace-nowrap">
         ${!isWorker ? `
           <button 
-            onclick="window.requestDelete('pagos', '${p.id}', 'Pago de $${Number(p.monto || 0).toFixed(2)} a ${escapeHtml(p.trabajadorNombre || '')}')"
+            onclick="window.requestDelete('pagos', ${jsArg(p.id)}, ${jsArg(`Pago de $${Number(p.monto || 0).toFixed(2)} a ${p.trabajadorNombre || ''}`)})"
             class="text-[#64748B] hover:text-[#BF6863] p-1 rounded-md hover:bg-[#BF6863]/10 transition-colors active:scale-95"
             title="Eliminar pago">
             <i class="fa-regular fa-trash-can text-xs"></i>
@@ -3753,7 +3732,7 @@ function updateFinancialDashboard() {
     const editRateBtn = !isWorker ? `
       <button 
         type="button" 
-        onclick="window.openEditRateModal('${worker.id}', '${escapeHtml(worker.nombre)}', ${hourlyRate}, ${artRate})"
+        onclick="window.openEditRateModal(${jsArg(worker.id)}, ${jsArg(worker.nombre)}, ${hourlyRate}, ${artRate})"
         class="hover:text-[#2563EB] dark:hover:text-[#60A5FA] hover:underline transition-colors cursor-pointer inline-flex flex-col items-end group"
         title="Clic para modificar tarifas">
         <span class="inline-flex items-center gap-1 font-medium">
@@ -3806,7 +3785,7 @@ function updateFinancialDashboard() {
         </button>
         <button 
           type="button" 
-          onclick="window.quickPayWorker('${worker.id}', '${escapeHtml(worker.nombre)}', ${pendingBalance})" 
+          onclick="window.quickPayWorker(${jsArg(worker.id)}, ${jsArg(worker.nombre)}, ${pendingBalance})" 
           class="px-2 py-1.5 rounded-lg bg-[#0284C7]/15 hover:bg-[#0284C7]/25 text-[#0284C7] dark:text-[#D4AF87] border border-[#0284C7]/30 text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
           title="Abonar / Registrar pago a ${escapeHtml(worker.nombre)}">
           <i class="fa-solid fa-money-bill-transfer text-[10px]"></i>
@@ -5425,7 +5404,7 @@ function updateClientsUI() {
             <button type="button" onclick="window.openClientModal('${client.id}')" class="p-1 rounded-md text-[#64748B] hover:text-[#2563EB] hover:bg-[#2563EB]/10 transition-colors" title="Editar cliente">
               <i class="fa-regular fa-pen-to-square text-xs"></i>
             </button>
-            <button type="button" onclick="window.deleteClient('${client.id}', '${escapeHtml(client.nombre)}')" class="p-1 rounded-md text-[#64748B] hover:text-[#BF6863] hover:bg-[#BF6863]/10 transition-colors" title="Eliminar cliente">
+            <button type="button" onclick="window.deleteClient(${jsArg(client.id)}, ${jsArg(client.nombre)})" class="p-1 rounded-md text-[#64748B] hover:text-[#BF6863] hover:bg-[#BF6863]/10 transition-colors" title="Eliminar cliente">
               <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
           </div>
@@ -5918,7 +5897,7 @@ window.requestDelete = function(collectionName, id, label) {
     return;
   }
   state.deleteTarget = { collection: collectionName, id, label };
-  elements.deleteModalText.innerHTML = `¿Seguro que deseas eliminar <strong>${label}</strong>? Se recalcularán los saldos de inmediato.`;
+  elements.deleteModalText.innerHTML = `¿Seguro que deseas eliminar <strong>${escapeHtml(label)}</strong>? Se recalcularán los saldos de inmediato.`;
   elements.deleteModal.classList.remove("hidden");
   elements.deleteModal.classList.add("flex");
 };
@@ -6207,7 +6186,8 @@ function updateManualCost() {
     const artCount = parseInt(elements.manualArtCount?.value || 0, 10) || 0;
     const workerArtRate = worker ? Number(worker.tarifaArte || 0) : 0;
     const manualArtRateVal = parseFloat(elements.manualArtRateInput?.value || 0);
-    const effectiveArtRate = (!isNaN(manualArtRateVal) && manualArtRateVal > 0) ? manualArtRateVal : workerArtRate;
+    const canOverrideArtRate = state.userProfile?.rol !== "worker";
+    const effectiveArtRate = (canOverrideArtRate && !isNaN(manualArtRateVal) && manualArtRateVal > 0) ? manualArtRateVal : workerArtRate;
     const totalCost = (artCount > 0 && effectiveArtRate > 0) ? (artCount * effectiveArtRate) : 0;
 
     if (elements.manualCalculatedCost) {
@@ -6298,7 +6278,8 @@ async function handleSaveManualEntry(e) {
 
     const workerArtRate = worker ? Number(worker.tarifaArte || 0) : 0;
     const manualArtRateVal = parseFloat(elements.manualArtRateInput?.value || 0);
-    const effectiveArtRate = (!isNaN(manualArtRateVal) && manualArtRateVal > 0) ? manualArtRateVal : workerArtRate;
+    // Solo la administradora puede usar una tarifa por arte distinta a la configurada
+    const effectiveArtRate = (!isWorkerRole && !isNaN(manualArtRateVal) && manualArtRateVal > 0) ? manualArtRateVal : workerArtRate;
 
     const manualHoursVal = parseFloat(elements.manualArtHours?.value || 0);
     const approxHours = (!isNaN(manualHoursVal) && manualHoursVal > 0) ? manualHoursVal : Number((artCount * 0.5).toFixed(2));
@@ -6992,7 +6973,7 @@ function setupEventListeners() {
   elements.btnWorkerOpenBill?.addEventListener("click", () => {
     const profile = state.userProfile;
     if (!profile) return;
-    const workerId = profile.trabajadorId || state.workers.find(w => w.nombre?.trim().toLowerCase() === profile.nombre?.trim().toLowerCase())?.id;
+    const workerId = profile.trabajadorId;
     if (workerId) {
       window.openStatementModal(workerId, "bill");
     } else if (state.workers.length > 0) {
@@ -7197,7 +7178,7 @@ function setupEventListeners() {
   elements.btnPageOpenMyBill?.addEventListener("click", () => {
     const profile = state.userProfile;
     if (!profile) return;
-    const workerId = profile.trabajadorId || state.workers.find(w => w.nombre?.trim().toLowerCase() === profile.nombre?.trim().toLowerCase())?.id;
+    const workerId = profile.trabajadorId;
     if (workerId) {
       window.openStatementModal(workerId, "bill");
     } else if (state.workers.length > 0) {
@@ -7363,6 +7344,12 @@ function formatSecondsToTime(totalSeconds) {
 
   const pad = (n) => String(n).padStart(2, "0");
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+}
+
+// Serializa un valor como literal JS seguro para usarlo dentro de atributos onclick="..."
+// (escapeHtml solo no basta: el navegador decodifica &#039; a ' antes de ejecutar el código)
+function jsArg(value) {
+  return escapeHtml(JSON.stringify(String(value ?? "")));
 }
 
 function escapeHtml(str) {

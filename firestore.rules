@@ -1,17 +1,21 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     // =========================================================================
     // FUNCIONES AUXILIARES DE SEGURIDAD
     // =========================================================================
 
-    // Verifica si el usuario autenticado es la Administradora Maestra (Lina)
+    // Verifica si el usuario autenticado es la Administradora Maestra (Lina),
+    // un administrador promovido (rol "admin" asignado por un admin) o un correo
+    // autorizado en /configuracion/admins (solo editable por administradores)
     function isMasterAdmin() {
       return request.auth != null && (
         request.auth.token.email.lower() == "linadelae@gmail.com" ||
         (exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == "admin")
+         get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == "admin") ||
+        (exists(/databases/$(database)/documents/configuracion/admins) &&
+         request.auth.token.email.lower() in get(/databases/$(database)/documents/configuracion/admins).data.get('emails', []))
       );
     }
 
@@ -23,7 +27,37 @@ service cloud.firestore {
     // Obtiene el trabajadorId asignado al usuario autenticado desde /usuarios/{uid}
     function getUserWorkerId() {
       return (request.auth != null && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))) ?
-        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.trabajadorId : null;
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.get('trabajadorId', null) : null;
+    }
+
+    // Un usuario solo puede vincularse a una ficha de trabajador creada por él mismo (ownerUid).
+    // Las fichas creadas por la administradora solo las vincula la administradora.
+    function ownsWorkerOrNone(workerId) {
+      return workerId == null || (
+        exists(/databases/$(database)/documents/trabajadores/$(workerId)) &&
+        get(/databases/$(database)/documents/trabajadores/$(workerId)).data.get('ownerUid', null) == request.auth.uid
+      );
+    }
+
+    // Tarea registrada por un colaborador: siempre a su nombre, siempre pendiente de aprobación
+    // y con un costo que no supera su tarifa real guardada en /trabajadores
+    function isValidWorkerTask() {
+      let data = request.resource.data;
+      let workerId = getUserWorkerId();
+      let worker = get(/databases/$(database)/documents/trabajadores/$(workerId)).data;
+      return workerId != null &&
+        data.trabajadorId == workerId &&
+        data.userId == request.auth.uid &&
+        data.estado == "pendiente" &&
+        data.costoTotal is number && data.costoTotal >= 0 &&
+        data.tarifaHora == worker.get('tarifaHora', 0) &&
+        (
+          (data.get('cantidadArtes', 0) == 0 &&
+           data.costoTotal <= data.horas * data.tarifaHora * 1.01 + 0.01) ||
+          (data.cantidadArtes is int && data.cantidadArtes > 0 &&
+           data.tarifaArte == worker.get('tarifaArte', 0) &&
+           data.costoTotal <= data.cantidadArtes * data.tarifaArte + 0.01)
+        );
     }
 
     // =========================================================================
@@ -32,65 +66,86 @@ service cloud.firestore {
 
     // 1. Colección de Usuarios (/usuarios/{userId})
     match /usuarios/{userId} {
-      // Todos los usuarios autenticados pueden consultar perfiles
-      allow read: if isAuthenticated();
-      
-      // Un usuario solo puede crear su propio perfil inicial
-      allow create: if isAuthenticated() && request.auth.uid == userId;
-      
-      // Un usuario puede actualizar sus datos personales (nombre, foto),
-      // pero NUNCA puede auto-asignarse el rol 'admin' (solo Lina puede cambiar roles)
-      allow update: if isAuthenticated() && (
-        isMasterAdmin() || 
-        (request.auth.uid == userId && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['rol'])))
+      // Cada usuario consulta solo su propio perfil; los administradores consultan todos
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isMasterAdmin());
+
+      // Un usuario solo puede crear su propio perfil inicial, siempre como colaborador
+      // y vinculado únicamente a una ficha de trabajador propia
+      allow create: if isAuthenticated() && request.auth.uid == userId && (
+        isMasterAdmin() || (
+          request.resource.data.get('rol', 'worker') == "worker" &&
+          ownsWorkerOrNone(request.resource.data.get('trabajadorId', null))
+        )
       );
-      
+
+      // Un usuario puede actualizar sus datos personales (nombre, foto, banco),
+      // pero NUNCA puede auto-asignarse el rol 'admin' ni vincularse a la ficha de otro trabajador
+      allow update: if isAuthenticated() && (
+        isMasterAdmin() ||
+        (request.auth.uid == userId &&
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['rol']) &&
+         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['trabajadorId']) ||
+          ownsWorkerOrNone(request.resource.data.get('trabajadorId', null))))
+      );
+
       // Solo Lina puede eliminar cuentas de usuario
       allow delete: if isMasterAdmin();
     }
 
     // 2. Colección de Trabajadores (/trabajadores/{workerId})
     match /trabajadores/{workerId} {
-      // Todos los colaboradores autenticados pueden ver la lista y sus tarifas asignadas
-      allow read: if isAuthenticated();
-      
-      // Administradores pueden crear colaboradores (incluyendo perfiles de solo datos con tarifa definida);
-      // si un nuevo usuario se autoregistra, su tarifa inicial debe ser 0 obligatoriamente
-      allow create: if isMasterAdmin() || (
-        isAuthenticated() && request.resource.data.tarifaHora == 0
+      // Administradores ven todos; cada colaborador solo su propia ficha (datos bancarios y tarifas)
+      allow read: if isAuthenticated() && (
+        isMasterAdmin() ||
+        getUserWorkerId() == workerId ||
+        resource.data.get('ownerUid', null) == request.auth.uid
       );
-      
+
+      // Administradores pueden crear colaboradores (incluyendo perfiles de solo datos con tarifa definida);
+      // si un nuevo usuario se autoregistra, su ficha queda a su nombre (ownerUid) y sus tarifas en 0
+      allow create: if isMasterAdmin() || (
+        isAuthenticated() &&
+        request.resource.data.ownerUid == request.auth.uid &&
+        request.resource.data.get('tarifaHora', 0) == 0 &&
+        request.resource.data.get('tarifaArte', 0) == 0
+      );
+
       // Administradores pueden modificar cualquier dato;
-      // Colaboradores vinculados pueden actualizar sus datos bancarios y personales (sin alterar tarifas)
+      // Colaboradores vinculados pueden actualizar sus datos bancarios y personales (sin alterar tarifas ni dueño)
       allow update: if isMasterAdmin() || (
         isAuthenticated() && getUserWorkerId() == workerId &&
-        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['tarifaHora', 'tarifaArte']))
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['tarifaHora', 'tarifaArte', 'ownerUid']))
       );
-      
+
       // ÚNICAMENTE Administradores pueden eliminar trabajadores
       allow delete: if isMasterAdmin();
     }
 
     // 3. Colección de Tareas Registradas (/tareas/{taskId})
     match /tareas/{taskId} {
-      // Los usuarios autenticados pueden consultar tareas (el filtrado seguro por trabajador se realiza en las consultas de la app)
-      allow read: if isAuthenticated();
-      
-      // Los colaboradores autenticados pueden registrar tareas (por horas o por piezas de diseño de artes)
+      // Administradores consultan todas; cada colaborador solo las de su propia ficha
+      allow read: if isAuthenticated() && (
+        isMasterAdmin() || (getUserWorkerId() != null && resource.data.trabajadorId == getUserWorkerId())
+      );
+
+      // Registro de tareas (por horas o por piezas de diseño de artes).
+      // Los colaboradores solo registran tareas propias, pendientes y con su tarifa real.
       allow create: if isAuthenticated() && (
         (request.resource.data.horas > 0 || (request.resource.data.cantidadArtes is number && request.resource.data.cantidadArtes > 0)) &&
         request.resource.data.descripcion is string
-      );
-      
+      ) && (isMasterAdmin() || isValidWorkerTask());
+
       // Solo Lina puede modificar o eliminar tareas ya registradas (auditoría financiera)
       allow update, delete: if isMasterAdmin();
     }
 
     // 4. Colección de Pagos y Desembolsos (/pagos/{paymentId})
     match /pagos/{paymentId} {
-      // Los usuarios autenticados pueden consultar pagos para validar recibos y balances
-      allow read: if isAuthenticated();
-      
+      // Administradores consultan todos; cada colaborador solo los pagos que recibió
+      allow read: if isAuthenticated() && (
+        isMasterAdmin() || (getUserWorkerId() != null && resource.data.trabajadorId == getUserWorkerId())
+      );
+
       // ÚNICAMENTE la Administradora Maestra (Lina) puede registrar, editar o anular pagos
       // Ningún colaborador puede crear o alterar comprobantes de pago bajo ninguna circunstancia
       allow create, update, delete: if isMasterAdmin();
@@ -98,15 +153,17 @@ service cloud.firestore {
 
     // 5. Colección de Configuración Administrativa (/configuracion/{docId})
     match /configuracion/{docId} {
-      // Los usuarios autenticados pueden leer configuraciones públicas
-      allow read: if isAuthenticated();
-      
+      // La lista de administradores es legible por usuarios autenticados (la app la usa para mostrar roles);
+      // el resto de configuraciones (presupuesto Upwork) es solo para administradores
+      allow read: if isAuthenticated() && (docId == "admins" || isMasterAdmin());
+
       // ÚNICAMENTE la Administradora Maestra (Lina) puede modificar configuraciones como el presupuesto Upwork
       allow write: if isMasterAdmin();
     }
 
     // 6. Colección de Clientes y Presupuestos (/clientes/{clientId})
     match /clientes/{clientId} {
+      // Lectura abierta a autenticados: los colaboradores la usan para autocompletar el cliente de sus tareas
       allow read: if isAuthenticated();
       allow write: if isMasterAdmin();
     }
