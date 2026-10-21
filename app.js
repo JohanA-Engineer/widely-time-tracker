@@ -2698,7 +2698,7 @@ function populateProfileData() {
 
   if (elements.myProfileRoleBadge) {
     elements.myProfileRoleBadge.textContent = isAdmin ? "ADMINISTRADOR TOTAL" : "COLABORADOR";
-    elements.myProfileRoleBadge.className = `text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full ${isAdmin ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'} uppercase`;
+    elements.myProfileRoleBadge.className = isAdmin ? "profile-role-badge-admin" : "profile-role-badge-worker";
   }
 
   // Prellenar información personal
@@ -2768,16 +2768,20 @@ function updateDigitalBankCardPreview() {
 
   const card = elements.digitalBankCard;
   if (card) {
-    if (bank === "Nequi") {
-      card.className = "relative overflow-hidden rounded-2xl p-5 text-white shadow-xl transition-all duration-300 bg-gradient-to-br from-[#1C002B] via-[#2F064B] to-[#12001E] border border-purple-500/40";
-    } else if (bank === "Daviplata" || bank === "Davivienda") {
-      card.className = "relative overflow-hidden rounded-2xl p-5 text-white shadow-xl transition-all duration-300 bg-gradient-to-br from-[#2D0606] via-[#4A0B0B] to-[#1E0404] border border-red-500/40";
-    } else if (bank === "Nu Colombia") {
-      card.className = "relative overflow-hidden rounded-2xl p-5 text-white shadow-xl transition-all duration-300 bg-gradient-to-br from-[#220736] via-[#3B075E] to-[#170524] border border-fuchsia-500/40";
-    } else if (bank === "BBVA Colombia") {
-      card.className = "relative overflow-hidden rounded-2xl p-5 text-white shadow-xl transition-all duration-300 bg-gradient-to-br from-[#061838] via-[#0B2556] to-[#041026] border border-sky-500/40";
+    card.className = "digital-bank-card";
+    const bNorm = (bank || "").toLowerCase();
+    if (bNorm.includes("nequi")) {
+      card.classList.add("bank-nequi");
+    } else if (bNorm.includes("daviplata") || bNorm.includes("davivienda")) {
+      card.classList.add("bank-daviplata");
+    } else if (bNorm.includes("nu")) {
+      card.classList.add("bank-nu");
+    } else if (bNorm.includes("bbva")) {
+      card.classList.add("bank-bbva");
+    } else if (bNorm.includes("bogot") || bNorm.includes("occidente") || bNorm.includes("colpatria") || bNorm.includes("popular") || bNorm.includes("lulo")) {
+      card.classList.add("bank-bogota");
     } else {
-      card.className = "relative overflow-hidden rounded-2xl p-5 text-white shadow-xl transition-all duration-300 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 border border-blue-500/30";
+      card.classList.add("bank-bancolombia");
     }
   }
 }
