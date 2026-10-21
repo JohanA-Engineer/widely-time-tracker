@@ -29,3 +29,6 @@ env.js
 .env
 .env.local
 .agents/
+
+# Carpeta generada por el despliegue
+_site/

@@ -738,8 +738,6 @@ function init() {
 
   if (db) {
     initFirebaseAuth();
-  } else {
-    loadLocalFallbackData();
   }
 }
 
@@ -1050,7 +1048,7 @@ async function handleLogin(e) {
       updatePaymentsUI();
       updateWorkersUI();
     } else {
-      loginMockUser(isMasterAdmin(email) ? "admin" : "worker", email.split("@")[0]);
+      showToast("No hay conexión con Firebase. Verifica tu conexión a internet e inténtalo de nuevo.", "error");
     }
   } catch (error) {
     console.error("[Auth] Error en inicio de sesión:", error);
@@ -1059,9 +1057,7 @@ async function handleLogin(e) {
       msg = "Credenciales incorrectas. Verifica tu correo y contraseña.";
       showToast(`Error al iniciar sesión: ${msg}`, "error");
     } else if (error.code === "auth/configuration-not-found" || error.code === "auth/operation-not-allowed") {
-      showToast(`Conectando... En Firebase Console debes presionar "Comenzar" en Authentication.`, "info");
-      await loginMockUser(isMasterAdmin(email) ? "admin" : "worker", email.split("@")[0], email);
-      return;
+      showToast("El inicio de sesión con correo no está habilitado en Firebase Authentication.", "error");
     } else {
       showToast(`Error al iniciar sesión: ${msg}`, "error");
     }
@@ -1138,7 +1134,7 @@ async function handleRegister(e) {
       updatePaymentsUI();
       updateWorkersUI();
     } else {
-      await loginMockUser(role, name, email);
+      showToast("No hay conexión con Firebase. Verifica tu conexión a internet e inténtalo de nuevo.", "error");
     }
   } catch (error) {
     console.error("[Auth] Error al registrar perfil:", error);
@@ -1150,22 +1146,16 @@ async function handleRegister(e) {
       msg = "La contraseña debe tener al menos 6 caracteres.";
       showToast(`Error: ${msg}`, "error");
     } else if (error.code === "auth/configuration-not-found" || error.code === "auth/operation-not-allowed") {
-      // Firebase Authentication aún no habilitado en la consola: conectar de inmediato con guardado en Firestore
-      showToast(`¡Perfil "${name}" guardado! Nota: Activa Authentication en Firebase Console para usar contraseñas.`, "info");
-      await loginMockUser(role, name, email);
-      return;
+      showToast("El registro con correo no está habilitado en Firebase Authentication.", "error");
     } else {
-      showToast(`¡Perfil "${name}" conectado con éxito!`, "success");
-      await loginMockUser(role, name, email);
-      return;
+      showToast(`No se pudo crear la cuenta: ${msg}`, "error");
     }
   }
 }
 
 async function handleGoogleAuth() {
   if (!auth) {
-    showToast("Firebase no está inicializado. Iniciando sesión demo.", "info");
-    loginMockUser("worker", "Usuario Google");
+    showToast("No hay conexión con Firebase. Verifica tu conexión a internet e inténtalo de nuevo.", "error");
     return;
   }
 
@@ -1289,68 +1279,6 @@ async function handleLogout() {
     updatePaymentsUI();
     updateWorkersUI();
   }
-}
-
-async function loginMockUser(role, customName, customEmail) {
-  let profile = null;
-  if (role === "admin") {
-    profile = {
-      uid: "admin_" + Date.now(),
-      nombre: customName || "Administrador",
-      email: customEmail || "admin@widely.com",
-      rol: "admin"
-    };
-  } else {
-    let workerName = customName || "Colaborador Demo";
-    let workerId = null;
-
-    if (db) {
-      try {
-        const newDoc = await addDoc(collection(db, "trabajadores"), {
-          nombre: workerName,
-          tarifaHora: 0,
-          email: customEmail || "",
-          createdAt: serverTimestamp()
-        });
-        workerId = newDoc.id;
-      } catch (err) {
-        console.warn("[Auth] No se pudo guardar en trabajadores:", err);
-      }
-    }
-
-    if (!workerId) {
-      workerId = "worker_" + Date.now();
-    }
-
-    profile = {
-      uid: "user_" + Date.now(),
-      nombre: workerName,
-      email: customEmail || "colaborador@widely.com",
-      rol: "worker",
-      trabajadorId: workerId
-    };
-  }
-
-  if (db) {
-    try {
-      await setDoc(doc(db, "usuarios", profile.uid), {
-        ...profile,
-        createdAt: new Date().toISOString()
-      });
-    } catch (e) {
-      console.warn("[Auth] No se pudo guardar documento en usuarios:", e);
-    }
-  }
-
-  state.userProfile = profile;
-  localStorage.setItem("widely_cached_user", JSON.stringify(profile));
-  applyRoleView();
-  closeAuthModal();
-  showToast(`¡Conectado como ${profile.nombre}! Modo activo: ${profile.rol === "admin" ? "Administrador Total" : "Colaborador"}`, "success");
-  updateFinancialDashboard();
-  updateTasksUI();
-  updatePaymentsUI();
-  updateWorkersUI();
 }
 
 /* ============================================================================
@@ -1892,7 +1820,7 @@ function setupMiniWindowContent(doc, win) {
   doc.head.innerHTML = `
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous" referrerpolicy="no-referrer">
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body {
@@ -7534,48 +7462,6 @@ function showToast(message, type = "info") {
     toast.classList.add("toast-exit");
     setTimeout(() => toast.remove(), 160);
   }, 3200);
-}
-
-function loadLocalFallbackData() {
-  state.workers = [
-    { id: "mock_1", nombre: "Carlos Méndez", tarifaHora: 20.00 },
-    { id: "mock_2", nombre: "Lucía Morales", tarifaHora: 25.00 }
-  ];
-  state.tasks = [
-    {
-      id: "mock_t1",
-      fecha: new Date().toISOString().split("T")[0],
-      trabajadorId: "mock_1",
-      trabajadorNombre: "Carlos Méndez",
-      cliente: "Proyecto General",
-      categoria: "diseno",
-      descripcion: "Desarrollo de landing page",
-      segundos: 7200,
-      horas: 2.0,
-      tarifaHora: 20.00,
-      costoTotal: 40.00
-    }
-  ];
-  state.payments = [
-    {
-      id: "mock_p1",
-      fecha: new Date().toISOString().split("T")[0],
-      trabajadorId: "mock_1",
-      trabajadorNombre: "Carlos Méndez",
-      monto: 15.00,
-      referencia: "Anticipo de prueba"
-    }
-  ];
-
-  state.clients = [
-    { id: "mock_c1", nombre: "Proyecto General", tarifaPorHora: 35.00, limiteHoras: 20, notas: "Cliente corporativo" }
-  ];
-
-  updateWorkersUI();
-  updateTasksUI();
-  updatePaymentsUI();
-  updateClientsUI();
-  updateFinancialDashboard();
 }
 
 /* ============================================================================

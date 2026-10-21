@@ -6,15 +6,22 @@ service cloud.firestore {
     // FUNCIONES AUXILIARES DE SEGURIDAD
     // =========================================================================
 
+    // El correo del token solo cuenta si Firebase confirmó que pertenece al usuario
+    // (Google lo verifica siempre; con correo y contraseña requiere el enlace de verificación)
+    function hasVerifiedEmail() {
+      return request.auth.token.get('email_verified', false) == true;
+    }
+
     // Verifica si el usuario autenticado es la Administradora Maestra (Lina),
     // un administrador promovido (rol "admin" asignado por un admin) o un correo
     // autorizado en /configuracion/admins (solo editable por administradores)
     function isMasterAdmin() {
       return request.auth != null && (
-        request.auth.token.email.lower() == "linadelae@gmail.com" ||
+        (hasVerifiedEmail() && request.auth.token.email.lower() == "linadelae@gmail.com") ||
         (exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
          get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == "admin") ||
-        (exists(/databases/$(database)/documents/configuracion/admins) &&
+        (hasVerifiedEmail() &&
+         exists(/databases/$(database)/documents/configuracion/admins) &&
          request.auth.token.email.lower() in get(/databases/$(database)/documents/configuracion/admins).data.get('emails', []))
       );
     }
