@@ -418,10 +418,21 @@ const elements = {
   sidebarMyProfileLink: document.getElementById("sidebarMyProfileLink"),
   sidebarTeamLink: document.getElementById("sidebarTeamLink"),
 
-  // Modal Mi Perfil (Todo usuario)
-  myProfileModal: document.getElementById("myProfileModal"),
-  btnCloseMyProfile: document.getElementById("btnCloseMyProfile"),
-  btnCancelMyProfile: document.getElementById("btnCancelMyProfile"),
+  // Vista de Página Mi Perfil (Page View Integrada SaaS Pro)
+  profilePageView: document.getElementById("profilePageView"),
+  btnBackToDashboard: document.getElementById("btnBackToDashboard"),
+  btnCancelProfilePage: document.getElementById("btnCancelProfilePage"),
+  btnTopSaveProfile: document.getElementById("btnTopSaveProfile"),
+  btnPageOpenMyBill: document.getElementById("btnPageOpenMyBill"),
+  digitalBankCard: document.getElementById("digitalBankCard"),
+  cardBankName: document.getElementById("cardBankName"),
+  cardNumberDisplay: document.getElementById("cardNumberDisplay"),
+  cardHolderDisplay: document.getElementById("cardHolderDisplay"),
+  cardTypeDisplay: document.getElementById("cardTypeDisplay"),
+  profileBankingStatusTag: document.getElementById("profileBankingStatusTag"),
+  myProfileSubEmail: document.getElementById("myProfileSubEmail"),
+
+  // Formulario y campos de Mi Perfil
   formMyProfile: document.getElementById("formMyProfile"),
   myProfileAvatar: document.getElementById("myProfileAvatar"),
   myProfileTitleName: document.getElementById("myProfileTitleName"),
@@ -2591,31 +2602,103 @@ function updateAdminUsersUI() {
 }
 
 /**
- * REQUISITO 1: MODAL MI PERFIL (Para cada usuario)
+ * REQUISITO 1: VISTA DE PÁGINA COMPLETA "MI PERFIL" (SaaS Pro Integrada)
  */
-function openMyProfileModal() {
+function showProfilePage() {
   const profile = state.userProfile;
   if (!profile) {
-    showToast("Inicia sesión para gestionar tu perfil.", "warning");
+    showToast("Inicia sesión para acceder a tu perfil.", "warning");
     return;
   }
+
+  // 1. Ocultar vistas de dashboard/portales
+  elements.adminPortalView?.classList.add("hidden");
+  elements.workerPortalView?.classList.add("hidden");
+
+  // 2. Mostrar la vista de página de perfil
+  elements.profilePageView?.classList.remove("hidden");
+
+  // 3. Marcar activo el botón de Mi Perfil en el Sidebar
+  document.querySelectorAll(".sidebar-nav-link").forEach(l => {
+    if (l.dataset.nav === "myprofile") {
+      l.classList.add("active");
+    } else {
+      l.classList.remove("active");
+    }
+  });
+
+  // 4. Poblar todos los datos del usuario
+  populateProfileData();
+
+  // 5. Scroll suave al inicio
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function hideProfilePage() {
+  elements.profilePageView?.classList.add("hidden");
+
+  const isWorker = state.userProfile?.rol === "worker";
+  if (isWorker) {
+    elements.workerPortalView?.classList.remove("hidden");
+    elements.adminPortalView?.classList.add("hidden");
+  } else {
+    elements.adminPortalView?.classList.remove("hidden");
+    elements.workerPortalView?.classList.add("hidden");
+  }
+
+  document.querySelectorAll(".sidebar-nav-link").forEach(l => {
+    if (l.dataset.nav === "dashboard") {
+      l.classList.add("active");
+    } else {
+      l.classList.remove("active");
+    }
+  });
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// Alias de compatibilidad
+function openMyProfileModal() {
+  showProfilePage();
+}
+
+function closeMyProfileModal() {
+  hideProfilePage();
+}
+
+/**
+ * Poblar datos del perfil del usuario en la página y en la tarjeta interactiva
+ */
+function populateProfileData() {
+  const profile = state.userProfile;
+  if (!profile) return;
 
   const isAdmin = profile.rol === "admin" || isMasterAdmin(profile.email);
   const initials = (profile.nombre || profile.email || "U").slice(0, 2).toUpperCase();
 
+  // Avatar grande en Hero
   if (elements.myProfileAvatar) {
     if (profile.fotoUrl) {
-      elements.myProfileAvatar.innerHTML = `<img src="${escapeHtml(profile.fotoUrl)}" alt="" class="w-full h-full object-cover rounded-xl" referrerpolicy="no-referrer">`;
+      elements.myProfileAvatar.innerHTML = `<img src="${escapeHtml(profile.fotoUrl)}" alt="" class="w-full h-full object-cover rounded-2xl" referrerpolicy="no-referrer">`;
     } else {
       elements.myProfileAvatar.textContent = initials;
-      elements.myProfileAvatar.className = `w-10 h-10 rounded-xl ${isAdmin ? 'bg-purple-600' : 'bg-[#2563EB]'} text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm`;
+      elements.myProfileAvatar.className = `w-20 h-20 sm:w-24 sm:h-24 rounded-2xl ${isAdmin ? 'bg-gradient-to-tr from-purple-600 to-indigo-600' : 'bg-gradient-to-tr from-blue-600 to-indigo-500'} text-white flex items-center justify-center font-bold text-3xl sm:text-4xl shadow-lg border-2 border-white/10 shrink-0`;
     }
   }
 
-  if (elements.myProfileTitleName) elements.myProfileTitleName.textContent = profile.nombre || "Mi Perfil";
+  if (elements.myProfileTitleName) {
+    elements.myProfileTitleName.textContent = profile.nombre || "Mi Perfil";
+  }
+  if (elements.myProfileSubEmail) {
+    elements.myProfileSubEmail.innerHTML = `
+      <i class="fa-regular fa-envelope text-slate-400"></i>
+      <span>${escapeHtml(profile.email || auth?.currentUser?.email || "")}</span>
+    `;
+  }
+
   if (elements.myProfileRoleBadge) {
-    elements.myProfileRoleBadge.textContent = isAdmin ? "ADMINISTRADOR" : "COLABORADOR";
-    elements.myProfileRoleBadge.className = `text-[9px] font-mono font-bold px-2 py-0.5 rounded-full ${isAdmin ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'} uppercase`;
+    elements.myProfileRoleBadge.textContent = isAdmin ? "ADMINISTRADOR TOTAL" : "COLABORADOR";
+    elements.myProfileRoleBadge.className = `text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full ${isAdmin ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'} uppercase`;
   }
 
   // Prellenar información personal
@@ -2627,7 +2710,7 @@ function openMyProfileModal() {
   if (elements.myProfileCity) elements.myProfileCity.value = profile.ciudad || "Bogotá D.C.";
   if (elements.myProfileAddress) elements.myProfileAddress.value = profile.direccion || "";
 
-  // Prellenar información bancaria
+  // Prellenar información bancaria (buscar en profile, en linked worker o en localStorage)
   let bank = profile.banco || "";
   let accountType = profile.tipoCuenta || "Ahorros";
   let accountNumber = profile.numeroCuenta || "";
@@ -2651,13 +2734,52 @@ function openMyProfileModal() {
   if (elements.myProfileNewPassword) elements.myProfileNewPassword.value = "";
   if (elements.myProfileConfirmPassword) elements.myProfileConfirmPassword.value = "";
 
-  elements.myProfileModal?.classList.remove("hidden");
-  elements.myProfileModal?.classList.add("flex");
+  // Actualizar previsualización de tarjeta digital
+  updateDigitalBankCardPreview();
 }
 
-function closeMyProfileModal() {
-  elements.myProfileModal?.classList.add("hidden");
-  elements.myProfileModal?.classList.remove("flex");
+/**
+ * Previsualización en tiempo real de la Tarjeta Digital Neobanco
+ */
+function updateDigitalBankCardPreview() {
+  const bank = elements.myProfileBank?.value || "Bancolombia";
+  const accNum = elements.myProfileAccountNumber?.value.trim() || "";
+  const holder = elements.myProfileAccountHolder?.value.trim() || elements.myProfileName?.value.trim() || "Titular";
+  const accType = elements.myProfileAccountType?.value || "Ahorros";
+
+  if (elements.cardBankName) elements.cardBankName.textContent = bank;
+  if (elements.cardHolderDisplay) elements.cardHolderDisplay.textContent = holder;
+  if (elements.cardTypeDisplay) elements.cardTypeDisplay.textContent = accType;
+
+  if (elements.cardNumberDisplay) {
+    if (!accNum) {
+      elements.cardNumberDisplay.textContent = "•••• •••• •••• ----";
+    } else if (accNum.length > 4) {
+      const last4 = accNum.slice(-4);
+      elements.cardNumberDisplay.textContent = `•••• •••• •••• ${last4}`;
+    } else {
+      elements.cardNumberDisplay.textContent = accNum;
+    }
+  }
+
+  if (elements.profileBankingStatusTag) {
+    elements.profileBankingStatusTag.innerHTML = `<i class="fa-solid fa-credit-card text-[11px]"></i> ${escapeHtml(bank)}`;
+  }
+
+  const card = elements.digitalBankCard;
+  if (card) {
+    if (bank === "Nequi") {
+      card.className = "relative overflow-hidden rounded-2xl p-5 text-white shadow-xl transition-all duration-300 bg-gradient-to-br from-[#1C002B] via-[#2F064B] to-[#12001E] border border-purple-500/40";
+    } else if (bank === "Daviplata" || bank === "Davivienda") {
+      card.className = "relative overflow-hidden rounded-2xl p-5 text-white shadow-xl transition-all duration-300 bg-gradient-to-br from-[#2D0606] via-[#4A0B0B] to-[#1E0404] border border-red-500/40";
+    } else if (bank === "Nu Colombia") {
+      card.className = "relative overflow-hidden rounded-2xl p-5 text-white shadow-xl transition-all duration-300 bg-gradient-to-br from-[#220736] via-[#3B075E] to-[#170524] border border-fuchsia-500/40";
+    } else if (bank === "BBVA Colombia") {
+      card.className = "relative overflow-hidden rounded-2xl p-5 text-white shadow-xl transition-all duration-300 bg-gradient-to-br from-[#061838] via-[#0B2556] to-[#041026] border border-sky-500/40";
+    } else {
+      card.className = "relative overflow-hidden rounded-2xl p-5 text-white shadow-xl transition-all duration-300 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 border border-blue-500/30";
+    }
+  }
 }
 
 async function handleSaveMyProfile(e) {
@@ -2737,9 +2859,9 @@ async function handleSaveMyProfile(e) {
     localStorage.setItem("widely_cached_user", JSON.stringify(updatedProfile));
     applyRoleView();
     updateWorkersUI();
+    populateProfileData();
 
     showToast("¡Tu perfil y datos bancarios se han guardado exitosamente!", "success");
-    closeMyProfileModal();
   } catch (err) {
     console.error("[My Profile Save Error]", err);
     showToast("Error al guardar perfil: " + err.message, "error");
@@ -7049,17 +7171,36 @@ function setupEventListeners() {
   // -------------------------------------------------------------
   // GESTIÓN DE PERFILES, ADMINISTRADORES & COLABORADORES SOLO DATOS
   // -------------------------------------------------------------
-  // Mi Perfil (Todo usuario con sesión)
-  elements.btnTopbarMyProfile?.addEventListener("click", openMyProfileModal);
-  elements.sidebarMyProfileLink?.addEventListener("click", openMyProfileModal);
-  elements.userProfileBar?.addEventListener("click", openMyProfileModal);
-  elements.btnCloseMyProfile?.addEventListener("click", closeMyProfileModal);
-  elements.btnCancelMyProfile?.addEventListener("click", closeMyProfileModal);
+  // Mi Perfil (Vista de Página Completa SaaS Pro)
+  elements.btnTopbarMyProfile?.addEventListener("click", showProfilePage);
+  elements.sidebarMyProfileLink?.addEventListener("click", showProfilePage);
+  elements.userProfileBar?.addEventListener("click", showProfilePage);
+  elements.btnBackToDashboard?.addEventListener("click", hideProfilePage);
+  elements.btnCancelProfilePage?.addEventListener("click", hideProfilePage);
+  elements.btnTopSaveProfile?.addEventListener("click", () => elements.formMyProfile?.requestSubmit());
   elements.formMyProfile?.addEventListener("submit", handleSaveMyProfile);
   elements.btnUpdateMyPassword?.addEventListener("click", handleUpdateMyPassword);
   elements.btnSendResetEmailMyProfile?.addEventListener("click", handleSendResetEmailMyProfile);
-  elements.myProfileModal?.addEventListener("click", (e) => {
-    if (e.target === elements.myProfileModal) closeMyProfileModal();
+
+  // Actualización en vivo de la Tarjeta Digital Neobanco
+  elements.myProfileBank?.addEventListener("change", updateDigitalBankCardPreview);
+  elements.myProfileAccountNumber?.addEventListener("input", updateDigitalBankCardPreview);
+  elements.myProfileAccountHolder?.addEventListener("input", updateDigitalBankCardPreview);
+  elements.myProfileAccountType?.addEventListener("change", updateDigitalBankCardPreview);
+  elements.myProfileName?.addEventListener("input", updateDigitalBankCardPreview);
+
+  // Acceso directo a Cuenta de Cobro Formal desde la Página de Perfil
+  elements.btnPageOpenMyBill?.addEventListener("click", () => {
+    const profile = state.userProfile;
+    if (!profile) return;
+    const workerId = profile.trabajadorId || state.workers.find(w => w.nombre?.trim().toLowerCase() === profile.nombre?.trim().toLowerCase())?.id;
+    if (workerId) {
+      window.openStatementModal(workerId, "bill");
+    } else if (state.workers.length > 0) {
+      window.openStatementModal(state.workers[0].id, "bill");
+    } else {
+      showToast("No tienes un perfil de trabajador asignado aún.", "warning");
+    }
   });
 
   // Pestañas de administración (Cuentas de Usuario vs Colaboradores Solo Datos)
@@ -7133,10 +7274,14 @@ function setupSidebarNavigation() {
 
       let targetId = null;
       if (navKey === "myprofile") {
-        openMyProfileModal();
+        showProfilePage();
         if (window.innerWidth < 1024) closeSidebar();
         return;
-      } else if (navKey === "dashboard") {
+      } else {
+        hideProfilePage();
+      }
+
+      if (navKey === "dashboard") {
         targetId = isWorker ? "workerDashboardSection" : "adminDashboardSection";
       } else if (navKey === "tracker") {
         targetId = isWorker ? "workerTimerSlot" : "adminTimerSlot";

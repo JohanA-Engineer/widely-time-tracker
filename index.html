@@ -1280,6 +1280,361 @@
       </div>
     </div>
 
+        <!-- =========================================================================
+             VISTA 3: MI PERFIL (PÁGINA COMPLETA INTEGRADA SAAS PRO)
+             ========================================================================= -->
+        <div id="profilePageView" class="space-y-6 hidden">
+
+          <!-- 1. Barra de Navegación Superior / Breadcrumb -->
+          <div class="flex items-center justify-between gap-3 pb-3 border-b border-[#E2E8F0] dark:border-[#1E293B]">
+            <div class="flex items-center gap-2 text-xs">
+              <button type="button" id="btnBackToDashboard" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition-all shadow-xs cursor-pointer active:scale-95">
+                <i class="fa-solid fa-arrow-left text-xs text-blue-600 dark:text-blue-400"></i>
+                <span>Volver al Dashboard</span>
+              </button>
+              <span class="text-slate-400 hidden sm:inline">/</span>
+              <span class="text-slate-500 font-medium hidden sm:inline">Ajustes de Cuenta</span>
+              <span class="text-slate-400 hidden sm:inline">/</span>
+              <span class="text-blue-600 dark:text-blue-400 font-semibold hidden sm:inline">Mi Perfil</span>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <span id="profileLastSavedNotice" class="hidden md:inline text-[11px] text-slate-400 font-mono">
+                <i class="fa-solid fa-cloud-arrow-up text-emerald-500 mr-1"></i>Sincronizado con Firestore
+              </span>
+              <button type="button" id="btnTopSaveProfile" class="btn-profile-save px-4 py-1.5 text-xs font-bold rounded-xl active:scale-95 transition-all shadow-xs cursor-pointer flex items-center gap-1.5">
+                <i class="fa-solid fa-check text-xs"></i>
+                <span>Guardar Cambios</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Hero Identity Banner (Header Ejecutivo FinTech) -->
+          <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-[#111827] to-[#0F172A] border border-slate-800 text-white p-6 sm:p-8 shadow-xl">
+            <!-- Glow decorativo sutil -->
+            <div class="absolute -right-16 -top-16 w-64 h-64 bg-blue-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-purple-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div class="flex items-center gap-5">
+                <!-- Avatar grande con anillo y badge en línea -->
+                <div class="relative">
+                  <div id="myProfileAvatar" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center font-bold text-3xl sm:text-4xl shadow-lg shadow-blue-500/25 border-2 border-white/10 shrink-0">
+                    U
+                  </div>
+                  <span class="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-900" title="Sesión activa"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                  <div class="flex items-center gap-2.5 flex-wrap">
+                    <h1 id="myProfileTitleName" class="text-xl sm:text-2xl font-bold text-white tracking-tight">Mi Perfil</h1>
+                    <span id="myProfileRoleBadge" class="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase">
+                      COLABORADOR
+                    </span>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                      <i class="fa-solid fa-circle-check text-[9px]"></i> Verificado
+                    </span>
+                  </div>
+                  <p id="myProfileSubEmail" class="text-xs sm:text-sm text-slate-300 flex items-center gap-2">
+                    <i class="fa-regular fa-envelope text-slate-400"></i>
+                    <span>correo@ejemplo.com</span>
+                  </p>
+                  <div class="flex items-center gap-3 text-[11px] text-slate-400 pt-1 flex-wrap">
+                    <span class="flex items-center gap-1">
+                      <i class="fa-solid fa-building text-slate-500"></i> Widely Social
+                    </span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1">
+                      <i class="fa-regular fa-calendar-check text-slate-500"></i> Perfil de Usuario Activo
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Badges de resumen en cabecera -->
+              <div class="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+                <div class="p-3 rounded-xl bg-white/5 border border-white/10 min-w-[130px]">
+                  <span class="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">Estado Cuenta</span>
+                  <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                    <i class="fa-solid fa-shield-halved text-[11px]"></i> Activa 100%
+                  </span>
+                </div>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/10 min-w-[130px]">
+                  <span class="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">Entidad Pago</span>
+                  <span id="profileBankingStatusTag" class="text-xs font-bold text-blue-400 flex items-center gap-1">
+                    <i class="fa-solid fa-credit-card text-[11px]"></i> Bancolombia
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Formulario & Bento Grid Principal -->
+          <form id="formMyProfile" class="m-0 space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+              <!-- COLUMNA IZQUIERDA (4 cols): Tarjeta Digital Neobanco & Acceso Rápido -->
+              <div class="lg:col-span-4 space-y-6">
+                
+                <!-- Tarjeta Neobanco Interactiva Visual -->
+                <div class="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-sm space-y-4">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-[#0F172A] dark:text-[#F8FAFC] uppercase tracking-wider flex items-center gap-1.5">
+                      <i class="fa-solid fa-wallet text-blue-600 dark:text-blue-400"></i>
+                      <span>Tarjeta de Liquidación</span>
+                    </span>
+                    <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold">
+                      En Vivo
+                    </span>
+                  </div>
+
+                  <!-- Mockup Visual de Tarjeta Digital Elegante -->
+                  <div id="digitalBankCard" class="relative overflow-hidden rounded-2xl p-5 text-white shadow-xl transition-all duration-300 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 border border-blue-500/30">
+                    <div class="absolute -right-8 -top-8 w-32 h-32 bg-blue-500/20 rounded-full blur-xl pointer-events-none"></div>
+
+                    <div class="relative flex items-center justify-between mb-6">
+                      <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-building-columns text-base text-blue-400"></i>
+                        <span id="cardBankName" class="font-bold text-sm tracking-wide">Bancolombia</span>
+                      </div>
+                      <!-- Chip EMV Metálico -->
+                      <div class="w-9 h-7 rounded-md bg-gradient-to-tr from-amber-400 via-amber-200 to-amber-500 border border-amber-300 shadow-xs flex items-center justify-center">
+                        <div class="w-6 h-4 border border-amber-600/40 rounded-xs grid grid-cols-2 gap-0.5 opacity-60">
+                          <div class="border-b border-r border-amber-600/40"></div>
+                          <div class="border-b border-amber-600/40"></div>
+                          <div class="border-r border-amber-600/40"></div>
+                          <div></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Número de Cuenta Formateado -->
+                    <div class="mb-5">
+                      <span class="text-[9px] uppercase font-mono text-slate-400 block mb-1">Número de Cuenta</span>
+                      <p id="cardNumberDisplay" class="font-mono text-base tracking-widest font-semibold text-slate-100">
+                        •••• •••• •••• ----
+                      </p>
+                    </div>
+
+                    <!-- Titular y Tipo de Cuenta -->
+                    <div class="flex items-end justify-between pt-2 border-t border-white/10">
+                      <div>
+                        <span class="text-[9px] uppercase font-mono text-slate-400 block">Titular Registrado</span>
+                        <p id="cardHolderDisplay" class="text-xs font-bold text-white uppercase truncate max-w-[160px]">
+                          Titular
+                        </p>
+                      </div>
+                      <div class="text-right">
+                        <span class="text-[9px] uppercase font-mono text-slate-400 block">Tipo Cuenta</span>
+                        <span id="cardTypeDisplay" class="text-[11px] font-semibold text-blue-300 uppercase">
+                          Ahorros
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Información de Cuentas de Cobro -->
+                  <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-[#162032] border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 space-y-2">
+                    <div class="flex items-center gap-2">
+                      <i class="fa-solid fa-file-invoice-dollar text-emerald-500 text-sm"></i>
+                      <span class="font-semibold text-slate-800 dark:text-slate-200">Facturación & Cuentas de Cobro</span>
+                    </div>
+                    <p class="text-[11px] leading-relaxed">
+                      Esta información se imprime automáticamente con validez legal en tu <strong>Cuenta de Cobro Formal</strong> y en los <strong>Recibos Oficiales</strong> emitidos por Widely Social.
+                    </p>
+                    <button type="button" id="btnPageOpenMyBill" class="w-full mt-1 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95">
+                      <i class="fa-solid fa-receipt text-xs"></i>
+                      <span>Ver Mi Cuenta de Cobro Formal</span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- COLUMNA DERECHA (8 cols): Formularios Bento de Edición -->
+              <div class="lg:col-span-8 space-y-6">
+
+                <!-- BLOQUE 1: Información Personal & Facturación -->
+                <div class="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-sm space-y-4">
+                  <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-user"></i>
+                      </div>
+                      <div>
+                        <h3 class="text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC]">Información Personal & Contacto</h3>
+                        <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Tus datos de identificación legal para reportes y nómina</p>
+                      </div>
+                    </div>
+                    <span class="text-[10px] font-mono text-slate-400">Paso 1 de 3</span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="myProfileName" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Nombre Completo *</label>
+                      <input type="text" id="myProfileName" required placeholder="Tu nombre y apellidos" class="form-input w-full text-xs py-2.5">
+                    </div>
+                    <div>
+                      <label for="myProfileEmail" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1 flex items-center justify-between">
+                        <span>Correo Electrónico</span>
+                        <span class="text-[10px] text-slate-400 font-mono"><i class="fa-solid fa-lock text-[9px] mr-1"></i>Cuenta Auth</span>
+                      </label>
+                      <input type="email" id="myProfileEmail" readonly class="form-input w-full text-xs py-2.5 bg-slate-100 dark:bg-slate-800/60 text-slate-500 cursor-not-allowed">
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label for="myProfilePhone" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Teléfono / WhatsApp</label>
+                      <input type="tel" id="myProfilePhone" placeholder="Ej. 3001234567" class="form-input w-full text-xs py-2.5">
+                    </div>
+                    <div>
+                      <label for="myProfileDocType" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Tipo Documento</label>
+                      <select id="myProfileDocType" class="form-input w-full text-xs py-2.5">
+                        <option value="CC">Cédula de Ciudadanía (C.C.)</option>
+                        <option value="CE">Cédula de Extranjería (C.E.)</option>
+                        <option value="NIT">NIT / RUT</option>
+                        <option value="PASSPORT">Pasaporte</option>
+                        <option value="OTRO">Otro Documento</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="myProfileDocNumber" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Número de Documento</label>
+                      <input type="text" id="myProfileDocNumber" placeholder="Ej. 1020304050" class="form-input w-full text-xs py-2.5 font-mono">
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="myProfileCity" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Ciudad / Municipio</label>
+                      <input type="text" id="myProfileCity" placeholder="Ej. Bogotá D.C., Medellín..." class="form-input w-full text-xs py-2.5">
+                    </div>
+                    <div>
+                      <label for="myProfileAddress" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Dirección (Opcional)</label>
+                      <input type="text" id="myProfileAddress" placeholder="Para Cuentas de Cobro" class="form-input w-full text-xs py-2.5">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- BLOQUE 2: Datos Bancarios de Pago -->
+                <div class="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-sm space-y-4">
+                  <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-building-columns"></i>
+                      </div>
+                      <div>
+                        <h3 class="text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC]">Datos Bancarios para Pagos & Liquidaciones</h3>
+                        <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Cuenta a la que Widely Social te transferirá tus pagos</p>
+                      </div>
+                    </div>
+                    <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                      Paso 2 de 3
+                    </span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="myProfileBank" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Entidad Bancaria</label>
+                      <select id="myProfileBank" class="form-input w-full text-xs py-2.5">
+                        <option value="Bancolombia">Bancolombia</option>
+                        <option value="Nequi">Nequi</option>
+                        <option value="Daviplata">Daviplata</option>
+                        <option value="Davivienda">Davivienda</option>
+                        <option value="Banco de Bogotá">Banco de Bogotá</option>
+                        <option value="BBVA Colombia">BBVA Colombia</option>
+                        <option value="Banco de Occidente">Banco de Occidente</option>
+                        <option value="Nu Colombia">Nu Colombia</option>
+                        <option value="Scotiabank Colpatria">Scotiabank Colpatria</option>
+                        <option value="Lulo Bank">Lulo Bank</option>
+                        <option value="Otro">Otro Banco</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="myProfileAccountType" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Tipo de Cuenta</label>
+                      <select id="myProfileAccountType" class="form-input w-full text-xs py-2.5">
+                        <option value="Ahorros">Cuenta de Ahorros</option>
+                        <option value="Corriente">Cuenta Corriente</option>
+                        <option value="Nequi">Nequi (Depósito Bajo Monto)</option>
+                        <option value="Daviplata">Daviplata</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="myProfileAccountNumber" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Número de Cuenta</label>
+                      <input type="text" id="myProfileAccountNumber" placeholder="Ej. 123-456789-00 o celular Nequi" class="form-input w-full text-xs py-2.5 font-mono">
+                    </div>
+                    <div>
+                      <label for="myProfileAccountHolder" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Titular de la Cuenta</label>
+                      <input type="text" id="myProfileAccountHolder" placeholder="Nombre completo del titular" class="form-input w-full text-xs py-2.5">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- BLOQUE 3: Seguridad & Contraseña -->
+                <div class="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-sm space-y-4">
+                  <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-shield-halved"></i>
+                      </div>
+                      <div>
+                        <h3 class="text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC]">Seguridad & Contraseña</h3>
+                        <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Control de credenciales y acceso seguro con Firebase Auth</p>
+                      </div>
+                    </div>
+                    <span class="text-[10px] font-mono text-slate-400">Paso 3 de 3</span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="myProfileNewPassword" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Nueva Contraseña</label>
+                      <input type="password" id="myProfileNewPassword" minlength="6" placeholder="Mínimo 6 caracteres" class="form-input w-full text-xs py-2.5">
+                    </div>
+                    <div>
+                      <label for="myProfileConfirmPassword" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Confirmar Contraseña</label>
+                      <input type="password" id="myProfileConfirmPassword" minlength="6" placeholder="Repite la contraseña" class="form-input w-full text-xs py-2.5">
+                    </div>
+                  </div>
+
+                  <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+                    <button type="button" id="btnUpdateMyPassword" class="px-4 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-bold transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2">
+                      <i class="fa-solid fa-key text-xs"></i>
+                      <span>Actualizar Contraseña</span>
+                    </button>
+                    <button type="button" id="btnSendResetEmailMyProfile" class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center justify-center gap-1.5 py-1 cursor-pointer">
+                      <i class="fa-regular fa-paper-plane text-xs"></i>
+                      <span>Enviar enlace de restablecimiento a mi correo</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Sticky Footer de Guardado -->
+                <div class="p-4 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 sticky bottom-4 z-20">
+                  <div class="text-xs text-slate-500 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
+                    <span>Tus cambios se guardarán en Firestore y en tus comprobantes.</span>
+                  </div>
+                  <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <button type="button" id="btnCancelProfilePage" class="flex-1 sm:flex-initial px-4 py-2.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer">
+                      Cancelar / Volver
+                    </button>
+                    <button type="submit" id="btnSaveMyProfile" class="btn-profile-save flex-1 sm:flex-initial px-6 py-2.5 text-xs font-bold rounded-xl active:scale-95 transition-all shadow-md cursor-pointer flex items-center justify-center gap-2">
+                      <i class="fa-solid fa-check text-xs"></i>
+                      <span>Guardar Todo el Perfil</span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </form>
+
+        </div>
+
       </main>
     </div>
   </div>
@@ -2170,192 +2525,7 @@
     </div>
   </div>
 
-  <!-- =========================================================================
-       MODAL 1: MI PERFIL (Para Cualquier Usuario Autenticado)
-       ========================================================================= -->
-  <div id="myProfileModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4 transition-opacity duration-200">
-    <div class="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] rounded-2xl profile-modal-container max-h-[92vh] flex flex-col shadow-2xl overflow-hidden mx-auto">
-      
-      <!-- Cabecera del Modal -->
-      <div class="px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-between bg-slate-50/70 dark:bg-[#162032]/60 shrink-0">
-        <div class="flex items-center gap-3 min-w-0">
-          <div id="myProfileAvatar" class="w-10 h-10 rounded-xl bg-[#2563EB] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm shadow-blue-500/20">
-            U
-          </div>
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <h3 id="myProfileTitleName" class="text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC] truncate">Mi Perfil</h3>
-              <span id="myProfileRoleBadge" class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 uppercase">COLABORADOR</span>
-            </div>
-            <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Información personal, datos bancarios y seguridad</p>
-          </div>
-        </div>
-        <button type="button" id="btnCloseMyProfile" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#64748B] hover:text-[#0F172A] dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer">
-          <i class="fa-solid fa-xmark text-sm"></i>
-        </button>
-      </div>
 
-      <!-- Formulario con Scroll Interno -->
-      <form id="formMyProfile" class="flex flex-col flex-1 overflow-hidden m-0">
-        <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
-
-          <!-- 1. Información Personal -->
-          <div class="p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#162032]/50 border border-[#E2E8F0] dark:border-[#1E293B] space-y-3">
-            <div class="flex items-center gap-2 border-b border-[#E2E8F0] dark:border-[#1E293B] pb-2">
-              <i class="fa-solid fa-user text-blue-600 text-xs"></i>
-              <span class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] uppercase tracking-wider">Información Personal</span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label for="myProfileName" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Nombre Completo</label>
-                <input type="text" id="myProfileName" required placeholder="Tu nombre y apellidos" class="form-input w-full text-xs py-2">
-              </div>
-              <div>
-                <label for="myProfileEmail" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1 flex items-center justify-between">
-                  <span>Correo Electrónico</span>
-                  <span class="text-[10px] text-slate-400 font-normal"><i class="fa-solid fa-lock text-[9px] mr-0.5"></i>Cuenta Auth</span>
-                </label>
-                <input type="email" id="myProfileEmail" readonly class="form-input w-full text-xs py-2 bg-slate-100 dark:bg-slate-800/60 text-slate-500 cursor-not-allowed">
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label for="myProfilePhone" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Teléfono / WhatsApp</label>
-                <input type="tel" id="myProfilePhone" placeholder="Ej. 3001234567" class="form-input w-full text-xs py-2">
-              </div>
-              <div>
-                <label for="myProfileDocType" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Tipo de Documento</label>
-                <select id="myProfileDocType" class="form-input w-full text-xs py-2">
-                  <option value="CC">Cédula de Ciudadanía (C.C.)</option>
-                  <option value="CE">Cédula de Extranjería (C.E.)</option>
-                  <option value="NIT">NIT / RUT</option>
-                  <option value="PASSPORT">Pasaporte</option>
-                  <option value="OTRO">Otro Documento</option>
-                </select>
-              </div>
-              <div>
-                <label for="myProfileDocNumber" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Número de Documento</label>
-                <input type="text" id="myProfileDocNumber" placeholder="Ej. 1020304050" class="form-input w-full text-xs py-2 font-mono">
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label for="myProfileCity" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Ciudad / Municipio</label>
-                <input type="text" id="myProfileCity" placeholder="Ej. Bogotá D.C., Medellín..." class="form-input w-full text-xs py-2">
-              </div>
-              <div>
-                <label for="myProfileAddress" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Dirección (Opcional)</label>
-                <input type="text" id="myProfileAddress" placeholder="Para Cuentas de Cobro" class="form-input w-full text-xs py-2">
-              </div>
-            </div>
-          </div>
-
-          <!-- 2. Datos Bancarios para Cobro -->
-          <div class="p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#162032]/50 border border-[#E2E8F0] dark:border-[#1E293B] space-y-3">
-            <div class="flex items-center justify-between border-b border-[#E2E8F0] dark:border-[#1E293B] pb-2">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-building-columns text-emerald-600 text-xs"></i>
-                <span class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] uppercase tracking-wider">Datos Bancarios para Pagos</span>
-              </div>
-              <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Cuentas de Cobro & Recibos</span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label for="myProfileBank" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Entidad Bancaria</label>
-                <select id="myProfileBank" class="form-input w-full text-xs py-2">
-                  <option value="Bancolombia">Bancolombia</option>
-                  <option value="Nequi">Nequi</option>
-                  <option value="Daviplata">Daviplata</option>
-                  <option value="Davivienda">Davivienda</option>
-                  <option value="Banco de Bogotá">Banco de Bogotá</option>
-                  <option value="BBVA Colombia">BBVA Colombia</option>
-                  <option value="Scotiabank Colpatria">Scotiabank Colpatria</option>
-                  <option value="Banco de Occidente">Banco de Occidente</option>
-                  <option value="Banco Popular">Banco Popular</option>
-                  <option value="Nu Colombia">Nu Colombia</option>
-                  <option value="Lulo Bank">Lulo Bank</option>
-                  <option value="Otro">Otro Banco / Internacional</option>
-                </select>
-              </div>
-
-              <div>
-                <label for="myProfileAccountType" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Tipo de Cuenta</label>
-                <select id="myProfileAccountType" class="form-input w-full text-xs py-2">
-                  <option value="Ahorros">Cuenta de Ahorros</option>
-                  <option value="Corriente">Cuenta Corriente</option>
-                  <option value="Nequi">Nequi / Monedero Digital</option>
-                  <option value="Daviplata">Daviplata</option>
-                  <option value="Digital">Cuenta Digital / Otra</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label for="myProfileAccountNumber" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Número de Cuenta</label>
-                <input type="text" id="myProfileAccountNumber" placeholder="Ej. 123-456789-00 o celular Nequi" class="form-input w-full text-xs py-2 font-mono">
-              </div>
-              <div>
-                <label for="myProfileAccountHolder" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Titular de la Cuenta</label>
-                <input type="text" id="myProfileAccountHolder" placeholder="Nombre completo del titular" class="form-input w-full text-xs py-2">
-              </div>
-            </div>
-          </div>
-
-          <!-- 3. Seguridad y Cambio de Contraseña -->
-          <div class="p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#162032]/50 border border-[#E2E8F0] dark:border-[#1E293B] space-y-3">
-            <div class="flex items-center justify-between border-b border-[#E2E8F0] dark:border-[#1E293B] pb-2">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-shield-halved text-amber-500 text-xs"></i>
-                <span class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] uppercase tracking-wider">Seguridad & Contraseña</span>
-              </div>
-              <span class="text-[10px] text-slate-400 font-mono">Firebase Auth</span>
-            </div>
-
-            <div class="space-y-2.5">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label for="myProfileNewPassword" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Nueva Contraseña</label>
-                  <input type="password" id="myProfileNewPassword" minlength="6" placeholder="Mínimo 6 caracteres" class="form-input w-full text-xs py-2">
-                </div>
-                <div>
-                  <label for="myProfileConfirmPassword" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Confirmar Contraseña</label>
-                  <input type="password" id="myProfileConfirmPassword" minlength="6" placeholder="Repite la contraseña" class="form-input w-full text-xs py-2">
-                </div>
-              </div>
-              <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-1">
-                <button type="button" id="btnUpdateMyPassword" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5">
-                  <i class="fa-solid fa-key text-[10px]"></i>
-                  <span>Actualizar Contraseña</span>
-                </button>
-                <button type="button" id="btnSendResetEmailMyProfile" class="text-xs text-blue-600 dark:text-blue-400 hover:underline transition-colors flex items-center gap-1 justify-center cursor-pointer">
-                  <i class="fa-regular fa-envelope text-xs"></i>
-                  <span>Enviar enlace de restablecimiento a mi correo</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Footer Fijo con Botón Guardar -->
-        <div class="px-5 py-3 border-t border-[#E2E8F0] dark:border-[#1E293B] bg-slate-50/80 dark:bg-[#162032]/80 flex items-center justify-end gap-2 shrink-0">
-          <button type="button" id="btnCancelMyProfile" class="px-4 py-2 text-xs font-semibold rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer">
-            Cancelar
-          </button>
-          <button type="submit" id="btnSaveMyProfile" class="btn-profile-save px-5 py-2 text-xs font-bold rounded-xl active:scale-95 transition-all shadow-sm cursor-pointer flex items-center gap-1.5">
-            <i class="fa-solid fa-check text-xs"></i>
-            <span>Guardar Perfil</span>
-          </button>
-        </div>
-      </form>
-
-    </div>
-  </div>
 
   <!-- =========================================================================
        MODAL 2: NUEVO PERFIL DE DATOS (SIN CUENTA) — EXCLUSIVO ADMINISTRADOR
