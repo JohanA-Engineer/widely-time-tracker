@@ -840,10 +840,10 @@ function applyRoleView() {
 
       if (elements.userRoleBadge) {
         elements.userRoleBadge.textContent = "ADMIN";
-        elements.userRoleBadge.className = "text-[9px] font-mono text-[#0a0a0a] dark:text-[#fafafa] font-bold uppercase";
+        elements.userRoleBadge.className = "text-[9px] font-mono text-blue-600 dark:text-blue-400 font-bold uppercase";
       }
       if (elements.userAvatar) {
-        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-[10px] bg-[#0a0a0a] text-[#fafafa] dark:bg-[#fafafa] dark:text-[#0a0a0a] flex items-center justify-center text-xs font-bold font-mono shrink-0";
+        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm shadow-blue-500/20";
       }
 
       // Activar Portal de Administrador
@@ -872,13 +872,11 @@ function applyRoleView() {
       }
 
       const sidebarAdminLinks = document.getElementById("sidebarAdminLinks");
-      const mobileSidebarAdminLinks = document.getElementById("mobileSidebarAdminLinks");
       const navBillingLabel = document.getElementById("navBillingLabel");
       const topbarSubtitle = document.getElementById("topbarSubtitle");
       const adminHeaderBadge = document.getElementById("adminHeaderBadge");
       const adminName = profile.nombre || "Lina De La Espriella";
       if (sidebarAdminLinks) sidebarAdminLinks.classList.remove("hidden");
-      if (mobileSidebarAdminLinks) mobileSidebarAdminLinks.classList.remove("hidden");
       if (navBillingLabel) navBillingLabel.textContent = "Liquidaciones & Nómina";
       if (topbarSubtitle) topbarSubtitle.textContent = `Centro de Mando & Finanzas • ${adminName}`;
       if (adminHeaderBadge) adminHeaderBadge.textContent = `ADMIN: ${adminName}`;
@@ -888,10 +886,10 @@ function applyRoleView() {
 
       if (elements.userRoleBadge) {
         elements.userRoleBadge.textContent = "COLABORADOR";
-        elements.userRoleBadge.className = "text-[9px] font-mono text-[#737373] dark:text-[#a1a1aa] font-bold uppercase";
+        elements.userRoleBadge.className = "text-[9px] font-mono text-cyan-600 dark:text-cyan-400 font-bold uppercase";
       }
       if (elements.userAvatar) {
-        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-[10px] bg-[#171717] text-[#fafafa] dark:bg-[#27272a] dark:text-[#fafafa] flex items-center justify-center text-xs font-bold font-mono shrink-0";
+        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-cyan-600 text-white flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm shadow-cyan-500/20";
       }
 
       // Activar Portal de Colaborador
@@ -928,11 +926,9 @@ function applyRoleView() {
       switchTab("tasks");
 
       const sidebarAdminLinks = document.getElementById("sidebarAdminLinks");
-      const mobileSidebarAdminLinks = document.getElementById("mobileSidebarAdminLinks");
       const navBillingLabel = document.getElementById("navBillingLabel");
       const topbarSubtitle = document.getElementById("topbarSubtitle");
       if (sidebarAdminLinks) sidebarAdminLinks.classList.add("hidden");
-      if (mobileSidebarAdminLinks) mobileSidebarAdminLinks.classList.add("hidden");
       if (navBillingLabel) navBillingLabel.textContent = "Mi Cuenta de Cobro";
       if (topbarSubtitle) topbarSubtitle.textContent = `Workspace Personal • ${profile.nombre || "Colaborador"}`;
 
@@ -1766,25 +1762,6 @@ function resetTimer() {
 
 function renderTimerDisplay() {
   elements.timerDisplay.textContent = formatSecondsToTime(state.timer.elapsedSeconds);
-
-  // Animación del anillo de progreso SVG (Option 1 Bento Grid)
-  const ring = document.getElementById("timerProgressRing");
-  if (ring) {
-    const circumference = 364.4;
-    let progress = 0;
-    if (state.pomodoro && state.pomodoro.enabled) {
-      const totalSecs = (state.pomodoro.phase === "focus" ? state.pomodoro.focusMinutes : state.pomodoro.breakMinutes) * 60;
-      progress = totalSecs > 0 ? (totalSecs - state.pomodoro.remainingSeconds) / totalSecs : 0;
-    } else if (state.timer.elapsedSeconds > 0) {
-      progress = (state.timer.elapsedSeconds % 60) / 60;
-      if (progress === 0) progress = 1; // Segundo 60 completo antes de resetear
-    } else {
-      progress = 0;
-    }
-    progress = Math.max(0, Math.min(1, progress));
-    ring.style.strokeDashoffset = (circumference * (1 - progress)).toString();
-  }
-
   updateDynamicIslandUI();
   updatePipDisplay();
   updateBackgroundTabTitle();
@@ -3366,9 +3343,9 @@ function setFilterPeriod(period) {
   const buttons = document.querySelectorAll(".btn-period-filter");
   buttons.forEach(btn => {
     if (btn.dataset.period === period) {
-      btn.className = "btn-period-filter px-3 py-1.5 rounded-[18px] transition-all active:scale-95 bg-[#0a0a0a] text-[#fafafa] dark:bg-[#fafafa] dark:text-[#0a0a0a] font-medium shadow-none";
+      btn.className = "btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 bg-blue-600 text-white shadow-sm";
     } else {
-      btn.className = "btn-period-filter px-3 py-1.5 rounded-[18px] transition-all active:scale-95 text-[#737373] dark:text-[#a1a1aa] hover:bg-[#f5f5f5] dark:hover:bg-[#18181b] hover:text-[#0a0a0a] dark:hover:text-white";
+      btn.className = "btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800";
     }
   });
 
@@ -3392,9 +3369,9 @@ window.setTaskStatusFilter = function(status) {
   const buttons = document.querySelectorAll(".btn-status-filter");
   buttons.forEach(btn => {
     if (btn.dataset.status === status) {
-      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-[18px] transition-all active:scale-95 bg-[#0a0a0a] text-[#fafafa] dark:bg-[#fafafa] dark:text-[#0a0a0a] font-medium shadow-none flex items-center gap-1";
+      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 bg-[#2563EB] text-white shadow-sm flex items-center gap-1";
     } else {
-      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-[18px] transition-all active:scale-95 text-[#737373] dark:text-[#a1a1aa] hover:bg-[#f5f5f5] dark:hover:bg-[#18181b] hover:text-[#0a0a0a] dark:hover:text-white flex items-center gap-1.5";
+      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white flex items-center gap-1.5";
     }
   });
   updateTasksUI();
@@ -5819,7 +5796,6 @@ function setTimerMode(mode) {
     }
     showToast("Modo libre de cronómetro activo.", "info");
   }
-  renderTimerDisplay();
 }
 
 function handlePomodoroTick() {
@@ -7276,14 +7252,12 @@ function setupSidebarNavigation() {
   const btnCloseSidebarMobile = document.getElementById("btnCloseSidebarMobile");
 
   function openSidebar() {
-    appSidebar?.classList.remove("-translate-y-[150%]");
-    appSidebar?.classList.add("translate-y-0");
+    appSidebar?.classList.remove("-translate-x-full");
     sidebarBackdrop?.classList.remove("hidden");
   }
 
   function closeSidebar() {
-    appSidebar?.classList.add("-translate-y-[150%]");
-    appSidebar?.classList.remove("translate-y-0");
+    appSidebar?.classList.add("-translate-x-full");
     sidebarBackdrop?.classList.add("hidden");
   }
 
@@ -7371,9 +7345,7 @@ function initDefaultDate() {
 function initClock() {
   function updateTime() {
     const now = new Date();
-    if (elements.currentTime) {
-      elements.currentTime.textContent = now.toLocaleTimeString();
-    }
+    elements.currentTime.textContent = now.toLocaleTimeString();
   }
   updateTime();
   setInterval(updateTime, 1000);

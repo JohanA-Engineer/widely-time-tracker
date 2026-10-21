@@ -1,153 +1,49 @@
 /* ==============================================================================
-   Widely Social Time Tracker — Clinical Blueprint Design System (Design.md)
-   Estilo: Monocromático Achromático de Alto Rendimiento (Vercel / Linear / shadcn/ui)
-   Superficies: Canvas (#f5f5f5) -> Sidebar (#fafafa) -> Paper/Cards (#ffffff)
-   Acento Único: Ember (#e7000b) reservado exclusivamente para acciones destructivas.
+   Time Tracker — Lina De La Espriella - Sistema de Diseño Azul y Blanco
+   Paleta: Sapphire Blue (#2563EB, #1D4ED8), Slate Navy (#0F172A), Pure White (#FFFFFF)
    ============================================================================== */
 
 :root {
-  /* Tokens Oficiales Design.md — Tema Claro */
-  --color-canvas: #f5f5f5;
-  --color-paper: #ffffff;
-  --color-surface-alt: #fafafa;
-  --color-ink: #0a0a0a;
-  --color-ink-soft: #171717;
-  --color-mid-gray: #737373;
-  --color-hairline: #e5e5e5;
-  --color-ember: #e7000b;
-
-  /* Tipografía — Geist & Inter */
-  --font-geist: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-geist-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-
-  /* Escala Tipográfica */
-  --text-caption: 12px;
-  --leading-caption: 1.33;
-  --tracking-caption: 0.6px;
-  --text-body: 14px;
-  --leading-body: 1.43;
-  --text-body-lg: 16px;
-  --leading-body-lg: 1.5;
-  --text-subheading: 18px;
-  --leading-subheading: 1.56;
-  --text-heading-sm: 24px;
-  --leading-heading-sm: 1.33;
-  --tracking-heading-sm: -0.6px;
-  --text-heading: 30px;
-  --leading-heading: 1.2;
-  --tracking-heading: -0.75px;
-  --text-heading-lg: 36px;
-  --leading-heading-lg: 1.11;
-  --tracking-heading-lg: -0.9px;
-  --text-display: 48px;
-  --leading-display: 1.1;
-  --tracking-display: -2.4px;
-
-  /* Pesos */
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-
-  /* Jerarquía Estricta de Radios */
-  --radius-cards: 24px;
-  --radius-buttons: 18px;
-  --radius-inputs: 18px;
-  --radius-badges: 18px;
-  --radius-nested: 10px;
-  --radius-small: 6px;
-
-  /* Elevación Susurrante de 1px */
-  --shadow-subtle: 0 0 0 1px rgba(23, 23, 23, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --shadow-subtle-2: 0 0 0 0 transparent;
-
-  /* Superficies Base */
-  --surface-canvas: #f5f5f5;
-  --surface-sidebar: #fafafa;
-  --surface-card: #ffffff;
-  --surface-input-fill: #f5f5f5;
-
-  /* Compatibilidad con variables legacy mapeadas a tokens del Design System */
-  --bg-app: var(--surface-canvas);
-  --bg-sidebar: var(--surface-sidebar);
-  --bg-card: var(--surface-card);
-  --bg-subtle: var(--color-surface-alt);
-  --primary: var(--color-ink);
-  --primary-hover: var(--color-ink-soft);
-  --primary-soft: var(--color-mid-gray);
-  --accent-warm: var(--color-ink);
-  --accent-warm-hover: var(--color-ink-soft);
-  --text-main: var(--color-ink);
-  --text-secondary: var(--color-mid-gray);
-  --border-soft: var(--color-hairline);
-  --border-strong: var(--color-hairline);
-  --positive: var(--color-ink);
-  --warning: #b45309;
-  --danger: var(--color-ember);
+  --bg-app: #F8FAFC;
+  --bg-sidebar: #0F172A;
+  --bg-card: #FFFFFF;
+  --bg-subtle: #F1F5F9;
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --primary-soft: #3B82F6;
+  --accent-warm: #0284C7;
+  --accent-warm-hover: #0369A1;
+  --text-main: #0F172A;
+  --text-secondary: #64748B;
+  --border-soft: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --positive: #2563EB;
+  --warning: #D97706;
+  --danger: #DC2626;
 }
 
 .dark {
-  /* Tokens Oficiales Design.md — Tema Oscuro Invertido */
-  --color-canvas: #09090b;
-  --color-paper: #121214;
-  --color-surface-alt: #101012;
-  --color-ink: #f4f4f5;
-  --color-ink-soft: #e4e4e7;
-  --color-mid-gray: #a1a1aa;
-  --color-hairline: #27272a;
-  --color-ember: #ef4444;
-
-  --shadow-subtle: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 3px rgba(0, 0, 0, 0.45), 0 1px 2px -1px rgba(0, 0, 0, 0.35);
-
-  --surface-canvas: #09090b;
-  --surface-sidebar: #101012;
-  --surface-card: #141416;
-  --surface-input-fill: #18181b;
-
-  --bg-app: var(--surface-canvas);
-  --bg-sidebar: var(--surface-sidebar);
-  --bg-card: var(--surface-card);
-  --bg-subtle: var(--color-surface-alt);
-  --primary: var(--color-ink);
-  --primary-hover: var(--color-ink-soft);
-  --primary-soft: var(--color-mid-gray);
-  --accent-warm: var(--color-ink);
-  --accent-warm-hover: var(--color-ink-soft);
-  --text-main: var(--color-ink);
-  --text-secondary: var(--color-mid-gray);
-  --border-soft: var(--color-hairline);
-  --border-strong: var(--color-hairline);
-  --positive: var(--color-ink);
-  --warning: #f59e0b;
-  --danger: var(--color-ember);
+  --bg-app: #0B0F19;
+  --bg-sidebar: #080C14;
+  --bg-card: #111827;
+  --bg-subtle: #162032;
+  --primary: #3B82F6;
+  --primary-hover: #60A5FA;
+  --primary-soft: #93C5FD;
+  --accent-warm: #38BDF8;
+  --accent-warm-hover: #7DD3FC;
+  --text-main: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --border-soft: #1E293B;
+  --border-strong: #334155;
+  --positive: #3B82F6;
+  --warning: #F59E0B;
+  --danger: #EF4444;
 }
 
 /* ==============================================================================
-   REGLAS DE RESILIENCIA Y RESET GLOBAL
+   REGLAS CRÍTICAS DE RESILIENCIA VISUAL (Fallback si falla conexión móvil)
    ============================================================================== */
-* {
-  box-sizing: border-box;
-}
-
-html {
-  font-family: var(--font-geist);
-  font-size: 14px;
-  line-height: var(--leading-body);
-  background-color: var(--surface-canvas);
-  color: var(--color-ink);
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  font-family: var(--font-geist);
-  background-color: var(--surface-canvas);
-  color: var(--color-ink);
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
-}
-
 .hidden, [hidden] {
   display: none !important;
 }
@@ -155,6 +51,7 @@ body {
 #firebaseWarning {
   display: none;
 }
+
 #firebaseWarning.is-active {
   display: block !important;
 }
@@ -163,307 +60,15 @@ svg {
   max-width: 100%;
 }
 
-/* Tipografía Geist y Jerarquía de Tracking */
-h1, .text-display {
-  font-family: var(--font-geist);
-  font-size: var(--text-display);
-  line-height: var(--leading-display);
-  letter-spacing: var(--tracking-display);
-  font-weight: 600;
-  color: var(--color-ink);
+#btnGoogleAuth svg {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  max-width: 20px !important;
+  display: inline-block !important;
 }
 
-h2, .text-heading {
-  font-family: var(--font-geist);
-  font-size: var(--text-heading);
-  line-height: var(--leading-heading);
-  letter-spacing: var(--tracking-heading);
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-h3, .text-heading-sm {
-  font-family: var(--font-geist);
-  font-size: var(--text-heading-sm);
-  line-height: var(--leading-heading-sm);
-  letter-spacing: var(--tracking-heading-sm);
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.text-caption,
-.caption-label {
-  font-family: var(--font-geist);
-  font-size: var(--text-caption);
-  line-height: var(--leading-caption);
-  letter-spacing: var(--tracking-caption);
-  text-transform: uppercase;
-  color: var(--color-mid-gray);
-  font-weight: 500;
-}
-
-/* Monospace y Números Tabulares */
-.tabular-nums,
-.font-mono,
-#timerDisplay,
-#kpiTotalHoras,
-#kpiTotalGenerado,
-#kpiTotalPagado,
-#kpiSaldoPendiente,
-#workerKpiHours,
-#workerKpiGenerated,
-#workerKpiBalance,
-#workerHeroRate,
-#trmRateDisplay,
-#currentTime,
-table td {
-  font-family: var(--font-geist-mono);
-  font-feature-settings: 'tnum' 1;
-  font-variant-numeric: tabular-nums;
-}
-
-/* ==============================================================================
-   CONTENEDORES Y TARJETAS (Cards — Radius 24px & Whisper Shadow)
-   ============================================================================== */
-.content-card,
-.kpi-card,
-.profile-section-card,
-.profile-hero-card,
-.dashboard-card,
-#authScreen .content-card,
-#workerDashboardSection,
-.section-card {
-  background-color: var(--surface-card) !important;
-  border: 1px solid var(--color-hairline) !important;
-  border-radius: var(--radius-cards) !important;
-  box-shadow: var(--shadow-subtle) !important;
-  transition: border-color 140ms ease, box-shadow 140ms ease;
-}
-
-.content-card:hover,
-.kpi-card:hover {
-  border-color: var(--color-hairline) !important;
-  box-shadow: var(--shadow-subtle) !important;
-}
-
-/* ==============================================================================
-   BOTONES Y CONTROLES INTERACTIVOS (Pills — Radius 18px)
-   ============================================================================== */
-button,
-.btn-ctrl,
-.btn-primary,
-.btn-secondary,
-.btn-ghost,
-.btn-outline,
-.btn-period-filter,
-.btn-slate,
-.btn-back-dashboard,
-.tab-btn,
-.profile-nav-tab {
-  font-family: var(--font-geist);
-  border-radius: var(--radius-buttons) !important;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 120ms ease;
-  user-select: none;
-}
-
-/* 1. Botón Primario Relleno (High-Emphasis Action) */
-.btn-primary,
-.btn-blue,
-.btn-green,
-.btn-emerald,
-.btn-profile-save,
-.btn-data-profile-save,
-#btnWorkerOpenBill,
-#btnStartTimer {
-  background-color: var(--color-ink) !important;
-  color: var(--color-paper) !important;
-  border: none !important;
-  box-shadow: none !important;
-  font-weight: 500 !important;
-  padding: 8px 16px !important;
-  height: 38px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.btn-primary:hover,
-.btn-blue:hover,
-.btn-green:hover,
-.btn-emerald:hover,
-.btn-profile-save:hover,
-.btn-data-profile-save:hover,
-#btnWorkerOpenBill:hover,
-#btnStartTimer:hover {
-  background-color: var(--color-ink-soft) !important;
-  opacity: 0.92;
-}
-
-.btn-primary:active,
-.btn-ctrl:active:not(:disabled) {
-  transform: scale(0.98);
-}
-
-.btn-primary:disabled,
-.btn-ctrl:disabled {
-  opacity: 0.35 !important;
-  cursor: not-allowed !important;
-}
-
-/* 2. Botón Secundario / Fantasma (Ghost Button) */
-.btn-secondary,
-.btn-ghost,
-.btn-slate,
-#btnWorkerOpenManualEntry {
-  background-color: var(--color-canvas) !important;
-  color: var(--color-ink) !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 8px 16px !important;
-  height: 38px;
-  cursor: pointer;
-}
-
-.btn-secondary:hover,
-.btn-ghost:hover,
-.btn-slate:hover,
-#btnWorkerOpenManualEntry:hover {
-  background-color: var(--color-hairline) !important;
-  color: var(--color-ink) !important;
-}
-
-/* 3. Botón Outline con Borde Fino */
-.btn-outline,
-.btn-back-dashboard,
-#btnTopbarMyProfile,
-#btnConfigureKey,
-#trmBadgeContainer {
-  background-color: transparent !important;
-  color: var(--color-ink) !important;
-  border: 1px solid var(--color-hairline) !important;
-  box-shadow: none !important;
-  padding: 6px 14px !important;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-}
-
-.btn-outline:hover,
-.btn-back-dashboard:hover,
-#btnTopbarMyProfile:hover,
-#btnConfigureKey:hover,
-#trmBadgeContainer:hover {
-  background-color: var(--color-canvas) !important;
-  border-color: var(--color-hairline) !important;
-}
-
-/* 4. Botón Destructivo (Ember #e7000b — Único Acento Cromático Reservado) */
-.btn-destructive,
-.btn-danger,
-#btnResetTimer,
-#btnLogout:hover {
-  background-color: transparent !important;
-  color: var(--color-ember) !important;
-  border: 1px solid rgba(231, 0, 11, 0.25) !important;
-  box-shadow: none !important;
-  cursor: pointer;
-}
-
-.btn-destructive:hover,
-.btn-danger:hover {
-  background-color: rgba(231, 0, 11, 0.08) !important;
-  border-color: var(--color-ember) !important;
-}
-
-/* Filtros de Período en Topbar (Pills) */
-.btn-period-filter {
-  padding: 5px 12px !important;
-  border-radius: var(--radius-buttons) !important;
-  font-size: 12px !important;
-  border: 1px solid transparent !important;
-  color: var(--color-mid-gray) !important;
-  background-color: transparent !important;
-}
-
-.btn-period-filter:hover {
-  background-color: var(--color-canvas) !important;
-  color: var(--color-ink) !important;
-}
-
-.btn-period-filter.bg-\[\#2563EB\],
-.btn-period-filter.active,
-.btn-period-filter[data-active="true"] {
-  background-color: var(--color-ink) !important;
-  color: var(--color-paper) !important;
-  font-weight: 600 !important;
-}
-
-/* ==============================================================================
-   CAMPOS DE ENTRADA (Inputs, Selects, Textareas — Radius 18px)
-   ============================================================================== */
-.form-input,
-input.form-input,
-select.form-input,
-textarea.form-input,
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-input[type="date"],
-select,
-textarea {
-  background-color: var(--surface-input-fill) !important;
-  color: var(--color-ink) !important;
-  border: 1px solid transparent !important;
-  border-radius: var(--radius-inputs) !important;
-  padding: 8px 14px !important;
-  font-size: 14px !important;
-  font-family: var(--font-geist);
-  line-height: 1.43;
-  outline: none !important;
-  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
-  height: 38px;
-}
-
-textarea.form-input,
-textarea {
-  height: auto !important;
-  min-height: 80px;
-  border-radius: var(--radius-nested) !important;
-}
-
-.form-input:focus,
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: var(--color-hairline) !important;
-  box-shadow: 0 0 0 1px var(--color-hairline) !important;
-  background-color: var(--surface-card) !important;
-}
-
-.form-input::placeholder,
-input::placeholder,
-textarea::placeholder {
-  color: var(--color-mid-gray) !important;
-  opacity: 0.85;
-}
-
-/* Inputs Readonly / Deshabilitados */
-input.form-input[readonly],
-input.form-input:disabled {
-  background-color: var(--surface-canvas) !important;
-  color: var(--color-mid-gray) !important;
-  border: 1px solid var(--color-hairline) !important;
-  cursor: not-allowed !important;
-}
-
-/* Padding Utilities de Iconos para Inputs */
+/* Centrado robusto vertical de iconos en campos de formulario */
 .input-icon-left {
   position: absolute;
   left: 0.875rem;
@@ -474,10 +79,11 @@ input.form-input:disabled {
   justify-content: center;
   pointer-events: none;
   font-size: 0.875rem;
-  color: var(--color-mid-gray);
+  line-height: 1;
   z-index: 5;
 }
 
+/* Padding utilities robustos con !important para inputs con iconos y prefijos */
 .form-input.pl-6, input.form-input.pl-6 { padding-left: 1.75rem !important; }
 .form-input.pl-7, input.form-input.pl-7 { padding-left: 2rem !important; }
 .form-input.pl-8, input.form-input.pl-8 { padding-left: 2.25rem !important; }
@@ -485,217 +91,421 @@ input.form-input:disabled {
 .form-input.pl-12, input.form-input.pl-12 { padding-left: 3rem !important; }
 .form-input.pl-14, input.form-input.pl-14 { padding-left: 3.75rem !important; }
 
+/* Prefijo de moneda ($) para inputs financieros */
 .input-currency-prefix {
   position: absolute;
   left: 0.8125rem;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--color-mid-gray);
-  font-family: var(--font-geist-mono);
+  color: var(--text-secondary);
+  font-family: 'Inter', ui-monospace, monospace;
   font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
   pointer-events: none;
+  user-select: none;
+  z-index: 5;
 }
 
-/* ==============================================================================
-   BADGES Y ETIQUETAS (Pills — Radius 18px & Font 12px)
-   ============================================================================== */
-.badge,
-.pill-badge,
-.profile-role-badge-admin,
-.profile-role-badge-worker,
-.profile-badge-verified,
-.status-pill {
-  border-radius: var(--radius-badges) !important;
-  padding: 2px 8px !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  font-family: var(--font-geist);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  line-height: 1.33;
+/* Flechas limpias y discretas en inputs numéricos generales */
+input[type="number"]::-webkit-inner-spin-button, 
+input[type="number"]::-webkit-outer-spin-button { 
+  opacity: 0.45;
+  cursor: pointer;
+}
+input[type="number"]:hover::-webkit-inner-spin-button, 
+input[type="number"]:hover::-webkit-outer-spin-button { 
+  opacity: 0.9;
 }
 
-/* Badge Solid */
-.badge-solid,
-.profile-role-badge-admin {
-  background-color: var(--color-ink-soft) !important;
-  color: var(--color-paper) !important;
-  border: none !important;
+/* Quitar flechas nativas (spinners) en inputs monetarios y porcentajes */
+.no-spinners::-webkit-inner-spin-button,
+.no-spinners::-webkit-outer-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+.no-spinners {
+  -moz-appearance: textfield !important;
 }
 
-/* Badge Soft */
-.badge-soft,
-.profile-role-badge-worker {
-  background-color: var(--color-canvas) !important;
-  color: var(--color-ink) !important;
-  border: 1px solid var(--color-hairline) !important;
+/* Contenedor del Modal Upwork con ancho máximo protegido */
+.upwork-modal-container {
+  width: 100% !important;
+  max-width: 660px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
-/* Badge Outline / Verificado */
-.badge-outline,
-.profile-badge-verified {
-  background-color: transparent !important;
-  color: var(--color-ink) !important;
-  border: 1px solid var(--color-hairline) !important;
+/* Botón Guardar Upwork con color verde oficial */
+.btn-upwork-save {
+  background-color: #14A800 !important;
+  color: #ffffff !important;
+}
+.btn-upwork-save:hover {
+  background-color: #118D00 !important;
 }
 
-/* ==============================================================================
-   SIDEBAR VERTICAL (Surface Alt: #fafafa / Dark: #101012 & Hairline Border)
-   ============================================================================== */
-#appSidebar {
-  background-color: var(--surface-sidebar) !important;
-  border-right: 1px solid var(--color-hairline) !important;
-  color: var(--color-mid-gray) !important;
-  box-shadow: none !important;
+/* Grilla responsive ultra-limpia para las semanas Upwork (auto-ajustable a 4, 5 o 6 semanas) */
+.grid-upwork-weeks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+@media (min-width: 640px) {
+  .grid-upwork-weeks {
+    grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+  }
+}
+.col-span-full-mobile {
+  grid-column: 1 / -1;
+}
+@media (min-width: 640px) {
+  .col-span-full-mobile {
+    grid-column: auto;
+  }
 }
 
-.sidebar-nav-link {
+/* Caja de isotipo azul protegida contra estilos faltantes */
+.brand-icon-box {
+  background-color: #2563EB !important;
+  color: #ffffff !important;
+}
+
+#authScreen .content-card {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}
+
+body, button, input, select, textarea {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.011em;
+}
+
+/* Números y cronómetro tabulares legibles */
+.tabular-nums, #timerDisplay, #kpiTotalHoras, #kpiTotalGenerado, #kpiTotalPagado, #kpiSaldoPendiente, #liveCostBadge, table td {
+  font-family: 'Inter', ui-monospace, monospace, sans-serif;
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tarjetas de Métricas (KPIs) — Blancas, limpias y con sombras tenues */
+.kpi-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 0.75rem;
+  padding: 1.125rem 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.kpi-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+/* Paneles de Contenido */
+.content-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: border-color 140ms ease;
+}
+
+/* Recámara del Cronómetro Digital (Sobria, sin luces artificiales) */
+.timer-chamber {
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-soft);
+  border-radius: 0.75rem;
+  position: relative;
+}
+
+/* Campos de Formulario (Inputs y Selects) */
+.form-input {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  color: var(--text-main);
+  border-radius: 0.5rem;
+  padding: 0.5625rem 0.8125rem;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.form-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.form-input option {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+}
+
+/* Botones de Control */
+.btn-ctrl {
+  border-radius: 0.5rem;
+  padding: 0.5625rem 0.9375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  user-select: none;
+  transition: background-color 120ms ease, opacity 120ms ease, border-color 120ms ease;
+}
+
+.btn-ctrl:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-ctrl:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Variantes Semánticas de Botones Azul & Blanco */
+.btn-green,
+.btn-blue,
+.btn-primary,
+.btn-emerald {
+  background-color: #2563EB;
+  color: #ffffff;
+}
+.btn-green:not(:disabled):hover,
+.btn-blue:not(:disabled):hover,
+.btn-primary:not(:disabled):hover,
+.btn-emerald:not(:disabled):hover {
+  background-color: #1D4ED8;
+}
+
+.btn-amber {
+  background-color: #D97706;
+  color: #ffffff;
+}
+.btn-amber:not(:disabled):hover {
+  background-color: #B45309;
+}
+
+.btn-slate {
+  background-color: #FFFFFF;
+  color: var(--text-main);
+  border: 1px solid var(--border-soft);
+}
+.btn-slate:not(:disabled):hover {
+  background-color: var(--bg-subtle);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-cyan {
+  background-color: #0284C7;
+  color: #ffffff;
+}
+.btn-cyan:not(:disabled):hover {
+  background-color: #0369A1;
+}
+
+/* Pestañas Segmented Control */
+.tab-btn {
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 120ms ease;
+}
+.tab-btn:hover {
+  color: var(--text-main);
+}
+.tab-btn.active {
+  background-color: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+/* Notificaciones Toast Flotantes */
+.toast-msg {
+  pointer-events: auto;
+  min-width: 280px;
+  max-width: 360px;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.625rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  color: var(--text-main);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  padding: 0.5rem 0.875rem !important;
-  border-radius: var(--radius-buttons) !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  color: var(--color-mid-gray) !important;
-  text-decoration: none;
-  cursor: pointer;
+  font-size: 0.8125rem;
+  animation: toast-slide 180ms ease-out forwards;
+}
+
+@keyframes toast-slide {
+  from {
+    transform: translateY(10px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.toast-exit {
+  animation: toast-out 140ms ease-in forwards;
+}
+
+@keyframes toast-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.98);
+    opacity: 0;
+  }
+}
+
+/* Scrollbar Sutil */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Tipografía de cronómetro fluida */
+#timerDisplay {
+  font-size: clamp(2.4rem, 7vw, 3.8rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+@media (min-width: 1920px) {
+  #timerDisplay {
+    font-size: 4.2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  input, select, textarea, .form-input {
+    font-size: 16px !important;
+  }
+  .content-card {
+    padding: 1rem;
+    border-radius: 0.75rem;
+  }
+  .kpi-card {
+    padding: 0.875rem 1rem;
+    border-radius: 0.75rem;
+  }
+}
+
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Control de visibilidad entre Pantalla de Inicio de Sesión y Dashboard */
+html.has-user-session #authScreen {
+  display: none !important;
+}
+
+html.has-user-session #mainAppDashboard {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 100vh;
+}
+
+@media (min-width: 1024px) {
+  html.has-user-session #mainAppDashboard {
+    flex-direction: row !important;
+  }
+}
+
+/* Estilos de Botones de Filtro por Período */
+.btn-period-filter {
+  color: var(--text-secondary);
+  border-radius: 0.5rem;
   transition: all 120ms ease;
-  margin-bottom: 2px;
 }
 
-.sidebar-nav-link:hover {
-  background-color: var(--color-canvas) !important;
-  color: var(--color-ink) !important;
+.btn-period-filter:hover {
+  color: var(--text-main);
+  background-color: var(--bg-subtle);
 }
 
-.sidebar-nav-link.active {
-  background-color: var(--color-ink) !important;
-  color: var(--color-paper) !important;
-  font-weight: 600 !important;
+.btn-period-filter.active-period {
+  background-color: #2563EB !important;
+  color: #ffffff !important;
   box-shadow: none !important;
 }
 
-.sidebar-nav-link.active i {
-  color: var(--color-paper) !important;
+/* Control de roles de usuario */
+html.has-user-session #authTopNavbar {
+  display: none !important;
 }
 
-/* Barra inferior de perfil en Sidebar */
-#userProfileBar {
-  border-radius: var(--radius-nested);
-  padding: 6px 10px;
-  transition: background-color 140ms ease;
+.role-worker .admin-only-feature {
+  display: none !important;
 }
 
-#userProfileBar:hover {
-  background-color: var(--color-canvas) !important;
+.role-admin .worker-only-feature {
+  display: none !important;
 }
 
-#userAvatar {
-  background-color: var(--color-ink) !important;
-  color: var(--color-paper) !important;
-  border-radius: var(--radius-nested) !important;
+/* Destello suave al resaltar formulario de pago */
+.highlight-pulse {
+  animation: flashHighlight 1.2s ease-out;
 }
 
-#userNameDisplay {
-  color: var(--color-ink) !important;
-  font-weight: 600;
+@keyframes flashHighlight {
+  0% {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.4);
+  }
+  100% {
+    box-shadow: none;
+  }
 }
 
-#userRoleBadge {
-  color: var(--color-mid-gray) !important;
-  font-size: 11px;
-}
-
-/* Brand Icon Box */
-.brand-icon-box {
-  background-color: var(--color-ink) !important;
-  color: var(--color-paper) !important;
-  border-radius: var(--radius-nested) !important;
-}
-
-/* ==============================================================================
-   TOPBAR HEADER (Frosted Glass & Hairline Border)
-   ============================================================================== */
-header.sticky {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(12px) !important;
-  border-bottom: 1px solid var(--color-hairline) !important;
-}
-
-.dark header.sticky {
-  background-color: rgba(18, 18, 20, 0.85) !important;
-  border-bottom: 1px solid var(--color-hairline) !important;
-}
-
-#authTopNavbar {
-  background-color: var(--surface-card) !important;
-  border-bottom: 1px solid var(--color-hairline) !important;
-}
-
-/* ==============================================================================
-   STAT BLOCKS & KPIS (Design.md: Typographic Scale Alone & Tight Tracking)
-   ============================================================================== */
-.stat-block,
-.kpi-stat-number {
-  font-family: var(--font-geist);
-  font-size: 32px;
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.025em;
-  color: var(--color-ink);
-}
-
-.stat-label,
-.kpi-stat-label {
-  font-family: var(--font-geist);
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--color-mid-gray);
-  display: block;
-  margin-bottom: 4px;
-}
-
-/* ==============================================================================
-   CRONÓMETRO DIGITAL Y ANILLO SVG (Cockpit Monocromático)
-   ============================================================================== */
-.timer-chamber {
-  background-color: var(--surface-canvas) !important;
-  border: 1px solid var(--color-hairline) !important;
-  border-radius: var(--radius-cards) !important;
-  position: relative;
-  overflow: hidden;
-}
-
-#timerDisplay {
-  font-size: 44px;
-  font-weight: 600;
-  letter-spacing: -0.05em;
-  color: var(--color-ink);
-}
-
-#timerRing {
-  stroke: var(--color-ink) !important;
-  transition: stroke-dashoffset 0.3s ease;
-}
-
-#timerRingBackground {
-  stroke: var(--color-hairline) !important;
-}
-
-/* ==============================================================================
-   DYNAMIC ISLAND FLOTANTE (Frosted Achromatic Dock)
-   ============================================================================== */
+/* ============================================================================
+   DYNAMIC ISLAND FLOTANTE DEL CRONÓMETRO (CONCEPTO 3 - macOS / iOS STYLE)
+   ============================================================================ */
 #dynamicIslandTimer {
   transform: translate(-50%, 6rem);
   opacity: 0;
   pointer-events: none;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-out;
   will-change: transform, opacity;
-  z-index: 60;
 }
 
 #dynamicIslandTimer.island-visible {
@@ -704,87 +514,429 @@ header.sticky {
   pointer-events: auto !important;
 }
 
+#dynamicIslandTimer.island-visible:hover {
+  transform: translate(-50%, -2px) !important;
+}
+
+/* Píldora Dynamic Island (Concepto 3 - Bordes Iridescentes y Glowing Rings) */
 .island-pill-wrapper {
-  background: rgba(10, 10, 10, 0.92) !important;
-  color: #fafafa !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 9999px !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
-  backdrop-filter: blur(12px) !important;
+  position: relative;
+  background: #05070E;
+  border-radius: 9999px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(6, 182, 212, 0.15);
 }
 
 .island-pill-wrapper::before {
-  display: none !important;
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: 9999px;
+  padding: 1.5px;
+  background: linear-gradient(90deg, #06B6D4 0%, #38BDF8 25%, #8B5CF6 65%, #F43F5E 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
-/* ==============================================================================
-   TABLAS Y LISTAS DE DATOS (Hairlines & Compact Typography)
-   ============================================================================== */
-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+/* Estado activo del botón Picture-in-Picture Flotante */
+#btnTogglePipTimer.pip-active,
+#islandBtnPip.pip-active {
+  background-color: #2563EB !important;
+  color: #FFFFFF !important;
+  border-color: #1D4ED8 !important;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4) !important;
 }
 
-table th {
-  font-family: var(--font-geist);
-  font-size: 12px;
+/* ============================================================================
+   ESTILOS SIDEBAR SAAS: SLATE NAVY (#0F172A) & SAPPHIRE BLUE (#2563EB)
+   ============================================================================ */
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5625rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--color-mid-gray);
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--color-hairline);
-  background-color: var(--surface-card);
+  color: #94A3B8;
+  transition: background-color 140ms ease, color 140ms ease;
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;
 }
 
-table td {
-  padding: 12px 14px;
-  font-size: 14px;
-  color: var(--color-ink);
-  border-bottom: 1px solid var(--color-hairline);
+.sidebar-nav-link:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
-table tr:last-child td {
-  border-bottom: none;
+.sidebar-nav-link.active {
+  background-color: #2563EB;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: none;
 }
 
-table tr:hover td {
-  background-color: var(--color-canvas);
+.section-anchor {
+  scroll-margin-top: 5rem;
 }
 
-/* ==============================================================================
-   MODALES Y DIÁLOGOS FLOTANTES (Radius 24px & Whisper Shadow)
-   ============================================================================== */
-.modal-backdrop,
-.fixed.inset-0.bg-black {
-  backdrop-filter: blur(6px) !important;
-  background-color: rgba(0, 0, 0, 0.45) !important;
+/* ============================================================================
+   ESTILOS DE IMPRESIÓN Y EXPORTACIÓN A PDF ULTRA-LIMPIA Y PROFESIONAL
+   (Cuenta de Cobro & Recibo de Pago Sin Encabezados/Pies de Navegador)
+   ============================================================================ */
+@media print {
+  /* 1. Margen 0 en la página para suprimir los encabezados (título/fecha) y pies de página (URL/página) del navegador */
+  @page {
+    margin: 0 !important;
+    size: auto;
+  }
+
+  /* 2. Reset radical para evitar cualquier scroll, fondo oscuro o artefacto visual */
+  html, body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    font-size: 10pt !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
+  }
+
+  /* 3. Ocultar absolutamente todos los elementos fuera de #statementModal */
+  body > *:not(#statementModal) {
+    display: none !important;
+  }
+
+  /* Reforzar la ocultación de componentes de la aplicación */
+  header,
+  footer,
+  #firebaseWarning,
+  #authScreen,
+  #mainAppDashboard,
+  html.has-user-session #mainAppDashboard,
+  #toastContainer,
+  #deleteModal,
+  #editRateModal,
+  #manualEntryModal,
+  #rejectTaskModal,
+  #upworkBudgetModal,
+  #clientModal,
+  #dynamicIslandTimer,
+  #clientsDatalist,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Si el modal está cerrado, no mostrar nada */
+  #statementModal.hidden {
+    display: none !important;
+  }
+
+  /* 4. Desanclar el modal de pantalla fija y convertirlo en el flujo natural de la hoja */
+  #statementModal {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    overflow: visible !important;
+    z-index: auto !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* 5. El contenedor del documento con márgenes físicos elegantes y tipografía de imprenta */
+  #statementModal > div {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 14mm 16mm !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    overflow: visible !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
+  }
+
+  /* 6. Ocultar controles interactivos del modal */
+  #statementHeaderBar,
+  #statementDocTypeSelector,
+  #statementWorkerTitleBadge,
+  #docTypeBillBtn,
+  #docTypeReceiptBtn,
+  #btnCloseStatement,
+  #btnPrintStatement {
+    display: none !important;
+  }
+
+  /* Documento inactivo 100% oculto */
+  #docViewBill.hidden,
+  #docViewReceipt.hidden {
+    display: none !important;
+  }
+
+  /* 7. Desplegar todas las tablas sin scrolls ni recortes */
+  #statementModal .max-h-56,
+  #statementModal .max-h-52,
+  #statementModal .max-h-36,
+  #statementModal .overflow-y-auto,
+  #statementModal .overflow-x-auto {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* 8. Tipografía nítida y moderna para documentos formales (Inter) */
+  #statementModal,
+  #statementModal h1,
+  #statementModal h2,
+  #statementModal h3,
+  #statementModal h4,
+  #statementModal p,
+  #statementModal span:not([class*="fa-"]),
+  #statementModal div:not([class*="fa-"]),
+  #statementModal td,
+  #statementModal th,
+  #statementModal strong,
+  #statementModal em {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
+  }
+
+  /* Cifras y números tabulares claros y nítidos */
+  #statementModal .tabular-nums,
+  #statementModal .font-mono,
+  #statementModal td.font-mono {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-feature-settings: 'tnum' 1, 'cv05' 1 !important;
+    font-variant-numeric: tabular-nums !important;
+    letter-spacing: 0.01em !important;
+  }
+
+  /* 9. Fidelidad de colores y fondos en exportación a PDF */
+  #statementModal * {
+    text-shadow: none !important;
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #statementModal,
+  #statementModal > div,
+  #statementModal #docViewBill,
+  #statementModal #docViewReceipt {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  #statementModal .bg-slate-50,
+  #statementModal thead {
+    background-color: #f8fafc !important;
+    background: #f8fafc !important;
+  }
+
+  #statementModal .bg-slate-100 {
+    background-color: #f1f5f9 !important;
+    background: #f1f5f9 !important;
+  }
+
+  #statementModal .bg-blue-50\/70,
+  #statementModal .bg-blue-50 {
+    background-color: #eff6ff !important;
+    background: #eff6ff !important;
+  }
+
+  #statementModal .border,
+  #statementModal .border-t,
+  #statementModal .border-b,
+  #statementModal .border-l,
+  #statementModal .border-r,
+  #statementModal .divide-y > * {
+    border-color: #cbd5e1 !important;
+  }
+
+  #statementModal .border-slate-900,
+  #statementModal .border-b-2 {
+    border-color: #0f172a !important;
+  }
+
+  #statementModal .text-slate-900 {
+    color: #0f172a !important;
+  }
+
+  #statementModal .text-slate-800 {
+    color: #1e293b !important;
+  }
+
+  #statementModal .text-slate-700 {
+    color: #334155 !important;
+  }
+
+  #statementModal .text-slate-600,
+  #statementModal .text-slate-500 {
+    color: #475569 !important;
+  }
+
+  #statementModal .text-slate-400 {
+    color: #64748b !important;
+  }
+
+  #statementModal .text-blue-600,
+  #statementModal .text-blue-700,
+  #statementModal .text-\[\#2563EB\],
+  #statementModal .text-\[\#1E40AF\] {
+    color: #1d4ed8 !important;
+  }
+
+  #statementModal .text-emerald-600,
+  #statementModal .text-emerald-700 {
+    color: #047857 !important;
+  }
+
+  #statementModal .text-rose-600,
+  #statementModal .text-rose-700,
+  #statementModal .text-\[\#BF6863\] {
+    color: #b91c1c !important;
+  }
+
+  /* Logotipo e icono institucional en Recibo */
+  #statementModal .bg-\[\#2563EB\] {
+    background-color: #2563EB !important;
+  }
+
+  #statementModal .bg-\[\#2563EB\] i,
+  #statementModal .bg-\[\#2563EB\] * {
+    color: #ffffff !important;
+  }
+
+  /* 10. Quitar líneas punteadas de edición durante la impresión */
+  #statementModal [contenteditable="true"] {
+    border-bottom: none !important;
+    outline: none !important;
+  }
+
+  /* 11. Paginación correcta de tablas */
+  table {
+    width: 100% !important;
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
 }
 
-.modal-container,
-.profile-modal-container,
-.profile-admin-modal-container,
-#modalTask > div,
-#modalAdminUserProfile > div,
-#modalAddDataProfile > div {
-  background-color: var(--surface-card) !important;
-  border: 1px solid var(--color-hairline) !important;
-  border-radius: var(--radius-cards) !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--color-hairline) !important;
+/* ============================================================================
+   ESTILOS DEDICADOS: SISTEMA DE PERFILES, DATOS BANCARIOS Y GESTIÓN DE EQUIPO
+   ============================================================================ */
+
+/* Contenedor del Modal de Perfil con ancho protegido */
+.profile-modal-container {
+  width: 100% !important;
+  max-width: 650px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
-/* ==============================================================================
-   PÁGINA: MI PERFIL (Adaptação al Blueprint Clínico)
-   ============================================================================== */
+/* Modal amplio para administración de perfiles */
+.profile-admin-modal-container {
+  width: 100% !important;
+  max-width: 720px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Botón Guardar Perfil con azul oficial */
+.btn-profile-save {
+  background-color: #2563EB !important;
+  color: #ffffff !important;
+}
+.btn-profile-save:hover {
+  background-color: #1D4ED8 !important;
+}
+
+/* Botón Guardar Perfil de Datos (Verde esmeralda distintivo) */
+.btn-data-profile-save {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+}
+.btn-data-profile-save:hover {
+  background-color: #047857 !important;
+}
+
+/* Pestañas de perfiles y equipo */
+.profile-nav-tab {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: all 150ms ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.profile-nav-tab.active {
+  background-color: #2563EB !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+}
+.profile-nav-tab:not(.active) {
+  color: #64748B;
+  background-color: transparent;
+}
+.profile-nav-tab:not(.active):hover {
+  color: #0F172A;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+.dark .profile-nav-tab:not(.active) {
+  color: #94A3B8;
+}
+.dark .profile-nav-tab:not(.active):hover {
+  color: #F8FAFC;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* =========================================================================
+   PÁGINA COMPLETA: MI PERFIL (SAAS PRO FINTECH PAGE) — TEMAS CLARO Y OSCURO
+   ========================================================================= */
 #profilePageView {
-  animation: fadeInPage 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: fadeInPage 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes fadeInPage {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -792,107 +944,192 @@ table tr:hover td {
   }
 }
 
+/* 1. Botón de Regreso al Dashboard */
+.btn-back-dashboard {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid #E2E8F0;
+  background-color: #FFFFFF;
+  color: #0F172A;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 120ms ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-back-dashboard:hover {
+  background-color: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+.btn-back-dashboard:active {
+  transform: scale(0.97);
+}
+
+.dark .btn-back-dashboard {
+  border: 1px solid #1E293B;
+  background-color: #111827;
+  color: #F8FAFC;
+  box-shadow: none;
+}
+
+.dark .btn-back-dashboard:hover {
+  background-color: #162032;
+  border-color: #334155;
+}
+
+/* 2. Hero Identity Banner */
 .profile-hero-card {
-  padding: 1.5rem !important;
-  border-radius: var(--radius-cards) !important;
-  background-color: var(--surface-card) !important;
-  border: 1px solid var(--color-hairline) !important;
-  box-shadow: var(--shadow-subtle) !important;
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  color: #0F172A;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.dark .profile-hero-card {
+  background-color: #111827;
+  border: 1px solid #1E293B;
+  color: #F8FAFC;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
 }
 
 .profile-hero-card .profile-name {
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.6px;
-  color: var(--color-ink);
+  color: #0F172A;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.dark .profile-hero-card .profile-name {
+  color: #F8FAFC;
 }
 
 .profile-hero-card .profile-email {
-  font-size: 14px;
-  color: var(--color-mid-gray);
+  color: #475569;
 }
 
+.dark .profile-hero-card .profile-email {
+  color: #94A3B8;
+}
+
+.profile-hero-card .profile-meta {
+  color: #64748B;
+}
+
+.dark .profile-hero-card .profile-meta {
+  color: #94A3B8;
+}
+
+/* Badges del Hero en Ambos Temas */
+.profile-role-badge-admin {
+  background-color: #F3E8FF;
+  color: #7E22CE;
+  border: 1px solid #D8B4FE;
+  font-weight: 700;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  font-family: ui-monospace, monospace;
+}
+
+.dark .profile-role-badge-admin {
+  background-color: rgba(147, 51, 234, 0.25);
+  color: #D8B4FE;
+  border: 1px solid rgba(147, 51, 234, 0.45);
+}
+
+.profile-role-badge-worker {
+  background-color: #EFF6FF;
+  color: #1D4ED8;
+  border: 1px solid #BFDBFE;
+  font-weight: 700;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  font-family: ui-monospace, monospace;
+}
+
+.dark .profile-role-badge-worker {
+  background-color: rgba(37, 99, 235, 0.25);
+  color: #93C5FD;
+  border: 1px solid rgba(37, 99, 235, 0.45);
+}
+
+.profile-badge-verified {
+  background-color: #ECFDF5;
+  color: #047857;
+  border: 1px solid #A7F3D0;
+  font-weight: 600;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: ui-monospace, monospace;
+}
+
+.dark .profile-badge-verified {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #6EE7B7;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+/* Mini stat boxes del Hero */
 .profile-hero-stat {
   padding: 0.65rem 0.875rem;
-  border-radius: var(--radius-nested);
-  background-color: var(--surface-canvas);
-  border: 1px solid var(--color-hairline);
+  border-radius: 0.75rem;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
   min-width: 130px;
 }
 
+.dark .profile-hero-stat {
+  background-color: #162032;
+  border: 1px solid #1E293B;
+}
+
 .profile-hero-stat .stat-label {
-  font-size: 11px;
+  font-size: 0.625rem;
+  font-family: ui-monospace, monospace;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--color-mid-gray);
+  color: #64748B;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.dark .profile-hero-stat .stat-label {
+  color: #94A3B8;
 }
 
 .profile-hero-stat .stat-value {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.profile-form-label {
-  display: block;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--color-mid-gray);
-  margin-bottom: 0.35rem;
-}
-
-.profile-section-card {
-  padding: 1.5rem;
-  border-radius: var(--radius-cards) !important;
-  background-color: var(--surface-card);
-  border: 1px solid var(--color-hairline);
-}
-
-.profile-section-card .section-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0F172A;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--color-hairline);
-  margin-bottom: 1rem;
+  gap: 0.35rem;
 }
 
-.profile-section-card .section-title {
-  color: var(--color-ink);
-  font-weight: 600;
-  font-size: 16px;
-  letter-spacing: -0.015em;
+.dark .profile-hero-stat .stat-value {
+  color: #F8FAFC;
 }
 
-.profile-section-card .section-subtitle {
-  color: var(--color-mid-gray);
-  font-size: 12px;
-}
-
-.profile-billing-info-box {
-  padding: 1rem;
-  border-radius: var(--radius-nested);
-  background-color: var(--surface-canvas);
-  border: 1px solid var(--color-hairline);
-}
-
-.profile-sticky-bar {
-  padding: 1rem 1.25rem;
-  border-radius: var(--radius-cards);
-  background-color: var(--surface-card);
-  border: 1px solid var(--color-hairline);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-/* ==============================================================================
-   TARJETA NEOBANCO DIGITAL (Acabado Metálico Protegido dentro de la Card)
-   ============================================================================== */
+/* 3. Tarjeta de Liquidación Neobanco (Siempre Fondo Rico y Tipografía Metálica Clara) */
 .digital-bank-card {
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius-nested) !important;
+  border-radius: 1rem;
   padding: 1.25rem 1.5rem;
   color: #FFFFFF !important;
   box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.25), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
@@ -909,6 +1146,7 @@ table tr:hover td {
   box-shadow: 0 16px 28px -6px rgba(0, 0, 0, 0.32), 0 6px 12px -2px rgba(0, 0, 0, 0.18);
 }
 
+/* Colores de Tarjetas por Banco */
 .digital-bank-card.bank-bancolombia,
 .digital-bank-card:not([class*="bank-"]) {
   background: linear-gradient(135deg, #0A192F 0%, #152C5B 50%, #1E3A8A 100%) !important;
@@ -956,7 +1194,7 @@ table tr:hover td {
 .digital-bank-card .card-label {
   color: rgba(255, 255, 255, 0.72) !important;
   font-size: 0.625rem;
-  font-family: var(--font-geist-mono);
+  font-family: ui-monospace, monospace;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   display: block;
@@ -964,7 +1202,7 @@ table tr:hover td {
 
 .digital-bank-card .card-number {
   color: #FFFFFF !important;
-  font-family: var(--font-geist-mono);
+  font-family: ui-monospace, 'Courier New', monospace;
   font-size: 1.125rem;
   font-weight: 700;
   letter-spacing: 0.15em;
@@ -989,152 +1227,148 @@ table tr:hover td {
   letter-spacing: 0.05em;
 }
 
-/* ==============================================================================
-   CONTROL DE SESIÓN, ROLES Y RESILIENCIA VISUAL
-   ============================================================================== */
-@supports (padding: env(safe-area-inset-top)) {
-  body {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
-  }
+/* 4. Tarjetas Bento de Edición */
+.profile-section-card {
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: background-color 150ms ease, border-color 150ms ease;
 }
 
-/* Control de visibilidad instantánea entre Pantalla de Inicio de Sesión y Dashboard */
-html.has-user-session #authScreen,
-html.has-user-session #authTopNavbar {
-  display: none !important;
+.dark .profile-section-card {
+  background-color: #111827;
+  border: 1px solid #1E293B;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-html.has-user-session #mainAppDashboard {
-  display: flex !important;
-  flex-direction: column !important;
-  min-height: 100vh;
-}
-
-@media (min-width: 1024px) {
-  html.has-user-session #mainAppDashboard {
-    flex-direction: row !important;
-  }
-}
-
-.role-worker .admin-only-feature {
-  display: none !important;
-}
-
-.role-admin .worker-only-feature {
-  display: none !important;
-}
-
-/* Notificaciones Toast Flotantes (Design.md: Achromatic Pill) */
-.toast-msg {
-  pointer-events: auto;
-  min-width: 280px;
-  max-width: 380px;
-  border-radius: var(--radius-buttons);
-  background-color: var(--surface-card);
-  border: 1px solid var(--color-hairline);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--color-hairline);
-  color: var(--color-ink);
-  font-family: var(--font-geist);
-  font-size: 13px;
-  padding: 10px 14px;
+.profile-section-card .section-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  animation: toast-slide 180ms ease-out forwards;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #F1F5F9;
+  margin-bottom: 1rem;
 }
 
-@keyframes toast-slide {
-  from {
-    transform: translateY(10px) scale(0.98);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
+.dark .profile-section-card .section-header {
+  border-bottom: 1px solid #1E293B;
 }
 
-.toast-exit {
-  animation: toast-out 140ms ease-in forwards;
+.profile-section-card .section-title {
+  color: #0F172A;
+  font-weight: 700;
+  font-size: 0.875rem;
 }
 
-@keyframes toast-out {
-  from {
-    transform: scale(1);
-    opacity: 1;
-  }
-  to {
-    transform: scale(0.96);
-    opacity: 0;
-  }
+.dark .profile-section-card .section-title {
+  color: #F8FAFC;
 }
 
-.highlight-pulse {
-  animation: flashHighlight 1.2s ease-out;
+.profile-section-card .section-subtitle {
+  color: #64748B;
+  font-size: 0.6875rem;
 }
 
-@keyframes flashHighlight {
-  0% { background-color: rgba(10, 10, 10, 0.08); }
-  100% { background-color: transparent; }
+.dark .profile-section-card .section-subtitle {
+  color: #94A3B8;
 }
 
-/* ============================================================================
-   ESTILOS DE IMPRESIÓN Y EXPORTACIÓN A PDF ULTRA-LIMPIA Y PROFESIONAL
-   ============================================================================ */
-@media print {
-  @page {
-    margin: 0 !important;
-    size: auto;
-  }
-
-  html, body {
-    background: #ffffff !important;
-    background-color: #ffffff !important;
-    color: #0f172a !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: auto !important;
-  }
-
-  body > *:not(#printInvoiceModal):not(#printLiquidationModal) {
-    display: none !important;
-  }
-
-  header,
-  footer,
-  #firebaseWarning,
-  #authScreen,
-  #mainAppDashboard,
-  html.has-user-session #mainAppDashboard,
-  #toastContainer,
-  #deleteModal,
-  #editRateModal,
-  #manualEntryModal,
-  #rejectTaskModal,
-  #modalTask,
-  #modalAdminUserProfile,
-  #modalAddDataProfile,
-  #upworkBudgetModal,
-  #dynamicIslandTimer {
-    display: none !important;
-  }
-
-  #printInvoiceModal,
-  #printLiquidationModal {
-    position: static !important;
-    display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    background: #ffffff !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 2.5cm 2cm !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
+.profile-section-card .section-step-badge {
+  font-size: 0.625rem;
+  font-family: ui-monospace, monospace;
+  color: #64748B;
 }
+
+.dark .profile-section-card .section-step-badge {
+  color: #94A3B8;
+}
+
+/* Labels de Formularios */
+.profile-form-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0F172A;
+  margin-bottom: 0.35rem;
+}
+
+.dark .profile-form-label {
+  color: #F8FAFC;
+}
+
+/* 5. Tarjeta de Información de Cobro */
+.profile-billing-info-box {
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+}
+
+.dark .profile-billing-info-box {
+  background-color: #162032;
+  border: 1px solid #1E293B;
+}
+
+.profile-billing-info-box .box-title {
+  color: #0F172A;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.dark .profile-billing-info-box .box-title {
+  color: #F8FAFC;
+}
+
+.profile-billing-info-box .box-desc {
+  color: #64748B;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+}
+
+.dark .profile-billing-info-box .box-desc {
+  color: #94A3B8;
+}
+
+/* 6. Barra Sticky de Guardado */
+.profile-sticky-bar {
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+}
+
+.dark .profile-sticky-bar {
+  background-color: #111827;
+  border: 1px solid #1E293B;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+.profile-sticky-bar .bar-text {
+  color: #64748B;
+  font-size: 0.75rem;
+}
+
+.dark .profile-sticky-bar .bar-text {
+  color: #94A3B8;
+}
+
+/* Inputs Readonly con alto contraste en ambos temas */
+input.form-input[readonly], input.form-input:disabled {
+  background-color: #F1F5F9 !important;
+  color: #64748B !important;
+  border-color: #E2E8F0 !important;
+  cursor: not-allowed;
+}
+
+.dark input.form-input[readonly], .dark input.form-input:disabled {
+  background-color: #162032 !important;
+  color: #94A3B8 !important;
+  border-color: #1E293B !important;
+}
+
+
+
+
