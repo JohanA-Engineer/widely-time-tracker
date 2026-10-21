@@ -13,6 +13,7 @@ import {
   onAuthStateChanged,
   signOut,
   updateProfile,
+  updatePassword,
   GoogleAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail
@@ -148,7 +149,17 @@ const MASTER_ADMIN_EMAILS = [
 
 function isMasterAdmin(email) {
   if (!email) return false;
-  return MASTER_ADMIN_EMAILS.includes(email.trim().toLowerCase());
+  const norm = String(email).trim().toLowerCase();
+  if (MASTER_ADMIN_EMAILS.includes(norm)) return true;
+  if (Array.isArray(state?.adminEmails) && state.adminEmails.includes(norm)) return true;
+  return false;
+}
+
+function isUserAdmin(profileOrUser) {
+  if (!profileOrUser) return false;
+  if (typeof profileOrUser === "string") return isMasterAdmin(profileOrUser);
+  if (profileOrUser.rol === "admin") return true;
+  return isMasterAdmin(profileOrUser.email);
 }
 
 let dailyChartInstance = null;
@@ -158,12 +169,16 @@ let tasksUnsubscribe = null;
 let paymentsUnsubscribe = null;
 let upworkConfigUnsubscribe = null;
 let clientsUnsubscribe = null;
+let usersUnsubscribe = null;
+let adminsConfigUnsubscribe = null;
 
 /* ============================================================================
    2. ESTADO GLOBAL DE LA APLICACIÓN
    ============================================================================ */
 let state = {
   workers: [],      // Colección 'trabajadores'
+  users: [],        // Colección 'usuarios' (solo administradores)
+  adminEmails: [],  // Lista de correos con rol Administrador
   tasks: [],        // Colección 'tareas'
   payments: [],     // Colección 'pagos'
   clients: [],      // Colección 'clientes'
@@ -399,6 +414,95 @@ const elements = {
   userRoleBadge: document.getElementById("userRoleBadge"),
   btnLogout: document.getElementById("btnLogout"),
   adminManagementSection: document.getElementById("adminManagementSection"),
+  btnTopbarMyProfile: document.getElementById("btnTopbarMyProfile"),
+  sidebarMyProfileLink: document.getElementById("sidebarMyProfileLink"),
+  sidebarTeamLink: document.getElementById("sidebarTeamLink"),
+
+  // Modal Mi Perfil (Todo usuario)
+  myProfileModal: document.getElementById("myProfileModal"),
+  btnCloseMyProfile: document.getElementById("btnCloseMyProfile"),
+  btnCancelMyProfile: document.getElementById("btnCancelMyProfile"),
+  formMyProfile: document.getElementById("formMyProfile"),
+  myProfileAvatar: document.getElementById("myProfileAvatar"),
+  myProfileTitleName: document.getElementById("myProfileTitleName"),
+  myProfileRoleBadge: document.getElementById("myProfileRoleBadge"),
+  myProfileName: document.getElementById("myProfileName"),
+  myProfileEmail: document.getElementById("myProfileEmail"),
+  myProfilePhone: document.getElementById("myProfilePhone"),
+  myProfileDocType: document.getElementById("myProfileDocType"),
+  myProfileDocNumber: document.getElementById("myProfileDocNumber"),
+  myProfileCity: document.getElementById("myProfileCity"),
+  myProfileAddress: document.getElementById("myProfileAddress"),
+  myProfileBank: document.getElementById("myProfileBank"),
+  myProfileAccountType: document.getElementById("myProfileAccountType"),
+  myProfileAccountNumber: document.getElementById("myProfileAccountNumber"),
+  myProfileAccountHolder: document.getElementById("myProfileAccountHolder"),
+  myProfileNewPassword: document.getElementById("myProfileNewPassword"),
+  myProfileConfirmPassword: document.getElementById("myProfileConfirmPassword"),
+  btnUpdateMyPassword: document.getElementById("btnUpdateMyPassword"),
+  btnSendResetEmailMyProfile: document.getElementById("btnSendResetEmailMyProfile"),
+  btnSaveMyProfile: document.getElementById("btnSaveMyProfile"),
+
+  // Sección Administración: Perfiles & Equipo
+  adminTeamSection: document.getElementById("adminTeamSection"),
+  tabUsersBtn: document.getElementById("tabUsersBtn"),
+  tabDataWorkersBtn: document.getElementById("tabDataWorkersBtn"),
+  usersCountBadge: document.getElementById("usersCountBadge"),
+  dataWorkersCountBadge: document.getElementById("dataWorkersCountBadge"),
+  registeredUsersContainer: document.getElementById("registeredUsersContainer"),
+  registeredUsersList: document.getElementById("registeredUsersList"),
+  dataWorkersContainer: document.getElementById("dataWorkersContainer"),
+  btnOpenCreateDataProfile: document.getElementById("btnOpenCreateDataProfile"),
+  btnOpenAddAdminModal: document.getElementById("btnOpenAddAdminModal"),
+
+  // Modal Perfil de Datos (Sin Cuenta)
+  createDataProfileModal: document.getElementById("createDataProfileModal"),
+  btnCloseDataProfileModal: document.getElementById("btnCloseDataProfileModal"),
+  btnCancelDataProfileModal: document.getElementById("btnCancelDataProfileModal"),
+  formDataProfile: document.getElementById("formDataProfile"),
+  dataProfileName: document.getElementById("dataProfileName"),
+  dataProfileRole: document.getElementById("dataProfileRole"),
+  dataProfileEmail: document.getElementById("dataProfileEmail"),
+  dataProfilePhone: document.getElementById("dataProfilePhone"),
+  dataProfileRate: document.getElementById("dataProfileRate"),
+  dataProfileArtRate: document.getElementById("dataProfileArtRate"),
+  dataProfileDocType: document.getElementById("dataProfileDocType"),
+  dataProfileDocNumber: document.getElementById("dataProfileDocNumber"),
+  dataProfileCity: document.getElementById("dataProfileCity"),
+  dataProfileBank: document.getElementById("dataProfileBank"),
+  dataProfileAccountType: document.getElementById("dataProfileAccountType"),
+  dataProfileAccountNumber: document.getElementById("dataProfileAccountNumber"),
+  btnSaveDataProfile: document.getElementById("btnSaveDataProfile"),
+
+  // Modal Administrador: Editar Usuario Registrado
+  adminEditUserModal: document.getElementById("adminEditUserModal"),
+  btnCloseAdminEditUserModal: document.getElementById("btnCloseAdminEditUserModal"),
+  btnCancelAdminEditUserModal: document.getElementById("btnCancelAdminEditUserModal"),
+  formAdminEditUser: document.getElementById("formAdminEditUser"),
+  adminEditUserUid: document.getElementById("adminEditUserUid"),
+  adminEditUserName: document.getElementById("adminEditUserName"),
+  adminEditUserEmail: document.getElementById("adminEditUserEmail"),
+  adminEditUserRole: document.getElementById("adminEditUserRole"),
+  adminEditUserWorkerSelect: document.getElementById("adminEditUserWorkerSelect"),
+  adminEditUserPhone: document.getElementById("adminEditUserPhone"),
+  adminEditUserDocType: document.getElementById("adminEditUserDocType"),
+  adminEditUserDocNumber: document.getElementById("adminEditUserDocNumber"),
+  adminEditUserCity: document.getElementById("adminEditUserCity"),
+  adminEditUserAddress: document.getElementById("adminEditUserAddress"),
+  adminEditUserBank: document.getElementById("adminEditUserBank"),
+  adminEditUserAccountType: document.getElementById("adminEditUserAccountType"),
+  adminEditUserAccountNumber: document.getElementById("adminEditUserAccountNumber"),
+  adminEditUserAccountHolder: document.getElementById("adminEditUserAccountHolder"),
+  btnAdminSendPasswordReset: document.getElementById("btnAdminSendPasswordReset"),
+  btnSaveAdminEditUser: document.getElementById("btnSaveAdminEditUser"),
+
+  // Modal Añadir Administrador
+  addAdminModal: document.getElementById("addAdminModal"),
+  btnCloseAddAdminModal: document.getElementById("btnCloseAddAdminModal"),
+  btnCancelAddAdminModal: document.getElementById("btnCancelAddAdminModal"),
+  formAddAdmin: document.getElementById("formAddAdmin"),
+  newAdminEmailInput: document.getElementById("newAdminEmailInput"),
+  btnSaveNewAdmin: document.getElementById("btnSaveNewAdmin"),
 
   // Dual Portal (Administrador vs Colaborador)
   workerPortalView: document.getElementById("workerPortalView"),
@@ -698,7 +802,7 @@ function applyRoleView() {
   const profile = state.userProfile;
 
   if (profile) {
-    if (isMasterAdmin(profile.email)) {
+    if (isMasterAdmin(profile.email) || isUserAdmin(profile)) {
       profile.rol = "admin";
     }
     // Usuario con sesión activa: Mostrar Dashboard y ocultar pantalla de login
@@ -1278,8 +1382,11 @@ function setupFirestoreListeners(profile) {
     if (paymentsUnsubscribe) { paymentsUnsubscribe(); paymentsUnsubscribe = null; }
     if (upworkConfigUnsubscribe) { upworkConfigUnsubscribe(); upworkConfigUnsubscribe = null; }
     if (clientsUnsubscribe) { clientsUnsubscribe(); clientsUnsubscribe = null; }
+    if (usersUnsubscribe) { usersUnsubscribe(); usersUnsubscribe = null; }
+    if (adminsConfigUnsubscribe) { adminsConfigUnsubscribe(); adminsConfigUnsubscribe = null; }
     state.tasks = [];
     state.payments = [];
+    state.users = [];
     updateTasksUI();
     updatePaymentsUI();
     updateFinancialDashboard();
@@ -1439,6 +1546,40 @@ function setupFirestoreListeners(profile) {
     }, (error) => {
       console.warn("[Firestore] Aviso en sincronización de clientes:", error.message);
     });
+  }
+
+  // 6. ADMINISTRADORES AUTORIZADOS: Sincronización en tiempo real
+  if (!adminsConfigUnsubscribe) {
+    const adminsDocRef = doc(db, "configuracion", "admins");
+    adminsConfigUnsubscribe = onSnapshot(adminsDocRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        if (Array.isArray(data.emails)) {
+          state.adminEmails = data.emails.map(e => String(e).trim().toLowerCase());
+        }
+      }
+    }, (err) => {
+      console.info("[Firestore] Configuración de admins inicial:", err.message);
+    });
+  }
+
+  // 7. USUARIOS REGISTRADOS: Acceso total para Administradores (Requisito 3)
+  if (isAdmin && !usersUnsubscribe) {
+    const usersCol = collection(db, "usuarios");
+    usersUnsubscribe = onSnapshot(usersCol, (snapshot) => {
+      state.users = snapshot.docs.map(doc => ({
+        id: doc.id,
+        uid: doc.id,
+        ...doc.data()
+      })).sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
+      updateAdminUsersUI();
+    }, (error) => {
+      console.warn("[Firestore] Aviso en sincronización de usuarios:", error.message);
+    });
+  } else if (!isAdmin && usersUnsubscribe) {
+    usersUnsubscribe();
+    usersUnsubscribe = null;
+    state.users = [];
   }
 }
 
@@ -2270,25 +2411,35 @@ function updateWorkersUI() {
   }
 
   elements.workerCount.textContent = state.workers.length;
+  if (elements.dataWorkersCountBadge) {
+    elements.dataWorkersCountBadge.textContent = state.workers.length;
+  }
 
   if (state.workers.length === 0) {
-    elements.workersList.innerHTML = `<div class="text-xs text-slate-400 dark:text-slate-500 text-center py-4">No hay trabajadores registrados aún.</div>`;
+    elements.workersList.innerHTML = `<div class="text-xs text-slate-400 dark:text-slate-500 text-center py-4">No hay colaboradores registrados aún.</div>`;
   } else {
     elements.workersList.innerHTML = state.workers.map(w => {
       const rate = Number(w.tarifaHora || 0);
       const artRate = Number(w.tarifaArte || 0);
       const hasRate = rate > 0 || artRate > 0;
+      const isDataOnly = w.esSoloDatos || w.tipoPerfil === "solo_datos";
+      const profileTypeTag = isDataOnly
+        ? `<span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold border border-emerald-500/20">Solo Datos (Sin Cuenta)</span>`
+        : `<span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-700 dark:text-blue-300 font-semibold border border-blue-500/20">Cuenta</span>`;
+
       return `
         <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors text-xs">
           <div class="min-w-0 pr-2">
-            <div class="font-semibold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5">
+            <div class="font-semibold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5 flex-wrap">
               <span>${escapeHtml(w.nombre)}</span>
-              ${w.email ? `<span class="text-[10px] text-slate-400 font-normal">(${escapeHtml(w.email)})</span>` : ''}
+              ${w.cargo ? `<span class="text-[10px] text-slate-500 font-normal">(${escapeHtml(w.cargo)})</span>` : ''}
+              ${profileTypeTag}
             </div>
             <div class="flex items-center gap-1.5 mt-1 flex-wrap">
               ${rate > 0 ? `<span class="text-[11px] text-[#2563EB] dark:text-[#60A5FA] font-mono font-medium tabular-nums bg-[#2563EB]/10 px-1.5 py-0.5 rounded border border-[#2563EB]/20">$${rate.toFixed(2)}/h</span>` : ''}
               ${artRate > 0 ? `<span class="text-[11px] text-purple-600 dark:text-purple-400 font-mono font-medium tabular-nums bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20"><i class="fa-solid fa-palette text-[9px] mr-1"></i>$${artRate.toFixed(2)}/arte</span>` : ''}
               ${!hasRate ? `<span class="text-[10px] text-amber-600 dark:text-amber-400 font-mono bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 font-medium">Sin tarifas</span>` : ''}
+              ${w.banco ? `<span class="text-[10px] text-slate-400 font-mono">• 🏦 ${escapeHtml(w.banco)}</span>` : ''}
             </div>
           </div>
           <div class="flex items-center gap-1 shrink-0">
@@ -2311,7 +2462,7 @@ function updateWorkersUI() {
             <button 
               type="button"
               onclick="window.requestDelete('trabajadores', '${w.id}', '${escapeHtml(w.nombre)}')"
-              title="Eliminar trabajador" 
+              title="Eliminar colaborador" 
               class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors active:scale-95 text-xs cursor-pointer">
               <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
@@ -2328,7 +2479,686 @@ function updateWorkersUI() {
   }
 
   updateLiveCost();
+  updateAdminUsersUI();
 }
+
+/* ============================================================================
+   8.A. GESTIÓN DE PERFILES, ADMINISTRADORES & COLABORADORES SOLO DATOS
+   ============================================================================ */
+
+/**
+ * Alternar pestañas del panel de administración: Cuentas de Usuario vs Colaboradores Solo Datos
+ */
+function switchAdminTab(tab) {
+  if (tab === "users") {
+    elements.tabUsersBtn?.classList.add("active");
+    elements.tabDataWorkersBtn?.classList.remove("active");
+    elements.registeredUsersContainer?.classList.remove("hidden");
+    elements.dataWorkersContainer?.classList.add("hidden");
+  } else {
+    elements.tabDataWorkersBtn?.classList.add("active");
+    elements.tabUsersBtn?.classList.remove("active");
+    elements.dataWorkersContainer?.classList.remove("hidden");
+    elements.registeredUsersContainer?.classList.add("hidden");
+  }
+}
+
+/**
+ * Renderizar lista de usuarios registrados en el panel de administración (Requisito 3)
+ */
+function updateAdminUsersUI() {
+  if (!elements.registeredUsersList) return;
+  if (elements.usersCountBadge) {
+    elements.usersCountBadge.textContent = state.users.length;
+  }
+
+  if (state.users.length === 0) {
+    elements.registeredUsersList.innerHTML = `
+      <div class="text-xs text-slate-400 dark:text-slate-500 text-center py-6">
+        No hay cuentas de usuarios registradas aún en el sistema.
+      </div>
+    `;
+    return;
+  }
+
+  elements.registeredUsersList.innerHTML = state.users.map(u => {
+    const emailNorm = String(u.email || "").trim().toLowerCase();
+    const isMaster = MASTER_ADMIN_EMAILS.includes(emailNorm);
+    const isAdmin = isUserAdmin(u);
+    const userInitials = (u.nombre || u.email || "U").slice(0, 2).toUpperCase();
+
+    // Buscar si tiene trabajador vinculado
+    let linkedWorkerName = "";
+    if (u.trabajadorId) {
+      const match = state.workers.find(w => w.id === u.trabajadorId);
+      if (match) linkedWorkerName = match.nombre;
+    }
+
+    const roleBadge = isAdmin
+      ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/25">
+          <i class="fa-solid fa-crown text-[9px]"></i> Administrador
+        </span>`
+      : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25">
+          <i class="fa-solid fa-user text-[9px]"></i> Colaborador
+        </span>`;
+
+    const masterBadge = isMaster
+      ? `<span class="text-[9px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded">Principal Protegida</span>`
+      : "";
+
+    const toggleRoleBtn = isMaster
+      ? ""
+      : `<button type="button" 
+           onclick="window.toggleUserRole('${u.id || u.uid}')" 
+           title="${isAdmin ? 'Cambiar a Colaborador' : 'Hacer Administrador'}" 
+           class="px-2 py-1 text-[11px] rounded-lg font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer">
+           <i class="fa-solid ${isAdmin ? 'fa-arrow-down text-rose-500' : 'fa-arrow-up text-purple-500'} mr-1 text-[10px]"></i>${isAdmin ? 'Bajar Rol' : 'Hacer Admin'}
+         </button>`;
+
+    return `
+      <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors text-xs">
+        <div class="flex items-center gap-2.5 min-w-0 pr-2">
+          <div class="w-8 h-8 rounded-lg ${isAdmin ? 'bg-purple-600' : 'bg-blue-600'} text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+            ${escapeHtml(userInitials)}
+          </div>
+          <div class="min-w-0">
+            <div class="font-semibold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5 flex-wrap">
+              <span>${escapeHtml(u.nombre || "Usuario")}</span>
+              ${roleBadge}
+              ${masterBadge}
+            </div>
+            <div class="text-[11px] text-slate-400 truncate flex items-center gap-2 flex-wrap mt-0.5">
+              <span>${escapeHtml(u.email || "")}</span>
+              ${u.telefono ? `<span>• 📞 ${escapeHtml(u.telefono)}</span>` : ""}
+              ${u.banco ? `<span>• 🏦 ${escapeHtml(u.banco)}</span>` : ""}
+              ${linkedWorkerName ? `<span class="text-blue-500 dark:text-blue-400 font-medium">• Ficha: ${escapeHtml(linkedWorkerName)}</span>` : ""}
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          ${toggleRoleBtn}
+          <button type="button" 
+            onclick="window.openAdminEditUserModal('${u.id || u.uid}')" 
+            title="Editar Perfil y Permisos" 
+            class="px-2.5 py-1 text-[11px] rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-xs active:scale-95 cursor-pointer flex items-center gap-1">
+            <i class="fa-solid fa-pen-to-square text-[10px]"></i>
+            <span class="hidden sm:inline">Editar</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+/**
+ * REQUISITO 1: MODAL MI PERFIL (Para cada usuario)
+ */
+function openMyProfileModal() {
+  const profile = state.userProfile;
+  if (!profile) {
+    showToast("Inicia sesión para gestionar tu perfil.", "warning");
+    return;
+  }
+
+  const isAdmin = profile.rol === "admin" || isMasterAdmin(profile.email);
+  const initials = (profile.nombre || profile.email || "U").slice(0, 2).toUpperCase();
+
+  if (elements.myProfileAvatar) {
+    if (profile.fotoUrl) {
+      elements.myProfileAvatar.innerHTML = `<img src="${escapeHtml(profile.fotoUrl)}" alt="" class="w-full h-full object-cover rounded-xl" referrerpolicy="no-referrer">`;
+    } else {
+      elements.myProfileAvatar.textContent = initials;
+      elements.myProfileAvatar.className = `w-10 h-10 rounded-xl ${isAdmin ? 'bg-purple-600' : 'bg-[#2563EB]'} text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm`;
+    }
+  }
+
+  if (elements.myProfileTitleName) elements.myProfileTitleName.textContent = profile.nombre || "Mi Perfil";
+  if (elements.myProfileRoleBadge) {
+    elements.myProfileRoleBadge.textContent = isAdmin ? "ADMINISTRADOR" : "COLABORADOR";
+    elements.myProfileRoleBadge.className = `text-[9px] font-mono font-bold px-2 py-0.5 rounded-full ${isAdmin ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'} uppercase`;
+  }
+
+  // Prellenar información personal
+  if (elements.myProfileName) elements.myProfileName.value = profile.nombre || "";
+  if (elements.myProfileEmail) elements.myProfileEmail.value = profile.email || auth?.currentUser?.email || "";
+  if (elements.myProfilePhone) elements.myProfilePhone.value = profile.telefono || "";
+  if (elements.myProfileDocType) elements.myProfileDocType.value = profile.tipoDocumento || "CC";
+  if (elements.myProfileDocNumber) elements.myProfileDocNumber.value = profile.numeroDocumento || "";
+  if (elements.myProfileCity) elements.myProfileCity.value = profile.ciudad || "Bogotá D.C.";
+  if (elements.myProfileAddress) elements.myProfileAddress.value = profile.direccion || "";
+
+  // Prellenar información bancaria
+  let bank = profile.banco || "";
+  let accountType = profile.tipoCuenta || "Ahorros";
+  let accountNumber = profile.numeroCuenta || "";
+  let accountHolder = profile.titularCuenta || profile.nombre || "";
+
+  const workerId = profile.trabajadorId || state.workers.find(w => w.nombre?.trim().toLowerCase() === profile.nombre?.trim().toLowerCase())?.id;
+  if (workerId) {
+    const banking = loadWorkerBankingPrefs(workerId);
+    if (!bank) bank = banking.bank;
+    if (!accountType || accountType === "Ahorros") accountType = banking.accountType || "Ahorros";
+    if (!accountNumber) accountNumber = banking.accountNumber;
+    if (!accountHolder) accountHolder = banking.accountHolder || profile.nombre;
+  }
+
+  if (elements.myProfileBank) elements.myProfileBank.value = bank || "Bancolombia";
+  if (elements.myProfileAccountType) elements.myProfileAccountType.value = accountType || "Ahorros";
+  if (elements.myProfileAccountNumber) elements.myProfileAccountNumber.value = accountNumber || "";
+  if (elements.myProfileAccountHolder) elements.myProfileAccountHolder.value = accountHolder || profile.nombre || "";
+
+  // Limpiar campos de contraseña
+  if (elements.myProfileNewPassword) elements.myProfileNewPassword.value = "";
+  if (elements.myProfileConfirmPassword) elements.myProfileConfirmPassword.value = "";
+
+  elements.myProfileModal?.classList.remove("hidden");
+  elements.myProfileModal?.classList.add("flex");
+}
+
+function closeMyProfileModal() {
+  elements.myProfileModal?.classList.add("hidden");
+  elements.myProfileModal?.classList.remove("flex");
+}
+
+async function handleSaveMyProfile(e) {
+  e.preventDefault();
+  const profile = state.userProfile;
+  if (!profile) return;
+
+  const nombre = elements.myProfileName?.value.trim() || "";
+  const telefono = elements.myProfilePhone?.value.trim() || "";
+  const tipoDocumento = elements.myProfileDocType?.value || "CC";
+  const numeroDocumento = elements.myProfileDocNumber?.value.trim() || "";
+  const ciudad = elements.myProfileCity?.value.trim() || "Bogotá D.C.";
+  const direccion = elements.myProfileAddress?.value.trim() || "";
+  const banco = elements.myProfileBank?.value || "Bancolombia";
+  const tipoCuenta = elements.myProfileAccountType?.value || "Ahorros";
+  const numeroCuenta = elements.myProfileAccountNumber?.value.trim() || "";
+  const titularCuenta = elements.myProfileAccountHolder?.value.trim() || nombre;
+
+  if (!nombre) {
+    showToast("Por favor ingresa tu nombre.", "warning");
+    return;
+  }
+
+  const updatedProfile = {
+    ...profile,
+    nombre,
+    telefono,
+    tipoDocumento,
+    numeroDocumento,
+    ciudad,
+    direccion,
+    banco,
+    tipoCuenta,
+    numeroCuenta,
+    titularCuenta,
+    updatedAt: new Date().toISOString()
+  };
+
+  try {
+    const uid = auth?.currentUser?.uid || profile.uid;
+    if (db && uid) {
+      await setDoc(doc(db, "usuarios", uid), updatedProfile, { merge: true });
+
+      // Sincronizar nombre en Auth si cambió
+      if (auth.currentUser && auth.currentUser.displayName !== nombre) {
+        await updateProfile(auth.currentUser, { displayName: nombre });
+      }
+
+      // Sincronizar con ficha de trabajador si existe
+      const workerId = profile.trabajadorId || state.workers.find(w => w.nombre?.trim().toLowerCase() === profile.nombre?.trim().toLowerCase())?.id;
+      if (workerId) {
+        try {
+          await setDoc(doc(db, "trabajadores", workerId), {
+            nombre,
+            telefono,
+            tipoDocumento,
+            numeroDocumento,
+            ciudad,
+            banco,
+            tipoCuenta,
+            numeroCuenta,
+            titularCuenta
+          }, { merge: true });
+        } catch (workerSyncErr) {
+          console.info("[Firestore] Nota sincronización trabajador:", workerSyncErr.message);
+        }
+
+        try {
+          localStorage.setItem(`widely_banking_${workerId}`, JSON.stringify({
+            banco, tipoCuenta, numeroCuenta, titularCuenta, documento: numeroDocumento, ciudad, telefono
+          }));
+        } catch (e) {}
+      }
+    }
+
+    state.userProfile = updatedProfile;
+    localStorage.setItem("widely_cached_user", JSON.stringify(updatedProfile));
+    applyRoleView();
+    updateWorkersUI();
+
+    showToast("¡Tu perfil y datos bancarios se han guardado exitosamente!", "success");
+    closeMyProfileModal();
+  } catch (err) {
+    console.error("[My Profile Save Error]", err);
+    showToast("Error al guardar perfil: " + err.message, "error");
+  }
+}
+
+async function handleUpdateMyPassword() {
+  const newPass = elements.myProfileNewPassword?.value || "";
+  const confirmPass = elements.myProfileConfirmPassword?.value || "";
+
+  if (!newPass || newPass.length < 6) {
+    showToast("La nueva contraseña debe tener al menos 6 caracteres.", "warning");
+    elements.myProfileNewPassword?.focus();
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    showToast("Las contraseñas no coinciden. Por favor verifícalas.", "warning");
+    elements.myProfileConfirmPassword?.focus();
+    return;
+  }
+
+  if (!auth || !auth.currentUser) {
+    showToast("No hay una sesión activa de Firebase.", "error");
+    return;
+  }
+
+  try {
+    await updatePassword(auth.currentUser, newPass);
+    if (elements.myProfileNewPassword) elements.myProfileNewPassword.value = "";
+    if (elements.myProfileConfirmPassword) elements.myProfileConfirmPassword.value = "";
+    showToast("¡Contraseña actualizada exitosamente!", "success");
+  } catch (err) {
+    console.warn("[Password Update Warning]", err);
+    if (err.code === "auth/requires-recent-login") {
+      showToast("Por seguridad de Firebase debes haber iniciado sesión recientemente. Enviando enlace de restablecimiento a tu correo...", "warning");
+      try {
+        await sendPasswordResetEmail(auth, auth.currentUser.email);
+        showToast("Enlace de restablecimiento enviado a " + auth.currentUser.email, "success");
+      } catch (resetErr) {
+        showToast("Error al enviar enlace: " + resetErr.message, "error");
+      }
+    } else {
+      showToast("Error al cambiar contraseña: " + err.message, "error");
+    }
+  }
+}
+
+async function handleSendResetEmailMyProfile() {
+  const email = auth?.currentUser?.email || state.userProfile?.email;
+  if (!email) {
+    showToast("No se encontró el correo del usuario.", "warning");
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showToast(`Se ha enviado un enlace de cambio de contraseña a ${email}`, "success");
+  } catch (err) {
+    showToast("Error al enviar correo de restablecimiento: " + err.message, "error");
+  }
+}
+
+/**
+ * REQUISITO 4: CREACIÓN DE PERFIL SOLO DATOS (Sin cuenta de login ni credenciales)
+ */
+function openCreateDataProfileModal() {
+  elements.formDataProfile?.reset();
+  if (elements.dataProfileDocType) elements.dataProfileDocType.value = "CC";
+  if (elements.dataProfileCity) elements.dataProfileCity.value = "Bogotá D.C.";
+  if (elements.dataProfileBank) elements.dataProfileBank.value = "Bancolombia";
+  if (elements.dataProfileAccountType) elements.dataProfileAccountType.value = "Ahorros";
+
+  elements.createDataProfileModal?.classList.remove("hidden");
+  elements.createDataProfileModal?.classList.add("flex");
+}
+
+function closeCreateDataProfileModal() {
+  elements.createDataProfileModal?.classList.add("hidden");
+  elements.createDataProfileModal?.classList.remove("flex");
+}
+
+async function handleSaveDataProfile(e) {
+  e.preventDefault();
+
+  const nombre = elements.dataProfileName?.value.trim() || "";
+  const cargo = elements.dataProfileRole?.value.trim() || "Colaborador Externo";
+  const email = elements.dataProfileEmail?.value.trim() || "";
+  const telefono = elements.dataProfilePhone?.value.trim() || "";
+  const tarifaHora = parseFloat(elements.dataProfileRate?.value) || 0;
+  const tarifaArte = parseFloat(elements.dataProfileArtRate?.value) || 0;
+  const tipoDocumento = elements.dataProfileDocType?.value || "CC";
+  const numeroDocumento = elements.dataProfileDocNumber?.value.trim() || "";
+  const ciudad = elements.dataProfileCity?.value.trim() || "Bogotá D.C.";
+  const banco = elements.dataProfileBank?.value || "Bancolombia";
+  const tipoCuenta = elements.dataProfileAccountType?.value || "Ahorros";
+  const numeroCuenta = elements.dataProfileAccountNumber?.value.trim() || "";
+  const titularCuenta = nombre;
+
+  if (!nombre) {
+    showToast("El nombre del colaborador es obligatorio.", "warning");
+    return;
+  }
+
+  const workerDoc = {
+    nombre,
+    cargo,
+    email,
+    telefono,
+    tarifaHora,
+    tarifaArte,
+    tipoDocumento,
+    numeroDocumento,
+    ciudad,
+    banco,
+    tipoCuenta,
+    numeroCuenta,
+    titularCuenta,
+    esSoloDatos: true,
+    tipoPerfil: "solo_datos",
+    createdAt: new Date().toISOString()
+  };
+
+  try {
+    if (db) {
+      const docRef = await addDoc(collection(db, "trabajadores"), workerDoc);
+      localStorage.setItem(`widely_banking_${docRef.id}`, JSON.stringify({
+        banco, tipoCuenta, numeroCuenta, titularCuenta, documento: numeroDocumento, ciudad, telefono
+      }));
+    } else {
+      const mockId = "local_data_" + Date.now();
+      state.workers.push({ id: mockId, ...workerDoc });
+      updateWorkersUI();
+    }
+
+    showToast(`Perfil de solo datos creado para ${nombre}. Ya puedes asignarle tareas en el cronómetro y liquidar sus pagos.`, "success");
+    closeCreateDataProfileModal();
+    switchAdminTab("workers");
+  } catch (err) {
+    console.error("[Data Profile Create Error]", err);
+    showToast("Error al crear perfil de datos: " + err.message, "error");
+  }
+}
+
+/**
+ * REQUISITO 3: EDICIÓN DE PERFIL DE CUALQUIER USUARIO POR PARTE DEL ADMINISTRADOR
+ */
+function openAdminEditUserModal(userId) {
+  let u = state.users.find(item => item.id === userId || item.uid === userId);
+  if (!u && state.userProfile && (state.userProfile.uid === userId || state.userProfile.id === userId)) {
+    u = state.userProfile;
+  }
+  if (!u) {
+    showToast("Usuario no encontrado", "error");
+    return;
+  }
+
+  elements.adminEditUserUid.value = u.id || u.uid;
+  elements.adminEditUserName.value = u.nombre || "";
+  elements.adminEditUserEmail.value = u.email || "";
+
+  const isMaster = MASTER_ADMIN_EMAILS.includes(String(u.email || "").trim().toLowerCase());
+  const isAdmin = u.rol === "admin" || isMasterAdmin(u.email);
+  elements.adminEditUserRole.value = isAdmin ? "admin" : "worker";
+  if (isMaster) {
+    elements.adminEditUserRole.disabled = true;
+  } else {
+    elements.adminEditUserRole.disabled = false;
+  }
+
+  // Poblar select de fichas de trabajadores
+  if (elements.adminEditUserWorkerSelect) {
+    elements.adminEditUserWorkerSelect.innerHTML = `
+      <option value="">-- Sin ficha de trabajador vinculada --</option>
+      ${state.workers.map(w => `
+        <option value="${w.id}" ${u.trabajadorId === w.id ? "selected" : ""}>
+          ${escapeHtml(w.nombre)} ${w.cargo ? `(${escapeHtml(w.cargo)})` : ""}
+        </option>
+      `).join("")}
+    `;
+  }
+
+  // Contacto & Documentos
+  elements.adminEditUserPhone.value = u.telefono || "";
+  elements.adminEditUserDocType.value = u.tipoDocumento || "CC";
+  elements.adminEditUserDocNumber.value = u.numeroDocumento || "";
+  elements.adminEditUserCity.value = u.ciudad || "";
+  elements.adminEditUserAddress.value = u.direccion || "";
+
+  // Datos bancarios
+  elements.adminEditUserBank.value = u.banco || "Bancolombia";
+  elements.adminEditUserAccountType.value = u.tipoCuenta || "Ahorros";
+  elements.adminEditUserAccountNumber.value = u.numeroCuenta || "";
+  elements.adminEditUserAccountHolder.value = u.titularCuenta || u.nombre || "";
+
+  // Botón reset password del usuario
+  if (elements.btnAdminSendPasswordReset) {
+    elements.btnAdminSendPasswordReset.onclick = async () => {
+      if (!u.email) {
+        showToast("El usuario no tiene correo registrado", "warning");
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, u.email);
+        showToast(`Enlace de restablecimiento enviado a ${u.email}`, "success");
+      } catch (err) {
+        showToast("Error al enviar enlace: " + err.message, "error");
+      }
+    };
+  }
+
+  elements.adminEditUserModal?.classList.remove("hidden");
+  elements.adminEditUserModal?.classList.add("flex");
+}
+
+function closeAdminEditUserModal() {
+  elements.adminEditUserModal?.classList.add("hidden");
+  elements.adminEditUserModal?.classList.remove("flex");
+}
+
+async function handleSaveAdminEditUser(e) {
+  e.preventDefault();
+  const uid = elements.adminEditUserUid?.value;
+  if (!uid) return;
+
+  const user = state.users.find(u => u.id === uid || u.uid === uid) || (state.userProfile?.uid === uid ? state.userProfile : null);
+  const email = (elements.adminEditUserEmail?.value || user?.email || "").trim().toLowerCase();
+  const isMaster = MASTER_ADMIN_EMAILS.includes(email);
+
+  const nombre = elements.adminEditUserName?.value.trim() || "";
+  const rol = isMaster ? "admin" : (elements.adminEditUserRole?.value || "worker");
+  const trabajadorId = elements.adminEditUserWorkerSelect?.value || "";
+  const telefono = elements.adminEditUserPhone?.value.trim() || "";
+  const tipoDocumento = elements.adminEditUserDocType?.value || "CC";
+  const numeroDocumento = elements.adminEditUserDocNumber?.value.trim() || "";
+  const ciudad = elements.adminEditUserCity?.value.trim() || "";
+  const direccion = elements.adminEditUserAddress?.value.trim() || "";
+  const banco = elements.adminEditUserBank?.value || "Bancolombia";
+  const tipoCuenta = elements.adminEditUserAccountType?.value || "Ahorros";
+  const numeroCuenta = elements.adminEditUserAccountNumber?.value.trim() || "";
+  const titularCuenta = elements.adminEditUserAccountHolder?.value.trim() || nombre;
+
+  if (!nombre) {
+    showToast("El nombre es requerido.", "warning");
+    return;
+  }
+
+  const updatedData = {
+    nombre,
+    rol,
+    trabajadorId,
+    telefono,
+    tipoDocumento,
+    numeroDocumento,
+    ciudad,
+    direccion,
+    banco,
+    tipoCuenta,
+    numeroCuenta,
+    titularCuenta,
+    updatedAt: new Date().toISOString()
+  };
+
+  try {
+    if (db) {
+      await setDoc(doc(db, "usuarios", uid), updatedData, { merge: true });
+
+      // Sincronizar rol en configuracion/admins si aplica
+      if (email && !isMaster) {
+        let currentAdmins = Array.isArray(state.adminEmails) ? [...state.adminEmails] : [];
+        if (rol === "admin") {
+          if (!currentAdmins.includes(email)) currentAdmins.push(email);
+        } else {
+          currentAdmins = currentAdmins.filter(e => e !== email);
+        }
+        state.adminEmails = currentAdmins;
+        await setDoc(doc(db, "configuracion", "admins"), { emails: currentAdmins }, { merge: true });
+      }
+
+      // Si tiene ficha de trabajador vinculada, sincronizar datos bancarios
+      if (trabajadorId) {
+        await setDoc(doc(db, "trabajadores", trabajadorId), {
+          nombre,
+          telefono,
+          tipoDocumento,
+          numeroDocumento,
+          ciudad,
+          banco,
+          tipoCuenta,
+          numeroCuenta,
+          titularCuenta
+        }, { merge: true });
+
+        localStorage.setItem(`widely_banking_${trabajadorId}`, JSON.stringify({
+          banco, tipoCuenta, numeroCuenta, titularCuenta, documento: numeroDocumento, ciudad, telefono
+        }));
+      }
+    }
+
+    // Actualizar usuario en estado local
+    const idx = state.users.findIndex(u => u.id === uid || u.uid === uid);
+    if (idx !== -1) {
+      state.users[idx] = { ...state.users[idx], ...updatedData };
+    }
+    if (state.userProfile && (state.userProfile.uid === uid || state.userProfile.id === uid)) {
+      state.userProfile = { ...state.userProfile, ...updatedData };
+      localStorage.setItem("widely_cached_user", JSON.stringify(state.userProfile));
+      applyRoleView();
+    }
+
+    updateAdminUsersUI();
+    updateWorkersUI();
+    showToast("Perfil de usuario actualizado con éxito", "success");
+    closeAdminEditUserModal();
+  } catch (err) {
+    console.error("[Admin Edit User Error]", err);
+    showToast("Error al guardar cambios: " + err.message, "error");
+  }
+}
+
+/**
+ * REQUISITO 2: AÑADIR / AUTORIZAR OTRO ADMINISTRADOR
+ */
+function openAddAdminModal() {
+  if (elements.newAdminEmailInput) elements.newAdminEmailInput.value = "";
+  elements.addAdminModal?.classList.remove("hidden");
+  elements.addAdminModal?.classList.add("flex");
+}
+
+function closeAddAdminModal() {
+  elements.addAdminModal?.classList.add("hidden");
+  elements.addAdminModal?.classList.remove("flex");
+}
+
+async function handleSaveNewAdmin(e) {
+  e.preventDefault();
+  const email = elements.newAdminEmailInput?.value.trim().toLowerCase();
+  if (!email) return;
+
+  if (MASTER_ADMIN_EMAILS.includes(email) || (Array.isArray(state.adminEmails) && state.adminEmails.includes(email))) {
+    showToast(`${email} ya tiene rol de Administrador.`, "info");
+    closeAddAdminModal();
+    return;
+  }
+
+  try {
+    const updated = Array.from(new Set([...(state.adminEmails || []), email]));
+    state.adminEmails = updated;
+
+    if (db) {
+      await setDoc(doc(db, "configuracion", "admins"), { emails: updated }, { merge: true });
+
+      // Si el usuario ya está registrado en la colección 'usuarios', promover su documento
+      const existingUser = state.users.find(u => (u.email || "").trim().toLowerCase() === email);
+      if (existingUser) {
+        await setDoc(doc(db, "usuarios", existingUser.id || existingUser.uid), { rol: "admin" }, { merge: true });
+        existingUser.rol = "admin";
+      }
+    }
+
+    showToast(`¡${email} ha sido autorizado como Administrador!`, "success");
+    closeAddAdminModal();
+    updateAdminUsersUI();
+  } catch (err) {
+    console.error("[Add Admin Error]", err);
+    showToast("Error al autorizar administrador: " + err.message, "error");
+  }
+}
+
+/**
+ * Alternar rol rápidamente de un usuario entre Admin y Worker
+ */
+async function toggleUserRole(userId) {
+  const u = state.users.find(item => item.id === userId || item.uid === userId);
+  if (!u) return;
+
+  const email = String(u.email || "").trim().toLowerCase();
+  if (MASTER_ADMIN_EMAILS.includes(email)) {
+    showToast("La cuenta principal linadelae@gmail.com no puede ser modificada.", "warning");
+    return;
+  }
+
+  const currentIsAdmin = u.rol === "admin" || (Array.isArray(state.adminEmails) && state.adminEmails.includes(email));
+  const newRole = currentIsAdmin ? "worker" : "admin";
+
+  try {
+    if (db) {
+      await setDoc(doc(db, "usuarios", u.id || u.uid), { rol: newRole }, { merge: true });
+
+      let currentAdmins = Array.isArray(state.adminEmails) ? [...state.adminEmails] : [];
+      if (newRole === "admin") {
+        if (!currentAdmins.includes(email)) currentAdmins.push(email);
+      } else {
+        currentAdmins = currentAdmins.filter(e => e !== email);
+      }
+      state.adminEmails = currentAdmins;
+      await setDoc(doc(db, "configuracion", "admins"), { emails: currentAdmins }, { merge: true });
+    }
+
+    u.rol = newRole;
+    updateAdminUsersUI();
+    showToast(newRole === "admin" ? `¡${u.nombre || email} ahora es Administrador!` : `${u.nombre || email} ahora es Colaborador.`, "success");
+  } catch (err) {
+    showToast("Error al alternar rol: " + err.message, "error");
+  }
+}
+
+// Exponer métodos al ámbito global para handlers inline en HTML
+window.openMyProfileModal = openMyProfileModal;
+window.closeMyProfileModal = closeMyProfileModal;
+window.openCreateDataProfileModal = openCreateDataProfileModal;
+window.closeCreateDataProfileModal = closeCreateDataProfileModal;
+window.openAdminEditUserModal = openAdminEditUserModal;
+window.closeAdminEditUserModal = closeAdminEditUserModal;
+window.openAddAdminModal = openAddAdminModal;
+window.closeAddAdminModal = closeAddAdminModal;
+window.toggleUserRole = toggleUserRole;
+window.switchAdminTab = switchAdminTab;
+window.updateAdminUsersUI = updateAdminUsersUI;
 
 /* ============================================================================
    8.B. FILTROS DE PERÍODO & PERIOD LIQUIDATION
@@ -5629,7 +6459,9 @@ function saveWorkerBankingPrefs(workerId) {
     city: elements.billCity?.textContent.trim() || "Bogotá D.C.",
     bank: elements.billBank?.textContent.trim() || "Bancolombia",
     accountType: elements.billAccountType?.textContent.trim() || "Ahorros",
-    accountNumber: elements.billAccountNumber?.textContent.trim() || ""
+    accountNumber: elements.billAccountNumber?.textContent.trim() || "",
+    idNumber: elements.billWorkerIdNumber?.textContent.trim() || "",
+    phone: elements.billWorkerPhone?.textContent.trim() || ""
   };
   try {
     localStorage.setItem(`widely_banking_${workerId}`, JSON.stringify(data));
@@ -5638,12 +6470,23 @@ function saveWorkerBankingPrefs(workerId) {
 
 function loadWorkerBankingPrefs(workerId) {
   if (!workerId) return {};
+  const worker = state.workers.find(w => w.id === workerId);
+  let localData = {};
   try {
     const raw = localStorage.getItem(`widely_banking_${workerId}`);
-    return raw ? JSON.parse(raw) : {};
-  } catch (e) {
-    return {};
-  }
+    if (raw) localData = JSON.parse(raw);
+  } catch (e) {}
+
+  return {
+    bank: localData.bank || localData.banco || worker?.banco || "Bancolombia",
+    accountType: localData.accountType || localData.tipoCuenta || worker?.tipoCuenta || "Ahorros",
+    accountNumber: localData.accountNumber || localData.numeroCuenta || worker?.numeroCuenta || "",
+    idNumber: localData.idNumber || localData.documento || localData.numeroDocumento || worker?.numeroDocumento || worker?.documento || "",
+    city: localData.city || localData.ciudad || worker?.ciudad || "Bogotá D.C.",
+    phone: localData.phone || localData.telefono || worker?.telefono || "",
+    mobile: localData.mobile || localData.celular || worker?.telefono || "",
+    accountHolder: localData.accountHolder || localData.titularCuenta || worker?.titularCuenta || worker?.nombre || ""
+  };
 }
 
 window.openStatementModal = function(workerId, preferredType) {
@@ -6203,6 +7046,52 @@ function setupEventListeners() {
   elements.islandBtnPip?.addEventListener("click", togglePictureInPictureWindow);
   document.addEventListener("visibilitychange", handleVisibilityChange);
 
+  // -------------------------------------------------------------
+  // GESTIÓN DE PERFILES, ADMINISTRADORES & COLABORADORES SOLO DATOS
+  // -------------------------------------------------------------
+  // Mi Perfil (Todo usuario con sesión)
+  elements.btnTopbarMyProfile?.addEventListener("click", openMyProfileModal);
+  elements.sidebarMyProfileLink?.addEventListener("click", openMyProfileModal);
+  elements.userProfileBar?.addEventListener("click", openMyProfileModal);
+  elements.btnCloseMyProfile?.addEventListener("click", closeMyProfileModal);
+  elements.btnCancelMyProfile?.addEventListener("click", closeMyProfileModal);
+  elements.formMyProfile?.addEventListener("submit", handleSaveMyProfile);
+  elements.btnUpdateMyPassword?.addEventListener("click", handleUpdateMyPassword);
+  elements.btnSendResetEmailMyProfile?.addEventListener("click", handleSendResetEmailMyProfile);
+  elements.myProfileModal?.addEventListener("click", (e) => {
+    if (e.target === elements.myProfileModal) closeMyProfileModal();
+  });
+
+  // Pestañas de administración (Cuentas de Usuario vs Colaboradores Solo Datos)
+  elements.tabUsersBtn?.addEventListener("click", () => switchAdminTab("users"));
+  elements.tabDataWorkersBtn?.addEventListener("click", () => switchAdminTab("workers"));
+
+  // Perfil de datos sin cuenta (Admin)
+  elements.btnOpenCreateDataProfile?.addEventListener("click", openCreateDataProfileModal);
+  elements.btnCloseDataProfileModal?.addEventListener("click", closeCreateDataProfileModal);
+  elements.btnCancelDataProfileModal?.addEventListener("click", closeCreateDataProfileModal);
+  elements.formDataProfile?.addEventListener("submit", handleSaveDataProfile);
+  elements.createDataProfileModal?.addEventListener("click", (e) => {
+    if (e.target === elements.createDataProfileModal) closeCreateDataProfileModal();
+  });
+
+  // Editar perfil de usuario (Admin)
+  elements.btnCloseAdminEditUserModal?.addEventListener("click", closeAdminEditUserModal);
+  elements.btnCancelAdminEditUserModal?.addEventListener("click", closeAdminEditUserModal);
+  elements.formAdminEditUser?.addEventListener("submit", handleSaveAdminEditUser);
+  elements.adminEditUserModal?.addEventListener("click", (e) => {
+    if (e.target === elements.adminEditUserModal) closeAdminEditUserModal();
+  });
+
+  // Añadir Administrador (Admin)
+  elements.btnOpenAddAdminModal?.addEventListener("click", openAddAdminModal);
+  elements.btnCloseAddAdminModal?.addEventListener("click", closeAddAdminModal);
+  elements.btnCancelAddAdminModal?.addEventListener("click", closeAddAdminModal);
+  elements.formAddAdmin?.addEventListener("submit", handleSaveNewAdmin);
+  elements.addAdminModal?.addEventListener("click", (e) => {
+    if (e.target === elements.addAdminModal) closeAddAdminModal();
+  });
+
   // Inicializar Navegación Lateral (Modelo 1 - Sidebar SaaS Pro)
   setupSidebarNavigation();
 }
@@ -6243,7 +7132,11 @@ function setupSidebarNavigation() {
       const isWorker = state.userProfile?.rol === "worker";
 
       let targetId = null;
-      if (navKey === "dashboard") {
+      if (navKey === "myprofile") {
+        openMyProfileModal();
+        if (window.innerWidth < 1024) closeSidebar();
+        return;
+      } else if (navKey === "dashboard") {
         targetId = isWorker ? "workerDashboardSection" : "adminDashboardSection";
       } else if (navKey === "tracker") {
         targetId = isWorker ? "workerTimerSlot" : "adminTimerSlot";
@@ -6257,7 +7150,7 @@ function setupSidebarNavigation() {
       } else if (navKey === "reports") {
         targetId = isWorker ? "workerDashboardSection" : "adminReportsSection";
       } else if (navKey === "team") {
-        targetId = "formWorker";
+        targetId = "adminTeamSection";
       } else if (navKey === "clients") {
         targetId = "adminClientsSection";
       } else if (navKey === "upwork") {

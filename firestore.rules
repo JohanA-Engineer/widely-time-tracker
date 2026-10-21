@@ -54,16 +54,20 @@ service cloud.firestore {
       // Todos los colaboradores autenticados pueden ver la lista y sus tarifas asignadas
       allow read: if isAuthenticated();
       
-      // Solo Lina puede crear trabajadores con tarifa definida;
+      // Administradores pueden crear colaboradores (incluyendo perfiles de solo datos con tarifa definida);
       // si un nuevo usuario se autoregistra, su tarifa inicial debe ser 0 obligatoriamente
       allow create: if isMasterAdmin() || (
         isAuthenticated() && request.resource.data.tarifaHora == 0
       );
       
-      // ÚNICAMENTE Lina puede modificar tarifas por hora o datos de los trabajadores
-      allow update: if isMasterAdmin();
+      // Administradores pueden modificar cualquier dato;
+      // Colaboradores vinculados pueden actualizar sus datos bancarios y personales (sin alterar tarifas)
+      allow update: if isMasterAdmin() || (
+        isAuthenticated() && getUserWorkerId() == workerId &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['tarifaHora', 'tarifaArte']))
+      );
       
-      // ÚNICAMENTE Lina puede eliminar trabajadores
+      // ÚNICAMENTE Administradores pueden eliminar trabajadores
       allow delete: if isMasterAdmin();
     }
 

@@ -281,13 +281,17 @@
             <i class="fa-solid fa-chart-pie text-sm w-5 text-center"></i>
             <span>Reportes & Métricas</span>
           </a>
+          <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="myprofile" id="sidebarMyProfileLink">
+            <i class="fa-solid fa-user-gear text-sm w-5 text-center text-blue-500"></i>
+            <span>Mi Perfil</span>
+          </a>
 
           <!-- Accesos exclusivos de Administración (Solo Lina) -->
           <div id="sidebarAdminLinks" class="pt-3 mt-3 border-t border-[#1E293B] space-y-1">
             <div class="px-3 text-[10px] font-mono uppercase tracking-wider text-[#3B82F6] font-semibold">Administración</div>
-            <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="team">
-              <i class="fa-solid fa-users text-sm w-5 text-center"></i>
-              <span>Equipo & Tarifas</span>
+            <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="team" id="sidebarTeamLink">
+              <i class="fa-solid fa-users-gear text-sm w-5 text-center text-[#2563EB]"></i>
+              <span>Perfiles & Equipo</span>
             </a>
             <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="clients" id="sidebarClientsLink">
               <i class="fa-solid fa-briefcase text-sm w-5 text-center text-amber-500"></i>
@@ -307,12 +311,15 @@
 
       <!-- Footer del Sidebar: Perfil de Usuario, Tema y Salir -->
       <div class="p-3 border-t border-[#1E293B] bg-[#0B1220] flex items-center justify-between gap-2 shrink-0">
-        <div id="userProfileBar" class="flex items-center gap-2.5 min-w-0 flex-1">
-          <div id="userAvatar" class="w-8 h-8 rounded-lg bg-[#2563EB] text-white flex items-center justify-center font-semibold text-xs shrink-0">
+        <div id="userProfileBar" class="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer hover:bg-[#1E293B]/70 p-1.5 -m-1.5 rounded-lg transition-all group" title="Clic para ver y editar Mi Perfil (Datos, Banco y Contraseña)">
+          <div id="userAvatar" class="w-8 h-8 rounded-lg bg-[#2563EB] text-white flex items-center justify-center font-semibold text-xs shrink-0 group-hover:scale-105 transition-transform shadow-xs">
             U
           </div>
           <div class="min-w-0 leading-tight flex-1">
-            <div id="userNameDisplay" class="text-xs font-semibold text-white truncate">Usuario</div>
+            <div id="userNameDisplay" class="text-xs font-semibold text-white truncate flex items-center gap-1">
+              <span>Usuario</span>
+              <i class="fa-solid fa-pen text-[8px] text-slate-500 group-hover:text-blue-400"></i>
+            </div>
             <div id="userRoleBadge" class="text-[9px] font-mono text-[#3B82F6] font-semibold uppercase">COLABORADOR</div>
           </div>
         </div>
@@ -379,6 +386,12 @@
           <div id="currentTime" class="hidden sm:block text-xs font-mono text-[#64748B] dark:text-[#94A3B8] tabular-nums font-medium px-2.5 py-1 rounded-lg bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
             --:--:--
           </div>
+
+          <!-- Botón Directo Mi Perfil -->
+          <button type="button" id="btnTopbarMyProfile" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-[#162032] dark:hover:bg-[#1E293B] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold cursor-pointer transition-all active:scale-95 shadow-xs" title="Ver y editar Mi Perfil (Datos, Banco y Contraseña)">
+            <i class="fa-solid fa-user-gear text-[#2563EB] text-xs"></i>
+            <span class="hidden md:inline">Mi Perfil</span>
+          </button>
         </div>
 
       </header>
@@ -1105,82 +1118,93 @@
 
       <!-- 5. Paneles de Gestión (formWorker, formPayment) -->
       <section id="adminManagementSection" class="admin-only-feature grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch">
-        <!-- Panel 1: Gestión de Trabajadores -->
-        <div class="content-card flex flex-col justify-between">
+        <!-- Panel 1: Gestión de Perfiles & Equipo -->
+        <div class="content-card flex flex-col justify-between" id="adminTeamSection">
           <div>
-            <div class="flex items-center justify-between pb-3 sm:pb-4 border-b border-[#E2E8F0] dark:border-[#1E293B]">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-4 border-b border-[#E2E8F0] dark:border-[#1E293B] gap-2.5">
               <div class="flex items-center gap-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></span>
-                <h2 class="text-xs sm:text-sm font-semibold tracking-tight text-[#0F172A] dark:text-[#F8FAFC] uppercase">Gestión de Trabajadores</h2>
+                <h2 class="text-xs sm:text-sm font-semibold tracking-tight text-[#0F172A] dark:text-[#F8FAFC] uppercase">Perfiles & Equipo</h2>
               </div>
-              <button type="button" onclick="window.openManualEntryModal()" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#2563EB]/10 hover:bg-[#2563EB]/20 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/20 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer" title="Cargar horas o diseños de artes a un trabajador">
-                <i class="fa-solid fa-plus text-[10px]"></i>
-                <span>Cargar Horas / Artes</span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <button type="button" id="btnOpenCreateDataProfile" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs" title="Crear un colaborador de solo datos que no tiene cuenta de acceso">
+                  <i class="fa-solid fa-user-plus text-[10px]"></i>
+                  <span>+ Perfil de Datos (Sin Cuenta)</span>
+                </button>
+                <button type="button" id="btnOpenAddAdminModal" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-[#2563EB]/10 hover:bg-[#2563EB]/20 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/25 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs" title="Añadir otro Administrador con acceso completo">
+                  <i class="fa-solid fa-user-shield text-[10px]"></i>
+                  <span>+ Añadir Admin</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Pestañas de Selección: Cuentas de Usuario vs Colaboradores Solo Datos -->
+            <div class="flex items-center gap-2 mt-3 p-1 bg-slate-100 dark:bg-[#162032] rounded-xl border border-slate-200 dark:border-slate-800">
+              <button type="button" id="tabUsersBtn" class="profile-nav-tab active flex-1 justify-center">
+                <i class="fa-solid fa-id-badge text-xs"></i>
+                <span>Cuentas de Usuario</span>
+                <span id="usersCountBadge" class="ml-1 text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-bold">0</span>
+              </button>
+              <button type="button" id="tabDataWorkersBtn" class="profile-nav-tab flex-1 justify-center">
+                <i class="fa-solid fa-user-tag text-xs"></i>
+                <span>Colaboradores (Solo Datos)</span>
+                <span id="dataWorkersCountBadge" class="ml-1 text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold">0</span>
               </button>
             </div>
 
-            <form id="formWorker" class="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-              <div>
-                <label for="workerName" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">Nombre Completo</label>
-                <input type="text" id="workerName" placeholder="Ej. Camila González" required class="form-input w-full">
+            <!-- Contenedor 1: Listado de Cuentas de Usuarios Registrados (Login) -->
+            <div id="registeredUsersContainer" class="mt-3.5 space-y-2.5">
+              <div class="flex items-center justify-between text-[11px] text-[#64748B] dark:text-[#94A3B8] px-0.5">
+                <span>Usuarios registrados con acceso al sistema</span>
+                <span class="font-mono text-[10px]">Gestión de Rol & Perfil</span>
               </div>
-
-              <div>
-                <label for="workerEmail" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5 flex items-center justify-between">
-                  <span>Correo Electrónico</span>
-                  <span class="text-[11px] text-[#64748B] dark:text-[#94A3B8] font-normal">Opcional para vincular</span>
-                </label>
-                <input type="email" id="workerEmail" placeholder="colaborador@widely.com" class="form-input w-full">
+              <div id="registeredUsersList" class="space-y-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+                <div class="text-xs text-[#64748B] text-center py-6">Cargando cuentas de usuario...</div>
               </div>
+            </div>
 
-              <div>
-                <label for="workerPhone" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5 flex items-center justify-between">
-                  <span>Teléfono / WhatsApp</span>
-                  <span class="text-[11px] text-[#64748B] dark:text-[#94A3B8] font-normal">Para envío de recibos</span>
-                </label>
-                <input type="tel" id="workerPhone" placeholder="Ej. 3001234567 o +573001234567" class="form-input w-full">
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <div class="flex items-center justify-between mb-1.5">
-                    <label for="workerRate" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC]">Tarifa por Hora ($)</label>
-                    <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8]">$/hora</span>
-                  </div>
+            <!-- Contenedor 2: Colaboradores Solo Datos (Sin Cuenta) -->
+            <div id="dataWorkersContainer" class="mt-3.5 space-y-3 hidden">
+              <form id="formWorker" class="p-3 rounded-xl bg-slate-50 dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1.5">
+                    <i class="fa-solid fa-bolt text-amber-500 text-xs"></i>
+                    <span>Registro Rápido de Ficha</span>
+                  </span>
+                  <span class="text-[10px] text-slate-500 font-mono">Sin cuenta</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input type="text" id="workerName" placeholder="Nombre (ej. Camila González)" required class="form-input text-xs py-1.5">
+                  <input type="email" id="workerEmail" placeholder="Correo ref. (opcional)" class="form-input text-xs py-1.5">
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <input type="tel" id="workerPhone" placeholder="Teléfono / WhatsApp" class="form-input text-xs py-1.5">
                   <div class="relative">
                     <span class="input-currency-prefix">$</span>
-                    <input type="number" id="workerRate" step="any" min="0" placeholder="0.00" class="form-input w-full pl-8 font-mono text-sm">
+                    <input type="number" id="workerRate" step="any" min="0" placeholder="0.00 $/h" class="form-input pl-6 text-xs py-1.5 font-mono">
+                  </div>
+                  <div class="relative col-span-2 sm:col-span-1">
+                    <span class="input-currency-prefix">$</span>
+                    <input type="number" id="workerArtRate" step="any" min="0" placeholder="0.00 $/arte" class="form-input pl-6 text-xs py-1.5 font-mono">
                   </div>
                 </div>
+                <button type="submit" id="btnSaveWorker" class="w-full btn-ctrl flex items-center justify-center gap-2 font-medium text-xs py-1.5 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-none cursor-pointer">
+                  <i class="fa-solid fa-plus text-xs"></i>
+                  <span>Añadir Colaborador Rápido</span>
+                </button>
+              </form>
 
-                <div>
-                  <div class="flex items-center justify-between mb-1.5">
-                    <label for="workerArtRate" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC]">Tarifa por Arte ($)</label>
-                    <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8]">$/diseño</span>
-                  </div>
-                  <div class="relative">
-                    <span class="input-currency-prefix">$</span>
-                    <input type="number" id="workerArtRate" step="any" min="0" placeholder="0.00" class="form-input w-full pl-8 font-mono text-sm">
-                  </div>
+              <div class="border-t border-[#E2E8F0] dark:border-[#1E293B] pt-2.5">
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="text-xs font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Fichas de Colaboradores</h3>
+                  <span id="workerCount" class="text-xs font-mono font-medium px-2 py-0.5 rounded-full bg-[#F1F5F9] dark:bg-[#162032] text-[#0F172A] dark:text-[#F8FAFC] border border-[#E2E8F0] dark:border-[#1E293B]">0</span>
+                </div>
+                <div id="workersList" class="space-y-2 max-h-52 overflow-y-auto pr-1 custom-scrollbar">
+                  <div class="text-xs text-[#64748B] text-center py-4">No hay colaboradores registrados.</div>
                 </div>
               </div>
-
-              <button type="submit" id="btnSaveWorker" class="w-full btn-ctrl flex items-center justify-center gap-2 font-medium text-xs sm:text-sm py-2.5 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-none cursor-pointer">
-                <i class="fa-solid fa-user-plus text-xs"></i>
-                <span>Añadir Trabajador</span>
-              </button>
-            </form>
-          </div>
-
-          <!-- Lista de Trabajadores Activos -->
-          <div class="mt-5 sm:mt-6 pt-3 sm:pt-4 border-t border-[#E2E8F0] dark:border-[#1E293B]">
-            <div class="flex items-center justify-between mb-2.5">
-              <h3 class="text-xs font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Trabajadores Activos</h3>
-              <span id="workerCount" class="text-xs font-mono font-medium px-2 py-0.5 rounded-full bg-[#F1F5F9] dark:bg-[#162032] text-[#0F172A] dark:text-[#F8FAFC] border border-[#E2E8F0] dark:border-[#1E293B]">0</span>
             </div>
-            <div id="workersList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-              <div class="text-xs text-[#64748B] text-center py-4">No hay trabajadores registrados.</div>
-            </div>
+
           </div>
         </div>
 
@@ -2142,6 +2166,557 @@
           </div>
         </div>
       </div>
+
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 1: MI PERFIL (Para Cualquier Usuario Autenticado)
+       ========================================================================= -->
+  <div id="myProfileModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4 transition-opacity duration-200">
+    <div class="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] rounded-2xl profile-modal-container max-h-[92vh] flex flex-col shadow-2xl overflow-hidden mx-auto">
+      
+      <!-- Cabecera del Modal -->
+      <div class="px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-between bg-slate-50/70 dark:bg-[#162032]/60 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="myProfileAvatar" class="w-10 h-10 rounded-xl bg-[#2563EB] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm shadow-blue-500/20">
+            U
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h3 id="myProfileTitleName" class="text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC] truncate">Mi Perfil</h3>
+              <span id="myProfileRoleBadge" class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 uppercase">COLABORADOR</span>
+            </div>
+            <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Información personal, datos bancarios y seguridad</p>
+          </div>
+        </div>
+        <button type="button" id="btnCloseMyProfile" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#64748B] hover:text-[#0F172A] dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Formulario con Scroll Interno -->
+      <form id="formMyProfile" class="flex flex-col flex-1 overflow-hidden m-0">
+        <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
+
+          <!-- 1. Información Personal -->
+          <div class="p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#162032]/50 border border-[#E2E8F0] dark:border-[#1E293B] space-y-3">
+            <div class="flex items-center gap-2 border-b border-[#E2E8F0] dark:border-[#1E293B] pb-2">
+              <i class="fa-solid fa-user text-blue-600 text-xs"></i>
+              <span class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] uppercase tracking-wider">Información Personal</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="myProfileName" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Nombre Completo</label>
+                <input type="text" id="myProfileName" required placeholder="Tu nombre y apellidos" class="form-input w-full text-xs py-2">
+              </div>
+              <div>
+                <label for="myProfileEmail" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1 flex items-center justify-between">
+                  <span>Correo Electrónico</span>
+                  <span class="text-[10px] text-slate-400 font-normal"><i class="fa-solid fa-lock text-[9px] mr-0.5"></i>Cuenta Auth</span>
+                </label>
+                <input type="email" id="myProfileEmail" readonly class="form-input w-full text-xs py-2 bg-slate-100 dark:bg-slate-800/60 text-slate-500 cursor-not-allowed">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label for="myProfilePhone" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Teléfono / WhatsApp</label>
+                <input type="tel" id="myProfilePhone" placeholder="Ej. 3001234567" class="form-input w-full text-xs py-2">
+              </div>
+              <div>
+                <label for="myProfileDocType" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Tipo de Documento</label>
+                <select id="myProfileDocType" class="form-input w-full text-xs py-2">
+                  <option value="CC">Cédula de Ciudadanía (C.C.)</option>
+                  <option value="CE">Cédula de Extranjería (C.E.)</option>
+                  <option value="NIT">NIT / RUT</option>
+                  <option value="PASSPORT">Pasaporte</option>
+                  <option value="OTRO">Otro Documento</option>
+                </select>
+              </div>
+              <div>
+                <label for="myProfileDocNumber" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Número de Documento</label>
+                <input type="text" id="myProfileDocNumber" placeholder="Ej. 1020304050" class="form-input w-full text-xs py-2 font-mono">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="myProfileCity" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Ciudad / Municipio</label>
+                <input type="text" id="myProfileCity" placeholder="Ej. Bogotá D.C., Medellín..." class="form-input w-full text-xs py-2">
+              </div>
+              <div>
+                <label for="myProfileAddress" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Dirección (Opcional)</label>
+                <input type="text" id="myProfileAddress" placeholder="Para Cuentas de Cobro" class="form-input w-full text-xs py-2">
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Datos Bancarios para Cobro -->
+          <div class="p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#162032]/50 border border-[#E2E8F0] dark:border-[#1E293B] space-y-3">
+            <div class="flex items-center justify-between border-b border-[#E2E8F0] dark:border-[#1E293B] pb-2">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-building-columns text-emerald-600 text-xs"></i>
+                <span class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] uppercase tracking-wider">Datos Bancarios para Pagos</span>
+              </div>
+              <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Cuentas de Cobro & Recibos</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="myProfileBank" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Entidad Bancaria</label>
+                <select id="myProfileBank" class="form-input w-full text-xs py-2">
+                  <option value="Bancolombia">Bancolombia</option>
+                  <option value="Nequi">Nequi</option>
+                  <option value="Daviplata">Daviplata</option>
+                  <option value="Davivienda">Davivienda</option>
+                  <option value="Banco de Bogotá">Banco de Bogotá</option>
+                  <option value="BBVA Colombia">BBVA Colombia</option>
+                  <option value="Scotiabank Colpatria">Scotiabank Colpatria</option>
+                  <option value="Banco de Occidente">Banco de Occidente</option>
+                  <option value="Banco Popular">Banco Popular</option>
+                  <option value="Nu Colombia">Nu Colombia</option>
+                  <option value="Lulo Bank">Lulo Bank</option>
+                  <option value="Otro">Otro Banco / Internacional</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="myProfileAccountType" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Tipo de Cuenta</label>
+                <select id="myProfileAccountType" class="form-input w-full text-xs py-2">
+                  <option value="Ahorros">Cuenta de Ahorros</option>
+                  <option value="Corriente">Cuenta Corriente</option>
+                  <option value="Nequi">Nequi / Monedero Digital</option>
+                  <option value="Daviplata">Daviplata</option>
+                  <option value="Digital">Cuenta Digital / Otra</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="myProfileAccountNumber" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Número de Cuenta</label>
+                <input type="text" id="myProfileAccountNumber" placeholder="Ej. 123-456789-00 o celular Nequi" class="form-input w-full text-xs py-2 font-mono">
+              </div>
+              <div>
+                <label for="myProfileAccountHolder" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Titular de la Cuenta</label>
+                <input type="text" id="myProfileAccountHolder" placeholder="Nombre completo del titular" class="form-input w-full text-xs py-2">
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Seguridad y Cambio de Contraseña -->
+          <div class="p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#162032]/50 border border-[#E2E8F0] dark:border-[#1E293B] space-y-3">
+            <div class="flex items-center justify-between border-b border-[#E2E8F0] dark:border-[#1E293B] pb-2">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-amber-500 text-xs"></i>
+                <span class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] uppercase tracking-wider">Seguridad & Contraseña</span>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">Firebase Auth</span>
+            </div>
+
+            <div class="space-y-2.5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label for="myProfileNewPassword" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Nueva Contraseña</label>
+                  <input type="password" id="myProfileNewPassword" minlength="6" placeholder="Mínimo 6 caracteres" class="form-input w-full text-xs py-2">
+                </div>
+                <div>
+                  <label for="myProfileConfirmPassword" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Confirmar Contraseña</label>
+                  <input type="password" id="myProfileConfirmPassword" minlength="6" placeholder="Repite la contraseña" class="form-input w-full text-xs py-2">
+                </div>
+              </div>
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-1">
+                <button type="button" id="btnUpdateMyPassword" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5">
+                  <i class="fa-solid fa-key text-[10px]"></i>
+                  <span>Actualizar Contraseña</span>
+                </button>
+                <button type="button" id="btnSendResetEmailMyProfile" class="text-xs text-blue-600 dark:text-blue-400 hover:underline transition-colors flex items-center gap-1 justify-center cursor-pointer">
+                  <i class="fa-regular fa-envelope text-xs"></i>
+                  <span>Enviar enlace de restablecimiento a mi correo</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer Fijo con Botón Guardar -->
+        <div class="px-5 py-3 border-t border-[#E2E8F0] dark:border-[#1E293B] bg-slate-50/80 dark:bg-[#162032]/80 flex items-center justify-end gap-2 shrink-0">
+          <button type="button" id="btnCancelMyProfile" class="px-4 py-2 text-xs font-semibold rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSaveMyProfile" class="btn-profile-save px-5 py-2 text-xs font-bold rounded-xl active:scale-95 transition-all shadow-sm cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-check text-xs"></i>
+            <span>Guardar Perfil</span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 2: NUEVO PERFIL DE DATOS (SIN CUENTA) — EXCLUSIVO ADMINISTRADOR
+       ========================================================================= -->
+  <div id="createDataProfileModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4 transition-opacity duration-200">
+    <div class="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] rounded-2xl profile-modal-container max-h-[92vh] flex flex-col shadow-2xl overflow-hidden mx-auto">
+      
+      <!-- Cabecera -->
+      <div class="px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-between bg-slate-50/70 dark:bg-[#162032]/60 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm font-bold border border-emerald-500/25">
+            <i class="fa-solid fa-user-tag"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC]">Nuevo Perfil de Datos</h3>
+              <span class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">SIN CUENTA DE LOGIN</span>
+            </div>
+            <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Ficha de contratista externo para asignación de tareas y liquidación</p>
+          </div>
+        </div>
+        <button type="button" id="btnCloseDataProfileModal" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#64748B] hover:text-[#0F172A] dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Formulario -->
+      <form id="formDataProfile" class="flex flex-col flex-1 overflow-hidden m-0">
+        <div class="p-4 sm:p-5 overflow-y-auto space-y-3.5 flex-1 custom-scrollbar">
+
+          <div class="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 text-[11px] text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
+            <i class="fa-solid fa-circle-info text-xs mt-0.5 shrink-0"></i>
+            <span>Este colaborador <strong>NO requerirá correo ni contraseña para iniciar sesión</strong>. Podrás seleccionarlo en el cronómetro, auditar sus horas, asignar tarifas y generar sus cuentas de cobro y recibos oficiales.</span>
+          </div>
+
+          <!-- 1. Identificación y Cargo -->
+          <div class="space-y-2.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="dataProfileName" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Nombre Completo *</label>
+                <input type="text" id="dataProfileName" required placeholder="Ej. Andrés Morales" class="form-input w-full text-xs py-2">
+              </div>
+              <div>
+                <label for="dataProfileRole" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Especialidad / Cargo</label>
+                <input type="text" id="dataProfileRole" placeholder="Ej. Diseñador Gráfico, Editor de Video..." class="form-input w-full text-xs py-2">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="dataProfileEmail" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Correo de Contacto (Opcional)</label>
+                <input type="email" id="dataProfileEmail" placeholder="contacto@ejemplo.com" class="form-input w-full text-xs py-2">
+              </div>
+              <div>
+                <label for="dataProfilePhone" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Teléfono / WhatsApp</label>
+                <input type="tel" id="dataProfilePhone" placeholder="Para envío de recibos" class="form-input w-full text-xs py-2">
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Tarifas -->
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#162032]/60 border border-[#E2E8F0] dark:border-[#1E293B]">
+            <span class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] block mb-2">Tarifas de Liquidación</span>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="dataProfileRate" class="block text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] mb-1">Tarifa por Hora ($)</label>
+                <div class="relative">
+                  <span class="input-currency-prefix">$</span>
+                  <input type="number" id="dataProfileRate" step="any" min="0" placeholder="0.00 $/h" class="form-input w-full pl-6 text-xs py-2 font-mono">
+                </div>
+              </div>
+              <div>
+                <label for="dataProfileArtRate" class="block text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] mb-1">Tarifa por Arte ($)</label>
+                <div class="relative">
+                  <span class="input-currency-prefix">$</span>
+                  <input type="number" id="dataProfileArtRate" step="any" min="0" placeholder="0.00 $/arte" class="form-input w-full pl-6 text-xs py-2 font-mono">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Documento & Ciudad -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="dataProfileDocType" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Tipo Documento</label>
+              <select id="dataProfileDocType" class="form-input w-full text-xs py-2">
+                <option value="CC">Cédula (C.C.)</option>
+                <option value="NIT">NIT / RUT</option>
+                <option value="CE">Cédula Ext. (C.E.)</option>
+                <option value="PASSPORT">Pasaporte</option>
+              </select>
+            </div>
+            <div>
+              <label for="dataProfileDocNumber" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">N° de Documento</label>
+              <input type="text" id="dataProfileDocNumber" placeholder="Ej. 1020304050" class="form-input w-full text-xs py-2 font-mono">
+            </div>
+            <div>
+              <label for="dataProfileCity" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Ciudad</label>
+              <input type="text" id="dataProfileCity" placeholder="Ej. Bogotá D.C." value="Bogotá D.C." class="form-input w-full text-xs py-2">
+            </div>
+          </div>
+
+          <!-- 4. Datos Bancarios -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="dataProfileBank" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Banco</label>
+              <select id="dataProfileBank" class="form-input w-full text-xs py-2">
+                <option value="Bancolombia">Bancolombia</option>
+                <option value="Nequi">Nequi</option>
+                <option value="Daviplata">Daviplata</option>
+                <option value="Davivienda">Davivienda</option>
+                <option value="Banco de Bogotá">Banco de Bogotá</option>
+                <option value="BBVA Colombia">BBVA Colombia</option>
+                <option value="Nu Colombia">Nu Colombia</option>
+                <option value="Otro">Otro Banco</option>
+              </select>
+            </div>
+            <div>
+              <label for="dataProfileAccountType" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Tipo Cuenta</label>
+              <select id="dataProfileAccountType" class="form-input w-full text-xs py-2">
+                <option value="Ahorros">Ahorros</option>
+                <option value="Corriente">Corriente</option>
+                <option value="Nequi">Nequi</option>
+                <option value="Daviplata">Daviplata</option>
+              </select>
+            </div>
+            <div>
+              <label for="dataProfileAccountNumber" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">N° de Cuenta</label>
+              <input type="text" id="dataProfileAccountNumber" placeholder="Ej. 000-000000-00" class="form-input w-full text-xs py-2 font-mono">
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="px-5 py-3 border-t border-[#E2E8F0] dark:border-[#1E293B] bg-slate-50/80 dark:bg-[#162032]/80 flex items-center justify-end gap-2 shrink-0">
+          <button type="button" id="btnCancelDataProfileModal" class="px-4 py-2 text-xs font-semibold rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSaveDataProfile" class="btn-data-profile-save px-5 py-2 text-xs font-bold rounded-xl active:scale-95 transition-all shadow-sm cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-check text-xs"></i>
+            <span>Crear Perfil de Datos</span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 3: GESTIÓN DE PERFIL POR ADMINISTRADOR (ACCESO TOTAL & ROLES)
+       ========================================================================= -->
+  <div id="adminEditUserModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4 transition-opacity duration-200">
+    <div class="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] rounded-2xl profile-admin-modal-container max-h-[92vh] flex flex-col shadow-2xl overflow-hidden mx-auto">
+      
+      <!-- Cabecera -->
+      <div class="px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-between bg-slate-50/70 dark:bg-[#162032]/60 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm font-bold border border-blue-500/25">
+            <i class="fa-solid fa-user-pen"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC]">Editar Perfil de Usuario</h3>
+              <span class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">ADMIN VIEW</span>
+            </div>
+            <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Gestión de información, datos bancarios, rol y vinculación</p>
+          </div>
+        </div>
+        <button type="button" id="btnCloseAdminEditUserModal" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#64748B] hover:text-[#0F172A] dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Formulario -->
+      <form id="formAdminEditUser" class="flex flex-col flex-1 overflow-hidden m-0">
+        <input type="hidden" id="adminEditUserUid">
+        <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
+
+          <!-- Rol y Asignación de Permisos (Requisito 2) -->
+          <div class="p-3.5 rounded-xl bg-gradient-to-r from-blue-500/10 via-purple-500/5 to-transparent border border-blue-500/25 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1.5 uppercase tracking-wider">
+                <i class="fa-solid fa-shield-halved text-blue-600"></i>
+                <span>Rol & Acceso del Usuario</span>
+              </span>
+              <span class="text-[10px] text-slate-500 font-mono">Control de Administración</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="adminEditUserRole" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Rol en la Plataforma</label>
+                <select id="adminEditUserRole" class="form-input w-full text-xs py-2 font-semibold">
+                  <option value="worker">Colaborador (Tracker de Horas & Cuenta de Cobro)</option>
+                  <option value="admin">Administrador (Acceso Total & Finanzas)</option>
+                </select>
+              </div>
+              <div>
+                <label for="adminEditUserWorkerSelect" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Ficha de Trabajador Vinculada</label>
+                <select id="adminEditUserWorkerSelect" class="form-input w-full text-xs py-2">
+                  <option value="">-- Sin ficha de trabajador vinculada --</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información Personal -->
+          <div class="p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#162032]/50 border border-[#E2E8F0] dark:border-[#1E293B] space-y-3">
+            <span class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] block border-b border-[#E2E8F0] dark:border-[#1E293B] pb-1.5">Información Personal & Contacto</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="adminEditUserName" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Nombre Completo</label>
+                <input type="text" id="adminEditUserName" required class="form-input w-full text-xs py-2">
+              </div>
+              <div>
+                <label for="adminEditUserEmail" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Correo Electrónico</label>
+                <input type="email" id="adminEditUserEmail" readonly class="form-input w-full text-xs py-2 bg-slate-100 dark:bg-slate-800/60 text-slate-500 cursor-not-allowed">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label for="adminEditUserPhone" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Teléfono / WhatsApp</label>
+                <input type="tel" id="adminEditUserPhone" class="form-input w-full text-xs py-2">
+              </div>
+              <div>
+                <label for="adminEditUserDocType" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Tipo Documento</label>
+                <select id="adminEditUserDocType" class="form-input w-full text-xs py-2">
+                  <option value="CC">Cédula (C.C.)</option>
+                  <option value="CE">Cédula Ext. (C.E.)</option>
+                  <option value="NIT">NIT / RUT</option>
+                  <option value="PASSPORT">Pasaporte</option>
+                  <option value="OTRO">Otro</option>
+                </select>
+              </div>
+              <div>
+                <label for="adminEditUserDocNumber" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Número Documento</label>
+                <input type="text" id="adminEditUserDocNumber" class="form-input w-full text-xs py-2 font-mono">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="adminEditUserCity" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Ciudad</label>
+                <input type="text" id="adminEditUserCity" class="form-input w-full text-xs py-2">
+              </div>
+              <div>
+                <label for="adminEditUserAddress" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Dirección</label>
+                <input type="text" id="adminEditUserAddress" class="form-input w-full text-xs py-2">
+              </div>
+            </div>
+          </div>
+
+          <!-- Datos Bancarios -->
+          <div class="p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#162032]/50 border border-[#E2E8F0] dark:border-[#1E293B] space-y-3">
+            <span class="text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] block border-b border-[#E2E8F0] dark:border-[#1E293B] pb-1.5">Datos Bancarios para Liquidación</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="adminEditUserBank" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Entidad Bancaria</label>
+                <select id="adminEditUserBank" class="form-input w-full text-xs py-2">
+                  <option value="Bancolombia">Bancolombia</option>
+                  <option value="Nequi">Nequi</option>
+                  <option value="Daviplata">Daviplata</option>
+                  <option value="Davivienda">Davivienda</option>
+                  <option value="Banco de Bogotá">Banco de Bogotá</option>
+                  <option value="BBVA Colombia">BBVA Colombia</option>
+                  <option value="Nu Colombia">Nu Colombia</option>
+                  <option value="Otro">Otro Banco</option>
+                </select>
+              </div>
+              <div>
+                <label for="adminEditUserAccountType" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Tipo Cuenta</label>
+                <select id="adminEditUserAccountType" class="form-input w-full text-xs py-2">
+                  <option value="Ahorros">Ahorros</option>
+                  <option value="Corriente">Corriente</option>
+                  <option value="Nequi">Nequi</option>
+                  <option value="Daviplata">Daviplata</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="adminEditUserAccountNumber" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Número de Cuenta</label>
+                <input type="text" id="adminEditUserAccountNumber" class="form-input w-full text-xs py-2 font-mono">
+              </div>
+              <div>
+                <label for="adminEditUserAccountHolder" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Titular Cuenta</label>
+                <input type="text" id="adminEditUserAccountHolder" class="form-input w-full text-xs py-2">
+              </div>
+            </div>
+          </div>
+
+          <!-- Soporte de Contraseña para el Usuario -->
+          <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between gap-3">
+            <div class="text-xs text-amber-800 dark:text-amber-300">
+              <span class="font-bold block">¿El usuario olvidó su contraseña?</span>
+              <span class="text-[11px] text-slate-500">Puedes enviarle un enlace oficial de recuperación a su correo.</span>
+            </div>
+            <button type="button" id="btnAdminSendPasswordReset" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 border border-amber-500/35 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0">
+              <i class="fa-regular fa-paper-plane text-xs mr-1"></i>
+              <span>Enviar Enlace</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="px-5 py-3 border-t border-[#E2E8F0] dark:border-[#1E293B] bg-slate-50/80 dark:bg-[#162032]/80 flex items-center justify-end gap-2 shrink-0">
+          <button type="button" id="btnCancelAdminEditUserModal" class="px-4 py-2 text-xs font-semibold rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSaveAdminEditUser" class="btn-profile-save px-5 py-2 text-xs font-bold rounded-xl active:scale-95 transition-all shadow-sm cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-check text-xs"></i>
+            <span>Guardar Cambios</span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 4: AÑADIR / AUTORIZAR ADMINISTRADOR
+       ========================================================================= -->
+  <div id="addAdminModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-opacity duration-200">
+    <div class="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] rounded-2xl w-full max-w-md flex flex-col shadow-2xl overflow-hidden mx-auto">
+      
+      <div class="px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-between bg-slate-50/70 dark:bg-[#162032]/60 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-600/15 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm font-bold border border-blue-500/25">
+            <i class="fa-solid fa-user-shield"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC]">Añadir Administrador</h3>
+            <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8]">Concede acceso total al sistema de finanzas</p>
+          </div>
+        </div>
+        <button type="button" id="btnCloseAddAdminModal" class="w-7 h-7 rounded-lg flex items-center justify-center text-[#64748B] hover:text-[#0F172A] dark:hover:text-white transition-colors cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <form id="formAddAdmin" class="p-4 sm:p-5 space-y-3.5">
+        <p class="text-xs text-[#64748B] dark:text-[#94A3B8] leading-relaxed">
+          Ingresa el correo electrónico de la persona a quien deseas asignar el rol de <strong>Administrador</strong>. Si ya tiene cuenta, sus permisos se actualizarán de inmediato; si es nuevo, obtendrá el rol en su primer inicio de sesión.
+        </p>
+
+        <div>
+          <label for="newAdminEmailInput" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1">Correo Electrónico *</label>
+          <input type="email" id="newAdminEmailInput" required placeholder="admin@widely.com" class="form-input w-full text-xs py-2">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" id="btnCancelAddAdminModal" class="px-4 py-2 text-xs font-semibold rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSaveNewAdmin" class="btn-profile-save px-5 py-2 text-xs font-bold rounded-xl active:scale-95 transition-all shadow-sm cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-user-shield text-xs"></i>
+            <span>Asignar Administrador</span>
+          </button>
+        </div>
+      </form>
 
     </div>
   </div>
