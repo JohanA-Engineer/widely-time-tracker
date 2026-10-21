@@ -4,7 +4,9 @@ Una aplicación web moderna y elegante para el control de horas trabajadas, regi
 
 ## 🚀 Tecnologías Utilizadas
 
-- **Frontend:** HTML5, CSS3 personalizado (tema oscuro premium con efecto glassmorphism), Tailwind CSS (CDN), Vanilla JavaScript moderno (ES Modules).
+- **Frontend:** HTML5, CSS3 personalizado con el sistema de diseño de `Design.md` (acromático, modo claro y oscuro), Tailwind CSS precompilado en `tailwind.min.css`, Vanilla JavaScript moderno (ES Modules).
+  - Los colores son tokens (`ink`, `mid`, `line`, `paper`, `canvas`, `muted`, `primary`, `ember`…) definidos en `styles.css` y `tailwind.config.js`.
+  - Después de cambiar clases en `index.html` o `app.js`, regenera los estilos con: `npx tailwindcss@3.4.17 -i src-tailwind.css -o tailwind.min.css --minify`
 - **Base de Datos en Tiempo Real:** Firebase Firestore (SDK v10 Modular).
 - **Backend (Opcional):** Python con FastAPI & Uvicorn para servir la app y proveer endpoints de monitoreo.
 - **Control de Versiones:** Git & GitHub.

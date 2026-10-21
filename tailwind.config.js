@@ -1,4 +1,10 @@
 /** @type {import('tailwindcss').Config} */
+// Sistema de diseño: Design.md ("Clinical Blueprint on Frosted Paper").
+// Los colores son tokens semánticos definidos como variables CSS en styles.css (:root y .dark),
+// así cada clase funciona en modo claro y oscuro sin necesidad de variantes dark:.
+// Para regenerar tailwind.min.css: npx tailwindcss@3.4.17 -i src-tailwind.css -o tailwind.min.css --minify
+const token = (name) => `rgb(var(--c-${name}) / <alpha-value>)`;
+
 module.exports = {
   darkMode: 'class',
   content: [
@@ -9,53 +15,29 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          300: '#93C5FD',
-          400: '#3B82F6',
-          500: '#2563EB',
-          600: '#1D4ED8',
-          700: '#1E40AF',
-          800: '#1E3A8A',
-          900: '#0F172A',
-        },
-        sage: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          300: '#93C5FD',
-          400: '#3B82F6',
-          500: '#2563EB',
-          600: '#1D4ED8',
-          700: '#1E40AF',
-          800: '#1E3A8A',
-          900: '#0F172A',
-        },
-        warm: {
-          50: '#F1F5F9',
-          100: '#F8FAFC',
-          200: '#E2E8F0',
-          300: '#BAE6FD',
-          400: '#0284C7',
-          500: '#0369A1',
-          600: '#0284C7',
-        },
-        charcoal: {
-          50: '#F7F8F7',
-          100: '#EBECEB',
-          200: '#D6D8D6',
-          500: '#64748B',
-          700: '#404741',
-          800: '#0F172A',
-          900: '#0F172A',
-          950: '#0B0F19',
-        }
+        canvas: token('canvas'),
+        paper: token('paper'),
+        alt: token('alt'),
+        muted: token('muted'),
+        ink: token('ink'),
+        soft: token('soft'),
+        mid: token('mid'),
+        faint: token('faint'),
+        line: token('line'),
+        ember: token('ember'),
+        primary: token('primary'),
+        'on-primary': token('on-primary'),
       },
       fontFamily: {
-        sans: ['"Inter"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        mono: ['"Inter"', 'ui-monospace', 'monospace'],
+        sans: ['"Geist"', '"Inter"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        mono: ['"Geist"', '"Inter"', 'ui-sans-serif', 'sans-serif'],
+      },
+      borderRadius: {
+        md: '10px',
+        lg: '18px',
+        xl: '24px',
+        '2xl': '24px',
+        '3xl': '24px',
       }
     }
   },

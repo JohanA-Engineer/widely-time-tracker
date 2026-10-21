@@ -108,14 +108,21 @@ document.getElementById("btnConfigureKey")?.addEventListener("click", () => {
    CATEGORÍAS DE ACTIVIDAD & METADATA
    ============================================================================ */
 const CATEGORIES = {
-  general: { label: "General", icon: "fa-briefcase", color: "text-[#64748B] dark:text-[#94A3B8]", bg: "bg-[#F8FAFC] dark:bg-[#162032] border-[#E2E8F0] dark:border-[#1E293B]", chartColor: "#64748B" },
-  diseno: { label: "Diseño Gráfico", icon: "fa-palette", color: "text-[#2563EB] dark:text-[#60A5FA]", bg: "bg-[#2563EB]/10 border-[#2563EB]/20", chartColor: "#2563EB" },
-  video: { label: "Edición Video", icon: "fa-film", color: "text-[#0284C7] dark:text-[#38BDF8]", bg: "bg-[#0284C7]/10 border-[#0284C7]/20", chartColor: "#0284C7" },
-  copy: { label: "Redacción & Copy", icon: "fa-pen-nib", color: "text-[#3B82F6] dark:text-[#93C5FD]", bg: "bg-[#3B82F6]/10 border-[#3B82F6]/20", chartColor: "#3B82F6" },
-  ads: { label: "Pauta & Ads", icon: "fa-chart-line", color: "text-[#1D4ED8] dark:text-[#60A5FA]", bg: "bg-[#1D4ED8]/10 border-[#1D4ED8]/20", chartColor: "#1D4ED8" },
-  reunion: { label: "Reunión", icon: "fa-users", color: "text-[#64748B] dark:text-[#94A3B8]", bg: "bg-[#F8FAFC] dark:bg-[#162032] border-[#E2E8F0] dark:border-[#1E293B]", chartColor: "#94A3B8" },
-  estrategia: { label: "Estrategia", icon: "fa-lightbulb", color: "text-[#0284C7] dark:text-[#38BDF8]", bg: "bg-[#0284C7]/10 border-[#0284C7]/20", chartColor: "#0284C7" }
+  general: { label: "General", icon: "fa-briefcase", color: "text-mid", bg: "bg-canvas dark:bg-muted border-line", chartColor: "#A3A3A3" },
+  diseno: { label: "Diseño Gráfico", icon: "fa-palette", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#0A0A0A" },
+  video: { label: "Edición Video", icon: "fa-film", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#404040" },
+  copy: { label: "Redacción & Copy", icon: "fa-pen-nib", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#737373" },
+  ads: { label: "Pauta & Ads", icon: "fa-chart-line", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#262626" },
+  reunion: { label: "Reunión", icon: "fa-users", color: "text-mid", bg: "bg-canvas dark:bg-muted border-line", chartColor: "#D4D4D4" },
+  estrategia: { label: "Estrategia", icon: "fa-lightbulb", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#525252" }
 };
+
+// En modo oscuro la escala de grises se invierte para mantener el contraste sobre fondo negro
+function invertGray(hex) {
+  const v = 255 - parseInt(hex.slice(1, 3), 16);
+  const h = v.toString(16).padStart(2, "0");
+  return `#${h}${h}${h}`;
+}
 
 function getCategoryMeta(key) {
   return CATEGORIES[key] || CATEGORIES.general;
@@ -264,7 +271,9 @@ const elements = {
 
   // Dashboard & Tablas
   financialTableBody: document.getElementById("financialTableBody"),
+  financialTilesList: document.getElementById("financialTilesList"),
   tasksTableBody: document.getElementById("tasksTableBody"),
+  tasksCardsList: document.getElementById("tasksCardsList"),
   paymentsTableBody: document.getElementById("paymentsTableBody"),
   taskCount: document.getElementById("taskCount"),
   paymentCount: document.getElementById("paymentCount"),
@@ -283,6 +292,9 @@ const elements = {
   kpiTotalPagado: document.getElementById("kpiTotalPagado"),
   kpiTotalPagadoCop: document.getElementById("kpiTotalPagadoCop"),
   kpiSaldoPendiente: document.getElementById("kpiSaldoPendiente"),
+  adminApprovalsList: document.getElementById("adminApprovalsList"),
+  adminApprovalsCount: document.getElementById("adminApprovalsCount"),
+  btnAdminApprovalsViewAll: document.getElementById("btnAdminApprovalsViewAll"),
   kpiSaldoPendienteCop: document.getElementById("kpiSaldoPendienteCop"),
   kpiSaldoDesc: document.getElementById("kpiSaldoDesc"),
 
@@ -834,10 +846,10 @@ function applyRoleView() {
 
       if (elements.userRoleBadge) {
         elements.userRoleBadge.textContent = "ADMIN";
-        elements.userRoleBadge.className = "text-[9px] font-mono text-blue-600 dark:text-blue-400 font-bold uppercase";
+        elements.userRoleBadge.className = "text-[9px] font-mono text-ink font-bold uppercase";
       }
       if (elements.userAvatar) {
-        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm shadow-blue-500/20";
+        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-primary text-on-primary flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm ";
       }
 
       // Activar Portal de Administrador
@@ -880,10 +892,10 @@ function applyRoleView() {
 
       if (elements.userRoleBadge) {
         elements.userRoleBadge.textContent = "COLABORADOR";
-        elements.userRoleBadge.className = "text-[9px] font-mono text-cyan-600 dark:text-cyan-400 font-bold uppercase";
+        elements.userRoleBadge.className = "text-[9px] font-mono text-ink font-bold uppercase";
       }
       if (elements.userAvatar) {
-        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-cyan-600 text-white flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm shadow-cyan-500/20";
+        elements.userAvatar.className = "w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-primary text-on-primary flex items-center justify-center text-xs font-bold font-mono shrink-0 shadow-sm ";
       }
 
       // Activar Portal de Colaborador
@@ -971,17 +983,17 @@ function closeAuthModal() {
 
 function switchAuthTab(tab) {
   if (tab === "login") {
-    elements.authTabLogin?.classList.add("bg-white", "dark:bg-slate-800", "text-slate-900", "dark:text-white", "shadow-sm");
-    elements.authTabLogin?.classList.remove("text-slate-500", "dark:text-slate-400");
-    elements.authTabRegister?.classList.remove("bg-white", "dark:bg-slate-800", "text-slate-900", "dark:text-white", "shadow-sm");
-    elements.authTabRegister?.classList.add("text-slate-500", "dark:text-slate-400");
+    elements.authTabLogin?.classList.add("bg-white", "dark:bg-muted", "text-ink", "dark:text-white", "shadow-sm");
+    elements.authTabLogin?.classList.remove("text-mid", "dark:text-mid");
+    elements.authTabRegister?.classList.remove("bg-white", "dark:bg-muted", "text-ink", "dark:text-white", "shadow-sm");
+    elements.authTabRegister?.classList.add("text-mid", "dark:text-mid");
     elements.formAuthLogin?.classList.remove("hidden");
     elements.formAuthRegister?.classList.add("hidden");
   } else {
-    elements.authTabRegister?.classList.add("bg-white", "dark:bg-slate-800", "text-slate-900", "dark:text-white", "shadow-sm");
-    elements.authTabRegister?.classList.remove("text-slate-500", "dark:text-slate-400");
-    elements.authTabLogin?.classList.remove("bg-white", "dark:bg-slate-800", "text-slate-900", "dark:text-white", "shadow-sm");
-    elements.authTabLogin?.classList.add("text-slate-500", "dark:text-slate-400");
+    elements.authTabRegister?.classList.add("bg-white", "dark:bg-muted", "text-ink", "dark:text-white", "shadow-sm");
+    elements.authTabRegister?.classList.remove("text-mid", "dark:text-mid");
+    elements.authTabLogin?.classList.remove("bg-white", "dark:bg-muted", "text-ink", "dark:text-white", "shadow-sm");
+    elements.authTabLogin?.classList.add("text-mid", "dark:text-mid");
     elements.formAuthRegister?.classList.remove("hidden");
     elements.formAuthLogin?.classList.add("hidden");
   }
@@ -1631,7 +1643,7 @@ function restoreActiveTimer() {
       elements.btnStart.disabled = false;
       elements.btnPause.disabled = true;
       elements.btnReset.disabled = false;
-      elements.timerStatusBadge.className = "text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30";
+      elements.timerStatusBadge.className = "text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-muted dark:bg-ink/10 text-mid border border-faint dark:border-line";
       elements.timerStatusBadge.textContent = "Pausado";
     }
   } catch (err) {
@@ -1674,8 +1686,8 @@ function startTimer() {
   elements.btnReset.disabled = false;
   elements.timerDisplay.classList.add("timer-active");
 
-  elements.timerStatusBadge.className = "text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 flex items-center gap-1.5";
-  elements.timerStatusBadge.innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Activo`;
+  elements.timerStatusBadge.className = "text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-muted dark:bg-ink/10 text-mid border border-faint dark:border-line flex items-center gap-1.5";
+  elements.timerStatusBadge.innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span> Activo`;
 
   state.islandDismissed = false;
   updateDynamicIslandUI();
@@ -1699,7 +1711,7 @@ function pauseTimer() {
   elements.btnPause.disabled = true;
   elements.timerDisplay.classList.remove("timer-active");
 
-  elements.timerStatusBadge.className = "text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30";
+  elements.timerStatusBadge.className = "text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-muted dark:bg-ink/10 text-mid border border-faint dark:border-line";
   elements.timerStatusBadge.textContent = "Pausado";
 
   updateDynamicIslandUI();
@@ -1731,7 +1743,7 @@ function resetTimer() {
   elements.btnPause.disabled = true;
   elements.btnReset.disabled = true;
 
-  elements.timerStatusBadge.className = "text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700";
+  elements.timerStatusBadge.className = "text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-line dark:bg-muted text-mid border border-line";
   elements.timerStatusBadge.textContent = "Detenido";
 }
 
@@ -1780,10 +1792,10 @@ function updateDynamicIslandUI() {
     if (elements.islandStatusDot) {
       elements.islandStatusDot.innerHTML = `
         <div class="relative flex items-center justify-center w-full h-full">
-          <i class="fa-regular fa-clock text-xs text-[#E9D5FF]"></i>
+          <i class="fa-regular fa-clock text-xs text-ink"></i>
           <span class="absolute -top-1 -right-1 flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
           </span>
         </div>
       `;
@@ -1794,7 +1806,7 @@ function updateDynamicIslandUI() {
   } else {
     if (elements.islandStatusDot) {
       elements.islandStatusDot.innerHTML = `
-        <i class="fa-regular fa-clock text-xs text-slate-400"></i>
+        <i class="fa-regular fa-clock text-xs text-mid"></i>
       `;
     }
     if (elements.islandPlayPauseIcon) {
@@ -1860,10 +1872,10 @@ function updatePipButtonsState(isActive) {
   if (elements.btnTogglePipTimer) {
     if (isActive) {
       elements.btnTogglePipTimer.classList.add("pip-active");
-      elements.btnTogglePipTimer.innerHTML = '<i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-[10px] text-white"></i><span class="hidden sm:inline">Cerrar Flotante</span><span class="sm:hidden">Cerrar</span>';
+      elements.btnTogglePipTimer.innerHTML = '<i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-[10px] text-on-primary"></i><span class="hidden sm:inline">Cerrar Flotante</span><span class="sm:hidden">Cerrar</span>';
     } else {
       elements.btnTogglePipTimer.classList.remove("pip-active");
-      elements.btnTogglePipTimer.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-[#2563EB] dark:text-[#60A5FA]"></i><span class="hidden sm:inline">Flotar sobre Apps</span><span class="sm:hidden">Flotar</span>';
+      elements.btnTogglePipTimer.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-ink"></i><span class="hidden sm:inline">Flotar sobre Apps</span><span class="sm:hidden">Flotar</span>';
     }
   }
   if (elements.islandBtnPip) {
@@ -1898,7 +1910,7 @@ function setupMiniWindowContent(doc, win) {
         width: calc(100% - 10px);
         height: calc(100% - 10px);
         max-height: 64px;
-        background: #05070E;
+        background: #0A0A0A;
         border-radius: 9999px;
         position: relative;
         display: flex;
@@ -1913,7 +1925,7 @@ function setupMiniWindowContent(doc, win) {
         inset: -1.5px;
         border-radius: 9999px;
         padding: 1.5px;
-        background: linear-gradient(90deg, #06B6D4 0%, #38BDF8 25%, #8B5CF6 65%, #F43F5E 100%);
+        background: rgba(255, 255, 255, 0.18);
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor;
         mask-composite: exclude;
@@ -1923,12 +1935,12 @@ function setupMiniWindowContent(doc, win) {
         width: 34px;
         height: 34px;
         border-radius: 10px;
-        background: #2D1537;
+        background: #262626;
         border: 1px solid rgba(192, 132, 252, 0.4);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #E9D5FF;
+        color: #FAFAFA;
         flex-shrink: 0;
         cursor: pointer;
         transition: transform 0.15s;
@@ -1955,7 +1967,7 @@ function setupMiniWindowContent(doc, win) {
         text-overflow: ellipsis;
       }
       .pip-sub {
-        color: #94A3B8;
+        color: #A3A3A3;
         font-size: 11px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
         font-weight: 500;
@@ -1988,14 +2000,14 @@ function setupMiniWindowContent(doc, win) {
       }
       .pip-btn-pause {
         background: rgba(6, 182, 212, 0.15);
-        border: 1.8px solid #06B6D4;
-        color: #22D3EE;
+        border: 1.8px solid #FAFAFA;
+        color: #FAFAFA;
         box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
       }
       .pip-btn-stop {
         background: rgba(239, 68, 68, 0.15);
-        border: 1.8px solid #EF4444;
-        color: #F87171;
+        border: 1.8px solid #FF4D4F;
+        color: #FF4D4F;
         box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
       }
     </style>
@@ -2018,9 +2030,9 @@ function setupMiniWindowContent(doc, win) {
       <div class="pip-text-box" id="pipTextFocus" title="Volver a la pestaña principal">
         <div class="pip-title" id="pipTaskTitle">${escapeHtml(titleDisplay)}</div>
         <div class="pip-sub">
-          <span id="pipTimer" style="color: #F8FAFC; font-weight: 700;">${timeFormatted}</span>
-          <span style="color: #64748B;"> • </span>
-          <span id="pipCost" style="color: #94A3B8;">${cost} USD</span>
+          <span id="pipTimer" style="color: #FAFAFA; font-weight: 700;">${timeFormatted}</span>
+          <span style="color: #737373;"> • </span>
+          <span id="pipCost" style="color: #A3A3A3;">${cost} USD</span>
         </div>
       </div>
 
@@ -2406,7 +2418,7 @@ function updateWorkersUI() {
   }
 
   if (state.workers.length === 0) {
-    elements.workersList.innerHTML = `<div class="text-xs text-slate-400 dark:text-slate-500 text-center py-4">No hay colaboradores registrados aún.</div>`;
+    elements.workersList.innerHTML = `<div class="text-xs text-mid text-center py-4">No hay colaboradores registrados aún.</div>`;
   } else {
     elements.workersList.innerHTML = state.workers.map(w => {
       const rate = Number(w.tarifaHora || 0);
@@ -2414,22 +2426,22 @@ function updateWorkersUI() {
       const hasRate = rate > 0 || artRate > 0;
       const isDataOnly = w.esSoloDatos || w.tipoPerfil === "solo_datos";
       const profileTypeTag = isDataOnly
-        ? `<span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold border border-emerald-500/20">Solo Datos (Sin Cuenta)</span>`
-        : `<span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-700 dark:text-blue-300 font-semibold border border-blue-500/20">Cuenta</span>`;
+        ? `<span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-ink/10 text-mid font-semibold border border-line">Solo Datos (Sin Cuenta)</span>`
+        : `<span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-ink/10 text-ink font-semibold border border-line">Cuenta</span>`;
 
       return `
-        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors text-xs">
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-muted dark:bg-paper border border-line hover:border-line transition-colors text-xs">
           <div class="min-w-0 pr-2">
-            <div class="font-semibold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5 flex-wrap">
+            <div class="font-semibold text-ink truncate flex items-center gap-1.5 flex-wrap">
               <span>${escapeHtml(w.nombre)}</span>
-              ${w.cargo ? `<span class="text-[10px] text-slate-500 font-normal">(${escapeHtml(w.cargo)})</span>` : ''}
+              ${w.cargo ? `<span class="text-[10px] text-mid font-normal">(${escapeHtml(w.cargo)})</span>` : ''}
               ${profileTypeTag}
             </div>
             <div class="flex items-center gap-1.5 mt-1 flex-wrap">
-              ${rate > 0 ? `<span class="text-[11px] text-[#2563EB] dark:text-[#60A5FA] font-mono font-medium tabular-nums bg-[#2563EB]/10 px-1.5 py-0.5 rounded border border-[#2563EB]/20">$${rate.toFixed(2)}/h</span>` : ''}
-              ${artRate > 0 ? `<span class="text-[11px] text-purple-600 dark:text-purple-400 font-mono font-medium tabular-nums bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20"><i class="fa-solid fa-palette text-[9px] mr-1"></i>$${artRate.toFixed(2)}/arte</span>` : ''}
-              ${!hasRate ? `<span class="text-[10px] text-amber-600 dark:text-amber-400 font-mono bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 font-medium">Sin tarifas</span>` : ''}
-              ${w.banco ? `<span class="text-[10px] text-slate-400 font-mono">• 🏦 ${escapeHtml(w.banco)}</span>` : ''}
+              ${rate > 0 ? `<span class="text-[11px] text-ink font-mono font-medium tabular-nums bg-ink/10 px-1.5 py-0.5 rounded border border-line">$${rate.toFixed(2)}/h</span>` : ''}
+              ${artRate > 0 ? `<span class="text-[11px] text-ink font-mono font-medium tabular-nums bg-ink/10 px-1.5 py-0.5 rounded border border-line"><i class="fa-solid fa-palette text-[9px] mr-1"></i>$${artRate.toFixed(2)}/arte</span>` : ''}
+              ${!hasRate ? `<span class="text-[10px] text-mid font-mono bg-ink/10 px-1.5 py-0.5 rounded border border-line font-medium">Sin tarifas</span>` : ''}
+              ${w.banco ? `<span class="text-[10px] text-mid font-mono">• 🏦 ${escapeHtml(w.banco)}</span>` : ''}
             </div>
           </div>
           <div class="flex items-center gap-1 shrink-0">
@@ -2437,7 +2449,7 @@ function updateWorkersUI() {
               type="button"
               onclick="window.openManualEntryModal('${w.id}')"
               title="Cargar horas o diseños de arte para ${escapeHtml(w.nombre)}" 
-              class="px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 transition-all active:scale-95 text-xs flex items-center gap-1 font-medium cursor-pointer">
+              class="px-2 py-1 rounded-lg bg-ink/10 hover:bg-ink/20 text-mid border border-line transition-all active:scale-95 text-xs flex items-center gap-1 font-medium cursor-pointer">
               <i class="fa-solid fa-plus text-[10px]"></i>
               <span class="hidden sm:inline">Cargar</span>
             </button>
@@ -2445,7 +2457,7 @@ function updateWorkersUI() {
               type="button"
               onclick="window.openEditRateModal(${jsArg(w.id)}, ${jsArg(w.nombre)}, ${rate}, ${artRate})"
               title="Asignar o editar tarifas" 
-              class="px-2 py-1 rounded-lg bg-[#2563EB]/10 hover:bg-[#2563EB]/20 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/20 transition-all active:scale-95 text-xs flex items-center gap-1 font-medium cursor-pointer">
+              class="px-2 py-1 rounded-lg bg-ink/10 hover:bg-ink/20 text-ink border border-line transition-all active:scale-95 text-xs flex items-center gap-1 font-medium cursor-pointer">
               <i class="fa-solid fa-pen-to-square text-[10px]"></i>
               <span>Tarifas</span>
             </button>
@@ -2453,7 +2465,7 @@ function updateWorkersUI() {
               type="button"
               onclick="window.requestDelete('trabajadores', ${jsArg(w.id)}, ${jsArg(w.nombre)})"
               title="Eliminar colaborador" 
-              class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors active:scale-95 text-xs cursor-pointer">
+              class="text-mid hover:text-ember p-1.5 rounded-lg hover:bg-ember/10 transition-colors active:scale-95 text-xs cursor-pointer">
               <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
           </div>
@@ -2504,7 +2516,7 @@ function updateAdminUsersUI() {
 
   if (state.users.length === 0) {
     elements.registeredUsersList.innerHTML = `
-      <div class="text-xs text-slate-400 dark:text-slate-500 text-center py-6">
+      <div class="text-xs text-mid text-center py-6">
         No hay cuentas de usuarios registradas aún en el sistema.
       </div>
     `;
@@ -2525,15 +2537,15 @@ function updateAdminUsersUI() {
     }
 
     const roleBadge = isAdmin
-      ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/25">
+      ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-ink/15 text-ink border border-line">
           <i class="fa-solid fa-crown text-[9px]"></i> Administrador
         </span>`
-      : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25">
+      : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-ink/15 text-ink border border-line">
           <i class="fa-solid fa-user text-[9px]"></i> Colaborador
         </span>`;
 
     const masterBadge = isMaster
-      ? `<span class="text-[9px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded">Principal Protegida</span>`
+      ? `<span class="text-[9px] font-bold text-mid bg-ink/10 border border-line px-1.5 py-0.5 rounded">Principal Protegida</span>`
       : "";
 
     const toggleRoleBtn = isMaster
@@ -2541,27 +2553,27 @@ function updateAdminUsersUI() {
       : `<button type="button" 
            onclick="window.toggleUserRole('${u.id || u.uid}')" 
            title="${isAdmin ? 'Cambiar a Colaborador' : 'Hacer Administrador'}" 
-           class="px-2 py-1 text-[11px] rounded-lg font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer">
-           <i class="fa-solid ${isAdmin ? 'fa-arrow-down text-rose-500' : 'fa-arrow-up text-purple-500'} mr-1 text-[10px]"></i>${isAdmin ? 'Bajar Rol' : 'Hacer Admin'}
+           class="px-2 py-1 text-[11px] rounded-lg font-medium border border-line bg-white dark:bg-muted text-mid dark:text-faint hover:bg-muted transition-all cursor-pointer">
+           <i class="fa-solid ${isAdmin ? 'fa-arrow-down text-ember' : 'fa-arrow-up text-ink'} mr-1 text-[10px]"></i>${isAdmin ? 'Bajar Rol' : 'Hacer Admin'}
          </button>`;
 
     return `
-      <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors text-xs">
+      <div class="flex items-center justify-between p-3 rounded-xl bg-muted dark:bg-paper border border-line hover:border-line transition-colors text-xs">
         <div class="flex items-center gap-2.5 min-w-0 pr-2">
-          <div class="w-8 h-8 rounded-lg ${isAdmin ? 'bg-purple-600' : 'bg-blue-600'} text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+          <div class="w-8 h-8 rounded-lg ${isAdmin ? 'bg-primary' : 'bg-primary'} text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
             ${escapeHtml(userInitials)}
           </div>
           <div class="min-w-0">
-            <div class="font-semibold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5 flex-wrap">
+            <div class="font-semibold text-ink truncate flex items-center gap-1.5 flex-wrap">
               <span>${escapeHtml(u.nombre || "Usuario")}</span>
               ${roleBadge}
               ${masterBadge}
             </div>
-            <div class="text-[11px] text-slate-400 truncate flex items-center gap-2 flex-wrap mt-0.5">
+            <div class="text-[11px] text-mid truncate flex items-center gap-2 flex-wrap mt-0.5">
               <span>${escapeHtml(u.email || "")}</span>
               ${u.telefono ? `<span>• 📞 ${escapeHtml(u.telefono)}</span>` : ""}
               ${u.banco ? `<span>• 🏦 ${escapeHtml(u.banco)}</span>` : ""}
-              ${linkedWorkerName ? `<span class="text-blue-500 dark:text-blue-400 font-medium">• Ficha: ${escapeHtml(linkedWorkerName)}</span>` : ""}
+              ${linkedWorkerName ? `<span class="text-ink font-medium">• Ficha: ${escapeHtml(linkedWorkerName)}</span>` : ""}
             </div>
           </div>
         </div>
@@ -2570,7 +2582,7 @@ function updateAdminUsersUI() {
           <button type="button" 
             onclick="window.openAdminEditUserModal('${u.id || u.uid}')" 
             title="Editar Perfil y Permisos" 
-            class="px-2.5 py-1 text-[11px] rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-xs active:scale-95 cursor-pointer flex items-center gap-1">
+            class="px-2.5 py-1 text-[11px] rounded-lg font-semibold bg-primary hover:bg-primary/90 text-on-primary transition-all shadow-xs active:scale-95 cursor-pointer flex items-center gap-1">
             <i class="fa-solid fa-pen-to-square text-[10px]"></i>
             <span class="hidden sm:inline">Editar</span>
           </button>
@@ -2661,7 +2673,7 @@ function populateProfileData() {
       elements.myProfileAvatar.innerHTML = `<img src="${escapeHtml(profile.fotoUrl)}" alt="" class="w-full h-full object-cover rounded-2xl" referrerpolicy="no-referrer">`;
     } else {
       elements.myProfileAvatar.textContent = initials;
-      elements.myProfileAvatar.className = `w-20 h-20 sm:w-24 sm:h-24 rounded-2xl ${isAdmin ? 'bg-gradient-to-tr from-purple-600 to-indigo-600' : 'bg-gradient-to-tr from-blue-600 to-indigo-500'} text-white flex items-center justify-center font-bold text-3xl sm:text-4xl shadow-lg border-2 border-white/10 shrink-0`;
+      elements.myProfileAvatar.className = `w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-bold text-3xl sm:text-4xl shadow-lg border-2 border-white/10 shrink-0`;
     }
   }
 
@@ -2670,7 +2682,7 @@ function populateProfileData() {
   }
   if (elements.myProfileSubEmail) {
     elements.myProfileSubEmail.innerHTML = `
-      <i class="fa-regular fa-envelope text-slate-400"></i>
+      <i class="fa-regular fa-envelope text-mid"></i>
       <span>${escapeHtml(profile.email || auth?.currentUser?.email || "")}</span>
     `;
   }
@@ -3322,9 +3334,9 @@ function setFilterPeriod(period) {
   const buttons = document.querySelectorAll(".btn-period-filter");
   buttons.forEach(btn => {
     if (btn.dataset.period === period) {
-      btn.className = "btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 bg-blue-600 text-white shadow-sm";
+      btn.className = "btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 bg-primary text-on-primary shadow-sm";
     } else {
-      btn.className = "btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800";
+      btn.className = "btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 text-mid hover:bg-muted";
     }
   });
 
@@ -3343,14 +3355,64 @@ function setFilterPeriod(period) {
   updatePaymentsUI();
 }
 
+// Lista de tareas pendientes de aprobación (todas las fechas, sin depender del filtro de período)
+function renderAdminApprovals() {
+  if (!elements.adminApprovalsList) return;
+  const pending = state.tasks
+    .filter(t => t.estado === "pendiente")
+    .sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+
+  if (elements.adminApprovalsCount) elements.adminApprovalsCount.textContent = pending.length;
+
+  if (pending.length === 0) {
+    elements.adminApprovalsList.innerHTML = `<div class="empty-note">No hay tareas pendientes de aprobación.</div>`;
+    return;
+  }
+
+  const MAX_ITEMS = 6;
+  const rows = pending.slice(0, MAX_ITEMS).map(t => {
+    const name = t.trabajadorNombre || "Colaborador";
+    const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p.charAt(0).toUpperCase()).join("");
+    const isArt = Number(t.cantidadArtes) > 0;
+    const qty = isArt ? `${Number(t.cantidadArtes)} arte${Number(t.cantidadArtes) === 1 ? "" : "s"}` : `${Number(t.horas || 0).toFixed(2)} h`;
+    const origin = t.esManual ? "manual" : "cronómetro";
+    const meta = [name, t.cliente, origin, t.fecha].filter(Boolean).map(escapeHtml).join(" · ");
+    return `
+      <div class="ds-row approval-row">
+        <div class="ds-avatar">${escapeHtml(initials || "C")}</div>
+        <div class="ds-grow">
+          <b>${escapeHtml(t.descripcion || "Tarea sin descripción")}</b>
+          <span>${meta}</span>
+        </div>
+        <div class="ds-amount">
+          <b>${qty}</b>
+          <span>$${Number(t.costoTotal || 0).toFixed(2)}</span>
+        </div>
+        <div class="ds-actions">
+          <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" onclick="window.openRejectModal(${jsArg(t.id)})" aria-label="Rechazar">
+            <i class="fa-solid fa-xmark"></i><span class="mobile-only">Rechazar</span>
+          </button>
+          <button type="button" class="btn-ds btn-ds-primary btn-ds-sm" onclick="window.approveTask(${jsArg(t.id)})">
+            <i class="fa-solid fa-check"></i><span>Aprobar</span>
+          </button>
+        </div>
+      </div>`;
+  }).join("");
+
+  const more = pending.length > MAX_ITEMS
+    ? `<div class="empty-note">Y ${pending.length - MAX_ITEMS} más en el registro de tareas.</div>`
+    : "";
+  elements.adminApprovalsList.innerHTML = rows + more;
+}
+
 window.setTaskStatusFilter = function(status) {
   state.taskStatusFilter = status;
   const buttons = document.querySelectorAll(".btn-status-filter");
   buttons.forEach(btn => {
     if (btn.dataset.status === status) {
-      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 bg-[#2563EB] text-white shadow-sm flex items-center gap-1";
+      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 bg-primary text-on-primary shadow-sm flex items-center gap-1";
     } else {
-      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white flex items-center gap-1.5";
+      btn.className = "btn-status-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 text-mid hover:text-ink dark:hover:text-white flex items-center gap-1.5";
     }
   });
   updateTasksUI();
@@ -3395,6 +3457,8 @@ function updateTasksUI() {
     }
   }
 
+  if (isAdmin) renderAdminApprovals();
+
   // Filtrado activo según botón seleccionado
   let displayedTasks = allUserTasks;
   if (state.taskStatusFilter === "pendiente") {
@@ -3419,51 +3483,55 @@ function updateTasksUI() {
 
     elements.tasksTableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="py-6 text-center text-slate-400 dark:text-slate-500 text-xs">
+        <td colspan="6" class="py-6 text-center text-mid text-xs">
           ${emptyMsg}
         </td>
       </tr>
     `;
+    if (elements.tasksCardsList) elements.tasksCardsList.innerHTML = `<div class="empty-note">${emptyMsg}</div>`;
     return;
   }
 
+  // Filas compactas para pantallas pequeñas (misma información y acciones que la tabla)
+  const taskCards = [];
+
   elements.tasksTableBody.innerHTML = displayedTasks.map(t => {
     const formattedTime = formatSecondsToTime(t.segundos || 0);
-    const isManualTag = t.esManual ? `<span class="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded bg-[#0284C7]/15 text-[#0284C7] dark:text-[#D4AF87] border border-[#0284C7]/25 shrink-0">Manual</span>` : "";
+    const isManualTag = t.esManual ? `<span class="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded bg-ink/15 text-ink border border-line shrink-0">Manual</span>` : "";
     const cat = getCategoryMeta(t.categoria);
     const catBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium ${cat.bg} ${cat.color} border shrink-0"><i class="fa-solid ${cat.icon} text-[9px]"></i><span>${cat.label}</span></span>`;
-    const clientBadge = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-[#F1F5F9] dark:bg-[#162032] text-[#0F172A] dark:text-[#F8FAFC] border border-[#E2E8F0] dark:border-[#1E293B] shrink-0"><i class="fa-solid fa-briefcase text-[9px] text-[#2563EB]"></i><span>${escapeHtml(t.cliente)}</span></span>` : "";
+    const clientBadge = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-muted text-ink border border-line shrink-0"><i class="fa-solid fa-briefcase text-[9px] text-ink"></i><span>${escapeHtml(t.cliente)}</span></span>` : "";
 
     const taskStatus = t.estado || "aprobada";
     let statusBadge = "";
     if (taskStatus === "pendiente") {
-      statusBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 shrink-0" title="Pendiente de aprobación por la administración"><i class="fa-solid fa-clock-rotate-left text-[9px]"></i><span>Pendiente</span></span>`;
+      statusBadge = `<span class="status-badge status-pending" title="Pendiente de aprobación por la administración">Pendiente</span>`;
     } else if (taskStatus === "rechazada") {
       const reasonTitle = t.motivoRechazo ? `Motivo: ${escapeHtml(t.motivoRechazo)}` : "Horas rechazadas por la administración";
-      statusBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shrink-0 cursor-help" title="${reasonTitle}"><i class="fa-solid fa-circle-xmark text-[9px]"></i><span>Rechazada</span></span>`;
+      statusBadge = `<span class="status-badge status-rejected cursor-help" title="${reasonTitle}">Rechazada</span>`;
     } else if (t.esManual) {
-      statusBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0" title="Aprobada"><i class="fa-solid fa-circle-check text-[9px]"></i><span>Aprobada</span></span>`;
+      statusBadge = `<span class="status-badge status-approved" title="Aprobada">Aprobada</span>`;
     }
 
     const rejectionNotice = (taskStatus === "rechazada" && t.motivoRechazo) 
-      ? `<div class="text-[11px] text-rose-600 dark:text-rose-400 font-medium italic mt-1 flex items-center gap-1.5 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900/50">
+      ? `<div class="text-[11px] text-ember font-medium italic mt-1 flex items-center gap-1.5 bg-ember/10 dark:bg-ember/40 px-2 py-0.5 rounded border border-ember dark:border-ember/50">
            <i class="fa-solid fa-circle-exclamation text-[10px] shrink-0"></i>
            <span><strong>Motivo:</strong> ${escapeHtml(t.motivoRechazo)}</span>
          </div>`
       : "";
 
     const pendingNotice = (taskStatus === "pendiente")
-      ? `<div class="text-[10px] text-amber-600 dark:text-amber-400 italic mt-0.5 flex items-center gap-1">
+      ? `<div class="text-[10px] text-mid italic mt-0.5 flex items-center gap-1">
            <i class="fa-regular fa-clock text-[9px] shrink-0"></i>
-           <span>Horas manuales en espera de validación administrativa</span>
+           <span>Horas en espera de validación administrativa</span>
          </div>`
       : "";
 
     let costDisplay = "";
     if (taskStatus === "rechazada") {
-      costDisplay = `<span class="line-through text-slate-400 dark:text-slate-500 tabular-nums" title="Horas rechazadas (no computan en liquidación)">$${Number(t.costoTotal || 0).toFixed(2)}</span>`;
+      costDisplay = `<span class="line-through text-mid tabular-nums" title="Horas rechazadas (no computan en liquidación)">$${Number(t.costoTotal || 0).toFixed(2)}</span>`;
     } else if (taskStatus === "pendiente") {
-      costDisplay = `<span class="text-amber-600 dark:text-amber-400 font-semibold tabular-nums" title="Pendiente de aprobación">$${Number(t.costoTotal || 0).toFixed(2)}</span>`;
+      costDisplay = `<span class="text-mid font-semibold tabular-nums" title="Pendiente de aprobación">$${Number(t.costoTotal || 0).toFixed(2)}</span>`;
     } else {
       costDisplay = `<span class="tabular-nums font-semibold">$${Number(t.costoTotal || 0).toFixed(2)}</span>`;
     }
@@ -3475,19 +3543,19 @@ function updateTasksUI() {
           <div class="flex items-center justify-center gap-1">
             <button 
               onclick="window.approveTask('${t.id}')"
-              class="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 p-1.5 rounded-lg hover:bg-emerald-500/15 transition-colors active:scale-95"
+              class="text-mid hover:text-mid p-1.5 rounded-lg hover:bg-ink/15 transition-colors active:scale-95"
               title="Aprobar horas">
               <i class="fa-solid fa-check text-xs"></i>
             </button>
             <button 
               onclick="window.openRejectModal('${t.id}')"
-              class="text-rose-600 hover:text-rose-700 dark:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/15 transition-colors active:scale-95"
+              class="text-ember hover:text-ember p-1.5 rounded-lg hover:bg-ember/15 transition-colors active:scale-95"
               title="Rechazar horas">
               <i class="fa-solid fa-xmark text-xs"></i>
             </button>
             <button 
               onclick="window.requestDelete('tareas', ${jsArg(t.id)}, ${jsArg('Tarea: ' + (t.descripcion || ''))})"
-              class="text-[#64748B] hover:text-[#BF6863] p-1.5 rounded-lg hover:bg-[#BF6863]/10 transition-colors active:scale-95"
+              class="text-mid hover:text-ember p-1.5 rounded-lg hover:bg-ember/10 transition-colors active:scale-95"
               title="Eliminar registro">
               <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
@@ -3498,13 +3566,13 @@ function updateTasksUI() {
           <div class="flex items-center justify-center gap-1">
             <button 
               onclick="window.approveTask('${t.id}')"
-              class="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 p-1.5 rounded-lg hover:bg-emerald-500/15 transition-colors active:scale-95"
+              class="text-mid hover:text-mid p-1.5 rounded-lg hover:bg-ink/15 transition-colors active:scale-95"
               title="Reconsiderar y Aprobar">
               <i class="fa-solid fa-check text-xs"></i>
             </button>
             <button 
               onclick="window.requestDelete('tareas', ${jsArg(t.id)}, ${jsArg('Tarea: ' + (t.descripcion || ''))})"
-              class="text-[#64748B] hover:text-[#BF6863] p-1.5 rounded-lg hover:bg-[#BF6863]/10 transition-colors active:scale-95"
+              class="text-mid hover:text-ember p-1.5 rounded-lg hover:bg-ember/10 transition-colors active:scale-95"
               title="Eliminar registro">
               <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
@@ -3517,14 +3585,14 @@ function updateTasksUI() {
             ${t.esManual ? `
               <button 
                 onclick="window.openRejectModal('${t.id}')"
-                class="text-[#64748B] hover:text-rose-600 dark:text-[#94A3B8] p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors active:scale-95"
+                class="text-mid hover:text-ember p-1.5 rounded-lg hover:bg-ember/10 transition-colors active:scale-95"
                 title="Rechazar horas previamente aprobadas">
                 <i class="fa-solid fa-ban text-xs"></i>
               </button>
             ` : ''}
             <button 
               onclick="window.requestDelete('tareas', ${jsArg(t.id)}, ${jsArg('Tarea: ' + (t.descripcion || ''))})"
-              class="text-[#64748B] hover:text-[#BF6863] p-1.5 rounded-lg hover:bg-[#BF6863]/10 transition-colors active:scale-95"
+              class="text-mid hover:text-ember p-1.5 rounded-lg hover:bg-ember/10 transition-colors active:scale-95"
               title="Eliminar tarea">
               <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
@@ -3536,7 +3604,7 @@ function updateTasksUI() {
       actionButtons = `
         <button 
           onclick="window.requestDelete('tareas', ${jsArg(t.id)}, ${jsArg('Tarea: ' + (t.descripcion || ''))})"
-          class="text-[#64748B] hover:text-[#BF6863] p-1.5 rounded-lg hover:bg-[#BF6863]/10 transition-colors active:scale-95"
+          class="text-mid hover:text-ember p-1.5 rounded-lg hover:bg-ember/10 transition-colors active:scale-95"
           title="Eliminar registro">
           <i class="fa-regular fa-trash-can text-xs"></i>
         </button>
@@ -3545,28 +3613,45 @@ function updateTasksUI() {
 
     const isArtTask = t.tipoCobro === "artes" || (t.cantidadArtes && Number(t.cantidadArtes) > 0);
     const artBadge = isArtTask 
-      ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/25 shrink-0"><i class="fa-solid fa-palette text-[9px]"></i><span>${t.cantidadArtes} ${t.cantidadArtes === 1 ? 'arte' : 'artes'}</span></span>` 
+      ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink/15 text-ink border border-line shrink-0"><i class="fa-solid fa-palette text-[9px]"></i><span>${t.cantidadArtes} ${t.cantidadArtes === 1 ? 'arte' : 'artes'}</span></span>` 
       : "";
 
     let timeColContent = "";
     if (isArtTask) {
       timeColContent = `
-        <span class="inline-flex items-center gap-1 font-semibold text-purple-600 dark:text-purple-400 font-mono tabular-nums"><i class="fa-solid fa-palette text-[10px]"></i> ${t.cantidadArtes} ${t.cantidadArtes === 1 ? 'arte' : 'artes'}</span>
-        <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block font-mono">($${Number(t.tarifaArte || 0).toFixed(2)} c/u)</span>
+        <span class="inline-flex items-center gap-1 font-semibold text-ink font-mono tabular-nums"><i class="fa-solid fa-palette text-[10px]"></i> ${t.cantidadArtes} ${t.cantidadArtes === 1 ? 'arte' : 'artes'}</span>
+        <span class="text-[10px] text-mid block font-mono">($${Number(t.tarifaArte || 0).toFixed(2)} c/u)</span>
       `;
     } else {
       timeColContent = `
-        ${formattedTime} <span class="text-[10px] text-[#64748B]/80 dark:text-[#94A3B8]/80">(${Number(t.horas || 0).toFixed(2)}h)</span>
+        ${formattedTime} <span class="text-[10px] text-mid/80">(${Number(t.horas || 0).toFixed(2)}h)</span>
       `;
     }
 
+    const cardQty = isArtTask
+      ? `${t.cantidadArtes} ${Number(t.cantidadArtes) === 1 ? "arte" : "artes"}`
+      : `${Number(t.horas || 0).toFixed(2)} h`;
+    const cardMeta = [isWorker ? null : t.trabajadorNombre, t.cliente, cat.label, t.fecha, t.esManual ? "manual" : null]
+      .filter(Boolean).map(escapeHtml).join(" · ");
+    taskCards.push(`
+      <div class="ds-row task-card">
+        <div class="ds-grow">
+          <b class="${taskStatus === 'rechazada' ? 'line-through text-mid' : ''}">${escapeHtml(t.descripcion || 'Sin descripción')}</b>
+          <span>${cardMeta}</span>
+          ${t.motivoRechazo && taskStatus === 'rechazada' ? `<span class="task-card-note">Motivo: ${escapeHtml(t.motivoRechazo)}</span>` : ''}
+        </div>
+        ${statusBadge || '<span class="status-badge status-approved">Aprobada</span>'}
+        <div class="ds-amount"><b class="tabular-nums">${cardQty}</b><span class="tabular-nums">${costDisplay}</span></div>
+        <div class="task-card-actions">${actionButtons}</div>
+      </div>`);
+
     return `
-      <tr class="hover:bg-[#F1F5F9] dark:hover:bg-[#162032] transition-colors ${taskStatus === 'rechazada' ? 'opacity-75 bg-rose-50/30 dark:bg-rose-950/20' : taskStatus === 'pendiente' ? 'bg-amber-50/30 dark:bg-amber-950/20' : ''}">
-        <td class="py-2.5 px-3 text-[#64748B] dark:text-[#94A3B8] font-mono whitespace-nowrap tabular-nums">${t.fecha || '-'}</td>
-        <td class="py-2.5 px-3 font-semibold text-[#0F172A] dark:text-[#F8FAFC] whitespace-nowrap">${escapeHtml(t.trabajadorNombre || 'Anónimo')}</td>
-        <td class="py-2.5 px-3 text-[#64748B] dark:text-[#94A3B8] max-w-sm">
+      <tr class="hover:bg-muted transition-colors ${taskStatus === 'rechazada' ? 'bg-ember/5' : taskStatus === 'pendiente' ? 'bg-muted/60' : ''}">
+        <td class="py-2.5 px-3 text-mid font-mono whitespace-nowrap tabular-nums">${t.fecha || '-'}</td>
+        <td class="py-2.5 px-3 font-semibold text-ink whitespace-nowrap">${escapeHtml(t.trabajadorNombre || 'Anónimo')}</td>
+        <td class="py-2.5 px-3 text-mid max-w-sm">
           <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="font-medium text-[#0F172A] dark:text-[#F8FAFC]" title="${escapeHtml(t.descripcion || '')}">${escapeHtml(t.descripcion || 'Sin descripción')}</span>
+            <span class="font-medium text-ink" title="${escapeHtml(t.descripcion || '')}">${escapeHtml(t.descripcion || 'Sin descripción')}</span>
             ${clientBadge}
             ${catBadge}
             ${artBadge}
@@ -3576,10 +3661,10 @@ function updateTasksUI() {
           ${rejectionNotice}
           ${pendingNotice}
         </td>
-        <td class="py-2.5 px-2 text-right font-mono text-[#64748B] dark:text-[#94A3B8] whitespace-nowrap tabular-nums">
+        <td class="py-2.5 px-2 text-right font-mono text-mid whitespace-nowrap tabular-nums">
           ${timeColContent}
         </td>
-        <td class="py-2.5 px-2 text-right font-mono font-medium text-[#0F172A] dark:text-[#F8FAFC] whitespace-nowrap tabular-nums">
+        <td class="py-2.5 px-2 text-right font-mono font-medium text-ink whitespace-nowrap tabular-nums">
           ${costDisplay}
         </td>
         <td class="py-2.5 px-2 text-center whitespace-nowrap">
@@ -3588,6 +3673,7 @@ function updateTasksUI() {
       </tr>
     `;
   }).join("");
+  if (elements.tasksCardsList) elements.tasksCardsList.innerHTML = taskCards.join("");
 }
 
 function updatePaymentsUI() {
@@ -3608,7 +3694,7 @@ function updatePaymentsUI() {
   if (displayedPayments.length === 0) {
     elements.paymentsTableBody.innerHTML = `
       <tr>
-        <td colspan="5" class="py-6 text-center text-[#64748B] dark:text-[#94A3B8] text-xs">
+        <td colspan="5" class="py-6 text-center text-mid text-xs">
           ${isWorker ? "No tienes pagos registrados en este período." : "No hay pagos registrados en este período."}
         </td>
       </tr>
@@ -3617,24 +3703,24 @@ function updatePaymentsUI() {
   }
 
   elements.paymentsTableBody.innerHTML = displayedPayments.map(p => `
-    <tr class="hover:bg-[#F1F5F9] dark:hover:bg-[#162032] transition-colors">
-      <td class="py-2.5 px-3 text-[#64748B] dark:text-[#94A3B8] font-mono whitespace-nowrap tabular-nums">${p.fecha || '-'}</td>
-      <td class="py-2.5 px-3 font-semibold text-[#0F172A] dark:text-[#F8FAFC] whitespace-nowrap">${escapeHtml(p.trabajadorNombre || '')}</td>
-      <td class="py-2.5 px-3 text-[#64748B] dark:text-[#94A3B8] max-w-xs truncate" title="${escapeHtml(p.referencia || '')}">
+    <tr class="hover:bg-muted transition-colors">
+      <td class="py-2.5 px-3 text-mid font-mono whitespace-nowrap tabular-nums">${p.fecha || '-'}</td>
+      <td class="py-2.5 px-3 font-semibold text-ink whitespace-nowrap">${escapeHtml(p.trabajadorNombre || '')}</td>
+      <td class="py-2.5 px-3 text-mid max-w-xs truncate" title="${escapeHtml(p.referencia || '')}">
         ${escapeHtml(p.referencia || 'Pago')}
       </td>
-      <td class="py-2.5 px-2 text-right font-mono font-medium text-[#2563EB] whitespace-nowrap tabular-nums">
+      <td class="py-2.5 px-2 text-right font-mono font-medium text-ink whitespace-nowrap tabular-nums">
         $${Number(p.monto || 0).toFixed(2)}
       </td>
       <td class="py-2.5 px-2 text-center whitespace-nowrap">
         ${!isWorker ? `
           <button 
             onclick="window.requestDelete('pagos', ${jsArg(p.id)}, ${jsArg(`Pago de $${Number(p.monto || 0).toFixed(2)} a ${p.trabajadorNombre || ''}`)})"
-            class="text-[#64748B] hover:text-[#BF6863] p-1 rounded-md hover:bg-[#BF6863]/10 transition-colors active:scale-95"
+            class="text-mid hover:text-ember p-1 rounded-md hover:bg-ember/10 transition-colors active:scale-95"
             title="Eliminar pago">
             <i class="fa-regular fa-trash-can text-xs"></i>
           </button>
-        ` : `<span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-mono">Registrado</span>`}
+        ` : `<span class="text-[10px] text-mid font-mono">Registrado</span>`}
       </td>
     </tr>
   `).join("");
@@ -3660,13 +3746,18 @@ function updateFinancialDashboard() {
   if (displayedWorkers.length === 0) {
     elements.financialTableBody.innerHTML = `
       <tr>
-        <td colspan="7" class="py-8 text-center text-slate-400 dark:text-slate-500 text-xs">
+        <td colspan="7" class="py-8 text-center text-mid text-xs">
           ${isWorker 
             ? "Tu perfil aún no está vinculado a un trabajador en la lista. Puedes usar el cronómetro para registrar tu tiempo."
             : "Agrega trabajadores para visualizar el balance financiero en tiempo real."}
         </td>
       </tr>
     `;
+    if (elements.financialTilesList) {
+      elements.financialTilesList.innerHTML = `<div class="empty-note">${isWorker
+        ? "Tu perfil aún no está vinculado a un trabajador."
+        : "Agrega trabajadores para visualizar el balance financiero en tiempo real."}</div>`;
+    }
     resetKPIs();
     return;
   }
@@ -3678,6 +3769,9 @@ function updateFinancialDashboard() {
   let totalSegundosGlobal = 0;
   let totalGeneradoGlobal = 0;
   let totalPagadoGlobal = 0;
+
+  // Tarjetas por colaborador para pantallas pequeñas (misma información que la tabla)
+  const tilesHtml = [];
 
   const rowsHtml = displayedWorkers.map(worker => {
     const workerTasks = allFilteredTasks.filter(t => 
@@ -3703,7 +3797,7 @@ function updateFinancialDashboard() {
     if (pendingBalance > 0.005) {
       // Pasivo pendiente: Rojo apagado elegante
       balanceBadge = `
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold font-mono bg-[#BF6863]/10 dark:bg-[#BF6863]/15 text-[#BF6863] border border-[#BF6863]/25 tabular-nums">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold font-mono bg-ember/10 dark:bg-ember/15 text-ink border border-ember/25 tabular-nums">
           <i class="fa-solid fa-clock text-[10px]"></i>
           +$${pendingBalance.toFixed(2)}
         </span>
@@ -3711,7 +3805,7 @@ function updateFinancialDashboard() {
     } else if (pendingBalance === 0) {
       // Al día: Verde natural
       balanceBadge = `
-        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold font-mono bg-[#2563EB]/10 dark:bg-[#2563EB]/15 text-[#2563EB] border border-[#2563EB]/25 tabular-nums">
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold font-mono bg-ink/10 dark:bg-ink/15 text-ink border border-line tabular-nums">
           <i class="fa-solid fa-check text-[10px]"></i>
           $0.00
         </span>
@@ -3719,7 +3813,7 @@ function updateFinancialDashboard() {
     } else {
       // Anticipo a favor
       balanceBadge = `
-        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold font-mono bg-[#3B82F6]/10 dark:bg-[#3B82F6]/15 text-[#2563EB] dark:text-[#60A5FA] border border-[#3B82F6]/25 tabular-nums">
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold font-mono bg-ink/10 dark:bg-ink/15 text-ink border border-line tabular-nums">
           <i class="fa-solid fa-arrow-down text-[10px]"></i>
           -$${Math.abs(pendingBalance).toFixed(2)}
         </span>
@@ -3733,18 +3827,18 @@ function updateFinancialDashboard() {
       <button 
         type="button" 
         onclick="window.openEditRateModal(${jsArg(worker.id)}, ${jsArg(worker.nombre)}, ${hourlyRate}, ${artRate})"
-        class="hover:text-[#2563EB] dark:hover:text-[#60A5FA] hover:underline transition-colors cursor-pointer inline-flex flex-col items-end group"
+        class="hover:text-ink hover:underline transition-colors cursor-pointer inline-flex flex-col items-end group"
         title="Clic para modificar tarifas">
         <span class="inline-flex items-center gap-1 font-medium">
           <span>$${hourlyRate.toFixed(2)}/h</span>
-          <i class="fa-solid fa-pencil text-[9px] opacity-0 group-hover:opacity-100 transition-opacity text-[#3B82F6]"></i>
+          <i class="fa-solid fa-pencil text-[9px] opacity-0 group-hover:opacity-100 transition-opacity text-ink"></i>
         </span>
-        ${artRate > 0 ? `<span class="text-[10px] text-purple-600 dark:text-purple-400 font-mono font-medium">$${artRate.toFixed(2)}/arte</span>` : ''}
+        ${artRate > 0 ? `<span class="text-[10px] text-ink font-mono font-medium">$${artRate.toFixed(2)}/arte</span>` : ''}
       </button>
     ` : `
       <div class="flex flex-col items-end">
         <span>$${hourlyRate.toFixed(2)}/h</span>
-        ${artRate > 0 ? `<span class="text-[10px] text-purple-600 dark:text-purple-400 font-mono">$${artRate.toFixed(2)}/arte</span>` : ''}
+        ${artRate > 0 ? `<span class="text-[10px] text-ink font-mono">$${artRate.toFixed(2)}/arte</span>` : ''}
       </div>
     `;
 
@@ -3752,7 +3846,7 @@ function updateFinancialDashboard() {
       <button 
         type="button" 
         onclick="window.openStatementModal('${worker.id}', 'bill')" 
-        class="px-2.5 py-1.5 rounded-lg bg-[#2563EB]/10 hover:bg-[#2563EB]/20 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/20 text-xs font-medium active:scale-95 transition-all inline-flex items-center gap-1.5 cursor-pointer"
+        class="px-2.5 py-1.5 rounded-lg bg-ink/10 hover:bg-ink/20 text-ink border border-line text-xs font-medium active:scale-95 transition-all inline-flex items-center gap-1.5 cursor-pointer"
         title="Generar y descargar mi Cuenta de Cobro formal">
         <i class="fa-solid fa-file-invoice-dollar text-xs"></i>
         <span>Descargar Cuenta de Cobro</span>
@@ -3762,7 +3856,7 @@ function updateFinancialDashboard() {
         <button 
           type="button" 
           onclick="window.openManualEntryModal('${worker.id}')" 
-          class="px-2 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          class="px-2 py-1.5 rounded-lg bg-ink/10 hover:bg-ink/20 text-mid border border-line text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
           title="Cargar horas o diseños de artes a ${escapeHtml(worker.nombre)}">
           <i class="fa-solid fa-plus text-[10px]"></i>
           <span class="hidden xl:inline">Cargar</span>
@@ -3770,7 +3864,7 @@ function updateFinancialDashboard() {
         <button 
           type="button" 
           onclick="window.openStatementModal('${worker.id}', 'receipt')" 
-          class="px-2.5 py-1.5 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          class="px-2.5 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-on-primary text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
           title="Generar Recibo de Pago Oficial (PDF)">
           <i class="fa-solid fa-receipt text-[10px]"></i>
           <span class="hidden sm:inline">Recibo Oficial</span>
@@ -3779,51 +3873,84 @@ function updateFinancialDashboard() {
         <button 
           type="button" 
           onclick="window.openStatementModal('${worker.id}', 'bill')" 
-          class="px-2 py-1.5 rounded-lg bg-[#F1F5F9] dark:bg-[#111827] hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B] text-[#2563EB] dark:text-[#60A5FA] border border-[#E2E8F0] dark:border-[#1E293B] text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          class="px-2 py-1.5 rounded-lg bg-muted dark:bg-paper hover:bg-muted text-ink border border-line text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
           title="Auditar Cuenta de Cobro de este colaborador">
           <i class="fa-solid fa-file-invoice-dollar text-[10px]"></i>
         </button>
         <button 
           type="button" 
           onclick="window.quickPayWorker(${jsArg(worker.id)}, ${jsArg(worker.nombre)}, ${pendingBalance})" 
-          class="px-2 py-1.5 rounded-lg bg-[#0284C7]/15 hover:bg-[#0284C7]/25 text-[#0284C7] dark:text-[#D4AF87] border border-[#0284C7]/30 text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
+          class="px-2 py-1.5 rounded-lg bg-ink/15 hover:bg-ink/25 text-ink border border-line text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
           title="Abonar / Registrar pago a ${escapeHtml(worker.nombre)}">
           <i class="fa-solid fa-money-bill-transfer text-[10px]"></i>
         </button>
       </div>
     `;
 
+    const initials = worker.nombre.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p.charAt(0).toUpperCase()).join("");
+    const rateLabel = artRate > 0 && hourlyRate === 0 ? `$${artRate.toFixed(2)}/arte` : `$${hourlyRate.toFixed(2)}/h`;
+    const tileSub = [worker.banco, rateLabel].filter(Boolean).map(escapeHtml).join(" · ");
+    const paidPercent = workerEarned > 0 ? Math.min(100, Math.round((workerPaid / workerEarned) * 100)) : (workerPaid > 0 ? 100 : 0);
+    const balanceLabel = pendingBalance > 0.005
+      ? `<div class="liq-balance"><span>Saldo</span><b class="tabular-nums">$${pendingBalance.toFixed(2)}</b></div>`
+      : pendingBalance === 0
+      ? `<span class="badge-solid">Al día</span>`
+      : `<div class="liq-balance"><span>A favor</span><b class="tabular-nums">$${Math.abs(pendingBalance).toFixed(2)}</b></div>`;
+    const tileActions = isWorker
+      ? `<button type="button" class="btn-ds btn-ds-primary btn-ds-sm" onclick="window.openStatementModal(${jsArg(worker.id)}, 'bill')"><i class="fa-solid fa-file-invoice-dollar"></i><span>Descargar cuenta de cobro</span></button>`
+      : `<button type="button" class="btn-ds btn-ds-outline btn-ds-sm" onclick="window.openStatementModal(${jsArg(worker.id)}, 'bill')"><i class="fa-solid fa-file-invoice-dollar"></i><span>Cuenta de cobro</span></button>
+         <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" style="flex:0 0 auto" onclick="window.openStatementModal(${jsArg(worker.id)}, 'receipt')" aria-label="Recibo oficial" title="Recibo oficial"><i class="fa-solid fa-receipt"></i></button>
+         <button type="button" class="btn-ds btn-ds-primary btn-ds-sm" onclick="window.quickPayWorker(${jsArg(worker.id)}, ${jsArg(worker.nombre)}, ${pendingBalance})"><i class="fa-solid fa-money-bill-transfer"></i><span>Abonar</span></button>`;
+    tilesHtml.push(`
+      <div class="liq-tile">
+        <div class="liq-head">
+          <div class="ds-avatar">${escapeHtml(initials || "C")}</div>
+          <div class="ds-grow"><b>${escapeHtml(worker.nombre)}</b><span>${tileSub}</span></div>
+          ${balanceLabel}
+        </div>
+        <div class="liq-kv">
+          <div><small>${workerArtes > 0 && workerHours === 0 ? "Artes" : "Horas"}</small><b class="tabular-nums">${workerArtes > 0 && workerHours === 0 ? workerArtes : workerHours.toFixed(2)}</b></div>
+          <div><small>Causado</small><b class="tabular-nums">$${workerEarned.toFixed(2)}</b></div>
+          <div><small>Abonado</small><b class="tabular-nums">$${workerPaid.toFixed(2)}</b></div>
+        </div>
+        <div>
+          <div class="liq-paid"><span>Pagado</span><span class="tabular-nums">${paidPercent} %</span></div>
+          <div class="liq-bar"><span style="width:${paidPercent}%"></span></div>
+        </div>
+        <div class="liq-actions">${tileActions}</div>
+      </div>`);
+
     return `
-      <tr class="hover:bg-[#F1F5F9] dark:hover:bg-[#162032] transition-colors">
-        <td class="py-3 px-3 font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
+      <tr class="hover:bg-muted transition-colors">
+        <td class="py-3 px-3 font-semibold text-ink">
           <div class="flex items-center gap-2.5">
-            <div class="w-7 h-7 rounded-lg bg-[#2563EB]/10 text-[#2563EB] dark:text-[#60A5FA] flex items-center justify-center text-xs font-semibold border border-[#2563EB]/20">
+            <div class="w-7 h-7 rounded-lg bg-ink/10 text-ink flex items-center justify-center text-xs font-semibold border border-line">
               ${worker.nombre.charAt(0).toUpperCase()}
             </div>
             <div>
               <span>${escapeHtml(worker.nombre)}</span>
-              ${worker.email ? `<span class="text-[10px] text-slate-400 font-normal block">${escapeHtml(worker.email)}</span>` : ''}
+              ${worker.email ? `<span class="text-[10px] text-mid font-normal block">${escapeHtml(worker.email)}</span>` : ''}
             </div>
           </div>
         </td>
-        <td class="py-3 px-2 text-right font-mono text-[#64748B] dark:text-[#94A3B8] tabular-nums">
+        <td class="py-3 px-2 text-right font-mono text-mid tabular-nums">
           ${editRateBtn}
         </td>
-        <td class="py-3 px-2 text-right font-mono text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">
+        <td class="py-3 px-2 text-right font-mono text-ink tabular-nums">
           <span class="font-medium">${workerHours.toFixed(2)}h</span>
-          ${workerArtes > 0 ? `<span class="text-[10px] text-purple-600 dark:text-purple-400 font-semibold block">🎨 ${workerArtes} ${workerArtes === 1 ? 'arte' : 'artes'}</span>` : `<span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block">${formatSecondsToTime(workerSeconds)}</span>`}
+          ${workerArtes > 0 ? `<span class="text-[10px] text-ink font-semibold block">🎨 ${workerArtes} ${workerArtes === 1 ? 'arte' : 'artes'}</span>` : `<span class="text-[10px] text-mid block">${formatSecondsToTime(workerSeconds)}</span>`}
         </td>
-        <td class="py-3 px-2 text-right font-mono font-medium text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">
+        <td class="py-3 px-2 text-right font-mono font-medium text-ink tabular-nums">
           <div>$${workerEarned.toFixed(2)}</div>
-          <div class="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">≈ ${formatCop(workerEarned * currentTrm)}</div>
+          <div class="text-[10px] text-mid font-normal">≈ ${formatCop(workerEarned * currentTrm)}</div>
         </td>
-        <td class="py-3 px-2 text-right font-mono font-medium text-[#2563EB] tabular-nums">
+        <td class="py-3 px-2 text-right font-mono font-medium text-ink tabular-nums">
           <div>$${workerPaid.toFixed(2)}</div>
-          <div class="text-[10px] text-blue-600 dark:text-blue-400 font-normal">≈ ${formatCop(workerPaid * currentTrm)}</div>
+          <div class="text-[10px] text-ink font-normal">≈ ${formatCop(workerPaid * currentTrm)}</div>
         </td>
         <td class="py-3 px-3 text-right">
           ${balanceBadge}
-          <div class="text-[10px] text-[#64748B] dark:text-[#94A3B8] font-mono mt-0.5">≈ ${formatCop(pendingBalance * currentTrm)}</div>
+          <div class="text-[10px] text-mid font-mono mt-0.5">≈ ${formatCop(pendingBalance * currentTrm)}</div>
         </td>
         <td class="py-3 px-2 text-center whitespace-nowrap">
           ${statementBtn}
@@ -3833,6 +3960,7 @@ function updateFinancialDashboard() {
   }).join("");
 
   elements.financialTableBody.innerHTML = rowsHtml;
+  if (elements.financialTilesList) elements.financialTilesList.innerHTML = tilesHtml.join("");
 
   // Actualizar KPIs Globales o Personales
   const balance = Number((totalGeneradoGlobal - totalPagadoGlobal).toFixed(2));
@@ -3847,26 +3975,26 @@ function updateFinancialDashboard() {
   const copBalance = balance * currentTrm;
 
   if (balance > 0.005) {
-    elements.kpiSaldoPendiente.className = "text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#BF6863] tabular-nums";
+    elements.kpiSaldoPendiente.className = "stat-value tabular-nums truncate";
     elements.kpiSaldoPendiente.textContent = `$${balance.toFixed(2)}`;
     if (elements.kpiSaldoPendienteCop) {
-      elements.kpiSaldoPendienteCop.className = "block text-xs font-mono font-medium text-[#BF6863] tabular-nums truncate mt-0.5";
+      elements.kpiSaldoPendienteCop.className = "stat-sub tabular-nums truncate";
       elements.kpiSaldoPendienteCop.textContent = `≈ ${formatCop(copBalance)}`;
     }
     elements.kpiSaldoDesc.textContent = isWorker ? "Tu saldo pendiente por cobrar" : "Deuda total por liquidar a trabajadores";
   } else if (balance === 0) {
-    elements.kpiSaldoPendiente.className = "text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#2563EB] tabular-nums";
+    elements.kpiSaldoPendiente.className = "stat-value tabular-nums truncate";
     elements.kpiSaldoPendiente.textContent = "$0.00";
     if (elements.kpiSaldoPendienteCop) {
-      elements.kpiSaldoPendienteCop.className = "block text-xs font-mono font-medium text-[#2563EB] tabular-nums truncate mt-0.5";
+      elements.kpiSaldoPendienteCop.className = "stat-sub tabular-nums truncate";
       elements.kpiSaldoPendienteCop.textContent = "≈ $0 COP";
     }
     elements.kpiSaldoDesc.textContent = isWorker ? "Tus pagos están al día" : "Todos los pagos están al día";
   } else {
-    elements.kpiSaldoPendiente.className = "text-xl sm:text-2xl 3xl:text-3xl font-semibold font-mono text-[#2563EB] dark:text-[#60A5FA] tabular-nums";
+    elements.kpiSaldoPendiente.className = "stat-value tabular-nums truncate";
     elements.kpiSaldoPendiente.textContent = `+$${Math.abs(balance).toFixed(2)}`;
     if (elements.kpiSaldoPendienteCop) {
-      elements.kpiSaldoPendienteCop.className = "block text-xs font-mono font-medium text-[#2563EB] dark:text-[#60A5FA] tabular-nums truncate mt-0.5";
+      elements.kpiSaldoPendienteCop.className = "stat-sub tabular-nums truncate";
       elements.kpiSaldoPendienteCop.textContent = `≈ +${formatCop(Math.abs(copBalance))}`;
     }
     elements.kpiSaldoDesc.textContent = isWorker ? "Anticipo recibido a tu favor" : "Saldo a favor de la empresa";
@@ -3882,23 +4010,23 @@ function updateFinancialDashboard() {
     if (elements.workerKpiBalance) {
       if (balance > 0.005) {
         elements.workerKpiBalance.textContent = `$${balance.toFixed(2)}`;
-        elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-[#BF6863] tabular-nums";
+        elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-ink tabular-nums";
         if (elements.workerKpiBalanceCop) {
-          elements.workerKpiBalanceCop.className = "block text-xs font-mono font-medium text-[#BF6863] tabular-nums truncate mt-0.5";
+          elements.workerKpiBalanceCop.className = "block text-xs font-mono font-medium text-ink tabular-nums truncate mt-0.5";
           elements.workerKpiBalanceCop.textContent = `≈ ${formatCop(copBalance)}`;
         }
       } else if (balance === 0) {
         elements.workerKpiBalance.textContent = "$0.00";
-        elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-[#2563EB] tabular-nums";
+        elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-ink tabular-nums";
         if (elements.workerKpiBalanceCop) {
-          elements.workerKpiBalanceCop.className = "block text-xs font-mono font-medium text-[#2563EB] tabular-nums truncate mt-0.5";
+          elements.workerKpiBalanceCop.className = "block text-xs font-mono font-medium text-ink tabular-nums truncate mt-0.5";
           elements.workerKpiBalanceCop.textContent = "≈ $0 COP";
         }
       } else {
         elements.workerKpiBalance.textContent = `+$${Math.abs(balance).toFixed(2)}`;
-        elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-[#2563EB] dark:text-[#60A5FA] tabular-nums";
+        elements.workerKpiBalance.className = "text-2xl font-bold font-mono text-ink tabular-nums";
         if (elements.workerKpiBalanceCop) {
-          elements.workerKpiBalanceCop.className = "block text-xs font-mono font-medium text-[#2563EB] dark:text-[#60A5FA] tabular-nums truncate mt-0.5";
+          elements.workerKpiBalanceCop.className = "block text-xs font-mono font-medium text-ink tabular-nums truncate mt-0.5";
           elements.workerKpiBalanceCop.textContent = `≈ +${formatCop(Math.abs(copBalance))}`;
         }
       }
@@ -3943,7 +4071,7 @@ function resetKPIs() {
   if (elements.kpiTotalPagadoCop) elements.kpiTotalPagadoCop.textContent = "≈ $0 COP";
   elements.kpiSaldoPendiente.textContent = "$0.00";
   if (elements.kpiSaldoPendienteCop) elements.kpiSaldoPendienteCop.textContent = "≈ $0 COP";
-  elements.kpiSaldoPendiente.className = "text-2xl font-bold font-mono text-rose-600 dark:text-rose-400 tabular-nums";
+  elements.kpiSaldoPendiente.className = "stat-value tabular-nums truncate";
 
   if (elements.workerKpiEarnedCop) elements.workerKpiEarnedCop.textContent = "≈ $0 COP";
   if (elements.workerKpiPaidCop) elements.workerKpiPaidCop.textContent = "≈ $0 COP";
@@ -3988,11 +4116,11 @@ function updateTrmUI() {
   }
   if (elements.trmModalLiveBadge) {
     if (trmState.isCustom) {
-      elements.trmModalLiveBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span><span>Tasa fija personalizada</span>`;
-      elements.trmModalLiveBadge.className = "text-[10px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1";
+      elements.trmModalLiveBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span>Tasa fija personalizada</span>`;
+      elements.trmModalLiveBadge.className = "text-[10px] text-ink font-medium flex items-center gap-1";
     } else {
-      elements.trmModalLiveBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span><span>En vivo vía mercado financiero (interbancario)</span>`;
-      elements.trmModalLiveBadge.className = "text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1";
+      elements.trmModalLiveBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span><span>En vivo vía mercado financiero (interbancario)</span>`;
+      elements.trmModalLiveBadge.className = "text-[10px] text-mid font-medium flex items-center gap-1";
     }
   }
   if (elements.trmModalLastUpdate) {
@@ -4251,8 +4379,8 @@ function renderProductivityCharts() {
         datasets: [{
           label: "Horas trabajadas",
           data: chartData,
-          backgroundColor: isDark ? "rgba(59, 130, 246, 0.85)" : "rgba(37, 99, 235, 0.85)",
-          hoverBackgroundColor: isDark ? "#60A5FA" : "#1D4ED8",
+          backgroundColor: isDark ? "rgba(250, 250, 250, 0.9)" : "rgba(10, 10, 10, 0.9)",
+          hoverBackgroundColor: isDark ? "#FFFFFF" : "#262626",
           borderRadius: 6,
           borderSkipped: false,
           maxBarThickness: 32
@@ -4264,10 +4392,10 @@ function renderProductivityCharts() {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: isDark ? "#111827" : "#FFFFFF",
-            titleColor: isDark ? "#F8FAFC" : "#0F172A",
-            bodyColor: isDark ? "#94A3B8" : "#64748B",
-            borderColor: isDark ? "#1E293B" : "#E2E8F0",
+            backgroundColor: isDark ? "#171717" : "#FFFFFF",
+            titleColor: isDark ? "#FAFAFA" : "#0A0A0A",
+            bodyColor: isDark ? "#A3A3A3" : "#737373",
+            borderColor: isDark ? "#262626" : "#E5E5E5",
             borderWidth: 1,
             padding: 10,
             cornerRadius: 8,
@@ -4280,17 +4408,17 @@ function renderProductivityCharts() {
           x: {
             grid: { display: false },
             ticks: {
-              color: isDark ? "#94A3B8" : "#64748B",
+              color: isDark ? "#A3A3A3" : "#737373",
               font: { family: "'Inter', sans-serif", size: 10 }
             }
           },
           y: {
             beginAtZero: true,
             grid: {
-              color: isDark ? "rgba(255, 255, 255, 0.05)" : "#E2E8F0"
+              color: isDark ? "rgba(255, 255, 255, 0.05)" : "#E5E5E5"
             },
             ticks: {
-              color: isDark ? "#94A3B8" : "#64748B",
+              color: isDark ? "#A3A3A3" : "#737373",
               font: { family: "'Inter', sans-serif", size: 10 },
               callback: (v) => `${v}h`
             }
@@ -4323,12 +4451,12 @@ function renderProductivityCharts() {
         const meta = getCategoryMeta(k);
         catLabels.push(meta.label);
         catData.push(Number(categoryMap[k].toFixed(2)));
-        catColors.push(meta.chartColor);
+        catColors.push(isDark ? invertGray(meta.chartColor) : meta.chartColor);
       });
     } else {
       catLabels = ["Sin registros"];
       catData = [1];
-      catColors = [isDark ? "#1E293B" : "#E2E8F0"];
+      catColors = [isDark ? "#262626" : "#E5E5E5"];
     }
 
     const ctxCat = elements.productivityCategoryChart.getContext("2d");
@@ -4340,7 +4468,7 @@ function renderProductivityCharts() {
           data: catData,
           backgroundColor: catColors,
           borderWidth: 2,
-          borderColor: isDark ? "#111827" : "#FFFFFF",
+          borderColor: isDark ? "#171717" : "#FFFFFF",
           hoverOffset: 4
         }]
       },
@@ -4352,7 +4480,7 @@ function renderProductivityCharts() {
           legend: {
             position: "bottom",
             labels: {
-              color: isDark ? "#94A3B8" : "#64748B",
+              color: isDark ? "#A3A3A3" : "#737373",
               boxWidth: 8,
               boxHeight: 8,
               padding: 10,
@@ -4360,10 +4488,10 @@ function renderProductivityCharts() {
             }
           },
           tooltip: {
-            backgroundColor: isDark ? "#111827" : "#FFFFFF",
-            titleColor: isDark ? "#F8FAFC" : "#0F172A",
-            bodyColor: isDark ? "#94A3B8" : "#64748B",
-            borderColor: isDark ? "#1E293B" : "#E2E8F0",
+            backgroundColor: isDark ? "#171717" : "#FFFFFF",
+            titleColor: isDark ? "#FAFAFA" : "#0A0A0A",
+            bodyColor: isDark ? "#A3A3A3" : "#737373",
+            borderColor: isDark ? "#262626" : "#E5E5E5",
             borderWidth: 1,
             padding: 10,
             cornerRadius: 8,
@@ -4679,12 +4807,12 @@ function updateUpworkBudgetDashboard(currentTrm) {
     const pillsHtml = (monthConfig.weeks || []).map(w => {
       const val = Number(weeks[w.key]) || 0;
       const isCurrent = w.isCurrent;
-      const currentDot = isCurrent ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mr-1"></span>' : '';
+      const currentDot = isCurrent ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-pulse mr-1"></span>' : '';
       const bgClass = isCurrent
-        ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/35 shadow-xs"
-        : "bg-slate-100 dark:bg-[#1E293B] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60";
+        ? "bg-ink/15 text-mid font-bold border border-line shadow-xs"
+        : "bg-muted text-mid border border-line";
       return `<span class="inline-flex items-center px-2 py-0.5 rounded-md ${bgClass} transition-colors" title="${w.fullLabel}">
-        ${currentDot}${w.pillLabel}: <strong class="ml-1 font-mono text-slate-800 dark:text-slate-200">$${val.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</strong>
+        ${currentDot}${w.pillLabel}: <strong class="ml-1 font-mono text-ink">$${val.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</strong>
       </span>`;
     }).join("");
     elements.upworkWeeksPillsBar.innerHTML = pillsHtml;
@@ -4728,20 +4856,20 @@ function updateUpworkBudgetDashboard(currentTrm) {
   if (elements.upworkAvailableBudgetDisplay) {
     if (realNetMargin >= 0) {
       elements.upworkAvailableBudgetDisplay.textContent = `$${realNetMargin.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      elements.upworkAvailableBudgetDisplay.className = "text-xl sm:text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums";
+      elements.upworkAvailableBudgetDisplay.className = "hero-amount tabular-nums text-ink";
     } else {
       elements.upworkAvailableBudgetDisplay.textContent = `-$${Math.abs(realNetMargin).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      elements.upworkAvailableBudgetDisplay.className = "text-xl sm:text-2xl font-bold font-mono text-[#BF6863] tabular-nums";
+      elements.upworkAvailableBudgetDisplay.className = "hero-amount tabular-nums text-ember";
     }
   }
 
   if (elements.upworkAvailableBudgetCopDisplay) {
     if (realNetMargin >= 0) {
       elements.upworkAvailableBudgetCopDisplay.textContent = `≈ +${formatCop(realNetMarginCop)}`;
-      elements.upworkAvailableBudgetCopDisplay.className = "block text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5";
+      elements.upworkAvailableBudgetCopDisplay.className = "block text-xs font-mono font-medium text-mid tabular-nums mt-0.5";
     } else {
       elements.upworkAvailableBudgetCopDisplay.textContent = `≈ -${formatCop(Math.abs(realNetMarginCop))}`;
-      elements.upworkAvailableBudgetCopDisplay.className = "block text-xs font-mono font-medium text-[#BF6863] tabular-nums mt-0.5";
+      elements.upworkAvailableBudgetCopDisplay.className = "block text-xs font-mono font-medium text-ink tabular-nums mt-0.5";
     }
   }
 
@@ -4761,41 +4889,41 @@ function updateUpworkBudgetDashboard(currentTrm) {
     const barWidth = netRealRevenue > 0 ? Math.min(usagePercent, 100) : 0;
     elements.upworkBudgetProgressBar.style.width = `${barWidth}%`;
     if (usagePercent > 100) {
-      elements.upworkBudgetProgressBar.className = "h-2 rounded-full bg-[#BF6863] transition-all duration-500";
+      elements.upworkBudgetProgressBar.className = "h-2 rounded-full bg-ember transition-all duration-500";
     } else if (usagePercent > 80) {
-      elements.upworkBudgetProgressBar.className = "h-2 rounded-full bg-amber-500 transition-all duration-500";
+      elements.upworkBudgetProgressBar.className = "h-2 rounded-full bg-faint transition-all duration-500";
     } else {
-      elements.upworkBudgetProgressBar.className = "h-2 rounded-full bg-emerald-500 transition-all duration-500";
+      elements.upworkBudgetProgressBar.className = "h-2 rounded-full bg-primary transition-all duration-500";
     }
   }
 
   if (elements.upworkBudgetStatusBadge) {
     if (grossRevenue === 0) {
       elements.upworkBudgetStatusBadge.textContent = "Pendiente Recaudo";
-      elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-slate-500/10 text-slate-600 dark:text-slate-400";
+      elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-muted/10 text-mid";
     } else if (realNetMargin < 0) {
       elements.upworkBudgetStatusBadge.textContent = "Excedido";
-      elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-[#BF6863]/15 text-[#BF6863]";
+      elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-ember/15 text-ink";
     } else {
       const freePercent = Math.max(0, 100 - usagePercent);
       elements.upworkBudgetStatusBadge.textContent = `${freePercent}% Libre`;
-      elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+      elements.upworkBudgetStatusBadge.className = "text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-ink/10 text-mid";
     }
   }
 
   if (elements.upworkBudgetHealthDesc) {
     if (grossRevenue === 0) {
       elements.upworkBudgetHealthDesc.textContent = "Ingresa la recaudación de las semanas para monitorear el balance del mes";
-      elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-slate-500 dark:text-slate-400";
+      elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-mid";
     } else if (usagePercent > 100) {
       elements.upworkBudgetHealthDesc.textContent = "⚠️ Nómina mensual supera el recaudo neto en Colombia";
-      elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-[#BF6863]";
+      elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-ink";
     } else if (usagePercent > 80) {
       elements.upworkBudgetHealthDesc.textContent = "Alerta: nómina mensual cercana al límite del recaudo (80%+)";
-      elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-amber-600 dark:text-amber-400";
+      elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-mid";
     } else {
       elements.upworkBudgetHealthDesc.textContent = "Presupuesto mensual saludable con margen neto positivo";
-      elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-emerald-600 dark:text-emerald-400";
+      elements.upworkBudgetHealthDesc.className = "text-[10px] font-semibold text-mid";
     }
   }
 
@@ -4989,12 +5117,12 @@ function updateUpworkInputPreview() {
   const tier2 = elements.nequiTierBox2;
   const tier3 = elements.nequiTierBox3;
   [tier1, tier2, tier3].forEach(el => {
-    el?.classList.remove("ring-2", "ring-purple-500", "bg-purple-50", "dark:bg-purple-950/40");
+    el?.classList.remove("ring-2", "ring-ink", "bg-muted", "dark:bg-ink/40");
   });
   if (includeNequi && paypalAmount > 0) {
-    if (nequiCalc.tier === 1) tier1?.classList.add("ring-2", "ring-purple-500", "bg-purple-50", "dark:bg-purple-950/40");
-    else if (nequiCalc.tier === 2) tier2?.classList.add("ring-2", "ring-purple-500", "bg-purple-50", "dark:bg-purple-950/40");
-    else if (nequiCalc.tier === 3) tier3?.classList.add("ring-2", "ring-purple-500", "bg-purple-50", "dark:bg-purple-950/40");
+    if (nequiCalc.tier === 1) tier1?.classList.add("ring-2", "ring-ink", "bg-muted", "dark:bg-ink/40");
+    else if (nequiCalc.tier === 2) tier2?.classList.add("ring-2", "ring-ink", "bg-muted", "dark:bg-ink/40");
+    else if (nequiCalc.tier === 3) tier3?.classList.add("ring-2", "ring-ink", "bg-muted", "dark:bg-ink/40");
   }
 
   if (elements.upworkBreakdownNet) {
@@ -5006,10 +5134,10 @@ function updateUpworkInputPreview() {
   if (elements.upworkBreakdownNetMargin) {
     if (netMargin >= 0) {
       elements.upworkBreakdownNetMargin.textContent = `+$${netMargin.toFixed(2)} USD (≈ +${formatCop(netMargin * trm)})`;
-      elements.upworkBreakdownNetMargin.className = "font-bold text-emerald-600 dark:text-emerald-400";
+      elements.upworkBreakdownNetMargin.className = "font-bold text-mid";
     } else {
       elements.upworkBreakdownNetMargin.textContent = `-$${Math.abs(netMargin).toFixed(2)} USD (≈ -${formatCop(Math.abs(netMargin * trm))})`;
-      elements.upworkBreakdownNetMargin.className = "font-bold text-[#BF6863]";
+      elements.upworkBreakdownNetMargin.className = "font-bold text-ink";
     }
   }
 }
@@ -5317,7 +5445,7 @@ function updateClientsUI() {
   if (state.clients.length === 0) {
     elements.clientsTableBody.innerHTML = `
       <tr>
-        <td colspan="7" class="py-8 text-center text-[#64748B] dark:text-[#94A3B8] text-xs">
+        <td colspan="7" class="py-8 text-center text-mid text-xs">
           No tienes clientes registrados aún. Haz clic en <strong>+ Nuevo Cliente</strong> o <strong>Detectar Clientes</strong>.
         </td>
       </tr>
@@ -5345,66 +5473,66 @@ function updateClientsUI() {
     let progressHtml = "";
     if (limitHours > 0) {
       const pct = Math.min(Math.round((totalHours / limitHours) * 100), 999);
-      const barColor = pct > 100 ? "bg-[#BF6863]" : pct > 80 ? "bg-amber-500" : "bg-emerald-500";
+      const barColor = pct > 100 ? "bg-ember" : pct > 80 ? "bg-faint" : "bg-primary";
       progressHtml = `
         <div class="mt-1">
-          <div class="flex items-center justify-between text-[10px] font-mono text-[#64748B] dark:text-[#94A3B8]">
+          <div class="flex items-center justify-between text-[10px] font-mono text-mid">
             <span>${totalHours.toFixed(1)}h / ${limitHours.toFixed(1)}h</span>
-            <span class="${pct > 100 ? 'text-[#BF6863] font-bold' : ''}">${pct}%</span>
+            <span class="${pct > 100 ? 'text-ink font-bold' : ''}">${pct}%</span>
           </div>
-          <div class="w-full bg-[#E2E8F0] dark:bg-[#1E293B] rounded-full h-1.5 mt-0.5 overflow-hidden">
+          <div class="w-full bg-muted rounded-full h-1.5 mt-0.5 overflow-hidden">
             <div class="${barColor} h-1.5 rounded-full" style="width: ${Math.min(pct, 100)}%"></div>
           </div>
         </div>
       `;
     } else {
       progressHtml = `
-        <span class="text-xs font-mono font-medium text-[#0F172A] dark:text-[#F8FAFC]">${totalHours.toFixed(2)}h registradas</span>
-        <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block">Sin límite pactado</span>
+        <span class="text-xs font-mono font-medium text-ink">${totalHours.toFixed(2)}h registradas</span>
+        <span class="text-[10px] text-mid block">Sin límite pactado</span>
       `;
     }
 
     const marginColor = grossMargin >= 0 
-      ? "text-emerald-600 dark:text-emerald-400 font-semibold" 
-      : "text-[#BF6863] font-semibold";
+      ? "text-mid font-semibold" 
+      : "text-ink font-semibold";
 
     return `
-      <tr class="hover:bg-[#F1F5F9] dark:hover:bg-[#162032] transition-colors">
+      <tr class="hover:bg-muted transition-colors">
         <td class="py-3 px-3">
           <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-semibold shrink-0 border border-amber-500/20">
+            <div class="w-7 h-7 rounded-lg bg-ink/10 text-mid flex items-center justify-center text-xs font-semibold shrink-0 border border-line">
               <i class="fa-solid fa-briefcase text-[11px]"></i>
             </div>
             <div>
-              <span class="font-semibold text-[#0F172A] dark:text-[#F8FAFC] block text-xs">${escapeHtml(client.nombre)}</span>
-              ${client.notas ? `<span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] truncate block max-w-xs" title="${escapeHtml(client.notas)}">${escapeHtml(client.notas)}</span>` : ""}
+              <span class="font-semibold text-ink block text-xs">${escapeHtml(client.nombre)}</span>
+              ${client.notas ? `<span class="text-[10px] text-mid truncate block max-w-xs" title="${escapeHtml(client.notas)}">${escapeHtml(client.notas)}</span>` : ""}
             </div>
           </div>
         </td>
         <td class="py-3 px-2 text-right font-mono text-xs">
-          ${hourlyRate > 0 ? `<span class="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">$${hourlyRate.toFixed(2)}/h</span>` : `<span class="text-[#64748B] dark:text-[#94A3B8]">Sin tarifa</span>`}
+          ${hourlyRate > 0 ? `<span class="font-semibold text-ink">$${hourlyRate.toFixed(2)}/h</span>` : `<span class="text-mid">Sin tarifa</span>`}
         </td>
         <td class="py-3 px-3 min-w-[150px]">
           ${progressHtml}
         </td>
         <td class="py-3 px-2 text-right font-mono text-xs tabular-nums">
-          <span class="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">$${billableRevenue.toFixed(2)}</span>
-          <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block">≈ ${formatCop(billableCop)}</span>
+          <span class="font-semibold text-ink">$${billableRevenue.toFixed(2)}</span>
+          <span class="text-[10px] text-mid block">≈ ${formatCop(billableCop)}</span>
         </td>
         <td class="py-3 px-2 text-right font-mono text-xs tabular-nums">
-          <span class="font-medium text-[#2563EB]">$${totalPayrollCost.toFixed(2)}</span>
-          <span class="text-[10px] text-[#64748B] dark:text-[#94A3B8] block">≈ ${formatCop(payrollCop)}</span>
+          <span class="font-medium text-ink">$${totalPayrollCost.toFixed(2)}</span>
+          <span class="text-[10px] text-mid block">≈ ${formatCop(payrollCop)}</span>
         </td>
         <td class="py-3 px-3 text-right font-mono text-xs tabular-nums">
           <span class="${marginColor}">${grossMargin >= 0 ? '+' : ''}$${grossMargin.toFixed(2)}</span>
-          <span class="text-[10px] ${grossMargin >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#BF6863]'} block">≈ ${formatCop(marginCop)}</span>
+          <span class="text-[10px] ${grossMargin >= 0 ? 'text-mid' : 'text-ink'} block">≈ ${formatCop(marginCop)}</span>
         </td>
         <td class="py-3 px-2 text-center whitespace-nowrap">
           <div class="inline-flex items-center gap-1">
-            <button type="button" onclick="window.openClientModal('${client.id}')" class="p-1 rounded-md text-[#64748B] hover:text-[#2563EB] hover:bg-[#2563EB]/10 transition-colors" title="Editar cliente">
+            <button type="button" onclick="window.openClientModal('${client.id}')" class="p-1 rounded-md text-mid hover:text-ink hover:bg-ink/10 transition-colors" title="Editar cliente">
               <i class="fa-regular fa-pen-to-square text-xs"></i>
             </button>
-            <button type="button" onclick="window.deleteClient(${jsArg(client.id)}, ${jsArg(client.nombre)})" class="p-1 rounded-md text-[#64748B] hover:text-[#BF6863] hover:bg-[#BF6863]/10 transition-colors" title="Eliminar cliente">
+            <button type="button" onclick="window.deleteClient(${jsArg(client.id)}, ${jsArg(client.nombre)})" class="p-1 rounded-md text-mid hover:text-ember hover:bg-ember/10 transition-colors" title="Eliminar cliente">
               <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
           </div>
@@ -5749,10 +5877,10 @@ function setTimerMode(mode) {
     state.pomodoro.remainingSeconds = state.pomodoro.focusMinutes * 60;
 
     if (elements.btnModePomodoro) {
-      elements.btnModePomodoro.className = "px-2.5 py-1 text-xs font-semibold rounded-md bg-[#2563EB] text-white shadow-sm transition-all";
+      elements.btnModePomodoro.className = "px-2.5 py-1 text-xs font-semibold rounded-md bg-primary text-on-primary shadow-sm transition-all";
     }
     if (elements.btnModeStandard) {
-      elements.btnModeStandard.className = "px-2.5 py-1 text-xs font-medium rounded-md text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white transition-all";
+      elements.btnModeStandard.className = "px-2.5 py-1 text-xs font-medium rounded-md text-mid hover:text-ink dark:hover:text-white transition-all";
     }
     if (elements.pomodoroBanner) {
       elements.pomodoroBanner.classList.remove("hidden");
@@ -5765,10 +5893,10 @@ function setTimerMode(mode) {
   } else {
     state.pomodoro.enabled = false;
     if (elements.btnModeStandard) {
-      elements.btnModeStandard.className = "px-2.5 py-1 text-xs font-semibold rounded-md bg-[#2563EB] text-white shadow-sm transition-all";
+      elements.btnModeStandard.className = "px-2.5 py-1 text-xs font-semibold rounded-md bg-primary text-on-primary shadow-sm transition-all";
     }
     if (elements.btnModePomodoro) {
-      elements.btnModePomodoro.className = "px-2.5 py-1 text-xs font-medium rounded-md text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white transition-all";
+      elements.btnModePomodoro.className = "px-2.5 py-1 text-xs font-medium rounded-md text-mid hover:text-ink dark:hover:text-white transition-all";
     }
     if (elements.pomodoroBanner) {
       elements.pomodoroBanner.classList.add("hidden");
@@ -5851,21 +5979,21 @@ function updateWorkerGoalUI() {
   if (elements.workerGoalProgressBar) {
     elements.workerGoalProgressBar.style.width = `${Math.min(pct, 100)}%`;
     if (pct >= 100) {
-      elements.workerGoalProgressBar.className = "bg-emerald-500 h-2 rounded-full transition-all duration-500";
+      elements.workerGoalProgressBar.className = "bg-primary h-2 rounded-full transition-all duration-500";
     } else if (pct >= 50) {
-      elements.workerGoalProgressBar.className = "bg-[#2563EB] h-2 rounded-full transition-all duration-500";
+      elements.workerGoalProgressBar.className = "bg-primary h-2 rounded-full transition-all duration-500";
     } else {
-      elements.workerGoalProgressBar.className = "bg-amber-500 h-2 rounded-full transition-all duration-500";
+      elements.workerGoalProgressBar.className = "bg-faint h-2 rounded-full transition-all duration-500";
     }
   }
 
   if (elements.workerGoalStatusBadge) {
     if (pct >= 100) {
       elements.workerGoalStatusBadge.textContent = "¡Meta Superada!";
-      elements.workerGoalStatusBadge.className = "text-[9px] font-mono px-2 py-0.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20";
+      elements.workerGoalStatusBadge.className = "text-[9px] font-mono px-2 py-0.5 rounded-full font-semibold bg-ink/10 text-mid border border-line";
     } else {
       elements.workerGoalStatusBadge.textContent = `${pct}% Logrado`;
-      elements.workerGoalStatusBadge.className = "text-[9px] font-mono px-2 py-0.5 rounded-full font-semibold bg-[#2563EB]/10 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/20";
+      elements.workerGoalStatusBadge.className = "text-[9px] font-mono px-2 py-0.5 rounded-full font-semibold bg-ink/10 text-ink border border-line";
     }
   }
 }
@@ -6138,13 +6266,13 @@ function setManualEntryMode(mode) {
 
   if (targetMode === "artes") {
     if (elements.manualModeArtsBtn) {
-      elements.manualModeArtsBtn.className = "py-1.5 px-3 rounded-lg bg-[#2563EB] text-white shadow-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer";
+      elements.manualModeArtsBtn.className = "py-1.5 px-3 rounded-lg bg-primary text-on-primary shadow-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer";
     }
     if (elements.manualModeHoursBtn) {
-      elements.manualModeHoursBtn.className = "py-1.5 px-3 rounded-lg text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer";
+      elements.manualModeHoursBtn.className = "py-1.5 px-3 rounded-lg text-mid hover:text-ink dark:hover:text-white font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer";
     }
-    if (artsIcon) artsIcon.className = "fa-solid fa-palette text-xs text-white";
-    if (hoursIcon) hoursIcon.className = "fa-solid fa-clock text-xs text-[#2563EB] dark:text-[#60A5FA]";
+    if (artsIcon) artsIcon.className = "fa-solid fa-palette text-xs text-on-primary";
+    if (hoursIcon) hoursIcon.className = "fa-solid fa-clock text-xs text-ink";
 
     if (elements.manualHoursContainer) elements.manualHoursContainer.classList.add("hidden");
     if (elements.manualArtsContainer) elements.manualArtsContainer.classList.remove("hidden");
@@ -6162,13 +6290,13 @@ function setManualEntryMode(mode) {
     }
   } else {
     if (elements.manualModeHoursBtn) {
-      elements.manualModeHoursBtn.className = "py-1.5 px-3 rounded-lg bg-[#2563EB] text-white shadow-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer";
+      elements.manualModeHoursBtn.className = "py-1.5 px-3 rounded-lg bg-primary text-on-primary shadow-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer";
     }
     if (elements.manualModeArtsBtn) {
-      elements.manualModeArtsBtn.className = "py-1.5 px-3 rounded-lg text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer";
+      elements.manualModeArtsBtn.className = "py-1.5 px-3 rounded-lg text-mid hover:text-ink dark:hover:text-white font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer";
     }
-    if (hoursIcon) hoursIcon.className = "fa-solid fa-clock text-xs text-white";
-    if (artsIcon) artsIcon.className = "fa-solid fa-palette text-xs text-purple-600 dark:text-purple-400";
+    if (hoursIcon) hoursIcon.className = "fa-solid fa-clock text-xs text-on-primary";
+    if (artsIcon) artsIcon.className = "fa-solid fa-palette text-xs text-ink";
 
     if (elements.manualHoursContainer) elements.manualHoursContainer.classList.remove("hidden");
     if (elements.manualArtsContainer) elements.manualArtsContainer.classList.add("hidden");
@@ -6478,20 +6606,20 @@ window.setStatementDocType = function(type) {
 
   currentStatementDocType = type;
   if (type === "bill") {
-    elements.docTypeBillBtn?.classList.add("bg-blue-600", "text-white", "shadow-sm");
-    elements.docTypeBillBtn?.classList.remove("text-slate-500", "dark:text-slate-400");
-    elements.docTypeReceiptBtn?.classList.remove("bg-blue-600", "text-white", "shadow-sm");
-    elements.docTypeReceiptBtn?.classList.add("text-slate-500", "dark:text-slate-400");
+    elements.docTypeBillBtn?.classList.add("bg-primary", "text-on-primary", "shadow-sm");
+    elements.docTypeBillBtn?.classList.remove("text-mid", "dark:text-mid");
+    elements.docTypeReceiptBtn?.classList.remove("bg-primary", "text-on-primary", "shadow-sm");
+    elements.docTypeReceiptBtn?.classList.add("text-mid", "dark:text-mid");
     elements.docViewBill?.classList.remove("hidden");
     elements.docViewReceipt?.classList.add("hidden");
     if (elements.btnPrintStatementLabel) {
       elements.btnPrintStatementLabel.textContent = "Imprimir / Guardar Cuenta de Cobro (PDF)";
     }
   } else {
-    elements.docTypeReceiptBtn?.classList.add("bg-blue-600", "text-white", "shadow-sm");
-    elements.docTypeReceiptBtn?.classList.remove("text-slate-500", "dark:text-slate-400");
-    elements.docTypeBillBtn?.classList.remove("bg-blue-600", "text-white", "shadow-sm");
-    elements.docTypeBillBtn?.classList.add("text-slate-500", "dark:text-slate-400");
+    elements.docTypeReceiptBtn?.classList.add("bg-primary", "text-on-primary", "shadow-sm");
+    elements.docTypeReceiptBtn?.classList.remove("text-mid", "dark:text-mid");
+    elements.docTypeBillBtn?.classList.remove("bg-primary", "text-on-primary", "shadow-sm");
+    elements.docTypeBillBtn?.classList.add("text-mid", "dark:text-mid");
     elements.docViewReceipt?.classList.remove("hidden");
     elements.docViewBill?.classList.add("hidden");
     if (elements.btnPrintStatementLabel) {
@@ -6678,27 +6806,27 @@ window.openStatementModal = function(workerId, preferredType) {
 
   if (elements.billTasksBody) {
     if (filteredTasks.length === 0) {
-      elements.billTasksBody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400 text-xs">No hay actividades registradas en este período.</td></tr>`;
+      elements.billTasksBody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-mid text-xs">No hay actividades registradas en este período.</td></tr>`;
     } else {
       elements.billTasksBody.innerHTML = filteredTasks.map(t => {
         const cat = getCategoryMeta(t.categoria);
         const isArtTask = t.cantidadArtes && Number(t.cantidadArtes) > 0;
         const artPill = isArtTask
-          ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-purple-50 text-purple-700 border border-purple-200/60 ml-1.5"><i class="fa-solid fa-palette text-purple-600"></i> ${t.cantidadArtes} artes @ $${Number(t.tarifaArte || 0).toFixed(2)}</span>`
+          ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-muted text-ink border border-line ml-1.5"><i class="fa-solid fa-palette text-ink"></i> ${t.cantidadArtes} artes @ $${Number(t.tarifaArte || 0).toFixed(2)}</span>`
           : "";
         const volText = isArtTask ? `${t.cantidadArtes} artes` : `${Number(t.horas || 0).toFixed(2)}h`;
 
         return `
           <tr class="text-xs">
-            <td class="py-2.5 px-3 font-medium text-slate-600 tabular-nums whitespace-nowrap">${t.fecha || '-'}</td>
-            <td class="py-2.5 px-3 font-semibold text-slate-800">${escapeHtml(t.cliente || 'General')}</td>
-            <td class="py-2.5 px-3 text-slate-700">
+            <td class="py-2.5 px-3 font-medium text-mid tabular-nums whitespace-nowrap">${t.fecha || '-'}</td>
+            <td class="py-2.5 px-3 font-semibold text-ink">${escapeHtml(t.cliente || 'General')}</td>
+            <td class="py-2.5 px-3 text-ink">
               <span class="font-medium">${escapeHtml(t.descripcion || 'Servicio')}</span>
               ${artPill}
-              <span class="text-[10px] text-slate-500 block">${cat.label}</span>
+              <span class="text-[10px] text-mid block">${cat.label}</span>
             </td>
-            <td class="py-2.5 px-2 text-right font-medium text-slate-600 tabular-nums whitespace-nowrap">${volText}</td>
-            <td class="py-2.5 px-3 text-right font-bold text-slate-900 tabular-nums whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
+            <td class="py-2.5 px-2 text-right font-medium text-mid tabular-nums whitespace-nowrap">${volText}</td>
+            <td class="py-2.5 px-3 text-right font-bold text-ink tabular-nums whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
           </tr>
         `;
       }).join("");
@@ -6727,7 +6855,7 @@ window.openStatementModal = function(workerId, preferredType) {
   if (elements.receiptTotalPaid) elements.receiptTotalPaid.textContent = `$${totalPaid.toFixed(2)}`;
   if (elements.receiptNetBalance) {
     elements.receiptNetBalance.textContent = (netBalance >= 0 ? "+$" : "-$") + Math.abs(netBalance).toFixed(2);
-    elements.receiptNetBalance.className = netBalance > 0 ? "text-base sm:text-lg font-bold tabular-nums text-rose-600" : "text-base sm:text-lg font-bold tabular-nums text-emerald-600";
+    elements.receiptNetBalance.className = netBalance > 0 ? "text-base sm:text-lg font-bold tabular-nums text-ember" : "text-base sm:text-lg font-bold tabular-nums text-mid";
   }
   if (elements.receiptNetBalanceCop) {
     elements.receiptNetBalanceCop.textContent = `≈ ${formatCop(netBalance * currentTrm)}`;
@@ -6736,22 +6864,22 @@ window.openStatementModal = function(workerId, preferredType) {
 
   if (elements.receiptTasksBody) {
     if (filteredTasks.length === 0) {
-      elements.receiptTasksBody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400 text-xs">No hay actividades aprobadas en este período.</td></tr>`;
+      elements.receiptTasksBody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-mid text-xs">No hay actividades aprobadas en este período.</td></tr>`;
     } else {
       elements.receiptTasksBody.innerHTML = filteredTasks.map(t => {
         const cat = getCategoryMeta(t.categoria);
         const isArtTask = t.cantidadArtes && Number(t.cantidadArtes) > 0;
-        const catPill = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 text-slate-700 border border-slate-200"><i class="fa-solid ${cat.icon}"></i> ${cat.label}</span>`;
-        const clientPill = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 text-slate-700 border border-slate-200"><i class="fa-solid fa-briefcase text-blue-600"></i> ${escapeHtml(t.cliente)}</span>` : "";
+        const catPill = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-muted text-ink border border-line"><i class="fa-solid ${cat.icon}"></i> ${cat.label}</span>`;
+        const clientPill = t.cliente ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-muted text-ink border border-line"><i class="fa-solid fa-briefcase text-ink"></i> ${escapeHtml(t.cliente)}</span>` : "";
         const artPill = isArtTask
-          ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-purple-50 text-purple-700 border border-purple-200/60"><i class="fa-solid fa-palette text-purple-600"></i> ${t.cantidadArtes} artes @ $${Number(t.tarifaArte || 0).toFixed(2)}</span>`
+          ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-muted text-ink border border-line"><i class="fa-solid fa-palette text-ink"></i> ${t.cantidadArtes} artes @ $${Number(t.tarifaArte || 0).toFixed(2)}</span>`
           : "";
         const volText = isArtTask ? `${t.cantidadArtes} artes` : `${Number(t.horas || 0).toFixed(2)}h`;
 
         return `
           <tr class="text-xs">
-            <td class="py-2.5 px-3 font-medium text-slate-600 tabular-nums whitespace-nowrap">${t.fecha || '-'}</td>
-            <td class="py-2.5 px-3 text-slate-800">
+            <td class="py-2.5 px-3 font-medium text-mid tabular-nums whitespace-nowrap">${t.fecha || '-'}</td>
+            <td class="py-2.5 px-3 text-ink">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-medium">${escapeHtml(t.descripcion || 'Tarea')}</span>
                 ${clientPill}
@@ -6759,8 +6887,8 @@ window.openStatementModal = function(workerId, preferredType) {
                 ${artPill}
               </div>
             </td>
-            <td class="py-2.5 px-2 text-right font-medium text-slate-600 tabular-nums whitespace-nowrap">${volText}</td>
-            <td class="py-2.5 px-3 text-right font-bold text-slate-900 tabular-nums whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
+            <td class="py-2.5 px-2 text-right font-medium text-mid tabular-nums whitespace-nowrap">${volText}</td>
+            <td class="py-2.5 px-3 text-right font-bold text-ink tabular-nums whitespace-nowrap">$${Number(t.costoTotal || 0).toFixed(2)}</td>
           </tr>
         `;
       }).join("");
@@ -6769,13 +6897,13 @@ window.openStatementModal = function(workerId, preferredType) {
 
   if (elements.receiptPaymentsBody) {
     if (filteredPayments.length === 0) {
-      elements.receiptPaymentsBody.innerHTML = `<tr><td colspan="3" class="py-3 text-center text-slate-400 text-xs">No hay pagos registrados para este colaborador en el período.</td></tr>`;
+      elements.receiptPaymentsBody.innerHTML = `<tr><td colspan="3" class="py-3 text-center text-mid text-xs">No hay pagos registrados para este colaborador en el período.</td></tr>`;
     } else {
       elements.receiptPaymentsBody.innerHTML = filteredPayments.map(p => `
         <tr class="text-xs">
-          <td class="py-2.5 px-3 font-medium text-slate-600 tabular-nums whitespace-nowrap">${p.fecha || '-'}</td>
-          <td class="py-2.5 px-3 text-slate-800">${escapeHtml(p.referencia || 'Transferencia / Liquidación')}</td>
-          <td class="py-2.5 px-3 text-right font-bold text-emerald-600 tabular-nums whitespace-nowrap">$${Number(p.monto || 0).toFixed(2)}</td>
+          <td class="py-2.5 px-3 font-medium text-mid tabular-nums whitespace-nowrap">${p.fecha || '-'}</td>
+          <td class="py-2.5 px-3 text-ink">${escapeHtml(p.referencia || 'Transferencia / Liquidación')}</td>
+          <td class="py-2.5 px-3 text-right font-bold text-mid tabular-nums whitespace-nowrap">$${Number(p.monto || 0).toFixed(2)}</td>
         </tr>
       `).join("");
     }
@@ -6994,6 +7122,11 @@ function setupEventListeners() {
       card.classList.add("highlight-pulse");
       setTimeout(() => card.classList.remove("highlight-pulse"), 1600);
     }
+  });
+
+  elements.btnAdminApprovalsViewAll?.addEventListener("click", () => {
+    window.setTaskStatusFilter("pendiente");
+    document.querySelector('.sidebar-nav-link[data-nav="tasks"]')?.click();
   });
 
   elements.btnAdminScrollToWorker?.addEventListener("click", () => {
@@ -7246,6 +7379,25 @@ function setupSidebarNavigation() {
   btnCloseSidebarMobile?.addEventListener("click", closeSidebar);
   sidebarBackdrop?.addEventListener("click", closeSidebar);
 
+  // Barra inferior en celular: reutiliza la navegación del sidebar y los botones existentes
+  const tabbarButtons = document.querySelectorAll("#mobileTabbar button");
+  tabbarButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const { tabNav, tabScroll, tabClick } = btn.dataset;
+      if (tabNav) {
+        document.querySelector(`.sidebar-nav-link[data-nav="${tabNav}"]`)?.click();
+      } else if (tabScroll) {
+        hideProfilePage();
+        document.getElementById(tabScroll)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (tabClick) {
+        document.getElementById(tabClick)?.click();
+      }
+      if (!btn.classList.contains("tabbar-fab") && tabClick !== "btnToggleMobileSidebar") {
+        tabbarButtons.forEach(b => b.classList.toggle("active", b === btn));
+      }
+    });
+  });
+
   sidebarLinks.forEach(link => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
@@ -7366,10 +7518,10 @@ function showToast(message, type = "info") {
   const toast = document.createElement("div");
   toast.className = "toast-msg";
 
-  let icon = "fa-circle-info text-blue-500";
-  if (type === "success") icon = "fa-circle-check text-emerald-500";
-  else if (type === "warning") icon = "fa-triangle-exclamation text-amber-500";
-  else if (type === "error") icon = "fa-circle-xmark text-rose-500";
+  let icon = "fa-circle-info text-ink";
+  if (type === "success") icon = "fa-circle-check text-mid";
+  else if (type === "warning") icon = "fa-triangle-exclamation text-mid";
+  else if (type === "error") icon = "fa-circle-xmark text-ember";
 
   toast.innerHTML = `
     <i class="fa-solid ${icon} text-sm flex-shrink-0"></i>

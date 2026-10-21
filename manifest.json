@@ -4,8 +4,8 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#090d16",
-  "theme_color": "#2563eb",
+  "background_color": "#f5f5f5",
+  "theme_color": "#0a0a0a",
   "orientation": "any",
   "description": "Control de Horas, Cronómetro en Vivo y Dashboard Financiero — Lina De La Espriella",
   "icons": [
