@@ -233,168 +233,160 @@
   <!-- =========================================================================
        MODELO 1: SAAS PRO DASHBOARD SHELL (Sidebar Vertical + Canvas Principal)
        ========================================================================= -->
-  <div id="mainAppDashboard" class="hidden min-h-screen flex flex-col lg:flex-row bg-[var(--surface-canvas)] text-[var(--color-ink)] selection:bg-[#0a0a0a] selection:text-white dark:selection:bg-[#fafafa] dark:selection:text-black">
+  <div id="mainAppDashboard" class="hidden min-h-screen flex flex-col bg-[var(--surface-canvas)] text-[var(--color-ink)] selection:bg-[#0a0a0a] selection:text-white dark:selection:bg-[#fafafa] dark:selection:text-black">
     
-    <!-- BACKDROP MÓVIL PARA SIDEBAR -->
-    <div id="sidebarBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden hidden transition-opacity"></div>
+    <!-- BACKDROP MÓVIL (para menú desplegable en pantallas pequeñas) -->
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden hidden transition-opacity"></div>
 
-    <!-- 1. SIDEBAR VERTICAL (Modelo 1 - SaaS Pro: Verde Carbón #0F172A) -->
-    <aside id="appSidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0F172A] text-[#94A3B8] border-r border-[#1E293B] flex flex-col justify-between transition-transform duration-300 -translate-x-full lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen shrink-0 shadow-lg lg:shadow-none">
-      
-      <div class="flex flex-col flex-1 min-h-0">
-        <!-- Brand & Logo -->
-        <div class="p-4 sm:p-5 flex items-center justify-between border-b border-[#1E293B] shrink-0">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-[#2563EB] text-white flex items-center justify-center text-base font-bold shrink-0">
-              <i class="fa-solid fa-stopwatch"></i>
-            </div>
-            <div>
-              <div class="font-bold text-white tracking-tight text-sm leading-none">Time Tracker</div>
-              <span class="text-[10px] font-mono uppercase tracking-wider text-[#3B82F6] font-medium block mt-1">Lina De La Espriella</span>
-            </div>
+    <!-- 1. TOP NAVIGATION BAR UNIFICADO (Sin barra lateral — Estilo Vercel & Linear) -->
+    <header id="appTopNavbar" class="sticky top-0 z-40 bg-[var(--surface-card)]/90 backdrop-blur-md border-b border-[var(--color-hairline)] px-3 sm:px-6 py-2.5 transition-colors">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+        
+        <!-- Izquierda: Brand & Isotipo -->
+        <div class="flex items-center gap-3 shrink-0">
+          <div class="brand-icon-box w-9 h-9 rounded-[10px] bg-[#0a0a0a] text-white dark:bg-[#fafafa] dark:text-[#0a0a0a] flex items-center justify-center text-sm font-bold shadow-xs">
+            <i class="fa-solid fa-stopwatch"></i>
           </div>
-          <!-- Botón Cerrar en Pantallas Móviles -->
-          <button type="button" id="btnCloseSidebarMobile" class="lg:hidden text-[#64748B] hover:text-white p-1 rounded-lg">
-            <i class="fa-solid fa-xmark text-lg"></i>
-          </button>
+          <div>
+            <div class="flex items-center gap-1.5 leading-none">
+              <span class="font-bold tracking-tight text-sm text-[var(--color-ink)]">Time Tracker</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--color-ink-soft)] text-[var(--color-paper)] font-semibold">PRO</span>
+            </div>
+            <span class="text-[10px] font-mono text-[var(--color-mid-gray)] block mt-0.5">Widely Social</span>
+          </div>
         </div>
 
-        <!-- Enlaces de Navegación del Sidebar -->
-        <nav class="p-3 space-y-1 overflow-y-auto flex-1 text-xs">
+        <!-- Centro: Enlaces de Navegación en Cápsulas (Pills) -->
+        <nav class="hidden lg:flex items-center gap-1 bg-[var(--color-canvas)] p-1 rounded-[18px] border border-[var(--color-hairline)] text-xs font-medium">
           <a href="javascript:void(0)" class="sidebar-nav-link active" data-nav="dashboard">
-            <i class="fa-solid fa-gauge-high text-sm w-5 text-center"></i>
+            <i class="fa-solid fa-gauge-high text-xs mr-1"></i>
             <span>Dashboard</span>
           </a>
           <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="tracker">
-            <i class="fa-solid fa-stopwatch text-sm w-5 text-center"></i>
-            <span>Tracker de Horas</span>
+            <i class="fa-solid fa-stopwatch text-xs mr-1"></i>
+            <span>Tracker</span>
           </a>
           <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="billing">
-            <i class="fa-solid fa-file-invoice-dollar text-sm w-5 text-center"></i>
+            <i class="fa-solid fa-file-invoice-dollar text-xs mr-1"></i>
             <span id="navBillingLabel">Cuentas & Liquidación</span>
           </a>
           <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="tasks">
-            <i class="fa-solid fa-list-check text-sm w-5 text-center"></i>
-            <span>Registro de Tareas</span>
+            <i class="fa-solid fa-list-check text-xs mr-1"></i>
+            <span>Tareas</span>
           </a>
           <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="reports">
-            <i class="fa-solid fa-chart-pie text-sm w-5 text-center"></i>
-            <span>Reportes & Métricas</span>
+            <i class="fa-solid fa-chart-pie text-xs mr-1"></i>
+            <span>Reportes</span>
           </a>
           <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="myprofile" id="sidebarMyProfileLink">
-            <i class="fa-solid fa-user-gear text-sm w-5 text-center text-blue-500"></i>
+            <i class="fa-solid fa-user-gear text-xs mr-1"></i>
             <span>Mi Perfil</span>
           </a>
 
-          <!-- Accesos exclusivos de Administración (Solo Lina) -->
-          <div id="sidebarAdminLinks" class="pt-3 mt-3 border-t border-[#1E293B] space-y-1">
-            <div class="px-3 text-[10px] font-mono uppercase tracking-wider text-[#3B82F6] font-semibold">Administración</div>
+          <!-- Enlaces exclusivos de Admin dentro del Top-Nav -->
+          <div id="sidebarAdminLinks" class="flex items-center gap-1 border-l border-[var(--color-hairline)] pl-1 ml-0.5">
             <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="team" id="sidebarTeamLink">
-              <i class="fa-solid fa-users-gear text-sm w-5 text-center text-[#2563EB]"></i>
-              <span>Perfiles & Equipo</span>
+              <i class="fa-solid fa-users-gear text-xs mr-1"></i>
+              <span>Equipo</span>
             </a>
             <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="clients" id="sidebarClientsLink">
-              <i class="fa-solid fa-briefcase text-sm w-5 text-center text-amber-500"></i>
-              <span>Clientes & Margen</span>
+              <i class="fa-solid fa-briefcase text-xs mr-1"></i>
+              <span>Clientes</span>
             </a>
             <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="upwork" id="sidebarUpworkLink">
-              <i class="fa-brands fa-upwork text-sm w-5 text-center text-[#14A800]"></i>
-              <span>Presupuesto Upwork</span>
+              <i class="fa-brands fa-upwork text-xs mr-1 text-[#14A800]"></i>
+              <span>Upwork</span>
             </a>
             <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="payments">
-              <i class="fa-solid fa-money-bill-transfer text-sm w-5 text-center"></i>
-              <span>Registrar Pago</span>
+              <i class="fa-solid fa-money-bill-transfer text-xs mr-1"></i>
+              <span>Pagar</span>
             </a>
           </div>
         </nav>
-      </div>
 
-      <!-- Footer del Sidebar: Perfil de Usuario, Tema y Salir -->
-      <div class="p-3 border-t border-[#1E293B] bg-[#0B1220] flex items-center justify-between gap-2 shrink-0">
-        <div id="userProfileBar" class="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer hover:bg-[#1E293B]/70 p-1.5 -m-1.5 rounded-lg transition-all group" title="Clic para ver y editar Mi Perfil (Datos, Banco y Contraseña)">
-          <div id="userAvatar" class="w-8 h-8 rounded-lg bg-[#2563EB] text-white flex items-center justify-center font-semibold text-xs shrink-0 group-hover:scale-105 transition-transform shadow-xs">
-            U
-          </div>
-          <div class="min-w-0 leading-tight flex-1">
-            <div id="userNameDisplay" class="text-xs font-semibold text-white truncate flex items-center gap-1">
-              <span>Usuario</span>
-              <i class="fa-solid fa-pen text-[8px] text-slate-500 group-hover:text-blue-400"></i>
-            </div>
-            <div id="userRoleBadge" class="text-[9px] font-mono text-[#3B82F6] font-semibold uppercase">COLABORADOR</div>
-          </div>
-        </div>
-        <div class="flex items-center gap-1 shrink-0">
-          <button id="themeToggle" type="button" onclick="window.toggleTheme()" aria-label="Cambiar tema" class="w-7 h-7 rounded-lg hover:bg-[#1E293B] text-[#94A3B8] hover:text-[#0284C7] flex items-center justify-center text-xs transition-colors" title="Cambiar modo claro/oscuro">
-            <i id="themeIcon" class="fa-solid fa-sun text-[#0284C7] text-xs"></i>
-            <span id="themeText" class="hidden">Modo Claro</span>
-          </button>
-          <button id="btnLogout" type="button" title="Cerrar sesión" class="w-7 h-7 rounded-lg hover:bg-[#BF6863]/20 text-[#94A3B8] hover:text-[#BF6863] flex items-center justify-center text-xs transition-colors">
-            <i class="fa-solid fa-right-from-bracket text-xs"></i>
-          </button>
-        </div>
-      </div>
-
-    </aside>
-
-    <!-- 2. LIENZO PRINCIPAL (MAIN CANVAS) -->
-    <div class="flex-1 flex flex-col min-w-0 min-h-screen">
-      
-      <!-- Topbar Header del Lienzo -->
-      <header class="sticky top-0 z-30 bg-white/95 dark:bg-[#111827]/95 backdrop-blur-sm border-b border-[#E2E8F0] dark:border-[#1E293B] px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3 transition-colors">
-        
-        <div class="flex items-center gap-3 min-w-0">
-          <button type="button" id="btnToggleMobileSidebar" class="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Abrir menú">
-            <i class="fa-solid fa-bars text-base"></i>
-          </button>
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="text-xs sm:text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC] truncate">Time Tracker</span>
-              <span class="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-[#2563EB]"></span>
-            </div>
-            <div class="text-[10px] sm:text-xs text-[#64748B] dark:text-[#94A3B8] truncate" id="topbarSubtitle">Control de tiempos y honorarios</div>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+        <!-- Derecha: TRM, Filtro de Períodos, Tema y Perfil Cápsula -->
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          
           <!-- Filtro de Períodos -->
-          <div class="flex items-center gap-1 overflow-x-auto text-[11px] font-medium" id="periodFilterButtonGroup">
-            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 bg-[#2563EB] text-white shadow-none" data-period="all">
+          <div class="hidden xl:flex items-center gap-1 text-[11px] font-medium" id="periodFilterButtonGroup">
+            <button type="button" class="btn-period-filter px-2.5 py-1 rounded-[18px] transition-all bg-[var(--color-ink)] text-[var(--color-paper)] font-medium" data-period="all">
               Todo
             </button>
-            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#162032]" data-period="this_month">
+            <button type="button" class="btn-period-filter px-2.5 py-1 rounded-[18px] transition-all text-[var(--color-mid-gray)] hover:text-[var(--color-ink)]" data-period="this_month">
               Este Mes
             </button>
-            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#162032] hidden xs:inline-block" data-period="current_fortnight">
+            <button type="button" class="btn-period-filter px-2.5 py-1 rounded-[18px] transition-all text-[var(--color-mid-gray)] hover:text-[var(--color-ink)]" data-period="current_fortnight">
               Quincena Actual
             </button>
-            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#162032] hidden sm:inline-block" data-period="last_month">
+            <button type="button" class="btn-period-filter px-2.5 py-1 rounded-[18px] transition-all text-[var(--color-mid-gray)] hover:text-[var(--color-ink)]" data-period="last_month">
               Mes Pasado
             </button>
           </div>
 
-          <span id="periodFilterLabel" class="text-[11px] font-mono text-[#64748B] dark:text-[#94A3B8] hidden md:inline"></span>
+          <span id="periodFilterLabel" class="text-[11px] font-mono text-[var(--color-mid-gray)] hidden"></span>
 
-          <!-- Indicador TRM USD a COP en tiempo real -->
-          <button type="button" id="trmBadgeContainer" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100/80 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-mono font-medium shadow-none cursor-pointer transition-all active:scale-95" title="Tasa de cambio en tiempo real USD a COP. Clic para refrescar o personalizar">
+          <!-- Indicador TRM -->
+          <button type="button" id="trmBadgeContainer" class="flex items-center gap-1.5 px-2.5 py-1 rounded-[18px] border border-[var(--color-hairline)] bg-[var(--surface-canvas)] hover:bg-[var(--color-hairline)] text-[var(--color-ink)] text-xs font-mono font-medium cursor-pointer transition-all active:scale-95" title="Tasa de cambio en tiempo real USD a COP. Clic para refrescar o personalizar">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-            <span class="font-semibold text-[11px] hidden md:inline">1 USD ≈</span>
+            <span class="font-semibold text-[11px] hidden sm:inline">1 USD ≈</span>
             <span id="trmRateDisplay" class="font-bold tabular-nums">$3.169,76</span>
-            <span class="text-[10px] text-emerald-600 dark:text-emerald-400">COP</span>
+            <span class="text-[10px] text-[var(--color-mid-gray)]">COP</span>
           </button>
 
-          <!-- Reloj Digital -->
-          <div id="currentTime" class="hidden sm:block text-xs font-mono text-[#64748B] dark:text-[#94A3B8] tabular-nums font-medium px-2.5 py-1 rounded-lg bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
-            --:--:--
+          <!-- Toggle Tema -->
+          <button id="themeToggle" type="button" onclick="window.toggleTheme()" aria-label="Cambiar tema" class="w-8 h-8 rounded-[18px] border border-[var(--color-hairline)] hover:bg-[var(--color-canvas)] text-[var(--color-ink)] flex items-center justify-center text-xs transition-colors cursor-pointer" title="Cambiar modo claro/oscuro">
+            <i id="themeIcon" class="fa-solid fa-sun text-amber-500 text-xs"></i>
+            <span id="themeText" class="hidden">Modo Claro</span>
+          </button>
+
+          <!-- Perfil Cápsula & Salir -->
+          <div id="userProfileBar" class="flex items-center gap-2 pl-2 pr-1.5 py-1 rounded-[18px] border border-[var(--color-hairline)] bg-[var(--surface-canvas)] cursor-pointer hover:border-[var(--color-ink)] transition-all group" title="Clic para ver y editar Mi Perfil (Datos, Banco y Contraseña)">
+            <div id="userAvatar" class="w-6 h-6 rounded-full bg-[var(--color-ink)] text-[var(--color-paper)] flex items-center justify-center font-bold text-[10px] font-mono shrink-0">
+              U
+            </div>
+            <div class="min-w-0 leading-tight hidden md:block pr-1">
+              <div id="userNameDisplay" class="text-xs font-semibold text-[var(--color-ink)] truncate max-w-[100px]">Usuario</div>
+              <div id="userRoleBadge" class="text-[9px] font-mono text-[var(--color-mid-gray)] font-semibold uppercase">COLABORADOR</div>
+            </div>
+            <button id="btnLogout" type="button" title="Cerrar sesión" class="w-6 h-6 rounded-full hover:bg-[var(--color-hairline)] text-[var(--color-mid-gray)] hover:text-[var(--color-ember)] flex items-center justify-center text-xs transition-colors ml-1 cursor-pointer">
+              <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
+            </button>
           </div>
 
-          <!-- Botón Directo Mi Perfil -->
-          <button type="button" id="btnTopbarMyProfile" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-[#162032] dark:hover:bg-[#1E293B] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold cursor-pointer transition-all active:scale-95 shadow-xs" title="Ver y editar Mi Perfil (Datos, Banco y Contraseña)">
-            <i class="fa-solid fa-user-gear text-[#2563EB] text-xs"></i>
-            <span class="hidden md:inline">Mi Perfil</span>
+          <!-- Botón Hamburguesa Móvil -->
+          <button type="button" id="btnToggleMobileSidebar" class="lg:hidden p-2 rounded-[18px] border border-[var(--color-hairline)] text-[var(--color-ink)] hover:bg-[var(--color-canvas)] transition-colors" aria-label="Abrir menú de navegación">
+            <i class="fa-solid fa-bars text-sm"></i>
           </button>
+
         </div>
 
-      </header>
+      </div>
+
+      <!-- Menú Desplegable Móvil -->
+      <div id="appSidebar" class="lg:hidden fixed inset-x-0 top-[56px] bg-[var(--surface-card)] border-b border-[var(--color-hairline)] p-4 shadow-xl -translate-y-[150%] transition-transform duration-300 z-50">
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-[var(--color-hairline)]">
+          <span class="text-xs font-semibold uppercase tracking-wider text-[var(--color-mid-gray)]">Navegación</span>
+          <button type="button" id="btnCloseSidebarMobile" class="p-1 rounded-full text-[var(--color-mid-gray)] hover:text-[var(--color-ink)]">
+            <i class="fa-solid fa-xmark text-base"></i>
+          </button>
+        </div>
+        <nav class="grid grid-cols-2 gap-2 text-xs">
+          <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="dashboard"><i class="fa-solid fa-gauge-high mr-1.5"></i>Dashboard</a>
+          <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="tracker"><i class="fa-solid fa-stopwatch mr-1.5"></i>Tracker</a>
+          <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="billing"><i class="fa-solid fa-file-invoice-dollar mr-1.5"></i>Liquidaciones</a>
+          <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="tasks"><i class="fa-solid fa-list-check mr-1.5"></i>Tareas</a>
+          <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="reports"><i class="fa-solid fa-chart-pie mr-1.5"></i>Reportes</a>
+          <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="myprofile"><i class="fa-solid fa-user-gear mr-1.5"></i>Mi Perfil</a>
+          <div id="mobileSidebarAdminLinks" class="contents">
+            <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="team"><i class="fa-solid fa-users-gear mr-1.5"></i>Equipo</a>
+            <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="clients"><i class="fa-solid fa-briefcase mr-1.5"></i>Clientes</a>
+            <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="upwork"><i class="fa-brands fa-upwork mr-1.5 text-[#14A800]"></i>Upwork</a>
+            <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="payments"><i class="fa-solid fa-money-bill-transfer mr-1.5"></i>Pagar</a>
+          </div>
+        </nav>
+      </div>
+
+    </header>
 
       <!-- Contenedor Scrollable del Lienzo -->
       <main class="flex-1 p-3.5 sm:p-6 lg:p-8 space-y-6 max-w-7xl 2xl:max-w-[1600px] w-full mx-auto">
@@ -404,249 +396,268 @@
              ========================================================================= -->
         <div id="workerPortalView" class="space-y-6 hidden">
           <!-- 1. Banner Hero Personal del Colaborador -->
-          <div id="workerDashboardSection" class="section-anchor p-5 sm:p-6 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5">
-          <div id="workerHeroAvatar" class="w-12 h-12 rounded-xl bg-[#2563EB] text-white flex items-center justify-center text-lg font-bold shadow-none shrink-0">
-            W
-          </div>
-          <div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <h1 id="workerHeroName" class="text-lg sm:text-xl font-bold text-[#0F172A] dark:text-[#F8FAFC] tracking-tight">¡Hola, Colaborador! 👋</h1>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium uppercase bg-[#2563EB]/10 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/20">
-                Modo Colaborador
-              </span>
-            </div>
-            <p class="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
-              Workspace Personal de Tiempos, Tareas y Cobro de Honorarios — Lina De La Espriella
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2.5 flex-wrap self-end md:self-auto">
-          <div class="px-3.5 py-1.5 rounded-lg bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] text-xs">
-            <span class="text-[10px] text-[#64748B] block font-mono">TARIFA PACTADA:</span>
-            <span id="workerHeroRate" class="font-mono font-semibold text-[#0F172A] dark:text-[#F8FAFC] text-sm">$0.00 / h</span>
-          </div>
-          <button type="button" id="btnWorkerOpenManualEntry" class="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-[#162032] dark:hover:bg-[#1E293B] text-[#0F172A] dark:text-[#F8FAFC] text-xs font-medium active:scale-95 transition-all flex items-center gap-1.5 shadow-none cursor-pointer">
-            <i class="fa-solid fa-clock-rotate-left text-xs"></i>
-            <span>+ Horas / Artes</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 2. Centro Financiero & Liquidación Personal (Billing Hub) -->
-      <div class="p-5 sm:p-6 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-sm space-y-4">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-[#E2E8F0] dark:border-[#1E293B] gap-3">
-          <div>
-            <span class="text-[10px] font-mono uppercase tracking-widest text-[#3B82F6] font-medium block">Tu Balance de Honorarios</span>
-            <h2 class="text-base sm:text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC]">Estado de Cuenta del Período</h2>
-          </div>
-          
-          <!-- Botón Principal: DESCARGAR CUENTA DE COBRO -->
-          <button type="button" id="btnWorkerOpenBill" class="btn-primary py-2 px-4 text-xs sm:text-sm font-semibold rounded-lg flex items-center gap-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-none active:scale-95 transition-all">
-            <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
-            <span>Generar y Descargar Mi Cuenta de Cobro (PDF)</span>
-          </button>
-        </div>
-
-        <!-- Grid de 4 KPIs Personales (Blancos, limpios y equilibrados) -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div class="p-4 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
-            <span class="text-[10px] font-mono font-medium text-[#64748B] uppercase block">Horas Realizadas</span>
-            <div class="mt-1 flex items-baseline gap-1">
-              <span id="workerKpiHours" class="text-2xl font-bold font-mono text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">0.00</span>
-              <span class="text-xs text-[#64748B]">hrs</span>
-            </div>
-          </div>
-          <div class="p-4 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
-            <span class="text-[10px] font-mono font-medium text-[#64748B] uppercase block">Total Generado</span>
-            <div class="mt-1">
-              <span id="workerKpiEarned" class="text-2xl font-bold font-mono text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">$0.00</span>
-              <span id="workerKpiEarnedCop" class="block text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 tabular-nums truncate mt-0.5">≈ $0 COP</span>
-            </div>
-          </div>
-          <div class="p-4 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
-            <span class="text-[10px] font-mono font-medium text-[#2563EB] uppercase block">Anticipos Recibidos</span>
-            <div class="mt-1">
-              <span id="workerKpiPaid" class="text-2xl font-bold font-mono text-[#2563EB] tabular-nums">$0.00</span>
-              <span id="workerKpiPaidCop" class="block text-xs font-mono font-medium text-blue-600 dark:text-blue-400 tabular-nums truncate mt-0.5">≈ $0 COP</span>
-            </div>
-          </div>
-          <div class="p-4 rounded-xl bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
-            <span class="text-[10px] font-mono font-medium text-[#BF6863] uppercase block">Saldo Neto por Cobrar</span>
-            <div class="mt-1">
-              <span id="workerKpiBalance" class="text-2xl font-bold font-mono text-[#BF6863] tabular-nums">$0.00</span>
-              <span id="workerKpiBalanceCop" class="block text-xs font-mono font-medium text-[#BF6863] tabular-nums truncate mt-0.5">≈ $0 COP</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Meta Semanal de Rendimiento del Colaborador -->
-      <div id="workerGoalCard" class="p-4 rounded-xl bg-gradient-to-r from-blue-500/[0.04] to-indigo-500/[0.03] border border-blue-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-blue-600/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-base shrink-0 border border-blue-600/20">
-            <i class="fa-solid fa-bullseye"></i>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-[#0F172A] dark:text-[#F8FAFC]">Meta Semanal de Trabajo</span>
-              <span id="workerGoalStatusBadge" class="text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">En progreso</span>
-            </div>
-            <div class="text-[11px] text-[#64748B] dark:text-[#94A3B8] mt-0.5" id="workerGoalText">
-              Llevas 0.00h de 20.00h objetivo esta semana
-            </div>
-          </div>
-        </div>
-        <div class="w-full sm:w-64 flex flex-col items-end gap-1.5">
-          <div class="w-full bg-[#E2E8F0] dark:bg-[#1E293B] rounded-full h-2 overflow-hidden">
-            <div id="workerGoalProgressBar" class="h-2 rounded-full bg-blue-600 transition-all duration-500" style="width: 0%"></div>
-          </div>
-          <div class="flex items-center justify-between w-full text-[10px] text-[#64748B] dark:text-[#94A3B8]">
-            <span id="workerGoalPercent" class="font-mono">0% cumplido</span>
-            <button type="button" id="btnEditWorkerGoal" class="hover:underline text-blue-600 dark:text-blue-400 font-medium cursor-pointer">Ajustar meta</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Slot para el Cronómetro en Vivo -->
-      <div id="workerTimerSlot" class="w-full">
-        <!-- Tracker de Tareas (Cronómetro en Vivo) -->
-        <div id="timerMainCard" class="content-card flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between pb-3 sm:pb-4 border-b border-[#E2E8F0] dark:border-[#1E293B]">
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></span>
-                <h2 class="text-xs sm:text-sm font-semibold tracking-tight text-[#0F172A] dark:text-[#F8FAFC] uppercase">Tracker de Tareas en Vivo</h2>
+          <div id="workerDashboardSection" class="section-anchor p-5 sm:p-6 rounded-[24px] bg-[var(--surface-card)] border border-[var(--color-hairline)] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div id="workerHeroAvatar" class="w-12 h-12 rounded-[18px] bg-[var(--color-ink)] text-[var(--color-paper)] flex items-center justify-center text-lg font-bold shadow-none shrink-0">
+                W
               </div>
-              <div class="flex items-center gap-1.5 sm:gap-2">
-                <!-- Botón Flotante PiP (Siempre visible sobre otras apps del PC) -->
-                <button type="button" id="btnTogglePipTimer" class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-semibold border border-[#2563EB]/30 bg-[#2563EB]/10 hover:bg-[#2563EB]/20 text-[#2563EB] dark:text-[#60A5FA] flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs" title="Abrir mini-ventana flotante fija sobre todas las aplicaciones del PC (Photoshop, Figma, Excel, otras pestañas)">
-                  <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                  <span class="hidden sm:inline">Flotar sobre Apps</span>
-                  <span class="sm:hidden">Flotar</span>
-                </button>
-                <!-- Selector Modo: Cronómetro Libre vs Pomodoro -->
-                <div class="inline-flex p-0.5 rounded-lg bg-[#E2E8F0] dark:bg-[#1E293B] text-[10px] font-semibold">
-                  <button type="button" id="btnModeStandard" class="px-2 py-0.5 rounded-md bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F8FAFC] shadow-xs transition-all cursor-pointer">Libre</button>
-                  <button type="button" id="btnModePomodoro" class="px-2 py-0.5 rounded-md text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white transition-all cursor-pointer flex items-center gap-1">🍅 Pomodoro</button>
-                </div>
-                <span id="timerStatusBadge" class="text-[11px] sm:text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-[#F1F5F9] dark:bg-[#162032] text-[#64748B] dark:text-[#94A3B8] border border-[#E2E8F0] dark:border-[#1E293B]">
-                  Detenido
-                </span>
-              </div>
-            </div>
-
-            <div class="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-              <!-- Selector de Trabajador (Solo visible en modo Admin) -->
-              <div id="timerWorkerSelectContainer">
-                <label for="timerWorkerSelect" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">
-                  Trabajador
-                </label>
-                <select id="timerWorkerSelect" class="form-input w-full">
-                  <option value="">-- Selecciona un trabajador --</option>
-                </select>
-              </div>
-
-              <!-- Fila: Cliente / Cuenta y Categoría de Actividad -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label for="timerClientProject" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">
-                    Cliente / Cuenta
-                  </label>
-                  <input type="text" id="timerClientProject" list="clientsDatalist" placeholder="Ej. Nike, Cliente A, StartupX..." class="form-input w-full text-xs">
-                </div>
-                <div>
-                  <label for="timerCategory" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">
-                    Categoría
-                  </label>
-                  <select id="timerCategory" class="form-input w-full text-xs">
-                    <option value="general">💼 General / Otros</option>
-                    <option value="diseno">🎨 Diseño Gráfico</option>
-                    <option value="video">🎬 Edición de Video</option>
-                    <option value="copy">✍️ Redacción & Copy</option>
-                    <option value="ads">📈 Pauta & Ads</option>
-                    <option value="reunion">🤝 Reunión & Sync</option>
-                    <option value="estrategia">💡 Estrategia</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Tarea / Proyecto -->
               <div>
-                <label for="timerTaskDescription" class="block text-xs font-semibold text-[#0F172A] dark:text-[#F8FAFC] mb-1.5">
-                  Descripción de la Tarea
-                </label>
-                <input type="text" id="timerTaskDescription" placeholder="Ej. Campaña Facebook Ads, Rediseño UI..." class="form-input w-full">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h1 id="workerHeroName" class="text-lg sm:text-xl font-bold text-[var(--color-ink)] tracking-tight">¡Hola, Colaborador! 👋</h1>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium uppercase bg-[var(--color-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)]">
+                    Modo Colaborador
+                  </span>
+                </div>
+                <p class="text-xs text-[var(--color-mid-gray)] mt-0.5">
+                  Workspace Personal de Tiempos, Tareas y Cobro de Honorarios — Lina De La Espriella
+                </p>
               </div>
+            </div>
 
-              <!-- Display Digital del Reloj (Limpio, sobrio y natural) -->
-              <div class="timer-chamber my-3 sm:my-4 p-4 sm:p-6 rounded-xl text-center relative overflow-hidden bg-[#F1F5F9] dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B]">
-                <div id="timerGlowAura" class="hidden"></div>
+            <div class="flex items-center gap-2.5 flex-wrap self-end md:self-auto">
+              <div class="px-3.5 py-1.5 rounded-[18px] bg-[var(--surface-canvas)] border border-[var(--color-hairline)] text-xs">
+                <span class="text-[10px] text-[var(--color-mid-gray)] block font-mono">TARIFA PACTADA:</span>
+                <span id="workerHeroRate" class="font-mono font-semibold text-[var(--color-ink)] text-sm">$0.00 / h</span>
+              </div>
+              <button type="button" id="btnWorkerOpenManualEntry" class="btn-ctrl px-3.5 py-2 rounded-[18px] border border-[var(--color-hairline)] bg-[var(--surface-canvas)] hover:bg-[var(--color-hairline)] text-[var(--color-ink)] text-xs font-medium active:scale-95 transition-all flex items-center gap-1.5 shadow-none cursor-pointer">
+                <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                <span>+ Horas / Artes</span>
+              </button>
+            </div>
+          </div>
 
-                <!-- Alerta de Cronómetro Olvidado (> 4 horas) -->
-                <div id="timerOvertimeAlert" class="hidden mb-3 p-3 rounded-lg bg-[#C58B42]/10 border border-[#C58B42]/25 text-[#C58B42] text-xs flex items-center justify-between gap-2.5 text-left">
-                  <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-lg bg-[#C58B42]/20 text-[#C58B42] flex items-center justify-center shrink-0">
-                      <i class="fa-solid fa-triangle-exclamation"></i>
+          <!-- BENTO GRID 50/50 (Columna Izquierda: Cronómetro Cockpit | Columna Derecha: Balance & Metas) -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            
+            <!-- Columna Izquierda: Slot para el Cronómetro en Vivo -->
+            <div id="workerTimerSlot" class="w-full">
+              <!-- Tracker de Tareas (Cronómetro en Vivo) -->
+              <div id="timerMainCard" class="content-card flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between pb-3 sm:pb-4 border-b border-[var(--color-hairline)]">
+                    <div class="flex items-center gap-2">
+                      <span class="w-2.5 h-2.5 rounded-full bg-[var(--color-ink)]"></span>
+                      <h2 class="text-xs sm:text-sm font-semibold tracking-tight text-[var(--color-ink)] uppercase">Tracker de Tareas en Vivo</h2>
                     </div>
-                    <div class="leading-tight">
-                      <strong class="font-bold">¿Sigues trabajando?</strong>
-                      <span class="block text-[11px] opacity-90">Llevas más de 4 horas continuas con este cronómetro activo.</span>
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                      <!-- Botón Flotante PiP -->
+                      <button type="button" id="btnTogglePipTimer" class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[18px] text-[10px] sm:text-xs font-semibold border border-[var(--color-hairline)] bg-[var(--surface-canvas)] hover:bg-[var(--color-hairline)] text-[var(--color-ink)] flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs" title="Abrir mini-ventana flotante fija sobre todas las aplicaciones del PC">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        <span class="hidden sm:inline">Flotar sobre Apps</span>
+                        <span class="sm:hidden">Flotar</span>
+                      </button>
+                      <!-- Selector Modo: Cronómetro Libre vs Pomodoro -->
+                      <div class="inline-flex p-0.5 rounded-[18px] bg-[var(--surface-canvas)] border border-[var(--color-hairline)] text-[10px] font-semibold">
+                        <button type="button" id="btnModeStandard" class="px-2.5 py-0.5 rounded-[18px] bg-[var(--surface-card)] text-[var(--color-ink)] shadow-xs transition-all cursor-pointer">Libre</button>
+                        <button type="button" id="btnModePomodoro" class="px-2.5 py-0.5 rounded-[18px] text-[var(--color-mid-gray)] hover:text-[var(--color-ink)] transition-all cursor-pointer flex items-center gap-1">🍅 Pomodoro</button>
+                      </div>
+                      <span id="timerStatusBadge" class="text-[11px] sm:text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-[var(--surface-canvas)] text-[var(--color-mid-gray)] border border-[var(--color-hairline)]">
+                        Detenido
+                      </span>
                     </div>
                   </div>
-                  <button type="button" id="btnDismissOvertimeAlert" class="px-2.5 py-1 rounded-md bg-[#C58B42] hover:bg-[#b07d3b] text-white font-medium text-[10px] shrink-0 transition-colors shadow-none">
-                    Continuar
+
+                  <div class="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
+                    <!-- Selector de Trabajador (Solo visible en modo Admin) -->
+                    <div id="timerWorkerSelectContainer">
+                      <label for="timerWorkerSelect" class="block text-xs font-semibold text-[var(--color-ink)] mb-1.5">
+                        Trabajador
+                      </label>
+                      <select id="timerWorkerSelect" class="form-input w-full">
+                        <option value="">-- Selecciona un trabajador --</option>
+                      </select>
+                    </div>
+
+                    <!-- Fila: Cliente / Cuenta y Categoría de Actividad -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label for="timerClientProject" class="block text-xs font-semibold text-[var(--color-ink)] mb-1.5">
+                          Cliente / Cuenta
+                        </label>
+                        <input type="text" id="timerClientProject" list="clientsDatalist" placeholder="Ej. Nike, Cliente A, StartupX..." class="form-input w-full text-xs">
+                      </div>
+                      <div>
+                        <label for="timerCategory" class="block text-xs font-semibold text-[var(--color-ink)] mb-1.5">
+                          Categoría
+                        </label>
+                        <select id="timerCategory" class="form-input w-full text-xs">
+                          <option value="general">💼 General / Otros</option>
+                          <option value="diseno">🎨 Diseño Gráfico</option>
+                          <option value="video">🎬 Edición de Video</option>
+                          <option value="copy">✍️ Redacción & Copy</option>
+                          <option value="ads">📈 Pauta & Ads</option>
+                          <option value="reunion">🤝 Reunión & Sync</option>
+                          <option value="estrategia">💡 Estrategia</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <!-- Tarea / Proyecto -->
+                    <div>
+                      <label for="timerTaskDescription" class="block text-xs font-semibold text-[var(--color-ink)] mb-1.5">
+                        Descripción de la Tarea
+                      </label>
+                      <input type="text" id="timerTaskDescription" placeholder="Ej. Campaña Facebook Ads, Rediseño UI..." class="form-input w-full">
+                    </div>
+
+                    <!-- Display Digital del Reloj con Anillo SVG Circular (Opción 1 Bento Grid) -->
+                    <div class="timer-chamber my-3 sm:my-4 p-4 sm:p-5 rounded-[24px] text-center relative overflow-hidden bg-[var(--surface-canvas)] border border-[var(--color-hairline)]">
+                      <div id="timerGlowAura" class="hidden"></div>
+
+                      <!-- Alerta de Cronómetro Olvidado (> 4 horas) -->
+                      <div id="timerOvertimeAlert" class="hidden mb-3 p-3 rounded-[18px] bg-amber-500/10 border border-amber-500/25 text-amber-600 dark:text-amber-400 text-xs flex items-center justify-between gap-2.5 text-left">
+                        <div class="flex items-center gap-2">
+                          <div class="w-7 h-7 rounded-[10px] bg-amber-500/20 text-amber-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                          </div>
+                          <div class="leading-tight">
+                            <strong class="font-bold">¿Sigues trabajando?</strong>
+                            <span class="block text-[11px] opacity-90">Llevas más de 4 horas continuas con este cronómetro activo.</span>
+                          </div>
+                        </div>
+                        <button type="button" id="btnDismissOvertimeAlert" class="px-2.5 py-1 rounded-[18px] bg-amber-600 text-white font-medium text-[10px] shrink-0 transition-colors shadow-none cursor-pointer">
+                          Continuar
+                        </button>
+                      </div>
+
+                      <!-- Banner de Fase Pomodoro -->
+                      <div id="pomodoroBanner" class="hidden mb-2 items-center justify-center gap-2 py-1 px-3 rounded-[18px] bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[11px] font-medium border border-rose-500/20 max-w-fit mx-auto">
+                        <span class="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                        <span id="pomodoroPhaseLabel">🍅 Enfoque (25:00)</span>
+                      </div>
+
+                      <!-- Anillo Circular SVG y Display Monospace -->
+                      <div class="relative flex items-center justify-center py-2 sm:py-3">
+                        <svg class="w-44 h-44 sm:w-52 sm:h-52 transform -rotate-90" viewBox="0 0 140 140">
+                          <circle cx="70" cy="70" r="58" fill="none" stroke="currentColor" stroke-width="4.5" class="text-[var(--color-hairline)]" />
+                          <circle id="timerProgressRing" cx="70" cy="70" r="58" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="364.4" class="text-[var(--color-ink)] transition-all duration-300" />
+                        </svg>
+                        
+                        <div class="absolute inset-0 flex flex-col items-center justify-center select-none pointer-events-none">
+                          <span class="text-[10px] font-mono uppercase tracking-widest text-[var(--color-mid-gray)]">Tiempo</span>
+                          <div id="timerDisplay" class="font-mono text-3xl sm:text-4xl 3xl:text-5xl font-bold tracking-tight text-[var(--color-ink)] tabular-nums my-1">
+                            00:00:00
+                          </div>
+                          <div class="flex items-center gap-1.5 mt-0.5">
+                            <span class="text-[10px] text-[var(--color-mid-gray)] font-mono">Costo:</span>
+                            <span id="liveCostBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-[18px] bg-[var(--surface-card)] text-[var(--color-ink)] border border-[var(--color-hairline)] tabular-nums shadow-xs">
+                              $0.00
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+
+                    <!-- Controles del Cronómetro -->
+                    <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
+                      <button id="btnStart" class="btn-ctrl btn-green flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 text-xs sm:text-sm">
+                        <i class="fa-solid fa-play text-xs"></i>
+                        <span>Iniciar</span>
+                      </button>
+                      <button id="btnPause" class="btn-ctrl btn-amber flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 text-xs sm:text-sm" disabled>
+                        <i class="fa-solid fa-pause text-xs"></i>
+                        <span>Pausar</span>
+                      </button>
+                      <button id="btnReset" class="btn-ctrl btn-slate flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 text-xs sm:text-sm" disabled>
+                        <i class="fa-solid fa-rotate-left text-xs"></i>
+                        <span>Reiniciar</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Botón Principal: Registrar Tarea -->
+                <div class="mt-4">
+                  <button id="btnRegisterTask" class="w-full btn-ctrl btn-blue py-3 font-semibold flex items-center justify-center gap-2 text-xs sm:text-sm shadow-none">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>Registrar Tarea y Guardar Costo</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Columna Derecha: Balance de Honorarios + Meta Semanal -->
+            <div class="w-full space-y-6">
+              
+              <!-- 2. Centro Financiero & Liquidación Personal (Billing Hub) -->
+              <div id="workerBillingHub" class="content-card p-5 sm:p-6 rounded-[24px] space-y-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-[var(--color-hairline)] gap-3">
+                  <div>
+                    <span class="text-[10px] font-mono uppercase tracking-widest text-[var(--color-mid-gray)] font-medium block">Tu Balance de Honorarios</span>
+                    <h2 class="text-base sm:text-lg font-bold text-[var(--color-ink)]">Estado de Cuenta del Período</h2>
+                  </div>
+                  
+                  <!-- Botón Principal: DESCARGAR CUENTA DE COBRO -->
+                  <button type="button" id="btnWorkerOpenBill" class="btn-primary py-2 px-4 text-xs sm:text-sm font-semibold rounded-[18px] flex items-center gap-2 shadow-none active:scale-95 transition-all">
+                    <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
+                    <span>Descargar Cuenta de Cobro (PDF)</span>
                   </button>
                 </div>
 
-                <!-- Banner de Fase Pomodoro -->
-                <div id="pomodoroBanner" class="hidden mb-2 items-center justify-center gap-2 py-1 px-3 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[11px] font-medium border border-rose-500/20 max-w-fit mx-auto">
-                  <span class="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                  <span id="pomodoroPhaseLabel">🍅 Enfoque (25:00)</span>
-                </div>
-
-                <div class="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-[#64748B] dark:text-[#94A3B8] mb-1">Tiempo Transcurrido</div>
-                
-                <div id="timerDisplay" class="font-mono text-4xl xs:text-5xl sm:text-6xl 3xl:text-7xl font-bold tracking-wider text-[#0F172A] dark:text-[#F8FAFC] tabular-nums py-1 sm:py-2 select-none">
-                  00:00:00
-                </div>
-                
-                <div class="mt-2 sm:mt-3 pt-2.5 sm:pt-3 border-t border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-center gap-2">
-                  <span class="text-[11px] sm:text-xs text-[#64748B] dark:text-[#94A3B8]">Costo acumulado:</span>
-                  <span id="liveCostBadge" class="text-xs sm:text-sm font-mono font-medium px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-md bg-[#2563EB]/10 text-[#2563EB] dark:text-[#60A5FA] border border-[#2563EB]/20 tabular-nums">
-                    $0.00
-                  </span>
+                <!-- Grid de 4 KPIs Personales -->
+                <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                  <div class="p-3.5 rounded-[18px] bg-[var(--surface-canvas)] border border-[var(--color-hairline)]">
+                    <span class="text-[10px] font-mono font-medium text-[var(--color-mid-gray)] uppercase block">Horas Realizadas</span>
+                    <div class="mt-1 flex items-baseline gap-1">
+                      <span id="workerKpiHours" class="text-2xl font-bold font-mono text-[var(--color-ink)] tabular-nums">0.00</span>
+                      <span class="text-xs text-[var(--color-mid-gray)]">hrs</span>
+                    </div>
+                  </div>
+                  <div class="p-3.5 rounded-[18px] bg-[var(--surface-canvas)] border border-[var(--color-hairline)]">
+                    <span class="text-[10px] font-mono font-medium text-[var(--color-mid-gray)] uppercase block">Total Generado</span>
+                    <div class="mt-1">
+                      <span id="workerKpiEarned" class="text-2xl font-bold font-mono text-[var(--color-ink)] tabular-nums">$0.00</span>
+                      <span id="workerKpiEarnedCop" class="block text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 tabular-nums truncate mt-0.5">≈ $0 COP</span>
+                    </div>
+                  </div>
+                  <div class="p-3.5 rounded-[18px] bg-[var(--surface-canvas)] border border-[var(--color-hairline)]">
+                    <span class="text-[10px] font-mono font-medium text-[var(--color-mid-gray)] uppercase block">Anticipos Recibidos</span>
+                    <div class="mt-1">
+                      <span id="workerKpiPaid" class="text-2xl font-bold font-mono text-[var(--color-ink)] tabular-nums">$0.00</span>
+                      <span id="workerKpiPaidCop" class="block text-xs font-mono font-medium text-[var(--color-mid-gray)] tabular-nums truncate mt-0.5">≈ $0 COP</span>
+                    </div>
+                  </div>
+                  <div class="p-3.5 rounded-[18px] bg-[var(--surface-canvas)] border border-[var(--color-hairline)]">
+                    <span class="text-[10px] font-mono font-medium text-[var(--color-mid-gray)] uppercase block">Saldo por Cobrar</span>
+                    <div class="mt-1">
+                      <span id="workerKpiBalance" class="text-2xl font-bold font-mono text-[var(--color-ink)] tabular-nums">$0.00</span>
+                      <span id="workerKpiBalanceCop" class="block text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 tabular-nums truncate mt-0.5">≈ $0 COP</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <!-- Controles del Cronómetro -->
-              <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
-                <button id="btnStart" class="btn-ctrl btn-green flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 text-xs sm:text-sm">
-                  <i class="fa-solid fa-play text-xs"></i>
-                  <span>Iniciar</span>
-                </button>
-                <button id="btnPause" class="btn-ctrl btn-amber flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 text-xs sm:text-sm" disabled>
-                  <i class="fa-solid fa-pause text-xs"></i>
-                  <span>Pausar</span>
-                </button>
-                <button id="btnReset" class="btn-ctrl btn-slate flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 text-xs sm:text-sm" disabled>
-                  <i class="fa-solid fa-rotate-left text-xs"></i>
-                  <span>Reiniciar</span>
-                </button>
+              <!-- Meta Semanal de Rendimiento del Colaborador -->
+              <div id="workerGoalCard" class="content-card p-4 sm:p-5 rounded-[24px] border border-[var(--color-hairline)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-[10px] bg-[var(--surface-canvas)] text-[var(--color-ink)] flex items-center justify-center text-base shrink-0 border border-[var(--color-hairline)]">
+                    <i class="fa-solid fa-bullseye"></i>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-[var(--color-ink)]">Meta Semanal de Trabajo</span>
+                      <span id="workerGoalStatusBadge" class="text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[var(--surface-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)]">En progreso</span>
+                    </div>
+                    <div class="text-[11px] text-[var(--color-mid-gray)] mt-0.5" id="workerGoalText">
+                      Llevas 0.00h de 20.00h objetivo esta semana
+                    </div>
+                  </div>
+                </div>
+                <div class="w-full sm:w-64 flex flex-col items-end gap-1.5">
+                  <div class="w-full bg-[var(--color-canvas)] rounded-full h-2 overflow-hidden border border-[var(--color-hairline)]">
+                    <div id="workerGoalProgressBar" class="h-2 rounded-full bg-[var(--color-ink)] transition-all duration-500" style="width: 0%"></div>
+                  </div>
+                  <div class="flex items-center justify-between w-full text-[10px] text-[var(--color-mid-gray)]">
+                    <span id="workerGoalPercent" class="font-mono">0% cumplido</span>
+                    <button type="button" id="btnEditWorkerGoal" class="hover:underline text-[var(--color-ink)] font-medium cursor-pointer">Ajustar meta</button>
+                  </div>
+                </div>
               </div>
+
             </div>
-          </div>
 
-          <!-- Botón Principal: Registrar Tarea -->
-          <div class="mt-4">
-            <button id="btnRegisterTask" class="w-full btn-ctrl btn-blue py-3 font-semibold flex items-center justify-center gap-2 text-xs sm:text-sm shadow-none">
-              <i class="fa-solid fa-cloud-arrow-up"></i>
-              <span>Registrar Tarea y Guardar Costo</span>
-            </button>
           </div>
-        </div>
-      </div>
 
       <!-- Slot para Mis Actividades -->
       <div id="workerTasksSlot" class="w-full">
@@ -805,119 +816,131 @@
         </div>
       </div>
 
-      <!-- 2. Presupuesto Semanal Upwork & Margen Disponible (Solo Administrador) -->
-      <section id="adminUpworkBudgetSection" class="content-card p-4 sm:p-5 border border-emerald-500/25 bg-gradient-to-br from-emerald-500/[0.04] via-blue-500/[0.02] to-transparent dark:from-emerald-500/[0.08] dark:via-blue-500/[0.03]">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <!-- Cabecera de la tarjeta con logo de Upwork -->
-          <div class="flex items-start sm:items-center gap-3">
-            <div class="w-11 h-11 rounded-xl bg-[#14A800]/10 text-[#14A800] dark:bg-[#14A800]/20 flex items-center justify-center text-xl shrink-0 border border-[#14A800]/25">
-              <i class="fa-brands fa-upwork"></i>
-            </div>
-            <div>
-              <div class="flex items-center gap-2 flex-wrap">
-                <h3 class="text-xs sm:text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC] tracking-tight uppercase">Control Presupuestal Upwork & Nómina</h3>
-                <span id="upworkWeekCycleBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#14A800]/10 text-[#14A800] dark:text-[#52c93f] border border-[#14A800]/25 font-semibold">Mes Actual</span>
+      <!-- BENTO GRID 50/50 ADMIN (Columna Izquierda: Cronómetro Cockpit | Columna Derecha: Finanzas Upwork) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        
+        <!-- Columna Izquierda: Slot del Cronómetro en Vivo de Admin -->
+        <div id="adminTimerSlot" class="w-full">
+          <!-- timerMainCard se inserta aquí al cambiar a rol admin -->
+        </div>
+
+        <!-- Columna Derecha: Presupuesto Semanal Upwork & Nómina -->
+        <div class="w-full">
+          <section id="adminUpworkBudgetSection" class="content-card p-4 sm:p-5 border border-[var(--color-hairline)] bg-[var(--surface-card)]">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <!-- Cabecera de la tarjeta con logo de Upwork -->
+              <div class="flex items-start sm:items-center gap-3">
+                <div class="w-11 h-11 rounded-[18px] bg-[#14A800]/10 text-[#14A800] dark:bg-[#14A800]/20 flex items-center justify-center text-xl shrink-0 border border-[#14A800]/25">
+                  <i class="fa-brands fa-upwork"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="text-xs sm:text-sm font-bold text-[var(--color-ink)] tracking-tight uppercase">Control Presupuestal Upwork & Nómina</h3>
+                    <span id="upworkWeekCycleBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#14A800]/10 text-[#14A800] dark:text-[#52c93f] border border-[#14A800]/25 font-semibold">Mes Actual</span>
+                  </div>
+                  <p class="text-[11px] text-[var(--color-mid-gray)] mt-0.5">
+                    Recaudación semanal acumulada del mes contra el costo mensual de nómina
+                  </p>
+                </div>
               </div>
-              <p class="text-[11px] text-[#64748B] dark:text-[#94A3B8] mt-0.5">
-                Recaudación semanal acumulada del mes contra el costo mensual de nómina
-              </p>
-            </div>
-          </div>
 
-          <!-- Botón de Acción Rápida -->
-          <div class="flex items-center gap-2 self-start lg:self-auto">
-            <button type="button" id="btnEditUpworkBudget" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm">
-              <i class="fa-solid fa-pen-to-square text-[11px]"></i>
-              <span>Gestionar Semanas</span>
-            </button>
-          </div>
+              <!-- Botón de Acción Rápida -->
+              <div class="flex items-center gap-2 self-start lg:self-auto">
+                <button type="button" id="btnEditUpworkBudget" class="px-3 py-1.5 text-xs font-medium rounded-[18px] bg-[var(--color-ink)] text-[var(--color-paper)] hover:bg-[var(--color-ink-soft)] flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-none">
+                  <i class="fa-solid fa-pen-to-square text-[11px]"></i>
+                  <span>Gestionar Semanas</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Métricas de 3 Columnas: Recaudación Upwork, Costo Nómina Mensual, Presupuesto Disponible -->
+            <div class="mt-4 pt-4 border-t border-[var(--color-hairline)] grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              <!-- 1. Recaudación Semanal Upwork -->
+              <div class="p-3.5 rounded-[18px] bg-[var(--surface-canvas)] border border-[var(--color-hairline)]">
+                <div class="flex items-center justify-between text-[var(--color-mid-gray)] mb-1">
+                  <span class="text-[10px] font-mono uppercase font-semibold">Recaudo Mes Acumulado</span>
+                  <i class="fa-brands fa-upwork text-[#14A800] text-xs"></i>
+                </div>
+                <div class="flex items-baseline gap-1">
+                  <span id="upworkRevenueDisplay" class="text-xl sm:text-2xl font-bold font-mono text-[var(--color-ink)] tabular-nums">$0.00</span>
+                  <span class="text-[10px] text-[var(--color-mid-gray)] font-mono">USD</span>
+                </div>
+                <span id="upworkRevenueCopDisplay" class="block text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5">≈ $0 COP</span>
+                <div class="text-[10px] text-[var(--color-mid-gray)] mt-1 truncate" id="upworkRevenueSubtitle">Facturación mensual acumulada</div>
+                <div id="upworkWeeksPillsBar" class="flex items-center gap-1 text-[9px] font-mono mt-2 pt-1.5 border-t border-[var(--color-hairline)] text-[var(--color-mid-gray)] flex-wrap">
+                  <!-- Pastillas dinámicas por semana -->
+                </div>
+              </div>
+
+              <!-- 2. Costo Nómina Mensual -->
+              <div class="p-3.5 rounded-[18px] bg-[var(--surface-canvas)] border border-[var(--color-hairline)]">
+                <div class="flex items-center justify-between text-[var(--color-mid-gray)] mb-1">
+                  <span class="text-[10px] font-mono uppercase font-semibold">Costo Nómina Mensual</span>
+                  <i class="fa-solid fa-receipt text-[var(--color-ink)] text-xs"></i>
+                </div>
+                <div class="flex items-baseline gap-1">
+                  <span id="upworkPayrollCostDisplay" class="text-xl sm:text-2xl font-bold font-mono text-[var(--color-ink)] tabular-nums">$0.00</span>
+                  <span class="text-[10px] text-[var(--color-mid-gray)] font-mono">USD</span>
+                </div>
+                <span id="upworkPayrollCostCopDisplay" class="block text-xs font-mono font-medium text-[var(--color-mid-gray)] tabular-nums mt-0.5">≈ $0 COP</span>
+                <div class="text-[10px] text-[var(--color-mid-gray)] mt-1 truncate" id="upworkPayrollDetails">0.00h de tareas aprobadas este mes</div>
+              </div>
+
+              <!-- 3. Presupuesto Disponible (Margen Libre) -->
+              <div class="p-3.5 rounded-[18px] bg-[var(--surface-canvas)] border border-[var(--color-hairline)]">
+                <div class="flex items-center justify-between text-[var(--color-mid-gray)] mb-1">
+                  <span class="text-[10px] font-mono uppercase font-semibold">Presupuesto Disponible</span>
+                  <span id="upworkBudgetStatusBadge" class="text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">100% Libre</span>
+                </div>
+                <div class="flex items-baseline gap-1">
+                  <span id="upworkAvailableBudgetDisplay" class="text-xl sm:text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums">$0.00</span>
+                  <span class="text-[10px] text-[var(--color-mid-gray)] font-mono">USD</span>
+                </div>
+                <span id="upworkAvailableBudgetCopDisplay" class="block text-xs font-mono font-medium text-emerald-700 dark:text-emerald-300 tabular-nums mt-0.5">≈ $0 COP</span>
+                <div class="text-[10px] text-[var(--color-mid-gray)] mt-1 truncate" id="upworkBudgetSubtitle">Margen real de ganancia del mes</div>
+              </div>
+            </div>
+
+            <!-- Resumen de Ruta Financiera: Upwork -> PayPal -> Nequi Colombia -->
+            <div id="upworkNequiRouteSummary" class="mt-3.5 p-2.5 sm:p-3 rounded-[18px] bg-[var(--surface-canvas)] border border-[var(--color-hairline)] flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs font-mono">
+              <div class="flex items-center gap-2 flex-wrap text-[var(--color-mid-gray)]">
+                <span class="inline-flex items-center gap-1 font-semibold text-[var(--color-ink)]">
+                  <i class="fa-solid fa-route text-emerald-500"></i>
+                  <span>Ruta Bancaria:</span>
+                </span>
+                <span id="routeUpworkNetLabel" class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">Upwork (-15% + IVA)</span>
+                <i class="fa-solid fa-arrow-right text-[10px] text-[var(--color-mid-gray)]"></i>
+                <span class="px-1.5 py-0.5 rounded bg-[var(--surface-card)] text-[var(--color-ink)] border border-[var(--color-hairline)]">Retiro (-$1 USD)</span>
+                <i class="fa-solid fa-arrow-right text-[10px] text-[var(--color-mid-gray)]"></i>
+                <span class="px-1.5 py-0.5 rounded bg-[var(--surface-card)] text-[var(--color-ink)] border border-[var(--color-hairline)]">PayPal</span>
+                <i class="fa-solid fa-arrow-right text-[10px] text-[var(--color-mid-gray)]"></i>
+                <span id="routeNequiTierLabel" class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 font-semibold">Nequi (-4,76%)</span>
+              </div>
+              <div class="flex items-center gap-2 self-start md:self-auto shrink-0">
+                <span class="text-[var(--color-mid-gray)] text-[11px]">Neto en Nequi:</span>
+                <strong id="routeNetNequiUsd" class="text-emerald-600 dark:text-emerald-400 font-bold">$0.00 USD</strong>
+                <span class="text-[var(--color-mid-gray)]">•</span>
+                <strong id="routeNetNequiCop" class="text-[var(--color-ink)]">≈ $0 COP</strong>
+              </div>
+            </div>
+
+            <!-- Barra de Progreso de Consumo Presupuestal -->
+            <div class="mt-3 pt-3 border-t border-[var(--color-hairline)]">
+              <div class="flex items-center justify-between text-[11px] mb-1.5">
+                <span class="text-[var(--color-mid-gray)] font-medium flex items-center gap-1.5">
+                  <span>Ejecución del presupuesto:</span>
+                  <strong id="upworkBudgetPercentLabel" class="text-[var(--color-ink)] font-mono">0%</strong>
+                </span>
+                <span id="upworkBudgetHealthDesc" class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Presupuesto holgado</span>
+              </div>
+              <div class="w-full bg-[var(--color-canvas)] rounded-full h-2 overflow-hidden border border-[var(--color-hairline)]">
+                <div id="upworkBudgetProgressBar" class="h-2 rounded-full bg-emerald-500 transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+          </section>
         </div>
 
-        <!-- Métricas de 3 Columnas: Recaudación Upwork, Costo Nómina Mensual, Presupuesto Disponible -->
-        <div class="mt-4 pt-4 border-t border-[#E2E8F0] dark:border-[#1E293B] grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-          <!-- 1. Recaudación Semanal Upwork -->
-          <div class="p-3.5 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B]">
-            <div class="flex items-center justify-between text-[#64748B] dark:text-[#94A3B8] mb-1">
-              <span class="text-[10px] font-mono uppercase font-semibold">Recaudo Mes Acumulado</span>
-              <i class="fa-brands fa-upwork text-[#14A800] text-xs"></i>
-            </div>
-            <div class="flex items-baseline gap-1">
-              <span id="upworkRevenueDisplay" class="text-xl sm:text-2xl font-bold font-mono text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">$0.00</span>
-              <span class="text-[10px] text-[#64748B] font-mono">USD</span>
-            </div>
-            <span id="upworkRevenueCopDisplay" class="block text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5">≈ $0 COP</span>
-            <div class="text-[10px] text-[#64748B] dark:text-[#94A3B8] mt-1 truncate" id="upworkRevenueSubtitle">Facturación mensual acumulada</div>
-            <div id="upworkWeeksPillsBar" class="flex items-center gap-1 text-[9px] font-mono mt-2 pt-1.5 border-t border-[#E2E8F0]/60 dark:border-[#1E293B]/60 text-[#64748B] dark:text-[#94A3B8] flex-wrap">
-              <!-- Pastillas dinámicas por semana -->
-            </div>
-          </div>
-
-          <!-- 2. Costo Nómina Mensual -->
-          <div class="p-3.5 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B]">
-            <div class="flex items-center justify-between text-[#64748B] dark:text-[#94A3B8] mb-1">
-              <span class="text-[10px] font-mono uppercase font-semibold">Costo Nómina Mensual</span>
-              <i class="fa-solid fa-receipt text-[#2563EB] text-xs"></i>
-            </div>
-            <div class="flex items-baseline gap-1">
-              <span id="upworkPayrollCostDisplay" class="text-xl sm:text-2xl font-bold font-mono text-[#2563EB] tabular-nums">$0.00</span>
-              <span class="text-[10px] text-[#64748B] font-mono">USD</span>
-            </div>
-            <span id="upworkPayrollCostCopDisplay" class="block text-xs font-mono font-medium text-blue-600 dark:text-blue-400 tabular-nums mt-0.5">≈ $0 COP</span>
-            <div class="text-[10px] text-[#64748B] dark:text-[#94A3B8] mt-1 truncate" id="upworkPayrollDetails">0.00h de tareas aprobadas este mes</div>
-          </div>
-
-          <!-- 3. Presupuesto Disponible (Margen Libre) -->
-          <div class="p-3.5 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B]">
-            <div class="flex items-center justify-between text-[#64748B] dark:text-[#94A3B8] mb-1">
-              <span class="text-[10px] font-mono uppercase font-semibold">Presupuesto Disponible (Mes)</span>
-              <span id="upworkBudgetStatusBadge" class="text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">100% Libre</span>
-            </div>
-            <div class="flex items-baseline gap-1">
-              <span id="upworkAvailableBudgetDisplay" class="text-xl sm:text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums">$0.00</span>
-              <span class="text-[10px] text-[#64748B] font-mono">USD</span>
-            </div>
-            <span id="upworkAvailableBudgetCopDisplay" class="block text-xs font-mono font-medium text-emerald-700 dark:text-emerald-300 tabular-nums mt-0.5">≈ $0 COP</span>
-            <div class="text-[10px] text-[#64748B] dark:text-[#94A3B8] mt-1 truncate" id="upworkBudgetSubtitle">Margen real de ganancia del mes</div>
-          </div>
-        </div>
-
-        <!-- Resumen de Ruta Financiera: Upwork -> PayPal -> Nequi Colombia -->
-        <div id="upworkNequiRouteSummary" class="mt-3.5 p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-[#162032] border border-[#E2E8F0] dark:border-[#1E293B] flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs font-mono">
-          <div class="flex items-center gap-2 flex-wrap text-[#64748B] dark:text-[#94A3B8]">
-            <span class="inline-flex items-center gap-1 font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
-              <i class="fa-solid fa-route text-emerald-500"></i>
-              <span>Ruta Bancaria:</span>
-            </span>
-            <span id="routeUpworkNetLabel" class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">Upwork (-15% + IVA)</span>
-            <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
-            <span class="px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-600 dark:text-slate-400">Retiro (-$1 USD)</span>
-            <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
-            <span class="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">PayPal</span>
-            <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
-            <span id="routeNequiTierLabel" class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 font-semibold">Nequi (-4,76%)</span>
-          </div>
-          <div class="flex items-center gap-2 self-start md:self-auto shrink-0">
-            <span class="text-[#64748B] dark:text-[#94A3B8] text-[11px]">Neto Real en Nequi:</span>
-            <strong id="routeNetNequiUsd" class="text-emerald-600 dark:text-emerald-400 font-bold">$0.00 USD</strong>
-            <span class="text-slate-400">•</span>
-            <strong id="routeNetNequiCop" class="text-[#0F172A] dark:text-[#F8FAFC]">≈ $0 COP</strong>
-          </div>
-        </div>
-
-        <!-- Barra de Progreso de Consumo Presupuestal -->
-        <div class="mt-3 pt-3 border-t border-[#E2E8F0]/70 dark:border-[#1E293B]/70">
-          <div class="flex items-center justify-between text-[11px] mb-1.5">
-            <span class="text-[#64748B] dark:text-[#94A3B8] font-medium flex items-center gap-1.5">
-              <span>Ejecución del presupuesto del mes:</span>
-              <strong id="upworkBudgetPercentLabel" class="text-[#0F172A] dark:text-[#F8FAFC] font-mono">0%</strong>
-            </span>
-            <span id="upworkBudgetHealthDesc" class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Presupuesto holgado</span>
-          </div>
-          <div class="w-full bg-[#E2E8F0] dark:bg-[#1E293B] rounded-full h-2 overflow-hidden">
-            <div id="upworkBudgetProgressBar" class="h-2 rounded-full bg-emerald-500 transition-all duration-500" style="width: 0%"></div>
-          </div>
-        </div>
-      </section>
+      </div>
 
       <!-- 3. KPIs Ejecutivos Globales de Nómina (Tarjetas blancas, sobrias y consistentes) -->
       <section class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
@@ -1264,20 +1287,8 @@
       <!-- 6. Slot para Auditoría de Tareas del Admin -->
       <div id="adminTasksSlot" class="w-full"></div>
 
-      <!-- 7. Panel Colapsable de Tracker Administrativo -->
-      <div class="content-card">
-        <div class="flex items-center justify-between pb-3 border-b border-[#E2E8F0] dark:border-[#1E293B]">
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></span>
-            <h3 class="text-xs sm:text-sm font-semibold text-[#0F172A] dark:text-[#F8FAFC] uppercase">Tracker de Horas (Herramienta de Medición Administrativa)</h3>
-          </div>
-          <button type="button" id="btnToggleAdminTimer" class="px-3 py-1 rounded-lg bg-[#F1F5F9] dark:bg-[#162032] hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B] text-xs font-medium text-[#0F172A] dark:text-[#F8FAFC] border border-[#E2E8F0] dark:border-[#1E293B] transition-colors">
-            <i class="fa-solid fa-stopwatch mr-1"></i>
-            <span>Ver Cronómetro</span>
-          </button>
-        </div>
-        <div id="adminTimerSlot" class="mt-4 hidden"></div>
-      </div>
+      <!-- Referencia oculta para compatibilidad con handlers existentes -->
+      <button type="button" id="btnToggleAdminTimer" class="hidden" aria-hidden="true"></button>
     </div>
 
         <!-- =========================================================================
@@ -1628,7 +1639,6 @@
         </div>
 
       </main>
-    </div>
   </div>
 
   <!-- Contenedor Flotante de Toasts Adaptativo -->

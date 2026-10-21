@@ -872,11 +872,13 @@ function applyRoleView() {
       }
 
       const sidebarAdminLinks = document.getElementById("sidebarAdminLinks");
+      const mobileSidebarAdminLinks = document.getElementById("mobileSidebarAdminLinks");
       const navBillingLabel = document.getElementById("navBillingLabel");
       const topbarSubtitle = document.getElementById("topbarSubtitle");
       const adminHeaderBadge = document.getElementById("adminHeaderBadge");
       const adminName = profile.nombre || "Lina De La Espriella";
       if (sidebarAdminLinks) sidebarAdminLinks.classList.remove("hidden");
+      if (mobileSidebarAdminLinks) mobileSidebarAdminLinks.classList.remove("hidden");
       if (navBillingLabel) navBillingLabel.textContent = "Liquidaciones & Nómina";
       if (topbarSubtitle) topbarSubtitle.textContent = `Centro de Mando & Finanzas • ${adminName}`;
       if (adminHeaderBadge) adminHeaderBadge.textContent = `ADMIN: ${adminName}`;
@@ -926,9 +928,11 @@ function applyRoleView() {
       switchTab("tasks");
 
       const sidebarAdminLinks = document.getElementById("sidebarAdminLinks");
+      const mobileSidebarAdminLinks = document.getElementById("mobileSidebarAdminLinks");
       const navBillingLabel = document.getElementById("navBillingLabel");
       const topbarSubtitle = document.getElementById("topbarSubtitle");
       if (sidebarAdminLinks) sidebarAdminLinks.classList.add("hidden");
+      if (mobileSidebarAdminLinks) mobileSidebarAdminLinks.classList.add("hidden");
       if (navBillingLabel) navBillingLabel.textContent = "Mi Cuenta de Cobro";
       if (topbarSubtitle) topbarSubtitle.textContent = `Workspace Personal • ${profile.nombre || "Colaborador"}`;
 
@@ -1762,6 +1766,25 @@ function resetTimer() {
 
 function renderTimerDisplay() {
   elements.timerDisplay.textContent = formatSecondsToTime(state.timer.elapsedSeconds);
+
+  // Animación del anillo de progreso SVG (Option 1 Bento Grid)
+  const ring = document.getElementById("timerProgressRing");
+  if (ring) {
+    const circumference = 364.4;
+    let progress = 0;
+    if (state.pomodoro && state.pomodoro.enabled) {
+      const totalSecs = (state.pomodoro.phase === "focus" ? state.pomodoro.focusMinutes : state.pomodoro.breakMinutes) * 60;
+      progress = totalSecs > 0 ? (totalSecs - state.pomodoro.remainingSeconds) / totalSecs : 0;
+    } else if (state.timer.elapsedSeconds > 0) {
+      progress = (state.timer.elapsedSeconds % 60) / 60;
+      if (progress === 0) progress = 1; // Segundo 60 completo antes de resetear
+    } else {
+      progress = 0;
+    }
+    progress = Math.max(0, Math.min(1, progress));
+    ring.style.strokeDashoffset = (circumference * (1 - progress)).toString();
+  }
+
   updateDynamicIslandUI();
   updatePipDisplay();
   updateBackgroundTabTitle();
@@ -5796,6 +5819,7 @@ function setTimerMode(mode) {
     }
     showToast("Modo libre de cronómetro activo.", "info");
   }
+  renderTimerDisplay();
 }
 
 function handlePomodoroTick() {
@@ -7252,12 +7276,14 @@ function setupSidebarNavigation() {
   const btnCloseSidebarMobile = document.getElementById("btnCloseSidebarMobile");
 
   function openSidebar() {
-    appSidebar?.classList.remove("-translate-x-full");
+    appSidebar?.classList.remove("-translate-y-[150%]");
+    appSidebar?.classList.add("translate-y-0");
     sidebarBackdrop?.classList.remove("hidden");
   }
 
   function closeSidebar() {
-    appSidebar?.classList.add("-translate-x-full");
+    appSidebar?.classList.add("-translate-y-[150%]");
+    appSidebar?.classList.remove("translate-y-0");
     sidebarBackdrop?.classList.add("hidden");
   }
 
@@ -7345,7 +7371,9 @@ function initDefaultDate() {
 function initClock() {
   function updateTime() {
     const now = new Date();
-    elements.currentTime.textContent = now.toLocaleTimeString();
+    if (elements.currentTime) {
+      elements.currentTime.textContent = now.toLocaleTimeString();
+    }
   }
   updateTime();
   setInterval(updateTime, 1000);
