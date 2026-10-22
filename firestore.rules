@@ -71,13 +71,18 @@ service cloud.firestore {
       return id is string && id.matches('^[A-Za-z0-9_-]{1,64}$');
     }
 
-    // Tarea registrada por un colaborador: siempre a su nombre, siempre pendiente de aprobación
-    // y con un costo que no supera su tarifa real guardada en /trabajadores
+    // Tarea registrada por un colaborador aprobado: siempre a su nombre, siempre pendiente de aprobación,
+    // con campos de tamaño acotado y un costo que no supera su tarifa real guardada en /trabajadores
     function isValidWorkerTask() {
       let data = request.resource.data;
       let workerId = getUserWorkerId();
       let worker = get(/databases/$(database)/documents/trabajadores/$(workerId)).data;
       return workerId != null &&
+        isApprovedWorker() &&
+        data.descripcion.size() <= 1000 &&
+        data.get('cliente', '') is string && data.get('cliente', '').size() <= 120 &&
+        data.get('categoria', 'general') is string && data.get('categoria', 'general').size() <= 30 &&
+        data.get('segundos', 0) is number && data.get('segundos', 0) >= 0 &&
         data.trabajadorId == workerId &&
         data.userId == request.auth.uid &&
         data.estado == "pendiente" &&

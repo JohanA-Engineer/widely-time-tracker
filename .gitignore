@@ -32,3 +32,13 @@ env.js
 
 # Carpeta generada por el despliegue
 _site/
+
+# Llaves y credenciales (nunca deben subirse al repositorio público)
+*.pem
+*.key
+*.p12
+*.pfx
+serviceAccount*.json
+*-firebase-adminsdk-*.json
+.firebaserc
+firebase-debug.log

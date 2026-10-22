@@ -7,7 +7,7 @@ Este servidor sirve la aplicación web moderna (Frontend con Firebase en tiempo 
 y proporciona endpoints de diagnóstico y salud.
 
 Para ejecutar:
-    pip install fastapi uvicorn
+    pip install -r requirements.txt
     python main.py
 o:
     uvicorn main:app --reload --port 8000
@@ -15,11 +15,10 @@ o:
 """
 
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import uvicorn
 
 app = FastAPI(
@@ -28,17 +27,19 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Permitir CORS (útil para desarrollo y despliegues desacoplados)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Sin CORS: solo la propia app (servida desde este mismo servidor) puede leer sus respuestas.
+# TrustedHost bloquea ataques de DNS rebinding desde otras páginas web.
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1"])
 
 # Directorio base donde residen los archivos estáticos
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Únicos archivos que se sirven (los mismos que publica GitHub Pages).
+# Nunca se exponen .git, scripts, reglas ni documentación.
+PUBLIC_FILES = {
+    "index.html", "app.js", "env.js", "styles.css", "tailwind.min.css",
+    "sw.js", "manifest.json", "icon-192.svg", "icon-512.svg",
+}
 
 # Endpoint de Salud / Diagnóstico
 @app.get("/api/health")
@@ -46,7 +47,7 @@ def health_check():
     return {
         "status": "online",
         "service": "Widely Time Tracker Backend",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "python_version": "3.13+"
     }
 
@@ -58,9 +59,13 @@ def serve_index():
         return FileResponse(index_file)
     return {"error": "index.html no encontrado en el directorio"}
 
-# Montar archivos estáticos (styles.css, app.js, recursos adicionales)
-# Se monta al final para permitir que la ruta raíz '/' responda primero
-app.mount("/", StaticFiles(directory=BASE_DIR, html=True), name="static")
+# Archivos estáticos de la app, solo desde la lista permitida
+@app.get("/{filename}")
+def serve_public_file(filename: str):
+    path = os.path.join(BASE_DIR, filename)
+    if filename not in PUBLIC_FILES or not os.path.isfile(path):
+        return JSONResponse({"error": "no encontrado"}, status_code=404)
+    return FileResponse(path)
 
 if __name__ == "__main__":
     print("\n" + "=" * 60)

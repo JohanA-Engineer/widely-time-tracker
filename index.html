@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <!-- Seguridad: orígenes permitidos (GitHub Pages no permite cabeceras propias, por eso va como meta).
+       'unsafe-inline' es necesario porque la app usa onclick en el HTML generado. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.googleapis.com https://www.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com https://api.fxratesapi.com https://open.er-api.com https://latest.currency-api.pages.dev; frame-src https://widely-time-tracker.firebaseapp.com https://accounts.google.com https://apis.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <!-- Anti-clickjacking: la app no se puede mostrar dentro de un iframe de otra página -->
+  <script>if (window.top !== window.self) { document.documentElement.style.display = "none"; try { window.top.location = window.self.location.href; } catch (e) {} }</script>
   <title>Time Tracker</title>
 
   <!-- PWA & Mobile Web App Meta Tags -->
@@ -557,7 +564,7 @@
                   <label for="timerClientProject" class="block text-xs font-semibold text-ink mb-1.5">
                     Cliente / Cuenta
                   </label>
-                  <input type="text" id="timerClientProject" list="clientsDatalist" placeholder="Ej. Nike, Cliente A, StartupX..." class="form-input w-full text-xs">
+                  <input type="text" id="timerClientProject" list="clientsDatalist" maxlength="120" placeholder="Ej. Nike, Cliente A, StartupX..." class="form-input w-full text-xs">
                 </div>
                 <div>
                   <label for="timerCategory" class="block text-xs font-semibold text-ink mb-1.5">
@@ -580,7 +587,7 @@
                 <label for="timerTaskDescription" class="block text-xs font-semibold text-ink mb-1.5">
                   Descripción de la Tarea
                 </label>
-                <input type="text" id="timerTaskDescription" placeholder="Ej. Campaña Facebook Ads, Rediseño UI..." class="form-input w-full">
+                <input type="text" id="timerTaskDescription" maxlength="1000" placeholder="Ej. Campaña Facebook Ads, Rediseño UI..." class="form-input w-full">
               </div>
 
               <!-- Display Digital del Reloj (Limpio, sobrio y natural) -->
@@ -2112,7 +2119,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label for="manualClientProject" class="block text-xs font-semibold text-ink mb-1">Cliente / Cuenta</label>
-            <input type="text" id="manualClientProject" list="clientsDatalist" placeholder="Ej. Nike, Widely..." class="form-input w-full text-xs">
+            <input type="text" id="manualClientProject" list="clientsDatalist" maxlength="120" placeholder="Ej. Nike, Widely..." class="form-input w-full text-xs">
           </div>
           <div>
             <label for="manualCategory" class="block text-xs font-semibold text-ink mb-1">Categoría</label>
@@ -2130,7 +2137,7 @@
 
         <div>
           <label for="manualDescription" class="block text-xs font-semibold text-ink mb-1">Descripción de la Actividad / Artes</label>
-          <input type="text" id="manualDescription" placeholder="Ej. Diseño de 4 posts para feed y 2 historias animadas" required class="form-input w-full text-xs">
+          <input type="text" id="manualDescription" maxlength="1000" placeholder="Ej. Diseño de 4 posts para feed y 2 historias animadas" required class="form-input w-full text-xs">
         </div>
 
         <div class="p-2.5 rounded-lg bg-ink/10 border border-line text-[11px] text-ink flex items-center justify-between">

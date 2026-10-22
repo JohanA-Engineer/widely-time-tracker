@@ -1,0 +1,11 @@
+# Propone actualizaciones de las acciones de GitHub y de las dependencias de Python
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "monthly"

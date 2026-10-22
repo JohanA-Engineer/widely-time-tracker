@@ -1268,6 +1268,10 @@ async function handleLogout() {
     state.currentUser = null;
     state.userProfile = null;
     localStorage.removeItem("widely_cached_user");
+    // Los datos bancarios guardados en este navegador no deben quedar tras cerrar sesión
+    Object.keys(localStorage)
+      .filter(key => key.startsWith("widely_banking_"))
+      .forEach(key => localStorage.removeItem(key));
     setupFirestoreListeners(null);
     document.documentElement.classList.remove("has-user-session");
     applyRoleView();
@@ -5742,7 +5746,7 @@ function handleShareWhatsAppStatement() {
   }
 
   const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
-  window.open(whatsappUrl, "_blank");
+  window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   showToast(`Abriendo WhatsApp con comprobante para ${worker.nombre}...`, "success");
 }
 
