@@ -3356,7 +3356,7 @@ function updateTasksUI() {
   if (isWorker) {
     allUserTasks = allUserTasks.filter(t => 
       (myId && t.trabajadorId === myId) || 
-      (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === myName)
+      (!t.trabajadorId && t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === myName)
     );
   }
 
@@ -3613,7 +3613,7 @@ function updatePaymentsUI() {
     const myName = (state.userProfile.nombre || "").trim().toLowerCase();
     displayedPayments = displayedPayments.filter(p => 
       (myId && p.trabajadorId === myId) || 
-      (p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === myName)
+      (!p.trabajadorId && p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === myName)
     );
   }
 
@@ -3664,11 +3664,7 @@ function updateFinancialDashboard() {
   let displayedWorkers = state.workers;
   if (isWorker) {
     const myId = state.userProfile.trabajadorId;
-    const myName = (state.userProfile.nombre || "").trim().toLowerCase();
-    displayedWorkers = state.workers.filter(w => 
-      (myId && w.id === myId) || 
-      (w.nombre && w.nombre.trim().toLowerCase() === myName)
-    );
+    displayedWorkers = state.workers.filter(w => myId && w.id === myId);
   }
 
   if (displayedWorkers.length === 0) {
@@ -3703,7 +3699,7 @@ function updateFinancialDashboard() {
 
   const rowsHtml = displayedWorkers.map(worker => {
     const workerTasks = allFilteredTasks.filter(t => 
-      (t.trabajadorId === worker.id || (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase())) &&
+      (t.trabajadorId === worker.id || (!t.trabajadorId && t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase())) &&
       isTaskApproved(t)
     );
     const workerSeconds = workerTasks.reduce((acc, t) => acc + (Number(t.segundos) || 0), 0);
@@ -3711,7 +3707,7 @@ function updateFinancialDashboard() {
     const workerArtes = workerTasks.filter(t => t.cantidadArtes > 0).reduce((acc, t) => acc + (Number(t.cantidadArtes) || 0), 0);
     const workerEarned = workerTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
 
-    const workerPayments = allFilteredPayments.filter(p => p.trabajadorId === worker.id || (p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase()));
+    const workerPayments = allFilteredPayments.filter(p => p.trabajadorId === worker.id || (!p.trabajadorId && p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase()));
     const workerPaid = workerPayments.reduce((acc, p) => acc + (Number(p.monto) || 0), 0);
 
     const pendingBalance = Number((workerEarned - workerPaid).toFixed(2));
@@ -4255,7 +4251,7 @@ function renderProductivityCharts() {
     const myName = (state.userProfile.nombre || "").trim().toLowerCase();
     filteredTasks = filteredTasks.filter(t => 
       (myId && t.trabajadorId === myId) || 
-      (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === myName)
+      (!t.trabajadorId && t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === myName)
     );
   }
 
@@ -6669,13 +6665,13 @@ window.openStatementModal = function(workerId, preferredType) {
   currentStatementWorkerId = worker.id;
 
   const filteredTasks = state.tasks.filter(t => 
-    (t.trabajadorId === worker.id || (t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase())) &&
+    (t.trabajadorId === worker.id || (!t.trabajadorId && t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase())) &&
     isDateInPeriod(t.fecha, state.filterPeriod) &&
     isTaskApproved(t)
   );
 
   const filteredPayments = state.payments.filter(p =>
-    (p.trabajadorId === worker.id || (p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase())) &&
+    (p.trabajadorId === worker.id || (!p.trabajadorId && p.trabajadorNombre && p.trabajadorNombre.trim().toLowerCase() === worker.nombre.trim().toLowerCase())) &&
     isDateInPeriod(p.fecha, state.filterPeriod)
   );
 

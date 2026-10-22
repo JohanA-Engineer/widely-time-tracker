@@ -46,6 +46,25 @@ service cloud.firestore {
       );
     }
 
+    // El campo email del perfil solo puede ser el correo real de la cuenta (o no cambiar)
+    function keepsOwnEmail() {
+      return !('email' in request.resource.data) ||
+        (resource != null && request.resource.data.email == resource.data.get('email', null)) ||
+        request.resource.data.email.lower() == request.auth.token.get('email', '').lower();
+    }
+
+    // Colaborador aprobado: su ficha la creó la administradora, o la administradora ya le asignó
+    // una tarifa (las fichas autocreadas al registrarse nacen sin dueño aprobado y con tarifas en 0)
+    function isApprovedWorker() {
+      let workerId = getUserWorkerId();
+      let worker = get(/databases/$(database)/documents/trabajadores/$(workerId)).data;
+      return workerId != null && (
+        worker.get('ownerUid', null) == null ||
+        worker.get('tarifaHora', 0) > 0 ||
+        worker.get('tarifaArte', 0) > 0
+      );
+    }
+
     // IDs generados por la app (addDoc): solo letras, números, guion y guion bajo.
     // Evita que un ID elegido a mano lleve comillas o código a la interfaz de la administradora.
     function isSafeId(id) {
@@ -62,6 +81,7 @@ service cloud.firestore {
         data.trabajadorId == workerId &&
         data.userId == request.auth.uid &&
         data.estado == "pendiente" &&
+        data.get('trabajadorNombre', '') == worker.get('nombre', '') &&
         data.fecha is string && data.fecha.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') &&
         data.costoTotal is number && data.costoTotal >= 0 &&
         data.tarifaHora == worker.get('tarifaHora', 0) &&
@@ -88,6 +108,7 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.auth.uid == userId && (
         isMasterAdmin() || (
           request.resource.data.get('rol', 'worker') == "worker" &&
+          keepsOwnEmail() &&
           ownsWorkerOrNone(request.resource.data.get('trabajadorId', null))
         )
       );
@@ -98,6 +119,7 @@ service cloud.firestore {
         isMasterAdmin() ||
         (request.auth.uid == userId &&
          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['rol']) &&
+         keepsOwnEmail() &&
          (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['trabajadorId']) ||
           ownsWorkerOrNone(request.resource.data.get('trabajadorId', null))))
       );
@@ -168,9 +190,9 @@ service cloud.firestore {
 
     // 5. Colección de Configuración Administrativa (/configuracion/{docId})
     match /configuracion/{docId} {
-      // La lista de administradores es legible por usuarios autenticados (la app la usa para mostrar roles);
+      // La lista de administradores es legible por colaboradores aprobados (la app la usa para mostrar roles);
       // el resto de configuraciones (presupuesto Upwork) es solo para administradores
-      allow read: if isAuthenticated() && (docId == "admins" || isMasterAdmin());
+      allow read: if isAuthenticated() && (isMasterAdmin() || (docId == "admins" && isApprovedWorker()));
 
       // ÚNICAMENTE la Administradora Maestra (Lina) puede modificar configuraciones como el presupuesto Upwork
       allow write: if isMasterAdmin();
@@ -178,8 +200,9 @@ service cloud.firestore {
 
     // 6. Colección de Clientes y Presupuestos (/clientes/{clientId})
     match /clientes/{clientId} {
-      // Lectura abierta a autenticados: los colaboradores la usan para autocompletar el cliente de sus tareas
-      allow read: if isAuthenticated();
+      // Los colaboradores aprobados la usan para autocompletar el cliente de sus tareas;
+      // una cuenta recién registrada no la ve hasta que la administradora le asigne tarifa
+      allow read: if isAuthenticated() && (isMasterAdmin() || isApprovedWorker());
       allow write: if isMasterAdmin();
     }
   }
