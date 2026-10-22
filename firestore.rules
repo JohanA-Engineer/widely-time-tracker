@@ -46,6 +46,12 @@ service cloud.firestore {
       );
     }
 
+    // IDs generados por la app (addDoc): solo letras, números, guion y guion bajo.
+    // Evita que un ID elegido a mano lleve comillas o código a la interfaz de la administradora.
+    function isSafeId(id) {
+      return id is string && id.matches('^[A-Za-z0-9_-]{1,64}$');
+    }
+
     // Tarea registrada por un colaborador: siempre a su nombre, siempre pendiente de aprobación
     // y con un costo que no supera su tarifa real guardada en /trabajadores
     function isValidWorkerTask() {
@@ -56,6 +62,7 @@ service cloud.firestore {
         data.trabajadorId == workerId &&
         data.userId == request.auth.uid &&
         data.estado == "pendiente" &&
+        data.fecha is string && data.fecha.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') &&
         data.costoTotal is number && data.costoTotal >= 0 &&
         data.tarifaHora == worker.get('tarifaHora', 0) &&
         (
@@ -112,6 +119,7 @@ service cloud.firestore {
       // si un nuevo usuario se autoregistra, su ficha queda a su nombre (ownerUid) y sus tarifas en 0
       allow create: if isMasterAdmin() || (
         isAuthenticated() &&
+        isSafeId(workerId) &&
         request.resource.data.ownerUid == request.auth.uid &&
         request.resource.data.get('tarifaHora', 0) == 0 &&
         request.resource.data.get('tarifaArte', 0) == 0
@@ -140,7 +148,7 @@ service cloud.firestore {
       allow create: if isAuthenticated() && (
         (request.resource.data.horas > 0 || (request.resource.data.cantidadArtes is number && request.resource.data.cantidadArtes > 0)) &&
         request.resource.data.descripcion is string
-      ) && (isMasterAdmin() || isValidWorkerTask());
+      ) && (isMasterAdmin() || (isSafeId(taskId) && isValidWorkerTask()));
 
       // Solo Lina puede modificar o eliminar tareas ya registradas (auditoría financiera)
       allow update, delete: if isMasterAdmin();

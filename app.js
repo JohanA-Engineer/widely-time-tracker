@@ -2320,7 +2320,7 @@ function updateWorkersUI() {
       if (artRate > 0) parts.push(`$${artRate.toFixed(2)}/arte`);
       const tag = parts.length > 0 ? parts.join(" · ") : "Sin tarifa";
       return `
-        <option value="${w.id}" data-rate="${rate}" data-art-rate="${artRate}">
+        <option value="${escapeHtml(w.id)}" data-rate="${rate}" data-art-rate="${artRate}">
           ${escapeHtml(w.nombre)} (${tag})
         </option>
       `;
@@ -2328,7 +2328,7 @@ function updateWorkersUI() {
 
   elements.paymentWorkerSelect.innerHTML = `<option value="">-- Selecciona un trabajador --</option>` +
     state.workers.map(w => `
-      <option value="${w.id}">
+      <option value="${escapeHtml(w.id)}">
         ${escapeHtml(w.nombre)}
       </option>
     `).join("");
@@ -2375,7 +2375,7 @@ function updateWorkersUI() {
           <div class="flex items-center gap-1 shrink-0">
             <button 
               type="button"
-              onclick="window.openManualEntryModal('${w.id}')"
+              onclick="window.openManualEntryModal(${jsArg(w.id)})"
               title="Cargar horas o diseños de arte para ${escapeHtml(w.nombre)}" 
               class="px-2 py-1 rounded-lg bg-ink/10 hover:bg-ink/20 text-mid border border-line transition-all active:scale-95 text-xs flex items-center gap-1 font-medium cursor-pointer">
               <i class="fa-solid fa-plus text-[10px]"></i>
@@ -2479,7 +2479,7 @@ function updateAdminUsersUI() {
     const toggleRoleBtn = isMaster
       ? ""
       : `<button type="button" 
-           onclick="window.toggleUserRole('${u.id || u.uid}')" 
+           onclick="window.toggleUserRole(${jsArg(u.id || u.uid)})" 
            title="${isAdmin ? 'Cambiar a Colaborador' : 'Hacer Administrador'}" 
            class="px-2 py-1 text-[11px] rounded-lg font-medium border border-line bg-white dark:bg-muted text-mid dark:text-faint hover:bg-muted transition-all cursor-pointer">
            <i class="fa-solid ${isAdmin ? 'fa-arrow-down text-ember' : 'fa-arrow-up text-ink'} mr-1 text-[10px]"></i>${isAdmin ? 'Bajar Rol' : 'Hacer Admin'}
@@ -2508,7 +2508,7 @@ function updateAdminUsersUI() {
         <div class="flex items-center gap-1.5 shrink-0">
           ${toggleRoleBtn}
           <button type="button" 
-            onclick="window.openAdminEditUserModal('${u.id || u.uid}')" 
+            onclick="window.openAdminEditUserModal(${jsArg(u.id || u.uid)})" 
             title="Editar Perfil y Permisos" 
             class="px-2.5 py-1 text-[11px] rounded-lg font-semibold bg-primary hover:bg-primary/90 text-on-primary transition-all shadow-xs active:scale-95 cursor-pointer flex items-center gap-1">
             <i class="fa-solid fa-pen-to-square text-[10px]"></i>
@@ -2960,7 +2960,7 @@ function openAdminEditUserModal(userId) {
     elements.adminEditUserWorkerSelect.innerHTML = `
       <option value="">-- Sin ficha de trabajador vinculada --</option>
       ${state.workers.map(w => `
-        <option value="${w.id}" ${u.trabajadorId === w.id ? "selected" : ""}>
+        <option value="${escapeHtml(w.id)}" ${u.trabajadorId === w.id ? "selected" : ""}>
           ${escapeHtml(w.nombre)} ${w.cargo ? `(${escapeHtml(w.cargo)})` : ""}
         </option>
       `).join("")}
@@ -3470,13 +3470,13 @@ function updateTasksUI() {
         actionButtons = `
           <div class="flex items-center justify-center gap-1">
             <button 
-              onclick="window.approveTask('${t.id}')"
+              onclick="window.approveTask(${jsArg(t.id)})"
               class="text-mid hover:text-mid p-1.5 rounded-lg hover:bg-ink/15 transition-colors active:scale-95"
               title="Aprobar horas">
               <i class="fa-solid fa-check text-xs"></i>
             </button>
             <button 
-              onclick="window.openRejectModal('${t.id}')"
+              onclick="window.openRejectModal(${jsArg(t.id)})"
               class="text-ember hover:text-ember p-1.5 rounded-lg hover:bg-ember/15 transition-colors active:scale-95"
               title="Rechazar horas">
               <i class="fa-solid fa-xmark text-xs"></i>
@@ -3493,7 +3493,7 @@ function updateTasksUI() {
         actionButtons = `
           <div class="flex items-center justify-center gap-1">
             <button 
-              onclick="window.approveTask('${t.id}')"
+              onclick="window.approveTask(${jsArg(t.id)})"
               class="text-mid hover:text-mid p-1.5 rounded-lg hover:bg-ink/15 transition-colors active:scale-95"
               title="Reconsiderar y Aprobar">
               <i class="fa-solid fa-check text-xs"></i>
@@ -3512,7 +3512,7 @@ function updateTasksUI() {
           <div class="flex items-center justify-center gap-1">
             ${t.esManual ? `
               <button 
-                onclick="window.openRejectModal('${t.id}')"
+                onclick="window.openRejectModal(${jsArg(t.id)})"
                 class="text-mid hover:text-ember p-1.5 rounded-lg hover:bg-ember/10 transition-colors active:scale-95"
                 title="Rechazar horas previamente aprobadas">
                 <i class="fa-solid fa-ban text-xs"></i>
@@ -3575,7 +3575,7 @@ function updateTasksUI() {
 
     return `
       <tr class="hover:bg-muted transition-colors ${taskStatus === 'rechazada' ? 'bg-ember/5' : taskStatus === 'pendiente' ? 'bg-muted/60' : ''}">
-        <td class="py-2.5 px-3 text-mid font-mono whitespace-nowrap tabular-nums">${t.fecha || '-'}</td>
+        <td class="py-2.5 px-3 text-mid font-mono whitespace-nowrap tabular-nums">${escapeHtml(t.fecha || '-')}</td>
         <td class="py-2.5 px-3 font-semibold text-ink whitespace-nowrap">${escapeHtml(t.trabajadorNombre || 'Anónimo')}</td>
         <td class="py-2.5 px-3 text-mid max-w-sm">
           <div class="flex items-center gap-1.5 flex-wrap">
@@ -3632,7 +3632,7 @@ function updatePaymentsUI() {
 
   elements.paymentsTableBody.innerHTML = displayedPayments.map(p => `
     <tr class="hover:bg-muted transition-colors">
-      <td class="py-2.5 px-3 text-mid font-mono whitespace-nowrap tabular-nums">${p.fecha || '-'}</td>
+      <td class="py-2.5 px-3 text-mid font-mono whitespace-nowrap tabular-nums">${escapeHtml(p.fecha || '-')}</td>
       <td class="py-2.5 px-3 font-semibold text-ink whitespace-nowrap">${escapeHtml(p.trabajadorNombre || '')}</td>
       <td class="py-2.5 px-3 text-mid max-w-xs truncate" title="${escapeHtml(p.referencia || '')}">
         ${escapeHtml(p.referencia || 'Pago')}
@@ -3773,7 +3773,7 @@ function updateFinancialDashboard() {
     const statementBtn = isWorker ? `
       <button 
         type="button" 
-        onclick="window.openStatementModal('${worker.id}', 'bill')" 
+        onclick="window.openStatementModal(${jsArg(worker.id)}, 'bill')" 
         class="px-2.5 py-1.5 rounded-lg bg-ink/10 hover:bg-ink/20 text-ink border border-line text-xs font-medium active:scale-95 transition-all inline-flex items-center gap-1.5 cursor-pointer"
         title="Generar y descargar mi Cuenta de Cobro formal">
         <i class="fa-solid fa-file-invoice-dollar text-xs"></i>
@@ -3783,7 +3783,7 @@ function updateFinancialDashboard() {
       <div class="inline-flex items-center gap-1.5">
         <button 
           type="button" 
-          onclick="window.openManualEntryModal('${worker.id}')" 
+          onclick="window.openManualEntryModal(${jsArg(worker.id)})" 
           class="px-2 py-1.5 rounded-lg bg-ink/10 hover:bg-ink/20 text-mid border border-line text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
           title="Cargar horas o diseños de artes a ${escapeHtml(worker.nombre)}">
           <i class="fa-solid fa-plus text-[10px]"></i>
@@ -3791,7 +3791,7 @@ function updateFinancialDashboard() {
         </button>
         <button 
           type="button" 
-          onclick="window.openStatementModal('${worker.id}', 'receipt')" 
+          onclick="window.openStatementModal(${jsArg(worker.id)}, 'receipt')" 
           class="px-2.5 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-on-primary text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
           title="Generar Recibo de Pago Oficial (PDF)">
           <i class="fa-solid fa-receipt text-[10px]"></i>
@@ -3800,7 +3800,7 @@ function updateFinancialDashboard() {
         </button>
         <button 
           type="button" 
-          onclick="window.openStatementModal('${worker.id}', 'bill')" 
+          onclick="window.openStatementModal(${jsArg(worker.id)}, 'bill')" 
           class="px-2 py-1.5 rounded-lg bg-muted dark:bg-paper hover:bg-muted text-ink border border-line text-[11px] font-medium active:scale-95 transition-all inline-flex items-center gap-1 cursor-pointer"
           title="Auditar Cuenta de Cobro de este colaborador">
           <i class="fa-solid fa-file-invoice-dollar text-[10px]"></i>
@@ -4063,6 +4063,14 @@ function updateTrmUI() {
   }
 }
 
+// Rango razonable del dólar en pesos: descarta valores absurdos si una API externa falla o es manipulada
+const TRM_MIN = 1500;
+const TRM_MAX = 8000;
+function isPlausibleTrm(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n >= TRM_MIN && n <= TRM_MAX;
+}
+
 async function fetchLiveTrm(silent = true) {
   try {
     const customStored = localStorage.getItem("widely_custom_trm");
@@ -4084,7 +4092,7 @@ async function fetchLiveTrm(silent = true) {
     const res = await fetch("https://api.fxratesapi.com/latest?base=USD&currencies=COP");
     if (res.ok) {
       const data = await res.json();
-      if (data?.rates?.COP && !isNaN(data.rates.COP) && data.rates.COP > 1000) {
+      if (isPlausibleTrm(data?.rates?.COP)) {
         fetchedRate = Number(Number(data.rates.COP).toFixed(2));
       }
     }
@@ -4098,7 +4106,7 @@ async function fetchLiveTrm(silent = true) {
       const res = await fetch("https://open.er-api.com/v6/latest/USD");
       if (res.ok) {
         const data = await res.json();
-        if (data?.rates?.COP && !isNaN(data.rates.COP) && data.rates.COP > 1000) {
+        if (isPlausibleTrm(data?.rates?.COP)) {
           fetchedRate = Number(Number(data.rates.COP).toFixed(2));
         }
       }
@@ -4113,7 +4121,7 @@ async function fetchLiveTrm(silent = true) {
       const res = await fetch("https://latest.currency-api.pages.dev/v1/currencies/usd.json");
       if (res.ok) {
         const data = await res.json();
-        if (data?.usd?.cop && !isNaN(data.usd.cop) && data.usd.cop > 1000) {
+        if (isPlausibleTrm(data?.usd?.cop)) {
           fetchedRate = Number(Number(data.usd.cop).toFixed(2));
         }
       }
@@ -5457,7 +5465,7 @@ function updateClientsUI() {
         </td>
         <td class="py-3 px-2 text-center whitespace-nowrap">
           <div class="inline-flex items-center gap-1">
-            <button type="button" onclick="window.openClientModal('${client.id}')" class="p-1 rounded-md text-mid hover:text-ink hover:bg-ink/10 transition-colors" title="Editar cliente">
+            <button type="button" onclick="window.openClientModal(${jsArg(client.id)})" class="p-1 rounded-md text-mid hover:text-ink hover:bg-ink/10 transition-colors" title="Editar cliente">
               <i class="fa-regular fa-pen-to-square text-xs"></i>
             </button>
             <button type="button" onclick="window.deleteClient(${jsArg(client.id)}, ${jsArg(client.nombre)})" class="p-1 rounded-md text-mid hover:text-ember hover:bg-ember/10 transition-colors" title="Eliminar cliente">
@@ -6129,7 +6137,7 @@ function openManualEntryModal(preselectedWorkerId = null) {
       if (hRate > 0) parts.push(`$${hRate.toFixed(2)}/h`);
       if (aRate > 0) parts.push(`$${aRate.toFixed(2)}/arte`);
       const label = parts.length > 0 ? parts.join(" · ") : "Sin tarifas fijadas";
-      return `<option value="${w.id}" data-rate="${hRate}" data-art-rate="${aRate}">${escapeHtml(w.nombre)} (${label})</option>`;
+      return `<option value="${escapeHtml(w.id)}" data-rate="${hRate}" data-art-rate="${aRate}">${escapeHtml(w.nombre)} (${label})</option>`;
     }).join("");
 
   const isWorkerRole = state.userProfile?.rol === "worker";
@@ -6746,7 +6754,7 @@ window.openStatementModal = function(workerId, preferredType) {
 
         return `
           <tr class="text-xs">
-            <td class="py-2.5 px-3 font-medium text-mid tabular-nums whitespace-nowrap">${t.fecha || '-'}</td>
+            <td class="py-2.5 px-3 font-medium text-mid tabular-nums whitespace-nowrap">${escapeHtml(t.fecha || '-')}</td>
             <td class="py-2.5 px-3 font-semibold text-ink">${escapeHtml(t.cliente || 'General')}</td>
             <td class="py-2.5 px-3 text-ink">
               <span class="font-medium">${escapeHtml(t.descripcion || 'Servicio')}</span>
@@ -6806,7 +6814,7 @@ window.openStatementModal = function(workerId, preferredType) {
 
         return `
           <tr class="text-xs">
-            <td class="py-2.5 px-3 font-medium text-mid tabular-nums whitespace-nowrap">${t.fecha || '-'}</td>
+            <td class="py-2.5 px-3 font-medium text-mid tabular-nums whitespace-nowrap">${escapeHtml(t.fecha || '-')}</td>
             <td class="py-2.5 px-3 text-ink">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-medium">${escapeHtml(t.descripcion || 'Tarea')}</span>
@@ -6829,7 +6837,7 @@ window.openStatementModal = function(workerId, preferredType) {
     } else {
       elements.receiptPaymentsBody.innerHTML = filteredPayments.map(p => `
         <tr class="text-xs">
-          <td class="py-2.5 px-3 font-medium text-mid tabular-nums whitespace-nowrap">${p.fecha || '-'}</td>
+          <td class="py-2.5 px-3 font-medium text-mid tabular-nums whitespace-nowrap">${escapeHtml(p.fecha || '-')}</td>
           <td class="py-2.5 px-3 text-ink">${escapeHtml(p.referencia || 'Transferencia / Liquidación')}</td>
           <td class="py-2.5 px-3 text-right font-bold text-mid tabular-nums whitespace-nowrap">$${Number(p.monto || 0).toFixed(2)}</td>
         </tr>
