@@ -2137,7 +2137,7 @@ async function handleRegisterTask() {
   const rate = Number(worker.tarifaHora || 0);
   const hours = seconds / 3600;
   const totalCost = Number((hours * rate).toFixed(2));
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTodayKey();
 
   const taskData = {
     fecha: today,
@@ -2281,7 +2281,7 @@ async function handleSavePayment(e) {
   }
 
   const paymentData = {
-    fecha: date || new Date().toISOString().split("T")[0],
+    fecha: date || getTodayKey(),
     trabajadorId: worker.id,
     trabajadorNombre: worker.nombre,
     monto: Number(amount.toFixed(2)),
@@ -4493,6 +4493,14 @@ function getWeekLabel(range) {
 const WEEK_DAY_LABELS = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"];
 let weeklyOffset = 0;
 
+// Fecha de hoy en Colombia (AAAA-MM-DD). toISOString() usa UTC, y después de las 7 p. m.
+// en Colombia devolvía la fecha del día siguiente.
+function getTodayKey() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota", year: "numeric", month: "2-digit", day: "2-digit"
+  }).format(new Date());
+}
+
 function toLocalDateKey(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -4570,7 +4578,7 @@ function renderWeeklyView() {
   if (sections.length === 0) return;
 
   const days = getWeekDays(weeklyOffset);
-  const todayKey = toLocalDateKey(new Date());
+  const todayKey = getTodayKey();
   const { keys, rows, dayTotals, weekTotal } = buildWeeklySummary(days);
   const rangeLabel = getWeekLabel({ start: days[0], end: days[6] }) + (weeklyOffset === 0 ? " · actual" : "");
   const isWorker = state.userProfile?.rol === "worker";
@@ -5724,7 +5732,7 @@ function handleExportTasksCsv() {
     ];
   });
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = getTodayKey();
   exportToCsv(`Widely_Actividades_${periodLabel.replace(/[^a-zA-Z0-9]/g, "_")}_${todayStr}.csv`, headers, rows);
 }
 
@@ -5755,7 +5763,7 @@ function handleExportPaymentsCsv() {
     ];
   });
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = getTodayKey();
   exportToCsv(`Widely_Pagos_${periodLabel.replace(/[^a-zA-Z0-9]/g, "_")}_${todayStr}.csv`, headers, rows);
 }
 
@@ -5818,7 +5826,7 @@ function handleExportFinancialCsv() {
     ];
   });
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = getTodayKey();
   exportToCsv(`Widely_Nomina_Consolidada_${periodLabel.replace(/[^a-zA-Z0-9]/g, "_")}_${todayStr}.csv`, headers, rows);
 }
 
@@ -6322,7 +6330,7 @@ function openManualEntryModal(preselectedWorkerId = null) {
   }
 
   if (elements.manualDate && !elements.manualDate.value) {
-    elements.manualDate.value = new Date().toISOString().split("T")[0];
+    elements.manualDate.value = getTodayKey();
   }
 
   // Si el colaborador solo cobra por arte y no tiene tarifa por hora, abrir directamente en modo artes
@@ -6463,7 +6471,7 @@ async function handleSaveManualEntry(e) {
   const workerId = (isWorkerRole && userWorkerId) ? userWorkerId : (elements.manualWorkerSelect?.value || userWorkerId);
   const client = elements.manualClientProject?.value.trim() || "";
   const category = elements.manualCategory?.value || "general";
-  const date = elements.manualDate?.value || new Date().toISOString().split("T")[0];
+  const date = elements.manualDate?.value || getTodayKey();
   const description = elements.manualDescription?.value.trim() || "";
   const mode = elements.manualEntryMode?.value || "horas";
 
@@ -7577,7 +7585,7 @@ function switchTab(tab) {
 
 function initDefaultDate() {
   if (elements.paymentDate) {
-    elements.paymentDate.value = new Date().toISOString().split("T")[0];
+    elements.paymentDate.value = getTodayKey();
   }
 }
 
