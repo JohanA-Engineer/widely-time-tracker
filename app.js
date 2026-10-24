@@ -191,7 +191,7 @@ let state = {
   clients: [],      // Colección 'clientes'
   currentUser: null, // Firebase Auth user
   userProfile: null, // Perfil activo { uid, nombre, email, rol, trabajadorId }
-  filterPeriod: "all", // Filtro de liquidación: 'all', 'this_month', 'current_fortnight', 'last_month'
+  filterPeriod: "all", // Filtro de liquidación: 'all', 'this_week', 'this_month', 'current_fortnight', 'last_month'
   taskStatusFilter: "all", // Filtro de estado: 'all', 'pendiente', 'aprobada', 'rechazada'
   rejectTargetId: null,
   upworkWeeklyRevenue: 0, // Recaudación mensual acumulada Upwork en USD
@@ -2312,6 +2312,7 @@ async function handleSavePayment(e) {
    9. ACTUALIZACIÓN VISUAL (UI) Y COMPONENTES
    ============================================================================ */
 function updateWorkersUI() {
+  renderWeeklyView();
   const currentTimerVal = elements.timerWorkerSelect.value;
   const currentPayVal = elements.paymentWorkerSelect.value;
 
@@ -3228,6 +3229,12 @@ function isDateInPeriod(dateStr, period) {
   const targetMonth = targetDate.getMonth();
   const targetDay = targetDate.getDate();
 
+  if (period === "this_week") {
+    // Semana de lunes a domingo, mismo corte que Upwork y la vista semanal
+    const { start, end } = getCurrentWeekRange();
+    return targetDate >= start && targetDate <= end;
+  }
+
   if (period === "this_month") {
     return targetYear === currentYear && targetMonth === currentMonth;
   }
@@ -3265,15 +3272,16 @@ function setFilterPeriod(period) {
 
   const buttons = document.querySelectorAll(".btn-period-filter");
   buttons.forEach(btn => {
-    if (btn.dataset.period === period) {
-      btn.className = "btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 bg-primary text-on-primary shadow-sm";
-    } else {
-      btn.className = "btn-period-filter px-3 py-1.5 rounded-xl transition-all active:scale-95 text-mid hover:bg-muted";
-    }
+    const isActive = btn.dataset.period === period;
+    btn.classList.toggle("bg-primary", isActive);
+    btn.classList.toggle("text-on-primary", isActive);
+    btn.classList.toggle("text-mid", !isActive);
+    btn.classList.toggle("hover:bg-muted", !isActive);
   });
 
   const labels = {
     all: "(Todo el histórico)",
+    this_week: "(Esta semana)",
     this_month: "(Este mes)",
     current_fortnight: "(Quincena actual)",
     last_month: "(Mes pasado)"
@@ -3390,6 +3398,7 @@ function updateTasksUI() {
   }
 
   if (isAdmin) renderAdminApprovals();
+  renderWeeklyView();
 
   // Filtrado activo según botón seleccionado
   let displayedTasks = allUserTasks;
@@ -4261,6 +4270,7 @@ function renderProductivityCharts() {
 
   const periodLabels = {
     all: "Histórico completo",
+    this_week: "Semana en curso",
     this_month: "Mes en curso",
     current_fortnight: "Quincena actual",
     last_month: "Mes anterior"
@@ -4475,6 +4485,157 @@ function getWeekLabel(range) {
     return `Semana: ${startDay} al ${endDay} ${startMonth.toUpperCase()}`;
   }
   return `Semana: ${startDay} ${startMonth.toUpperCase()} al ${endDay} ${endMonth.toUpperCase()}`;
+}
+
+/* ============================================================================
+   VISTA SEMANAL (lunes a domingo, mismo corte que Upwork)
+   ============================================================================ */
+const WEEK_DAY_LABELS = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"];
+let weeklyOffset = 0;
+
+function toLocalDateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function getWeekDays(offset) {
+  const { start } = getCurrentWeekRange();
+  start.setDate(start.getDate() + offset * 7);
+  return Array.from({ length: 7 }, (_, i) => {
+    const day = new Date(start);
+    day.setDate(start.getDate() + i);
+    return day;
+  });
+}
+
+function formatWeeklyHours(hours) {
+  return `${hours.toFixed(1)} h`;
+}
+
+// Resume por colaborador y día: horas y costo aprobados, y horas pendientes de aprobación aparte
+function buildWeeklySummary(days) {
+  const keys = days.map(toLocalDateKey);
+  const isWorker = state.userProfile?.rol === "worker";
+  const myId = state.userProfile?.trabajadorId;
+  const workers = isWorker ? state.workers.filter(w => myId && w.id === myId) : state.workers;
+  const weekTasks = state.tasks.filter(t => keys.includes(t.fecha) && t.estado !== "rechazada");
+
+  const emptyDays = () => keys.map(() => ({ hours: 0, cost: 0, pending: 0 }));
+  const rows = workers.map(worker => {
+    const perDay = emptyDays();
+    weekTasks
+      .filter(t => t.trabajadorId === worker.id ||
+        (!t.trabajadorId && t.trabajadorNombre && t.trabajadorNombre.trim().toLowerCase() === (worker.nombre || "").trim().toLowerCase()))
+      .forEach(t => {
+        const cell = perDay[keys.indexOf(t.fecha)];
+        const hours = Number(t.horas) || 0;
+        if (isTaskApproved(t)) {
+          cell.hours += hours;
+          cell.cost += Number(t.costoTotal) || 0;
+        } else if (t.estado === "pendiente") {
+          cell.pending += hours;
+        }
+      });
+    const total = perDay.reduce((acc, d) => ({ hours: acc.hours + d.hours, cost: acc.cost + d.cost, pending: acc.pending + d.pending }),
+      { hours: 0, cost: 0, pending: 0 });
+    return { worker, perDay, total };
+  }).filter(row => isWorker || row.total.hours > 0 || row.total.pending > 0);
+
+  const dayTotals = keys.map((_, i) => rows.reduce((acc, r) => ({
+    hours: acc.hours + r.perDay[i].hours,
+    cost: acc.cost + r.perDay[i].cost,
+    pending: acc.pending + r.perDay[i].pending
+  }), { hours: 0, cost: 0, pending: 0 }));
+  const weekTotal = dayTotals.reduce((acc, d) => ({ hours: acc.hours + d.hours, cost: acc.cost + d.cost, pending: acc.pending + d.pending }),
+    { hours: 0, cost: 0, pending: 0 });
+
+  return { keys, rows, dayTotals, weekTotal };
+}
+
+function weeklyCellHtml(cell) {
+  if (cell.hours === 0 && cell.pending === 0) return `<span class="weekly-empty">—</span>`;
+  const approved = cell.hours > 0
+    ? `<b class="tabular-nums">${formatWeeklyHours(cell.hours)}</b><span class="tabular-nums">$${cell.cost.toFixed(2)}</span>`
+    : "";
+  const pending = cell.pending > 0
+    ? `<span class="weekly-pending tabular-nums" title="Pendiente de aprobación">+${formatWeeklyHours(cell.pending)}</span>`
+    : "";
+  return approved + pending;
+}
+
+function renderWeeklyView() {
+  const sections = document.querySelectorAll("[data-weekly]");
+  if (sections.length === 0) return;
+
+  const days = getWeekDays(weeklyOffset);
+  const todayKey = toLocalDateKey(new Date());
+  const { keys, rows, dayTotals, weekTotal } = buildWeeklySummary(days);
+  const rangeLabel = getWeekLabel({ start: days[0], end: days[6] }) + (weeklyOffset === 0 ? " · actual" : "");
+  const isWorker = state.userProfile?.rol === "worker";
+
+  let bodyHtml;
+  if (rows.length === 0) {
+    bodyHtml = `<div class="empty-note">${isWorker && !state.userProfile?.trabajadorId
+      ? "Tu cuenta aún no está vinculada a una ficha de colaborador."
+      : "No hay horas registradas en esta semana."}</div>`;
+  } else {
+    const headCells = days.map((d, i) =>
+      `<th class="${keys[i] === todayKey ? "weekly-today" : ""}">${WEEK_DAY_LABELS[i]} <span>${d.getDate()}</span></th>`).join("");
+    const bodyRows = rows.map(r => `
+      <tr>
+        <td class="weekly-name">${escapeHtml(r.worker.nombre || "Colaborador")}</td>
+        ${r.perDay.map((cell, i) => `<td class="${keys[i] === todayKey ? "weekly-today" : ""}">${weeklyCellHtml(cell)}</td>`).join("")}
+        <td class="weekly-total">${weeklyCellHtml(r.total)}</td>
+      </tr>`).join("");
+    const footRow = isWorker ? "" : `
+      <tr class="weekly-foot">
+        <td class="weekly-name">Total equipo</td>
+        ${dayTotals.map((cell, i) => `<td class="${keys[i] === todayKey ? "weekly-today" : ""}">${weeklyCellHtml(cell)}</td>`).join("")}
+        <td class="weekly-total">${weeklyCellHtml(weekTotal)}</td>
+      </tr>`;
+    const table = `
+      <div class="weekly-table-wrap">
+        <table class="weekly-table">
+          <thead><tr><th class="weekly-name">${isWorker ? "Tú" : "Colaborador"}</th>${headCells}<th class="weekly-total">Semana</th></tr></thead>
+          <tbody>${bodyRows}${footRow}</tbody>
+        </table>
+      </div>`;
+
+    // Celular: una tarjeta por colaborador con barras por día
+    const maxHours = Math.max(0.01, ...rows.flatMap(r => r.perDay.map(d => d.hours + d.pending)));
+    const cards = rows.map(r => `
+      <div class="weekly-card">
+        <div class="weekly-card-head">
+          <b>${escapeHtml(r.worker.nombre || "Colaborador")}</b>
+          <span class="tabular-nums">${formatWeeklyHours(r.total.hours)} · $${r.total.cost.toFixed(2)}${r.total.pending > 0 ? ` · +${formatWeeklyHours(r.total.pending)} pend.` : ""}</span>
+        </div>
+        <div class="weekly-bars">
+          ${r.perDay.map((cell, i) => `
+            <div class="weekly-bar ${keys[i] === todayKey ? "weekly-today" : ""}">
+              <div class="weekly-bar-track">
+                <span class="weekly-bar-pending" style="height:${Math.round(((cell.hours + cell.pending) / maxHours) * 100)}%"></span>
+                <span class="weekly-bar-fill" style="height:${Math.round((cell.hours / maxHours) * 100)}%"></span>
+              </div>
+              <small class="tabular-nums">${cell.hours + cell.pending > 0 ? (cell.hours + cell.pending).toFixed(1) : "—"}</small>
+              <span>${WEEK_DAY_LABELS[i]}</span>
+            </div>`).join("")}
+        </div>
+      </div>`).join("");
+
+    const legend = weekTotal.pending > 0
+      ? `<p class="weekly-legend"><span class="weekly-pending">+ h</span> horas pendientes de aprobación (no suman al costo)</p>`
+      : "";
+    bodyHtml = table + `<div class="weekly-cards">${cards}</div>` + legend;
+  }
+
+  sections.forEach(section => {
+    const rangeEl = section.querySelector("[data-weekly-range]");
+    const bodyEl = section.querySelector("[data-weekly-body]");
+    if (rangeEl) rangeEl.textContent = rangeLabel;
+    if (bodyEl) bodyEl.innerHTML = bodyHtml;
+  });
 }
 
 function getCurrentMonthRange() {
@@ -6687,6 +6848,7 @@ window.openStatementModal = function(workerId, preferredType) {
 
   const periodLabels = {
     all: "Todo el Histórico",
+    this_week: "Semana en Curso",
     this_month: "Mes en Curso",
     current_fortnight: "Quincena en Curso",
     last_month: "Mes Anterior"
@@ -7058,6 +7220,14 @@ function setupEventListeners() {
       card.classList.add("highlight-pulse");
       setTimeout(() => card.classList.remove("highlight-pulse"), 1600);
     }
+  });
+
+  document.addEventListener("click", (e) => {
+    const stepBtn = e.target.closest("[data-weekly-step]");
+    if (!stepBtn) return;
+    const step = Number(stepBtn.dataset.weeklyStep);
+    weeklyOffset = step === 0 ? 0 : weeklyOffset + step;
+    renderWeeklyView();
   });
 
   elements.btnAdminApprovalsViewAll?.addEventListener("click", () => {

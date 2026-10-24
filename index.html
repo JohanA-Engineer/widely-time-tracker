@@ -365,20 +365,23 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-2 sm:gap-4 shrink-0">
-          <!-- Filtro de Períodos -->
-          <div class="flex items-center gap-1 overflow-x-auto text-[11px] font-medium" id="periodFilterButtonGroup">
-            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 bg-primary text-on-primary shadow-none" data-period="all">
+        <div class="flex items-center gap-2 sm:gap-4 min-w-0">
+          <!-- Filtro de Períodos (en celular se desplaza horizontalmente) -->
+          <div class="flex items-center gap-1 overflow-x-auto text-[11px] font-medium min-w-0 no-scrollbar" id="periodFilterButtonGroup">
+            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 shrink-0 bg-primary text-on-primary" data-period="all">
               Todo
             </button>
-            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 text-mid hover:bg-muted" data-period="this_month">
-              Este Mes
+            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 shrink-0 text-mid hover:bg-muted" data-period="this_week">
+              Esta semana
             </button>
-            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 text-mid hover:bg-muted hidden xs:inline-block" data-period="current_fortnight">
-              Quincena Actual
+            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 shrink-0 text-mid hover:bg-muted" data-period="this_month">
+              Este mes
             </button>
-            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 text-mid hover:bg-muted hidden sm:inline-block" data-period="last_month">
-              Mes Pasado
+            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 shrink-0 text-mid hover:bg-muted" data-period="current_fortnight">
+              Quincena
+            </button>
+            <button type="button" class="btn-period-filter px-2.5 sm:px-3 py-1.5 rounded-lg transition-all active:scale-95 shrink-0 text-mid hover:bg-muted" data-period="last_month">
+              Mes pasado
             </button>
           </div>
 
@@ -491,6 +494,22 @@
           </div>
         </div>
       </div>
+
+      <!-- Vista semanal: horas y costo por día (lunes a domingo) -->
+      <section id="workerWeeklySection" class="section-anchor content-card" data-weekly>
+        <div class="card-head">
+          <div>
+            <h3 class="card-title">Vista semanal</h3>
+            <p class="card-subtitle" data-weekly-range>Semana actual</p>
+          </div>
+          <div class="weekly-nav">
+            <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-weekly-step="-1" aria-label="Semana anterior"><i class="fa-solid fa-chevron-left"></i></button>
+            <button type="button" class="btn-ds btn-ds-ghost btn-ds-sm" data-weekly-step="0">Esta semana</button>
+            <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-weekly-step="1" aria-label="Semana siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div data-weekly-body></div>
+      </section>
 
       <!-- Meta Semanal de Rendimiento del Colaborador -->
       <div id="workerGoalCard" class="p-4 rounded-xl border border-line flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -922,6 +941,22 @@
         <div id="adminApprovalsList" class="ds-list">
           <div class="empty-note">No hay tareas pendientes de aprobación.</div>
         </div>
+      </section>
+
+      <!-- Vista semanal: horas y costo por día (lunes a domingo) -->
+      <section id="adminWeeklySection" class="section-anchor content-card" data-weekly>
+        <div class="card-head">
+          <div>
+            <h3 class="card-title">Vista semanal</h3>
+            <p class="card-subtitle" data-weekly-range>Semana actual</p>
+          </div>
+          <div class="weekly-nav">
+            <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-weekly-step="-1" aria-label="Semana anterior"><i class="fa-solid fa-chevron-left"></i></button>
+            <button type="button" class="btn-ds btn-ds-ghost btn-ds-sm" data-weekly-step="0">Esta semana</button>
+            <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-weekly-step="1" aria-label="Semana siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div data-weekly-body></div>
       </section>
 
       <!-- 3. Centro de Liquidaciones de Colaboradores (Tabla Maestra) -->
