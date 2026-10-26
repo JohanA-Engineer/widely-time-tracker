@@ -397,6 +397,12 @@ const elements = {
   agencyAccountHolder: document.getElementById("agencyAccountHolder"),
   agencySignName: document.getElementById("agencySignName"),
   agencySignDoc: document.getElementById("agencySignDoc"),
+  agencyShowCoBank: document.getElementById("agencyShowCoBank"),
+  agencyShowUsBank: document.getElementById("agencyShowUsBank"),
+  agencyCoBankBlock: document.getElementById("agencyCoBankBlock"),
+  agencyUsBankBlock: document.getElementById("agencyUsBankBlock"),
+  agencyUsStatus: document.getElementById("agencyUsStatus"),
+  btnSaveUsBank: document.getElementById("btnSaveUsBank"),
   btnCloseStatement: document.getElementById("btnCloseStatement"),
   btnPrintStatement: document.getElementById("btnPrintStatement"),
   btnPrintStatementLabel: document.getElementById("btnPrintStatementLabel"),
@@ -7222,6 +7228,71 @@ function fillAgencyIssuer() {
   elements.agencySignDoc.textContent = p.numeroDocumento ? `${p.tipoDocumento || "CC"} ${p.numeroDocumento}` : "Firma";
 }
 
+// Cuenta en EE. UU.: vive solo en /privado/{uid} (Firestore, legible únicamente por Lina).
+// No se guarda en el navegador ni en el código.
+const US_BANK_FIELDS = {
+  beneficiario: "agencyUsBeneficiary",
+  banco: "agencyUsBankName",
+  tipoCuenta: "agencyUsType",
+  numeroCuenta: "agencyUsAccount",
+  routing: "agencyUsRouting",
+  swift: "agencyUsSwift",
+  direccion: "agencyUsAddress"
+};
+
+function updateAgencyBankBlocks() {
+  elements.agencyCoBankBlock?.classList.toggle("hidden", !elements.agencyShowCoBank?.checked);
+  elements.agencyUsBankBlock?.classList.toggle("hidden", !elements.agencyShowUsBank?.checked);
+}
+
+async function loadUsBankDetails() {
+  Object.values(US_BANK_FIELDS).forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ""; });
+  if (elements.agencyUsStatus) elements.agencyUsStatus.textContent = "";
+  if (!db || !state.currentUser?.uid) return;
+  try {
+    const snap = await getDoc(doc(db, "privado", state.currentUser.uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      Object.entries(US_BANK_FIELDS).forEach(([key, id]) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = data[key] || "";
+      });
+      if (elements.agencyShowUsBank) elements.agencyShowUsBank.checked = true;
+      updateAgencyBankBlocks();
+    }
+  } catch (err) {
+    console.warn("[Privado] No se pudieron cargar los datos de EE. UU.:", err.message);
+  }
+}
+
+async function saveUsBankDetails() {
+  if (!isLinaSession()) return;
+  if (!db || !state.currentUser?.uid) {
+    showToast("No hay conexión con Firebase para guardar los datos.", "error");
+    return;
+  }
+  const data = { actualizado: getTodayKey() };
+  for (const [key, id] of Object.entries(US_BANK_FIELDS)) {
+    const el = document.getElementById(id);
+    const value = (el?.textContent || "").replace(/\s+/g, " ").trim();
+    const max = Number(el?.dataset.max || 120);
+    if (value.length > max) {
+      showToast(`El campo es demasiado largo (máximo ${max} caracteres).`, "warning");
+      el?.focus();
+      return;
+    }
+    data[key] = value;
+  }
+  try {
+    await setDoc(doc(db, "privado", state.currentUser.uid), data);
+    if (elements.agencyUsStatus) elements.agencyUsStatus.textContent = "Guardado en tu perfil privado.";
+    showToast("Datos de la cuenta en EE. UU. guardados de forma privada.", "success");
+  } catch (err) {
+    console.error("[Privado] Error al guardar:", err);
+    showToast("No se pudieron guardar. Verifica que las reglas nuevas estén publicadas.", "error");
+  }
+}
+
 window.openAgencyBillModal = function(offset = 0) {
   if (!isLinaSession()) {
     showToast("Solo Lina puede generar la cuenta de cobro de la agencia.", "warning");
@@ -7242,6 +7313,8 @@ window.openAgencyBillModal = function(offset = 0) {
 
   fillAgencyIssuer();
   renderAgencyBill();
+  updateAgencyBankBlocks();
+  loadUsBankDetails();
 
   elements.statementModal?.classList.remove("hidden");
   elements.statementModal?.classList.add("flex");
@@ -7250,6 +7323,7 @@ window.openAgencyBillModal = function(offset = 0) {
 function closeStatementModal() {
   elements.statementModal?.classList.add("hidden");
   elements.statementModal?.classList.remove("flex");
+  Object.values(US_BANK_FIELDS).forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ""; });
 }
 
 /* ============================================================================
@@ -7439,6 +7513,9 @@ function setupEventListeners() {
   });
 
   elements.btnAgencyBill?.addEventListener("click", () => window.openAgencyBillModal(weeklyOffset));
+  elements.agencyShowCoBank?.addEventListener("change", updateAgencyBankBlocks);
+  elements.agencyShowUsBank?.addEventListener("change", updateAgencyBankBlocks);
+  elements.btnSaveUsBank?.addEventListener("click", saveUsBankDetails);
   document.addEventListener("click", (e) => {
     const agencyStep = e.target.closest("[data-agency-step]");
     if (!agencyStep) return;

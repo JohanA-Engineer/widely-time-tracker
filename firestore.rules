@@ -203,6 +203,31 @@ service cloud.firestore {
       allow write: if isMasterAdmin();
     }
 
+    // 7. Datos privados de Lina (/privado/{userId}): cuenta bancaria en EE. UU. para la cuenta de cobro
+    //    a la agencia. Solo la propia Lina (correo verificado) puede leerlos o escribirlos;
+    //    ni otras administradoras ni colaboradores tienen acceso.
+    match /privado/{userId} {
+      function isLinaOwner() {
+        return request.auth != null &&
+          request.auth.uid == userId &&
+          hasVerifiedEmail() &&
+          request.auth.token.email.lower() == "linadelae@gmail.com";
+      }
+      function isValidUsBank() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['beneficiario', 'banco', 'numeroCuenta', 'routing', 'swift', 'tipoCuenta', 'direccion', 'actualizado']) &&
+          d.get('beneficiario', '') is string && d.get('beneficiario', '').size() <= 120 &&
+          d.get('banco', '') is string && d.get('banco', '').size() <= 120 &&
+          d.get('numeroCuenta', '') is string && d.get('numeroCuenta', '').size() <= 40 &&
+          d.get('routing', '') is string && d.get('routing', '').size() <= 20 &&
+          d.get('swift', '') is string && d.get('swift', '').size() <= 20 &&
+          d.get('tipoCuenta', '') is string && d.get('tipoCuenta', '').size() <= 40 &&
+          d.get('direccion', '') is string && d.get('direccion', '').size() <= 200;
+      }
+      allow read, delete: if isLinaOwner();
+      allow create, update: if isLinaOwner() && isValidUsBank();
+    }
+
     // 6. Colección de Clientes y Presupuestos (/clientes/{clientId})
     match /clientes/{clientId} {
       // Los colaboradores aprobados la usan para autocompletar el cliente de sus tareas;

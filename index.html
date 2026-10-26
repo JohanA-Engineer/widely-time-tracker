@@ -2475,14 +2475,43 @@
           </div>
         </div>
 
+        <!-- Qué cuentas se incluyen (no se imprime) -->
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-ink print:hidden">
+          <span class="text-mid">Cuentas para el pago:</span>
+          <label class="inline-flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="agencyShowCoBank" checked> Colombia</label>
+          <label class="inline-flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="agencyShowUsBank"> Estados Unidos</label>
+        </div>
+
         <!-- Datos bancarios (editables) -->
-        <div class="p-3.5 sm:p-4 rounded-xl bg-muted border border-line text-xs space-y-2.5">
+        <div id="agencyCoBankBlock" class="p-3.5 sm:p-4 rounded-xl bg-muted border border-line text-xs space-y-2.5">
           <div class="text-[11px] font-bold uppercase tracking-wider text-ink border-b border-line pb-1.5">Información para consignación o transferencia</div>
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Banco</span><span id="agencyBank" contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5">--</span></div>
             <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Tipo de cuenta</span><span id="agencyAccountType" contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5">--</span></div>
             <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Número</span><span id="agencyAccountNumber" contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink tabular-nums mt-0.5">--</span></div>
             <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Titular</span><span id="agencyAccountHolder" contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5">--</span></div>
+          </div>
+        </div>
+
+
+        <!-- Cuenta en EE. UU. (privada: se guarda solo en el perfil privado de Lina en Firebase) -->
+        <div id="agencyUsBankBlock" class="hidden p-3.5 sm:p-4 rounded-xl bg-muted border border-line text-xs space-y-2.5">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-ink border-b border-line pb-1.5 flex items-center justify-between gap-2">
+            <span>Payment details (US account)</span>
+            <span class="text-[10px] text-mid font-normal normal-case print:hidden">Privado: solo tú puedes ver y editar estos datos</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Beneficiary name</span><span id="agencyUsBeneficiary" contenteditable="true" data-max="120" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5"></span></div>
+            <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Bank name</span><span id="agencyUsBankName" contenteditable="true" data-max="120" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5"></span></div>
+            <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Account type</span><span id="agencyUsType" contenteditable="true" data-max="40" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5"></span></div>
+            <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Account number</span><span id="agencyUsAccount" contenteditable="true" data-max="40" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink tabular-nums mt-0.5"></span></div>
+            <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Routing number (ACH)</span><span id="agencyUsRouting" contenteditable="true" data-max="20" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink tabular-nums mt-0.5"></span></div>
+            <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">SWIFT (opcional)</span><span id="agencyUsSwift" contenteditable="true" data-max="20" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5"></span></div>
+          </div>
+          <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Beneficiary address</span><span id="agencyUsAddress" contenteditable="true" data-max="200" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5"></span></div>
+          <div class="flex items-center justify-end gap-2 pt-1 print:hidden">
+            <span id="agencyUsStatus" class="text-[11px] text-mid"></span>
+            <button type="button" id="btnSaveUsBank" class="btn-ds btn-ds-primary btn-ds-sm"><i class="fa-solid fa-lock"></i><span>Guardar datos privados</span></button>
           </div>
         </div>
 
