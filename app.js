@@ -369,6 +369,34 @@ const elements = {
   docTypeReceiptBtn: document.getElementById("docTypeReceiptBtn"),
   docViewBill: document.getElementById("docViewBill"),
   docViewReceipt: document.getElementById("docViewReceipt"),
+  docViewAgency: document.getElementById("docViewAgency"),
+  statementTitleBadgeText: document.getElementById("statementTitleBadgeText"),
+  btnShareWhatsAppStatement: document.getElementById("btnShareWhatsAppStatement"),
+  btnAgencyBill: document.getElementById("btnAgencyBill"),
+  agencyWeekPicker: document.getElementById("agencyWeekPicker"),
+  agencyPendingNote: document.getElementById("agencyPendingNote"),
+  agencyConsecutive: document.getElementById("agencyConsecutive"),
+  agencyDate: document.getElementById("agencyDate"),
+  agencyCity: document.getElementById("agencyCity"),
+  agencyPeriodTag: document.getElementById("agencyPeriodTag"),
+  agencyRecipient: document.getElementById("agencyRecipient"),
+  agencyIssuerName: document.getElementById("agencyIssuerName"),
+  agencyIssuerDoc: document.getElementById("agencyIssuerDoc"),
+  agencyIssuerContact: document.getElementById("agencyIssuerContact"),
+  agencyConceptPeriod: document.getElementById("agencyConceptPeriod"),
+  agencyTotalAmount: document.getElementById("agencyTotalAmount"),
+  agencyTotalAmountCop: document.getElementById("agencyTotalAmountCop"),
+  agencyAmountInWords: document.getElementById("agencyAmountInWords"),
+  agencyClientsDetail: document.getElementById("agencyClientsDetail"),
+  agencySummaryCount: document.getElementById("agencySummaryCount"),
+  agencySummaryVolume: document.getElementById("agencySummaryVolume"),
+  agencySummaryTotal: document.getElementById("agencySummaryTotal"),
+  agencyBank: document.getElementById("agencyBank"),
+  agencyAccountType: document.getElementById("agencyAccountType"),
+  agencyAccountNumber: document.getElementById("agencyAccountNumber"),
+  agencyAccountHolder: document.getElementById("agencyAccountHolder"),
+  agencySignName: document.getElementById("agencySignName"),
+  agencySignDoc: document.getElementById("agencySignDoc"),
   btnCloseStatement: document.getElementById("btnCloseStatement"),
   btnPrintStatement: document.getElementById("btnPrintStatement"),
   btnPrintStatementLabel: document.getElementById("btnPrintStatementLabel"),
@@ -4576,6 +4604,7 @@ function weeklyCellHtml(cell) {
 function renderWeeklyView() {
   const sections = document.querySelectorAll("[data-weekly]");
   if (sections.length === 0) return;
+  elements.btnAgencyBill?.classList.toggle("hidden", !isLinaSession());
 
   const days = getWeekDays(weeklyOffset);
   const todayKey = getTodayKey();
@@ -6710,6 +6739,9 @@ window.setStatementDocType = function(type) {
   }
 
   currentStatementDocType = type;
+  elements.docViewAgency?.classList.add("hidden");
+  elements.btnShareWhatsAppStatement?.classList.remove("hidden");
+  if (elements.statementTitleBadgeText) elements.statementTitleBadgeText.textContent = "Cuenta de Cobro";
   if (type === "bill") {
     elements.docTypeBillBtn?.classList.add("bg-primary", "text-on-primary", "shadow-sm");
     elements.docTypeBillBtn?.classList.remove("text-mid", "dark:text-mid");
@@ -7041,6 +7073,180 @@ window.openStatementModal = function(workerId, preferredType) {
   elements.statementModal?.classList.add("flex");
 };
 
+/* ============================================================================
+   CUENTA DE COBRO SEMANAL A LA AGENCIA (solo Lina)
+   Widely Social y Treat Your Friends son del mismo dueño: si ambos tienen
+   actividades en la semana, se cobran juntos en un solo documento.
+   ============================================================================ */
+const AGENCY_CLIENTS = [
+  { label: "Widely Social", match: name => name.includes("widely") },
+  { label: "Treat Your Friends", match: name => name.includes("treat") }
+];
+let agencyWeekOffset = 0;
+
+function isLinaSession() {
+  const email = String(state.currentUser?.email || state.userProfile?.email || "").trim().toLowerCase();
+  return MASTER_ADMIN_EMAILS.includes(email);
+}
+
+function normalizeClientName(name) {
+  return String(name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+}
+
+function getAgencyClient(clientName) {
+  const normalized = normalizeClientName(clientName);
+  return AGENCY_CLIENTS.find(c => c.match(normalized)) || null;
+}
+
+function getWorkerDisplayName(task) {
+  const worker = state.workers.find(w => w.id === task.trabajadorId);
+  return worker?.nombre || task.trabajadorNombre || "Colaborador";
+}
+
+function formatLongDate(date) {
+  return date.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function getIsoWeekNumber(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+}
+
+function renderAgencyBill() {
+  const days = getWeekDays(agencyWeekOffset);
+  const keys = days.map(toLocalDateKey);
+  const weekTasks = state.tasks.filter(t => keys.includes(t.fecha) && getAgencyClient(t.cliente));
+  const approved = weekTasks.filter(t => isTaskApproved(t)).sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+  const pendingCount = weekTasks.filter(t => t.estado === "pendiente").length;
+
+  const periodText = `del ${formatLongDate(days[0])} al ${formatLongDate(days[6])}`;
+  const week = getIsoWeekNumber(days[0]);
+  if (elements.agencyWeekPicker) elements.agencyWeekPicker.textContent = getWeekLabel({ start: days[0], end: days[6] });
+  if (elements.agencyPendingNote) {
+    elements.agencyPendingNote.textContent = pendingCount > 0
+      ? `${pendingCount} actividad${pendingCount === 1 ? "" : "es"} pendiente${pendingCount === 1 ? "" : "s"} de aprobación no se incluye${pendingCount === 1 ? "" : "n"}.`
+      : "";
+  }
+  elements.agencyConsecutive.textContent = `No. AG-${days[0].getFullYear()}-S${String(week).padStart(2, "0")}`;
+  elements.agencyDate.textContent = formatLongDate(new Date());
+  elements.agencyPeriodTag.textContent = `Semana ${periodText}`;
+  elements.agencyConceptPeriod.textContent = `la semana ${periodText}`;
+
+  // Agrupar por cliente de la agencia
+  const groups = AGENCY_CLIENTS.map(client => {
+    const tasks = approved.filter(t => getAgencyClient(t.cliente) === client);
+    const hours = tasks.reduce((acc, t) => acc + (Number(t.cantidadArtes) > 0 ? 0 : Number(t.horas) || 0), 0);
+    const arts = tasks.reduce((acc, t) => acc + (Number(t.cantidadArtes) > 0 ? Number(t.cantidadArtes) : 0), 0);
+    const total = tasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
+    return { client, tasks, hours, arts, total };
+  }).filter(g => g.tasks.length > 0);
+
+  const recipients = groups.length > 0 ? groups.map(g => g.client.label) : AGENCY_CLIENTS.map(c => c.label);
+  elements.agencyRecipient.textContent = recipients.join(" · ");
+
+  const volumeLabel = (hours, arts) => [hours > 0 ? `${hours.toFixed(2)} h` : null, arts > 0 ? `${arts} arte${arts === 1 ? "" : "s"}` : null]
+    .filter(Boolean).join(" + ") || "0.00 h";
+
+  if (groups.length === 0) {
+    elements.agencyClientsDetail.innerHTML = `<div class="p-4 rounded-xl border border-line text-center text-xs text-mid">No hay actividades aprobadas de Widely Social ni Treat Your Friends en esta semana.</div>`;
+  } else {
+    elements.agencyClientsDetail.innerHTML = groups.map(g => `
+      <div>
+        <div class="flex items-baseline justify-between gap-2 mb-2">
+          <div class="text-xs font-bold uppercase tracking-wider text-ink">${escapeHtml(g.client.label)}</div>
+          <div class="text-xs text-mid tabular-nums">${volumeLabel(g.hours, g.arts)} · <strong class="text-ink">$${g.total.toFixed(2)}</strong></div>
+        </div>
+        <div class="border border-line rounded-xl overflow-x-auto">
+          <table class="w-full text-left text-xs min-w-[520px]">
+            <thead class="bg-muted text-ink font-semibold">
+              <tr>
+                <th class="py-2 px-3">Fecha</th>
+                <th class="py-2 px-3">Colaborador</th>
+                <th class="py-2 px-3">Actividad</th>
+                <th class="py-2 px-2 text-right">Horas / Artes</th>
+                <th class="py-2 px-3 text-right">Valor</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-line">
+              ${g.tasks.map(t => {
+                const isArt = Number(t.cantidadArtes) > 0;
+                const qty = isArt ? `${Number(t.cantidadArtes)} arte${Number(t.cantidadArtes) === 1 ? "" : "s"}` : `${Number(t.horas || 0).toFixed(2)} h`;
+                return `
+                <tr>
+                  <td class="py-2 px-3 tabular-nums whitespace-nowrap">${escapeHtml(t.fecha || "-")}</td>
+                  <td class="py-2 px-3 whitespace-nowrap">${escapeHtml(getWorkerDisplayName(t))}</td>
+                  <td class="py-2 px-3">${escapeHtml(t.descripcion || "Actividad")} <span class="text-mid">· ${escapeHtml(getCategoryMeta(t.categoria).label)}</span></td>
+                  <td class="py-2 px-2 text-right tabular-nums whitespace-nowrap">${qty}</td>
+                  <td class="py-2 px-3 text-right tabular-nums whitespace-nowrap font-semibold">$${Number(t.costoTotal || 0).toFixed(2)}</td>
+                </tr>`;
+              }).join("")}
+              <tr class="bg-muted font-semibold">
+                <td class="py-2 px-3" colspan="3">Subtotal ${escapeHtml(g.client.label)}</td>
+                <td class="py-2 px-2 text-right tabular-nums whitespace-nowrap">${volumeLabel(g.hours, g.arts)}</td>
+                <td class="py-2 px-3 text-right tabular-nums whitespace-nowrap">$${g.total.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>`).join("");
+  }
+
+  const totalHours = groups.reduce((a, g) => a + g.hours, 0);
+  const totalArts = groups.reduce((a, g) => a + g.arts, 0);
+  const total = Number(groups.reduce((a, g) => a + g.total, 0).toFixed(2));
+  elements.agencyTotalAmount.textContent = `$${total.toFixed(2)} USD`;
+  elements.agencyTotalAmountCop.textContent = `≈ ${formatCop(total * getActiveTrmRate())}`;
+  elements.agencyAmountInWords.textContent = numeroALetras(total);
+  elements.agencySummaryCount.textContent = approved.length;
+  elements.agencySummaryVolume.textContent = volumeLabel(totalHours, totalArts);
+  elements.agencySummaryTotal.textContent = `$${total.toFixed(2)}`;
+}
+
+function fillAgencyIssuer() {
+  const p = state.userProfile || {};
+  const name = p.nombre || "Lina De La Espriella";
+  const doc = p.numeroDocumento ? `${p.tipoDocumento || "CC"} ${p.numeroDocumento}` : "Documento: (completa tus datos en Mi perfil)";
+  const contact = [p.email || state.currentUser?.email, p.telefono].filter(Boolean).join(" · ");
+  elements.agencyIssuerName.textContent = name;
+  elements.agencyIssuerDoc.textContent = doc;
+  elements.agencyIssuerContact.textContent = contact || "--";
+  elements.agencyCity.textContent = p.ciudad || "Bogotá D.C.";
+  elements.agencyBank.textContent = p.banco || "--";
+  elements.agencyAccountType.textContent = p.tipoCuenta || "--";
+  elements.agencyAccountNumber.textContent = p.numeroCuenta || "--";
+  elements.agencyAccountHolder.textContent = p.titularCuenta || name;
+  elements.agencySignName.textContent = name;
+  elements.agencySignDoc.textContent = p.numeroDocumento ? `${p.tipoDocumento || "CC"} ${p.numeroDocumento}` : "Firma";
+}
+
+window.openAgencyBillModal = function(offset = 0) {
+  if (!isLinaSession()) {
+    showToast("Solo Lina puede generar la cuenta de cobro de la agencia.", "warning");
+    return;
+  }
+  agencyWeekOffset = offset;
+  currentStatementDocType = "agency";
+
+  elements.statementDocTypeSelector?.classList.add("hidden");
+  elements.statementWorkerTitleBadge?.classList.remove("hidden");
+  elements.statementWorkerTitleBadge?.classList.add("flex");
+  if (elements.statementTitleBadgeText) elements.statementTitleBadgeText.textContent = "Cuenta de cobro · Agencia";
+  elements.btnShareWhatsAppStatement?.classList.add("hidden");
+  elements.docViewBill?.classList.add("hidden");
+  elements.docViewReceipt?.classList.add("hidden");
+  elements.docViewAgency?.classList.remove("hidden");
+  if (elements.btnPrintStatementLabel) elements.btnPrintStatementLabel.textContent = "Imprimir / Guardar en PDF";
+
+  fillAgencyIssuer();
+  renderAgencyBill();
+
+  elements.statementModal?.classList.remove("hidden");
+  elements.statementModal?.classList.add("flex");
+};
+
 function closeStatementModal() {
   elements.statementModal?.classList.add("hidden");
   elements.statementModal?.classList.remove("flex");
@@ -7159,7 +7365,9 @@ function setupEventListeners() {
     const workerNameClean = (worker?.nombre || "Colaborador").trim().replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]/g, "_");
 
     // Cambiar título para el nombre por defecto del archivo PDF
-    if (currentStatementDocType === "bill") {
+    if (currentStatementDocType === "agency") {
+      document.title = `Cuenta_de_Cobro_Agencia_${(elements.agencyConsecutive?.textContent || "").replace(/[^A-Za-z0-9-]/g, "")}`;
+    } else if (currentStatementDocType === "bill") {
       document.title = `Cuenta_de_Cobro_${workerNameClean}`;
     } else {
       document.title = `Recibo_de_Pago_${workerNameClean}`;
@@ -7228,6 +7436,14 @@ function setupEventListeners() {
       card.classList.add("highlight-pulse");
       setTimeout(() => card.classList.remove("highlight-pulse"), 1600);
     }
+  });
+
+  elements.btnAgencyBill?.addEventListener("click", () => window.openAgencyBillModal(weeklyOffset));
+  document.addEventListener("click", (e) => {
+    const agencyStep = e.target.closest("[data-agency-step]");
+    if (!agencyStep) return;
+    agencyWeekOffset += Number(agencyStep.dataset.agencyStep);
+    renderAgencyBill();
   });
 
   document.addEventListener("click", (e) => {

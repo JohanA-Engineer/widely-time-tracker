@@ -954,6 +954,7 @@
             <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-weekly-step="-1" aria-label="Semana anterior"><i class="fa-solid fa-chevron-left"></i></button>
             <button type="button" class="btn-ds btn-ds-ghost btn-ds-sm" data-weekly-step="0">Esta semana</button>
             <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-weekly-step="1" aria-label="Semana siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+            <button type="button" id="btnAgencyBill" class="btn-ds btn-ds-primary btn-ds-sm hidden" title="Cuenta de cobro de la semana para Widely Social y Treat Your Friends"><i class="fa-solid fa-file-invoice-dollar"></i><span>Cuenta de cobro agencia</span></button>
           </div>
         </div>
         <div data-weekly-body></div>
@@ -2243,7 +2244,7 @@
         <div id="statementWorkerTitleBadge" class="hidden items-center gap-2">
           <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ink/10 text-ink border border-line text-xs font-semibold">
             <i class="fa-solid fa-file-invoice-dollar"></i>
-            <span>Cuenta de Cobro</span>
+            <span id="statementTitleBadgeText">Cuenta de Cobro</span>
           </span>
         </div>
 
@@ -2302,7 +2303,7 @@
         </div>
 
         <!-- Monto Destacado Formal -->
-        <div class="p-3.5 sm:p-4 rounded-xl bg-ink/70 border border-ink text-xs">
+        <div class="p-3.5 sm:p-4 rounded-xl bg-paper border-2 border-ink text-xs">
           <div class="flex flex-col sm:flex-row items-baseline justify-between gap-1">
             <span class="text-xs uppercase font-bold tracking-wider text-ink">VALOR TOTAL A COBRAR:</span>
             <div class="text-right">
@@ -2348,7 +2349,7 @@
             <span class="text-[10px] uppercase font-semibold tracking-wider text-mid block">Anticipos Recibidos</span>
             <span id="billPaidDeduction" class="font-bold text-ink text-sm tabular-nums mt-0.5 block">-$0.00</span>
           </div>
-          <div class="p-2.5 rounded-lg bg-ink/70 border border-ink">
+          <div class="p-2.5 rounded-lg bg-paper border-2 border-ink">
             <span class="text-[10px] uppercase font-semibold tracking-wider text-ink block">Saldo Neto a Cobrar</span>
             <span id="billNetPayable" class="font-bold text-ink text-sm tabular-nums mt-0.5 block">$0.00</span>
           </div>
@@ -2389,6 +2390,113 @@
             <div class="text-right text-[10px] text-mid">
               Documento formal expedido electrónicamente
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           PLANTILLA 3: CUENTA DE COBRO SEMANAL A LA AGENCIA (solo Lina)
+           Widely Social y Treat Your Friends: mismo dueño, se cobran juntos
+           ============================================================ -->
+      <div id="docViewAgency" class="space-y-4 hidden">
+        <!-- Selector de semana (no se imprime) -->
+        <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-muted border border-line print:hidden">
+          <div class="flex items-center gap-1.5">
+            <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-agency-step="-1" aria-label="Semana anterior"><i class="fa-solid fa-chevron-left"></i></button>
+            <span id="agencyWeekPicker" class="text-xs font-semibold text-ink px-1">--</span>
+            <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-agency-step="1" aria-label="Semana siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+          <span id="agencyPendingNote" class="text-[11px] text-mid"></span>
+        </div>
+
+        <!-- Encabezado -->
+        <div class="flex flex-col sm:flex-row items-start justify-between pb-3.5 border-b-2 border-line gap-2">
+          <div>
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-mid block">Documento de Cobro por Servicios</span>
+            <h2 class="text-2xl font-bold tracking-tight uppercase text-ink">CUENTA DE COBRO</h2>
+            <div class="text-xs font-semibold tracking-wide text-ink mt-1" id="agencyConsecutive">No. AG-2026-S00</div>
+          </div>
+          <div class="text-left sm:text-right text-xs space-y-1 text-mid">
+            <div><strong class="text-ink font-semibold">Fecha de emisión:</strong> <span id="agencyDate" class="font-medium text-ink">--</span></div>
+            <div><strong class="text-ink font-semibold">Ciudad:</strong> <span id="agencyCity" contenteditable="true" title="Clic para editar" class="border-b border-dashed border-faint outline-none px-1 font-medium text-ink">Bogotá D.C.</span></div>
+            <div><strong class="text-ink font-semibold">Período:</strong> <span id="agencyPeriodTag" class="font-semibold text-ink">--</span></div>
+          </div>
+        </div>
+
+        <!-- Partes -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="p-3.5 rounded-xl bg-muted border border-line">
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-mid block">Señores</span>
+            <div id="agencyRecipient" contenteditable="true" title="Clic para editar" class="text-sm font-bold text-ink mt-1 border-b border-dashed border-faint outline-none">Widely Social · Treat Your Friends</div>
+            <div class="text-mid mt-1">Debe a:</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-muted border border-line">
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-mid block">Prestadora del servicio</span>
+            <div id="agencyIssuerName" class="text-sm font-bold text-ink mt-1">--</div>
+            <div id="agencyIssuerDoc" class="text-ink mt-0.5">--</div>
+            <div id="agencyIssuerContact" class="text-mid mt-0.5">--</div>
+          </div>
+        </div>
+
+        <div class="text-xs text-ink leading-relaxed">
+          <strong>Por concepto de:</strong> servicios de diseño, contenido y marketing digital prestados durante <span id="agencyConceptPeriod" class="font-semibold">la semana</span>, según el detalle de actividades por cliente.
+        </div>
+
+        <!-- Valor total -->
+        <div class="p-3.5 sm:p-4 rounded-xl bg-paper border-2 border-ink text-xs">
+          <div class="flex flex-col sm:flex-row items-baseline justify-between gap-1">
+            <span class="text-xs uppercase font-bold tracking-wider text-ink">Valor total a cobrar:</span>
+            <div class="text-right">
+              <span id="agencyTotalAmount" class="text-2xl font-bold text-ink tabular-nums">$0.00 USD</span>
+              <span id="agencyTotalAmountCop" class="block text-xs font-medium text-mid tabular-nums">≈ $0 COP</span>
+            </div>
+          </div>
+          <div class="mt-1.5 pt-1.5 border-t border-line text-xs text-ink">
+            <strong class="font-semibold">SON:</strong> <span id="agencyAmountInWords" class="italic font-medium">Cero dólares con 00/100</span>
+          </div>
+        </div>
+
+        <!-- Detalle por cliente (dinámico) -->
+        <div id="agencyClientsDetail" class="space-y-4"></div>
+
+        <!-- Resumen -->
+        <div class="grid grid-cols-3 gap-2.5 text-center text-xs">
+          <div class="p-2.5 rounded-lg bg-muted border border-line">
+            <span class="text-[10px] uppercase font-semibold tracking-wider text-mid block">Actividades</span>
+            <span id="agencySummaryCount" class="font-bold text-ink text-sm tabular-nums mt-0.5 block">0</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-muted border border-line">
+            <span class="text-[10px] uppercase font-semibold tracking-wider text-mid block">Horas / Artes</span>
+            <span id="agencySummaryVolume" class="font-bold text-ink text-sm tabular-nums mt-0.5 block">0.00 h</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-paper border-2 border-ink">
+            <span class="text-[10px] uppercase font-semibold tracking-wider text-ink block">Total</span>
+            <span id="agencySummaryTotal" class="font-bold text-ink text-sm tabular-nums mt-0.5 block">$0.00</span>
+          </div>
+        </div>
+
+        <!-- Datos bancarios (editables) -->
+        <div class="p-3.5 sm:p-4 rounded-xl bg-muted border border-line text-xs space-y-2.5">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-ink border-b border-line pb-1.5">Información para consignación o transferencia</div>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Banco</span><span id="agencyBank" contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5">--</span></div>
+            <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Tipo de cuenta</span><span id="agencyAccountType" contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5">--</span></div>
+            <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Número</span><span id="agencyAccountNumber" contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink tabular-nums mt-0.5">--</span></div>
+            <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Titular</span><span id="agencyAccountHolder" contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5">--</span></div>
+          </div>
+        </div>
+
+        <!-- Firma -->
+        <div class="pt-2 text-xs space-y-4">
+          <p class="text-[11px] text-mid italic leading-relaxed">
+            Certifico que los servicios relacionados fueron prestados a satisfacción durante el período indicado.
+          </p>
+          <div class="pt-4 flex justify-between items-end">
+            <div class="text-left w-64 border-t-2 border-line pt-1.5">
+              <div id="agencySignName" class="font-bold text-ink text-xs">--</div>
+              <div id="agencySignDoc" class="text-[10px] text-mid font-medium">Firma</div>
+            </div>
+            <div class="text-right text-[10px] text-mid">Documento expedido electrónicamente</div>
           </div>
         </div>
       </div>

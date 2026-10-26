@@ -717,7 +717,8 @@ html.has-user-session #authTopNavbar {
 
   /* Documento inactivo 100% oculto */
   #docViewBill.hidden,
-  #docViewReceipt.hidden {
+  #docViewReceipt.hidden,
+  #docViewAgency.hidden {
     display: none !important;
   }
 
@@ -771,7 +772,8 @@ html.has-user-session #authTopNavbar {
   #statementModal,
   #statementModal > div,
   #statementModal #docViewBill,
-  #statementModal #docViewReceipt {
+  #statementModal #docViewReceipt,
+  #statementModal #docViewAgency {
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #0f172a !important;
