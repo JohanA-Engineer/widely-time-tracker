@@ -6846,7 +6846,9 @@ function saveWorkerBankingPrefs(workerId) {
   } catch (e) {}
 }
 
-function loadWorkerBankingPrefs(workerId) {
+// withDefaults: el formulario de perfil usa valores sugeridos (Bancolombia, Ahorros, Bogotá);
+// los documentos formales los piden sin relleno para mostrar solo datos reales.
+function loadWorkerBankingPrefs(workerId, { withDefaults = true } = {}) {
   if (!workerId) return {};
   const worker = state.workers.find(w => w.id === workerId);
   let localData = {};
@@ -6856,11 +6858,11 @@ function loadWorkerBankingPrefs(workerId) {
   } catch (e) {}
 
   return {
-    bank: localData.bank || localData.banco || worker?.banco || "Bancolombia",
-    accountType: localData.accountType || localData.tipoCuenta || worker?.tipoCuenta || "Ahorros",
+    bank: localData.bank || localData.banco || worker?.banco || (withDefaults ? "Bancolombia" : ""),
+    accountType: localData.accountType || localData.tipoCuenta || worker?.tipoCuenta || (withDefaults ? "Ahorros" : ""),
     accountNumber: localData.accountNumber || localData.numeroCuenta || worker?.numeroCuenta || "",
     idNumber: localData.idNumber || localData.documento || localData.numeroDocumento || worker?.numeroDocumento || worker?.documento || "",
-    city: localData.city || localData.ciudad || worker?.ciudad || "Bogotá D.C.",
+    city: localData.city || localData.ciudad || worker?.ciudad || (withDefaults ? "Bogotá D.C." : ""),
     phone: localData.phone || localData.telefono || worker?.telefono || "",
     mobile: localData.mobile || localData.celular || worker?.telefono || "",
     accountHolder: localData.accountHolder || localData.titularCuenta || worker?.titularCuenta || worker?.nombre || ""
@@ -6909,23 +6911,23 @@ window.openStatementModal = function(workerId, preferredType) {
   const billConsecutiveStr = `No. CC-${yearStr}-${workerInitials}-${monthPad}`;
   const receiptConsecutiveStr = `No. LP-${yearStr}-${monthPad}-${workerInitials}`;
 
-  // Cargar preferencias bancarias guardadas
-  const banking = loadWorkerBankingPrefs(worker.id);
+  // Cargar preferencias bancarias guardadas (sin valores de relleno)
+  const banking = loadWorkerBankingPrefs(worker.id, { withDefaults: false });
 
   // 1. POBLAR CUENTA DE COBRO FORMAL
   if (elements.billConsecutive) elements.billConsecutive.textContent = billConsecutiveStr;
   if (elements.billDate) elements.billDate.textContent = dateStr;
-  if (elements.billCity) elements.billCity.textContent = banking.city || "Bogotá D.C.";
+  if (elements.billCity) elements.billCity.textContent = banking.city || "";
   if (elements.billPeriodTag) elements.billPeriodTag.textContent = periodLabel;
   if (elements.billConceptPeriod) elements.billConceptPeriod.textContent = periodLabel;
 
   if (elements.billWorkerName) elements.billWorkerName.textContent = worker.nombre;
   if (elements.billWorkerIdNumber) {
-    elements.billWorkerIdNumber.textContent = banking.idNumber || "Ingresa C.C. aquí";
+    elements.billWorkerIdNumber.textContent = banking.idNumber || "";
   }
-  if (elements.billWorkerEmail) elements.billWorkerEmail.textContent = worker.email || state.userProfile?.email || "correo@ejemplo.com";
+  if (elements.billWorkerEmail) elements.billWorkerEmail.textContent = worker.email || "";
   if (elements.billWorkerPhone) {
-    elements.billWorkerPhone.textContent = banking.phone || "+57 (Opcional)";
+    elements.billWorkerPhone.textContent = banking.phone || "";
   }
 
   const payableAmount = netBalance > 0 ? netBalance : totalEarned;
@@ -6938,14 +6940,14 @@ window.openStatementModal = function(workerId, preferredType) {
   if (elements.billPaidDeduction) elements.billPaidDeduction.textContent = `-$${totalPaid.toFixed(2)}`;
   if (elements.billNetPayable) elements.billNetPayable.textContent = `$${netBalance.toFixed(2)}`;
 
-  if (elements.billBank) elements.billBank.textContent = banking.bank || "Bancolombia";
-  if (elements.billAccountType) elements.billAccountType.textContent = banking.accountType || "Ahorros";
-  if (elements.billAccountNumber) elements.billAccountNumber.textContent = banking.accountNumber || "000-000000-00";
-  if (elements.billAccountMobile) elements.billAccountMobile.textContent = banking.mobile || "Opcional";
+  if (elements.billBank) elements.billBank.textContent = banking.bank || "";
+  if (elements.billAccountType) elements.billAccountType.textContent = banking.accountType || "";
+  if (elements.billAccountNumber) elements.billAccountNumber.textContent = banking.accountNumber || "";
+  if (elements.billAccountMobile) elements.billAccountMobile.textContent = banking.mobile || "";
 
   if (elements.billSignWorkerName) elements.billSignWorkerName.textContent = worker.nombre;
   if (elements.billSignWorkerId) {
-    elements.billSignWorkerId.textContent = banking.idNumber ? `C.C. ${banking.idNumber}` : "C.C. ________________";
+    elements.billSignWorkerId.textContent = banking.idNumber ? `C.C. ${banking.idNumber}` : "";
   }
 
   if (elements.billTasksBody) {
@@ -7214,18 +7216,18 @@ function renderAgencyBill() {
 function fillAgencyIssuer() {
   const p = state.userProfile || {};
   const name = p.nombre || "Lina De La Espriella";
-  const doc = p.numeroDocumento ? `${p.tipoDocumento || "CC"} ${p.numeroDocumento}` : "Documento: (completa tus datos en Mi perfil)";
+  const doc = p.numeroDocumento ? `${p.tipoDocumento || "CC"} ${p.numeroDocumento}` : "";
   const contact = [p.email || state.currentUser?.email, p.telefono].filter(Boolean).join(" · ");
   elements.agencyIssuerName.textContent = name;
   elements.agencyIssuerDoc.textContent = doc;
-  elements.agencyIssuerContact.textContent = contact || "--";
-  elements.agencyCity.textContent = p.ciudad || "Bogotá D.C.";
-  elements.agencyBank.textContent = p.banco || "--";
-  elements.agencyAccountType.textContent = p.tipoCuenta || "--";
-  elements.agencyAccountNumber.textContent = p.numeroCuenta || "--";
+  elements.agencyIssuerContact.textContent = contact;
+  elements.agencyCity.textContent = p.ciudad || "";
+  elements.agencyBank.textContent = p.banco || "";
+  elements.agencyAccountType.textContent = p.tipoCuenta || "";
+  elements.agencyAccountNumber.textContent = p.numeroCuenta || "";
   elements.agencyAccountHolder.textContent = p.titularCuenta || name;
   elements.agencySignName.textContent = name;
-  elements.agencySignDoc.textContent = p.numeroDocumento ? `${p.tipoDocumento || "CC"} ${p.numeroDocumento}` : "Firma";
+  elements.agencySignDoc.textContent = p.numeroDocumento ? `${p.tipoDocumento || "CC"} ${p.numeroDocumento}` : "";
 }
 
 // Cuenta en EE. UU.: vive solo en /privado/{uid} (Firestore, legible únicamente por Lina).
@@ -7319,6 +7321,46 @@ window.openAgencyBillModal = function(offset = 0) {
   elements.statementModal?.classList.remove("hidden");
   elements.statementModal?.classList.add("flex");
 };
+
+// Documentos formales (cuentas de cobro y recibos): antes de imprimir se marcan los campos
+// sin dato para que no salgan en el PDF. En pantalla siguen visibles para poder editarlos.
+function isEmptyDocValue(el) {
+  const text = (el.textContent || "").replace(/\s+/g, " ").trim();
+  return text === "" || /^[-–—_.]+$/.test(text);
+}
+
+function prepareDocumentForPrint() {
+  const modal = elements.statementModal;
+  if (!modal) return;
+  modal.querySelectorAll(".doc-empty").forEach(el => el.classList.remove("doc-empty"));
+
+  // Campos sueltos (nodos de valor con id): si el resto del campo es solo su etiqueta,
+  // se oculta el campo completo; si convive con otros datos (p. ej. la firma), solo el valor.
+  const SKIP_TAGS = ["INPUT", "SELECT", "TEXTAREA", "BUTTON", "I"];
+  modal.querySelectorAll("[id]").forEach(el => {
+    if (SKIP_TAGS.includes(el.tagName) || el.children.length > 0 || !isEmptyDocValue(el)) return;
+    const field = el.parentElement;
+    const siblingsAreLabels = field && [...field.children].every(child => child === el || !child.id);
+    if (field && field !== modal && field.children.length <= 2 && siblingsAreLabels && !field.hasAttribute("data-doc-section")) {
+      field.classList.add("doc-empty");
+    } else {
+      el.classList.add("doc-empty");
+    }
+  });
+
+  // Grillas y secciones que se quedaron sin ningún dato
+  modal.querySelectorAll(".grid").forEach(grid => {
+    if (grid.children.length > 0 && [...grid.children].every(child => child.classList.contains("doc-empty"))) {
+      grid.classList.add("doc-empty");
+    }
+  });
+  // Secciones sin datos, o sin su dato clave (p. ej. un bloque bancario sin número de cuenta)
+  modal.querySelectorAll("[data-doc-section]").forEach(section => {
+    const values = [...section.querySelectorAll("[id]")].filter(el => el.children.length === 0 && !SKIP_TAGS.includes(el.tagName));
+    const missingRequired = [...section.querySelectorAll("[data-doc-required]")].some(el => isEmptyDocValue(el));
+    if (missingRequired || (values.length > 0 && values.every(el => el.closest(".doc-empty")))) section.classList.add("doc-empty");
+  });
+}
 
 function closeStatementModal() {
   elements.statementModal?.classList.add("hidden");
@@ -7447,6 +7489,8 @@ function setupEventListeners() {
       document.title = `Recibo_de_Pago_${workerNameClean}`;
     }
 
+    prepareDocumentForPrint();
+
     // Aislamiento total de tema: Si la app está en modo oscuro, desactivar temporalmente
     // la clase 'dark' para que el motor de PDF del navegador genere un documento 100% blanco.
     const wasDark = document.documentElement.classList.contains("dark");
@@ -7470,6 +7514,7 @@ function setupEventListeners() {
   // Respaldo global para atajos de teclado (Ctrl+P / Cmd+P)
   let _globalDarkRestore = false;
   window.addEventListener("beforeprint", () => {
+    prepareDocumentForPrint();
     if (document.documentElement.classList.contains("dark")) {
       document.documentElement.classList.remove("dark");
       _globalDarkRestore = true;

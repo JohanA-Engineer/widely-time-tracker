@@ -715,6 +715,11 @@ html.has-user-session #authTopNavbar {
     display: none !important;
   }
 
+  /* Campos y secciones sin datos: no salen en el PDF */
+  #statementModal .doc-empty {
+    display: none !important;
+  }
+
   /* Documento inactivo 100% oculto */
   #docViewBill.hidden,
   #docViewReceipt.hidden,
