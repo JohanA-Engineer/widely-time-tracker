@@ -1221,6 +1221,35 @@
                 </div>
               </div>
 
+              <p id="paymentWorkerKeyHint" class="hidden text-xs text-mid -mt-1"></p>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label for="paymentMethod" class="block text-xs font-semibold text-ink mb-1.5">Método de pago</label>
+                  <select id="paymentMethod" class="form-input w-full">
+                    <option value="Llave Bre-B">Llave Bre-B (banco EE. UU.)</option>
+                    <option value="Transferencia">Transferencia bancaria</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="paymentCop" class="block text-xs font-semibold text-ink mb-1.5">Pesos enviados (COP)</label>
+                  <input type="number" id="paymentCop" step="any" min="0" placeholder="Opcional" class="form-input w-full font-mono text-sm no-spinners">
+                </div>
+                <div>
+                  <label for="paymentTrm" class="block text-xs font-semibold text-ink mb-1.5">TRM usada</label>
+                  <input type="number" id="paymentTrm" step="any" min="0" placeholder="Se calcula con los pesos" class="form-input w-full font-mono text-sm no-spinners">
+                </div>
+                <div>
+                  <label for="paymentFee" class="block text-xs font-semibold text-ink mb-1.5">Costo de la transacción (USD)</label>
+                  <div class="relative">
+                    <span class="input-currency-prefix">$</span>
+                    <input type="number" id="paymentFee" step="any" min="0" placeholder="0.00" class="form-input w-full pl-8 font-mono text-sm no-spinners">
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label for="paymentReference" class="block text-xs font-semibold text-ink mb-1.5">Concepto o Referencia</label>
                 <input type="text" id="paymentReference" placeholder="Ej. Quincena #1, Transferencia #892" class="form-input w-full">
@@ -1540,6 +1569,23 @@
                     <div>
                       <label for="myProfileAccountHolder" class="profile-form-label">Titular de la Cuenta</label>
                       <input type="text" id="myProfileAccountHolder" placeholder="Nombre completo del titular" class="form-input w-full text-xs py-2.5">
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="myProfileKeyType" class="profile-form-label">Tipo de llave (Bre-B)</label>
+                      <select id="myProfileKeyType" class="form-input w-full text-xs py-2.5">
+                        <option value="">Sin llave</option>
+                        <option value="Celular">Celular</option>
+                        <option value="Cédula">Cédula</option>
+                        <option value="Correo">Correo</option>
+                        <option value="Alfanumérica">Alfanumérica</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="myProfileKey" class="profile-form-label">Llave para recibir pagos</label>
+                      <input type="text" id="myProfileKey" maxlength="80" placeholder="Ej. 3001234567 o tu llave alfanumérica" class="form-input w-full text-xs py-2.5 font-mono">
                     </div>
                   </div>
                 </div>
@@ -1885,6 +1931,38 @@
                     <span class="block text-mid text-[8px]">≤ $150</span>
                     <strong class="text-ink">7,14%</strong>
                   </div>
+
+              <!-- Ruta bancaria: banco en EE. UU. y pagos a colaboradores por llave (Bre-B) -->
+              <div class="p-2.5 rounded-lg bg-ink/[0.04] border border-line space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs font-semibold text-ink flex items-center gap-1.5"><i class="fa-solid fa-building-columns"></i> Ruta bancaria (EE. UU. → Colombia por llave)</span>
+                  <span id="bankRoutePreview" class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-ink/15 text-ink font-bold border border-line">—</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="col-span-2">
+                    <label for="bankRouteFromInput" class="block text-[11px] font-semibold text-ink mb-1">Aplica desde la semana del</label>
+                    <input type="date" id="bankRouteFromInput" class="form-input w-full py-1 font-mono text-xs">
+                    <span class="text-[9px] text-mid block mt-0.5">Las semanas anteriores se calculan con Upwork.</span>
+                  </div>
+                  <div>
+                    <label for="bankInPctInput" class="block text-[11px] font-semibold text-ink mb-1">Comisión al recibir (%)</label>
+                    <input type="number" id="bankInPctInput" step="0.01" min="0" max="100" placeholder="0" class="form-input w-full py-1 font-mono text-xs no-spinners">
+                  </div>
+                  <div>
+                    <label for="bankInFixedInput" class="block text-[11px] font-semibold text-ink mb-1">Costo fijo por recibo (USD)</label>
+                    <input type="number" id="bankInFixedInput" step="0.01" min="0" placeholder="0.00" class="form-input w-full py-1 font-mono text-xs no-spinners">
+                  </div>
+                  <div>
+                    <label for="bankPayFixedInput" class="block text-[11px] font-semibold text-ink mb-1">Costo por pago a colaborador (USD)</label>
+                    <input type="number" id="bankPayFixedInput" step="0.01" min="0" placeholder="0.00" class="form-input w-full py-1 font-mono text-xs no-spinners">
+                  </div>
+                  <div>
+                    <label for="bankPayPctInput" class="block text-[11px] font-semibold text-ink mb-1">Diferencia de cambio por pago (%)</label>
+                    <input type="number" id="bankPayPctInput" step="0.01" min="0" max="100" placeholder="0" class="form-input w-full py-1 font-mono text-xs no-spinners">
+                  </div>
+                </div>
+                <p class="text-[9px] text-mid">Si aún no conoces los costos, déjalos en 0. Cuando registres un pago con su costo real, se usa ese valor en lugar del estimado.</p>
+              </div>
                   <div id="nequiTierBox2" class="p-1 rounded bg-white dark:bg-paper border border-line transition-all">
                     <span class="block text-mid text-[8px]">$151–300</span>
                     <strong class="text-ink">4,76%</strong>
@@ -2374,6 +2452,10 @@
               <span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Número de Cuenta:</span>
               <span id="billAccountNumber" data-doc-required contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink tabular-nums mt-0.5">000-000000-00</span>
             </div>
+            <div>
+              <span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Llave (Bre-B):</span>
+              <span id="billPaymentKey" data-doc-required contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink tabular-nums mt-0.5"></span>
+            </div>
           </div>
         </div>
 
@@ -2490,6 +2572,7 @@
             <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Tipo de cuenta</span><span id="agencyAccountType" contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5">--</span></div>
             <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Número</span><span id="agencyAccountNumber" data-doc-required contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink tabular-nums mt-0.5">--</span></div>
             <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Titular</span><span id="agencyAccountHolder" contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink mt-0.5">--</span></div>
+            <div><span class="text-[10px] font-medium text-mid uppercase tracking-wider block">Llave (Bre-B)</span><span id="agencyPaymentKey" data-doc-required contenteditable="true" class="font-semibold border-b border-dashed border-faint outline-none px-1 block text-ink tabular-nums mt-0.5"></span></div>
           </div>
         </div>
 
@@ -2935,6 +3018,22 @@
               <div>
                 <label for="adminEditUserAccountHolder" class="block text-xs font-semibold text-ink mb-1">Titular Cuenta</label>
                 <input type="text" id="adminEditUserAccountHolder" class="form-input w-full text-xs py-2">
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="adminEditUserKeyType" class="block text-xs font-semibold text-ink mb-1">Tipo de llave (Bre-B)</label>
+                <select id="adminEditUserKeyType" class="form-input w-full text-xs py-2">
+                  <option value="">Sin llave</option>
+                        <option value="Celular">Celular</option>
+                        <option value="Cédula">Cédula</option>
+                        <option value="Correo">Correo</option>
+                        <option value="Alfanumérica">Alfanumérica</option>
+                </select>
+              </div>
+              <div>
+                <label for="adminEditUserKey" class="block text-xs font-semibold text-ink mb-1">Llave para pagos</label>
+                <input type="text" id="adminEditUserKey" maxlength="80" class="form-input w-full text-xs py-2 font-mono">
               </div>
             </div>
           </div>

@@ -195,6 +195,9 @@ let state = {
   taskStatusFilter: "all", // Filtro de estado: 'all', 'pendiente', 'aprobada', 'rechazada'
   rejectTargetId: null,
   upworkWeeklyRevenue: 0, // Recaudación mensual acumulada Upwork en USD
+  // Desde la semana del 19 oct 2026 la agencia paga a un banco en EE. UU. y los colaboradores
+  // se pagan desde ahí por llave Bre-B; antes de esa fecha se cobraba por Upwork.
+  bankRoute: { from: "2026-10-19", inPct: 0, inFixed: 0, payFixed: 0, payPct: 0 },
   upworkMonthlyWeeks: {
     w1: 0,
     w2: 0,
@@ -494,6 +497,8 @@ const elements = {
   myProfileAccountType: document.getElementById("myProfileAccountType"),
   myProfileAccountNumber: document.getElementById("myProfileAccountNumber"),
   myProfileAccountHolder: document.getElementById("myProfileAccountHolder"),
+  myProfileKeyType: document.getElementById("myProfileKeyType"),
+  myProfileKey: document.getElementById("myProfileKey"),
   myProfileNewPassword: document.getElementById("myProfileNewPassword"),
   myProfileConfirmPassword: document.getElementById("myProfileConfirmPassword"),
   btnUpdateMyPassword: document.getElementById("btnUpdateMyPassword"),
@@ -550,6 +555,21 @@ const elements = {
   adminEditUserAccountType: document.getElementById("adminEditUserAccountType"),
   adminEditUserAccountNumber: document.getElementById("adminEditUserAccountNumber"),
   adminEditUserAccountHolder: document.getElementById("adminEditUserAccountHolder"),
+  adminEditUserKeyType: document.getElementById("adminEditUserKeyType"),
+  adminEditUserKey: document.getElementById("adminEditUserKey"),
+  paymentMethod: document.getElementById("paymentMethod"),
+  paymentCop: document.getElementById("paymentCop"),
+  paymentTrm: document.getElementById("paymentTrm"),
+  paymentFee: document.getElementById("paymentFee"),
+  paymentWorkerKeyHint: document.getElementById("paymentWorkerKeyHint"),
+  billPaymentKey: document.getElementById("billPaymentKey"),
+  agencyPaymentKey: document.getElementById("agencyPaymentKey"),
+  bankRouteFromInput: document.getElementById("bankRouteFromInput"),
+  bankInPctInput: document.getElementById("bankInPctInput"),
+  bankInFixedInput: document.getElementById("bankInFixedInput"),
+  bankPayFixedInput: document.getElementById("bankPayFixedInput"),
+  bankPayPctInput: document.getElementById("bankPayPctInput"),
+  bankRoutePreview: document.getElementById("bankRoutePreview"),
   btnAdminSendPasswordReset: document.getElementById("btnAdminSendPasswordReset"),
   btnSaveAdminEditUser: document.getElementById("btnSaveAdminEditUser"),
 
@@ -1468,6 +1488,9 @@ function setupFirestoreListeners(profile) {
           state.nequiIncludeFee = data.nequiIncludeFee;
           localStorage.setItem("widely_nequi_include_fee", String(data.nequiIncludeFee));
         }
+        if (data.bankRoute && typeof data.bankRoute === "object") {
+          state.bankRoute = normalizeBankRoute(data.bankRoute);
+        }
         if (typeof data.includeVat === "boolean") {
           state.upworkIncludeVat = data.includeVat;
           localStorage.setItem("widely_upwork_include_vat", String(data.includeVat));
@@ -2290,6 +2313,21 @@ async function handleSaveWorker(e) {
 /* ============================================================================
    8. REGISTRO DE PAGOS
    ============================================================================ */
+// Muestra la llave Bre-B del colaborador elegido para copiarla en la app del banco
+function updatePaymentWorkerKeyHint() {
+  const hint = elements.paymentWorkerKeyHint;
+  if (!hint) return;
+  const worker = state.workers.find(w => w.id === elements.paymentWorkerSelect?.value);
+  if (!worker) {
+    hint.classList.add("hidden");
+    return;
+  }
+  hint.classList.remove("hidden");
+  hint.textContent = worker.llave
+    ? `Llave ${worker.tipoLlave ? `(${worker.tipoLlave}) ` : ""}de ${worker.nombre}: ${worker.llave}`
+    : `${worker.nombre} aún no tiene llave registrada en su perfil.`;
+}
+
 async function handleSavePayment(e) {
   e.preventDefault();
 
@@ -2314,14 +2352,28 @@ async function handleSavePayment(e) {
     return;
   }
 
+  const method = elements.paymentMethod?.value || "Llave Bre-B";
+  const copSent = parseFloat(elements.paymentCop?.value);
+  const trmUsed = parseFloat(elements.paymentTrm?.value);
+  const fee = parseFloat(elements.paymentFee?.value);
+  if ([copSent, trmUsed, fee].some(v => !isNaN(v) && v < 0)) {
+    showToast("Los pesos, la TRM y el costo no pueden ser negativos.", "warning");
+    return;
+  }
+
   const paymentData = {
     fecha: date || getTodayKey(),
     trabajadorId: worker.id,
     trabajadorNombre: worker.nombre,
     monto: Number(amount.toFixed(2)),
     referencia: reference || "Pago registrado",
+    metodo: method,
     createdAt: db ? serverTimestamp() : new Date().toISOString()
   };
+  if (!isNaN(copSent) && copSent > 0) paymentData.montoCop = Math.round(copSent);
+  if (!isNaN(trmUsed) && trmUsed > 0) paymentData.trm = Number(trmUsed.toFixed(2));
+  else if (paymentData.montoCop) paymentData.trm = Number((paymentData.montoCop / amount).toFixed(2));
+  if (!isNaN(fee)) paymentData.costoTransaccion = Number(fee.toFixed(2));
 
   try {
     if (db) {
@@ -2336,6 +2388,7 @@ async function handleSavePayment(e) {
     showToast(`Pago de $${amount.toFixed(2)} registrado para ${worker.nombre}.`, "success");
     elements.formPayment.reset();
     initDefaultDate();
+    updatePaymentWorkerKeyHint();
   } catch (error) {
     console.error("Error al registrar pago:", error);
     showToast("Error al registrar pago: " + error.message, "error");
@@ -2687,6 +2740,8 @@ function populateProfileData() {
   if (elements.myProfileAccountType) elements.myProfileAccountType.value = accountType || "Ahorros";
   if (elements.myProfileAccountNumber) elements.myProfileAccountNumber.value = accountNumber || "";
   if (elements.myProfileAccountHolder) elements.myProfileAccountHolder.value = accountHolder || profile.nombre || "";
+  if (elements.myProfileKeyType) elements.myProfileKeyType.value = profile.tipoLlave || "";
+  if (elements.myProfileKey) elements.myProfileKey.value = profile.llave || "";
 
   // Limpiar campos de contraseña
   if (elements.myProfileNewPassword) elements.myProfileNewPassword.value = "";
@@ -2759,6 +2814,8 @@ async function handleSaveMyProfile(e) {
   const tipoCuenta = elements.myProfileAccountType?.value || "Ahorros";
   const numeroCuenta = elements.myProfileAccountNumber?.value.trim() || "";
   const titularCuenta = elements.myProfileAccountHolder?.value.trim() || nombre;
+  const tipoLlave = elements.myProfileKeyType?.value || "";
+  const llave = (elements.myProfileKey?.value || "").trim().slice(0, 80);
 
   if (!nombre) {
     showToast("Por favor ingresa tu nombre.", "warning");
@@ -2777,6 +2834,8 @@ async function handleSaveMyProfile(e) {
     tipoCuenta,
     numeroCuenta,
     titularCuenta,
+    tipoLlave,
+    llave,
     updatedAt: new Date().toISOString()
   };
 
@@ -2803,7 +2862,9 @@ async function handleSaveMyProfile(e) {
             banco,
             tipoCuenta,
             numeroCuenta,
-            titularCuenta
+            titularCuenta,
+            tipoLlave,
+            llave
           }, { merge: true });
         } catch (workerSyncErr) {
           console.info("[Firestore] Nota sincronización trabajador:", workerSyncErr.message);
@@ -3018,6 +3079,8 @@ function openAdminEditUserModal(userId) {
   elements.adminEditUserAccountType.value = u.tipoCuenta || "Ahorros";
   elements.adminEditUserAccountNumber.value = u.numeroCuenta || "";
   elements.adminEditUserAccountHolder.value = u.titularCuenta || u.nombre || "";
+  if (elements.adminEditUserKeyType) elements.adminEditUserKeyType.value = u.tipoLlave || "";
+  if (elements.adminEditUserKey) elements.adminEditUserKey.value = u.llave || "";
 
   // Botón reset password del usuario
   if (elements.btnAdminSendPasswordReset) {
@@ -3065,6 +3128,8 @@ async function handleSaveAdminEditUser(e) {
   const tipoCuenta = elements.adminEditUserAccountType?.value || "Ahorros";
   const numeroCuenta = elements.adminEditUserAccountNumber?.value.trim() || "";
   const titularCuenta = elements.adminEditUserAccountHolder?.value.trim() || nombre;
+  const tipoLlave = elements.adminEditUserKeyType?.value || "";
+  const llave = (elements.adminEditUserKey?.value || "").trim().slice(0, 80);
 
   if (!nombre) {
     showToast("El nombre es requerido.", "warning");
@@ -3084,6 +3149,8 @@ async function handleSaveAdminEditUser(e) {
     tipoCuenta,
     numeroCuenta,
     titularCuenta,
+    tipoLlave,
+    llave,
     updatedAt: new Date().toISOString()
   };
 
@@ -3114,7 +3181,9 @@ async function handleSaveAdminEditUser(e) {
           banco,
           tipoCuenta,
           numeroCuenta,
-          titularCuenta
+          titularCuenta,
+          tipoLlave,
+          llave
         }, { merge: true });
 
         localStorage.setItem(`widely_banking_${trabajadorId}`, JSON.stringify({
@@ -3683,6 +3752,11 @@ function updatePaymentsUI() {
       <td class="py-2.5 px-3 font-semibold text-ink whitespace-nowrap">${escapeHtml(p.trabajadorNombre || '')}</td>
       <td class="py-2.5 px-3 text-mid max-w-xs truncate" title="${escapeHtml(p.referencia || '')}">
         ${escapeHtml(p.referencia || 'Pago')}
+        ${p.metodo || p.montoCop || typeof p.costoTransaccion === "number" ? `<span class="block text-[10px] text-mid">${[
+          p.metodo ? escapeHtml(p.metodo) : null,
+          p.montoCop ? `${formatCop(Number(p.montoCop))}${p.trm ? ` @ ${Number(p.trm).toFixed(2)}` : ""}` : null,
+          typeof p.costoTransaccion === "number" ? `costo $${Number(p.costoTransaccion).toFixed(2)}` : null
+        ].filter(Boolean).join(" · ")}</span>` : ""}
       </td>
       <td class="py-2.5 px-2 text-right font-mono font-medium text-ink whitespace-nowrap tabular-nums">
         $${Number(p.monto || 0).toFixed(2)}
@@ -4742,6 +4816,7 @@ function getUpworkWeeksForMonth(year, month) {
     weeks.push({
       num: weekNum,
       key: `w${weekNum}`,
+      mondayKey: toLocalDateKey(currentMonday),
       shortDateLabel,
       cardTitle: `Sem ${weekNum}`,
       fullLabel: `Semana ${weekNum} (${shortDateLabel})`,
@@ -4873,6 +4948,85 @@ function calculateNequiFee(usdAmount) {
   };
 }
 
+function normalizeBankRoute(data) {
+  const n = (v) => Math.max(0, Number(v) || 0);
+  const from = typeof data?.from === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data.from) ? data.from : "2026-10-19";
+  return { from, inPct: n(data?.inPct), inFixed: n(data?.inFixed), payFixed: n(data?.payFixed), payPct: n(data?.payPct) };
+}
+
+// Recaudo neto del mes: las semanas antes de `route.from` siguen la ruta Upwork → PayPal → Nequi;
+// desde esa semana, la ruta bancaria (comisión al recibir + costo fijo por cada semana cobrada).
+function computeMonthlyRevenue(weeks, upworkOpts, route) {
+  const monthWeeks = getUpworkWeeksForMonth();
+  let upworkGross = 0;
+  let bankGross = 0;
+  let bankWeeksPaid = 0;
+  monthWeeks.forEach(w => {
+    const amount = Number(weeks?.[w.key]) || 0;
+    if (w.mondayKey >= route.from) {
+      bankGross += amount;
+      if (amount > 0) bankWeeksPaid++;
+    } else {
+      upworkGross += amount;
+    }
+  });
+
+  const upworkFeeAmount = upworkGross > 0 ? upworkGross * (upworkOpts.feePercent / 100) : 0;
+  const upworkVatAmount = (upworkGross > 0 && upworkOpts.includeVat) ? upworkFeeAmount * 0.19 : 0;
+  const upworkNetEarnings = Math.max(0, upworkGross - upworkFeeAmount - upworkVatAmount);
+  const upworkPayoutAmount = upworkGross > 0 ? upworkOpts.payoutCost : 0;
+  const paypalAmount = Math.max(0, upworkNetEarnings - upworkPayoutAmount);
+  const nequiCalc = upworkOpts.includeNequi
+    ? calculateNequiFee(paypalAmount)
+    : { tier: 0, rate: 0, percentLabel: "0%", feeAmount: 0, netAmount: paypalAmount, tierName: "Cuenta Directa (0%)" };
+  const upworkNetReal = upworkGross > 0 ? nequiCalc.netAmount : 0;
+
+  const bankFees = bankGross > 0 ? bankGross * (route.inPct / 100) + bankWeeksPaid * route.inFixed : 0;
+  const bankNet = Math.max(0, bankGross - bankFees);
+
+  return {
+    grossRevenue: upworkGross + bankGross,
+    upworkGross, upworkFeeAmount, upworkVatAmount, upworkNetEarnings, upworkPayoutAmount, paypalAmount, nequiCalc, upworkNetReal,
+    bankGross, bankFees, bankNet, bankWeeksPaid,
+    netRealRevenue: upworkNetReal + bankNet
+  };
+}
+
+// Costo de pagar a los colaboradores por la ruta bancaria en el mes: costo real registrado
+// en cada pago o, si no se registró, el estimado (costo fijo + % de cambio).
+function getMonthlyTransferCost(route) {
+  const { start, end } = getCurrentMonthRange();
+  return state.payments.reduce((acc, p) => {
+    if (!p.fecha || p.fecha < route.from) return acc;
+    const date = new Date(p.fecha + "T00:00:00");
+    if (date < start || date > end) return acc;
+    if (typeof p.costoTransaccion === "number") return acc + p.costoTransaccion;
+    if (p.metodo && p.metodo !== "Llave Bre-B" && p.metodo !== "Transferencia") return acc;
+    return acc + route.payFixed + (Number(p.monto) || 0) * (route.payPct / 100);
+  }, 0);
+}
+
+function renderRouteStrip(rev, transferCost, trm) {
+  const container = document.getElementById("upworkNequiRouteSummary");
+  if (!container) return;
+  const usd = (v) => `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const route = state.bankRoute;
+  const steps = [];
+  if (rev.upworkGross > 0 || rev.bankGross === 0) {
+    steps.push({ small: "Upwork", value: `${usd(rev.upworkNetReal)} neto` });
+  }
+  if (rev.bankGross > 0 || rev.upworkGross === 0) {
+    const inLabel = route.inPct > 0 || route.inFixed > 0 ? `-${usd(rev.bankFees)}` : "Sin comisión";
+    steps.push({ small: "Banco EE. UU.", value: rev.bankGross > 0 ? `${usd(rev.bankGross)} · ${inLabel}` : inLabel });
+  }
+  steps.push({ small: "Pagos por llave", value: transferCost > 0 ? `-${usd(transferCost)}` : "Sin costo registrado" });
+  const finalNet = Math.max(0, rev.netRealRevenue - transferCost);
+  const html = steps.map(st => `<div class="route-step"><small>${st.small}</small><b>${st.value}</b></div>`).join("") +
+    `<div class="route-step route-step-final"><small>Neto real disponible</small><b>${usd(finalNet)} USD</b><span class="tile-sub tabular-nums">≈ ${formatCop(finalNet * trm)}</span></div>`;
+  container.innerHTML = html;
+  container.style.setProperty("--route-steps", String(steps.length + 1));
+}
+
 function updateUpworkBudgetDashboard(currentTrm) {
   if (!elements.adminUpworkBudgetSection) return;
 
@@ -4901,24 +5055,15 @@ function updateUpworkBudgetDashboard(currentTrm) {
   const payoutCost = typeof state.upworkPayoutCost === "number" ? state.upworkPayoutCost : 1.0;
   const includeNequi = state.nequiIncludeFee !== false;
 
-  // Pipeline Financiero Completo: Upwork -> PayPal -> Colombia (Nequi o Cuenta Directa)
-  // 1. Upwork Bruto -> Descuento tarifa de servicio (15% por defecto)
-  const upworkFeeAmount = grossRevenue > 0 ? (grossRevenue * (feePercent / 100)) : 0;
-  // 2. IVA Colombia (19%) sobre la tarifa de servicio de Upwork (VAT CO)
-  const upworkVatAmount = (grossRevenue > 0 && includeVat) ? (upworkFeeAmount * 0.19) : 0;
-  // 3. Ganancia neta en Upwork (Net earnings)
-  const upworkNetEarnings = Math.max(0, grossRevenue - upworkFeeAmount - upworkVatAmount);
-  // 4. Retiro a fin de mes Upwork -> PayPal ($1.00 USD)
-  const upworkPayoutAmount = grossRevenue > 0 ? payoutCost : 0;
-  // 5. Monto acreditado en PayPal
-  const paypalAmount = Math.max(0, upworkNetEarnings - upworkPayoutAmount);
-  // 6. Retiro PayPal -> Nequi Colombia (o Cuenta Bancaria Directa al 0%)
-  const nequiCalc = includeNequi ? calculateNequiFee(paypalAmount) : { tier: 0, rate: 0, percentLabel: "0%", feeAmount: 0, netAmount: paypalAmount, tierName: "Cuenta Directa (0%)" };
-  // 7. Ingreso Neto Real disponible en Colombia
-  const netRealRevenue = grossRevenue > 0 ? nequiCalc.netAmount : 0;
+  // Recaudo neto combinado: semanas por Upwork y semanas por la ruta bancaria
+  const rev = computeMonthlyRevenue(weeks, { feePercent, includeVat, payoutCost, includeNequi }, state.bankRoute);
+  const nequiCalc = rev.nequiCalc;
+  const netRealRevenue = rev.netRealRevenue;
+  // Costo de pagar a los colaboradores por llave (real o estimado) en el mes
+  const transferCost = getMonthlyTransferCost(state.bankRoute);
 
-  // Margen Real Neto mensual para la agencia = Saldo disponible en Colombia menos Costo de Nómina Mensual
-  const realNetMargin = netRealRevenue - monthlyPayrollCost;
+  // Margen Real Neto mensual = recaudo neto − costo de nómina − costos de transferencia
+  const realNetMargin = netRealRevenue - monthlyPayrollCost - transferCost;
 
   const grossRevenueCop = grossRevenue * trm;
   const payrollCop = monthlyPayrollCost * trm;
@@ -4934,9 +5079,10 @@ function updateUpworkBudgetDashboard(currentTrm) {
   }
   if (elements.upworkRevenueSubtitle) {
     if (grossRevenue > 0) {
-      const vatText = includeVat ? " + IVA CO" : "";
-      const nequiText = includeNequi ? ` • Nequi -${nequiCalc.percentLabel}` : " • Cuenta Directa (0% com.)";
-      elements.upworkRevenueSubtitle.textContent = `Neto en Colombia: $${netRealRevenue.toFixed(2)} (-${feePercent}%${vatText}, -$${payoutCost.toFixed(2)} retiro${nequiText})`;
+      const parts = [];
+      if (rev.upworkGross > 0) parts.push(`Upwork $${rev.upworkGross.toFixed(2)}`);
+      if (rev.bankGross > 0) parts.push(`banco $${rev.bankGross.toFixed(2)}`);
+      elements.upworkRevenueSubtitle.textContent = `Neto recibido: $${netRealRevenue.toFixed(2)} (${parts.join(" + ")})`;
     } else {
       elements.upworkRevenueSubtitle.textContent = "Clic en 'Gestionar Semanas' para ingresar recaudo";
     }
@@ -4951,32 +5097,16 @@ function updateUpworkBudgetDashboard(currentTrm) {
       const bgClass = isCurrent
         ? "bg-ink/15 text-mid font-bold border border-line shadow-xs"
         : "bg-muted text-mid border border-line";
-      return `<span class="inline-flex items-center px-2 py-0.5 rounded-md ${bgClass} transition-colors" title="${w.fullLabel}">
-        ${currentDot}${w.pillLabel}: <strong class="ml-1 font-mono text-ink">$${val.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</strong>
+      const routeTag = w.mondayKey >= state.bankRoute.from ? "Banco" : "Upwork";
+      return `<span class="inline-flex items-center px-2 py-0.5 rounded-md ${bgClass} transition-colors" title="${w.fullLabel} · ${routeTag}">
+        ${currentDot}${w.pillLabel}: <strong class="ml-1 font-mono text-ink">$${val.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</strong><span class="ml-1 text-mid">· ${routeTag}</span>
       </span>`;
     }).join("");
     elements.upworkWeeksPillsBar.innerHTML = pillsHtml;
   }
 
-  // Resumen de la Ruta Bancaria: Upwork -> PayPal -> Nequi / Cuenta Directa
-  if (elements.routeUpworkNetLabel) {
-    elements.routeUpworkNetLabel.textContent = `Upwork (-${feePercent}%${includeVat ? " + IVA" : ""})`;
-  }
-  if (elements.routeNequiTierLabel) {
-    if (includeNequi && paypalAmount > 0) {
-      elements.routeNequiTierLabel.textContent = `Nequi (-${nequiCalc.percentLabel})`;
-    } else if (includeNequi) {
-      elements.routeNequiTierLabel.textContent = `Nequi (-4,76%)`;
-    } else {
-      elements.routeNequiTierLabel.textContent = `Cuenta Directa (0%)`;
-    }
-  }
-  if (elements.routeNetNequiUsd) {
-    elements.routeNetNequiUsd.textContent = `$${netRealRevenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
-  }
-  if (elements.routeNetNequiCop) {
-    elements.routeNetNequiCop.textContent = `≈ ${formatCop(netRealRevenueCop)}`;
-  }
+  // Resumen de la ruta del dinero (Upwork y/o banco en EE. UU. → pagos por llave)
+  renderRouteStrip(rev, transferCost, trm);
 
   // 2. Costo Nómina Mensual
   if (elements.upworkPayrollCostDisplay) {
@@ -4989,7 +5119,8 @@ function updateUpworkBudgetDashboard(currentTrm) {
     const parts = [];
     if (monthlyHours > 0 || monthlyArts === 0) parts.push(`${monthlyHours.toFixed(2)}h`);
     if (monthlyArts > 0) parts.push(`${monthlyArts} ${monthlyArts === 1 ? 'arte' : 'artes'}`);
-    elements.upworkPayrollDetails.textContent = `${parts.join(" • ")} de tareas aprobadas este mes`;
+    const transferText = transferCost > 0 ? ` • + $${transferCost.toFixed(2)} en costos de transferencia` : "";
+    elements.upworkPayrollDetails.textContent = `${parts.join(" • ")} de tareas aprobadas este mes${transferText}`;
   }
 
   // 3. Presupuesto Disponible (Mes) / Margen Real
@@ -5016,7 +5147,7 @@ function updateUpworkBudgetDashboard(currentTrm) {
   // Porcentaje y barra de ejecución del presupuesto del mes
   let usagePercent = 0;
   if (netRealRevenue > 0) {
-    usagePercent = Math.min(Math.round((monthlyPayrollCost / netRealRevenue) * 100), 999);
+    usagePercent = Math.min(Math.round(((monthlyPayrollCost + transferCost) / netRealRevenue) * 100), 999);
   } else if (grossRevenue > 0) {
     usagePercent = 100;
   }
@@ -5136,6 +5267,7 @@ function openUpworkBudgetModal() {
     elements.nequiIncludeFeeInput.checked = state.nequiIncludeFee !== false;
   }
 
+  fillBankRouteInputs();
   updateUpworkInputPreview();
   elements.upworkBudgetModal.classList.remove("hidden");
   elements.upworkBudgetModal.classList.add("flex");
@@ -5149,6 +5281,26 @@ function openUpworkBudgetModal() {
       elements.upworkWeek1Input?.focus();
     }
   }, 50);
+}
+
+function readBankRouteInputs() {
+  if (!elements.bankRouteFromInput) return state.bankRoute;
+  return normalizeBankRoute({
+    from: elements.bankRouteFromInput.value || state.bankRoute.from,
+    inPct: elements.bankInPctInput?.value,
+    inFixed: elements.bankInFixedInput?.value,
+    payFixed: elements.bankPayFixedInput?.value,
+    payPct: elements.bankPayPctInput?.value
+  });
+}
+
+function fillBankRouteInputs() {
+  const r = state.bankRoute;
+  if (elements.bankRouteFromInput) elements.bankRouteFromInput.value = r.from;
+  if (elements.bankInPctInput) elements.bankInPctInput.value = r.inPct || "";
+  if (elements.bankInFixedInput) elements.bankInFixedInput.value = r.inFixed || "";
+  if (elements.bankPayFixedInput) elements.bankPayFixedInput.value = r.payFixed || "";
+  if (elements.bankPayPctInput) elements.bankPayPctInput.value = r.payPct || "";
 }
 
 function closeUpworkBudgetModal() {
@@ -5185,28 +5337,33 @@ function updateUpworkInputPreview() {
     elements.upworkInputCopPreview.textContent = `≈ ${formatCop(totalGross * trm)}`;
   }
 
-  // 1. Tarifa servicio Upwork (15% por defecto)
-  const feeAmount = totalGross > 0 ? (totalGross * (feePercent / 100)) : 0;
-  // 2. IVA Colombia (19%) sobre tarifa de Upwork (VAT CO on service fee)
-  const vatAmount = (totalGross > 0 && includeVat) ? (feeAmount * 0.19) : 0;
-  // 3. Ganancia neta en Upwork (Net earnings)
-  const upworkNetEarnings = Math.max(0, totalGross - feeAmount - vatAmount);
-  // 4. Retiro a fin de mes Upwork a PayPal ($1.00 USD)
-  const payoutAmount = totalGross > 0 ? payoutCost : 0;
-  // 5. Saldo en PayPal
-  const paypalAmount = Math.max(0, upworkNetEarnings - payoutAmount);
-  // 6. Nequi Colombia (o Cuenta Bancaria Directa con 0% comisión)
-  const nequiCalc = includeNequi ? calculateNequiFee(paypalAmount) : { tier: 0, rate: 0, percentLabel: "0%", feeAmount: 0, netAmount: paypalAmount, tierName: "Cuenta Directa (0%)" };
-  // 7. Monto neto real que entra a Colombia
-  const netReal = totalGross > 0 ? nequiCalc.netAmount : 0;
+  // Rutas del mes: semanas por Upwork (desglose de abajo) y semanas por banco en EE. UU.
+  const previewRoute = readBankRouteInputs();
+  const rev = computeMonthlyRevenue({ w1, w2, w3, w4, w5, w6 }, { feePercent, includeVat, payoutCost, includeNequi }, previewRoute);
+  const feeAmount = rev.upworkFeeAmount;
+  const vatAmount = rev.upworkVatAmount;
+  const upworkNetEarnings = rev.upworkNetEarnings;
+  const payoutAmount = rev.upworkPayoutAmount;
+  const paypalAmount = rev.paypalAmount;
+  const nequiCalc = rev.nequiCalc;
+  const transferCost = getMonthlyTransferCost(previewRoute);
+  const netReal = rev.netRealRevenue;
 
-  // Costo Nómina del Mes actual para comparar contra el margen
+  if (elements.bankRoutePreview) {
+    elements.bankRoutePreview.textContent = rev.bankGross > 0
+      ? `Banco: $${rev.bankGross.toFixed(2)} → $${rev.bankNet.toFixed(2)} neto`
+      : "Sin semanas por banco este mes";
+  }
+
+  // Costo Nómina del Mes actual (incluye costos de transferencia por llave)
   const monthlyTasks = getMonthlyApprovedTasks();
-  const monthlyPayroll = monthlyTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
+  const monthlyPayroll = monthlyTasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0) + transferCost;
   const netMargin = netReal - monthlyPayroll;
 
   if (elements.upworkBreakdownGross) {
-    elements.upworkBreakdownGross.textContent = `$${totalGross.toFixed(2)} USD`;
+    elements.upworkBreakdownGross.textContent = rev.bankGross > 0
+      ? `$${rev.upworkGross.toFixed(2)} USD (Upwork) + $${rev.bankGross.toFixed(2)} (banco)`
+      : `$${totalGross.toFixed(2)} USD`;
   }
   if (elements.upworkBreakdownFeeLabel) {
     elements.upworkBreakdownFeeLabel.textContent = `2. Tarifa de Servicio Upwork (${feePercent}%):`;
@@ -5282,7 +5439,7 @@ function updateUpworkInputPreview() {
   }
 }
 
-async function saveUpworkBudget(weeksOrAmount, feePercent = 15, payoutCost = 1.0, nequiIncludeFee = true, upworkIncludeVat = true) {
+async function saveUpworkBudget(weeksOrAmount, feePercent = 15, payoutCost = 1.0, nequiIncludeFee = true, upworkIncludeVat = true, bankRoute = state.bankRoute) {
   let cleanWeeks = { w1: 0, w2: 0, w3: 0, w4: 0, w5: 0, w6: 0 };
   if (typeof weeksOrAmount === "object" && weeksOrAmount !== null) {
     cleanWeeks = {
@@ -5306,6 +5463,7 @@ async function saveUpworkBudget(weeksOrAmount, feePercent = 15, payoutCost = 1.0
   state.upworkIncludeVat = upworkIncludeVat;
   state.upworkPayoutCost = payoutCost;
   state.nequiIncludeFee = nequiIncludeFee;
+  state.bankRoute = normalizeBankRoute(bankRoute);
 
   localStorage.setItem("widely_upwork_monthly_weeks", JSON.stringify(cleanWeeks));
   localStorage.setItem("widely_upwork_weekly_revenue", String(totalAmount));
@@ -5324,6 +5482,7 @@ async function saveUpworkBudget(weeksOrAmount, feePercent = 15, payoutCost = 1.0
         includeVat: upworkIncludeVat,
         payoutCost: payoutCost,
         nequiIncludeFee: nequiIncludeFee,
+        bankRoute: state.bankRoute,
         updatedAt: serverTimestamp(),
         updatedBy: state.currentUser?.email || "admin"
       }, { merge: true });
@@ -5423,6 +5582,9 @@ async function loadUpworkBudget() {
         if (typeof data.nequiIncludeFee === "boolean") {
           state.nequiIncludeFee = data.nequiIncludeFee;
           localStorage.setItem("widely_nequi_include_fee", String(data.nequiIncludeFee));
+        }
+        if (data.bankRoute && typeof data.bankRoute === "object") {
+          state.bankRoute = normalizeBankRoute(data.bankRoute);
         }
         updateUpworkBudgetDashboard();
       }
@@ -6944,6 +7106,9 @@ window.openStatementModal = function(workerId, preferredType) {
   if (elements.billAccountType) elements.billAccountType.textContent = banking.accountType || "";
   if (elements.billAccountNumber) elements.billAccountNumber.textContent = banking.accountNumber || "";
   if (elements.billAccountMobile) elements.billAccountMobile.textContent = banking.mobile || "";
+  if (elements.billPaymentKey) {
+    elements.billPaymentKey.textContent = worker.llave ? `${worker.tipoLlave ? worker.tipoLlave + ": " : ""}${worker.llave}` : "";
+  }
 
   if (elements.billSignWorkerName) elements.billSignWorkerName.textContent = worker.nombre;
   if (elements.billSignWorkerId) {
@@ -7226,6 +7391,7 @@ function fillAgencyIssuer() {
   elements.agencyAccountType.textContent = p.tipoCuenta || "";
   elements.agencyAccountNumber.textContent = p.numeroCuenta || "";
   elements.agencyAccountHolder.textContent = p.titularCuenta || name;
+  if (elements.agencyPaymentKey) elements.agencyPaymentKey.textContent = p.llave ? `${p.tipoLlave ? p.tipoLlave + ": " : ""}${p.llave}` : "";
   elements.agencySignName.textContent = name;
   elements.agencySignDoc.textContent = p.numeroDocumento ? `${p.tipoDocumento || "CC"} ${p.numeroDocumento}` : "";
 }
@@ -7354,10 +7520,11 @@ function prepareDocumentForPrint() {
       grid.classList.add("doc-empty");
     }
   });
-  // Secciones sin datos, o sin su dato clave (p. ej. un bloque bancario sin número de cuenta)
+  // Secciones sin datos, o sin ninguno de sus datos clave (p. ej. un bloque bancario sin cuenta ni llave)
   modal.querySelectorAll("[data-doc-section]").forEach(section => {
     const values = [...section.querySelectorAll("[id]")].filter(el => el.children.length === 0 && !SKIP_TAGS.includes(el.tagName));
-    const missingRequired = [...section.querySelectorAll("[data-doc-required]")].some(el => isEmptyDocValue(el));
+    const required = [...section.querySelectorAll("[data-doc-required]")];
+    const missingRequired = required.length > 0 && required.every(el => isEmptyDocValue(el));
     if (missingRequired || (values.length > 0 && values.every(el => el.closest(".doc-empty")))) section.classList.add("doc-empty");
   });
 }
@@ -7388,6 +7555,7 @@ function setupEventListeners() {
   // Formularios
   elements.formWorker.addEventListener("submit", handleSaveWorker);
   elements.formPayment.addEventListener("submit", handleSavePayment);
+  elements.paymentWorkerSelect?.addEventListener("change", updatePaymentWorkerKeyHint);
 
   // Pestañas
   elements.tabTasks.addEventListener("click", () => switchTab("tasks"));
@@ -7656,6 +7824,9 @@ function setupEventListeners() {
       }
     });
   });
+  [elements.bankRouteFromInput, elements.bankInPctInput, elements.bankInFixedInput, elements.bankPayFixedInput, elements.bankPayPctInput]
+    .forEach(input => input?.addEventListener("input", updateUpworkInputPreview));
+
   elements.formUpworkBudget?.addEventListener("submit", (e) => {
     e.preventDefault();
     const w1 = parseFloat(elements.upworkWeek1Input?.value) || 0;
@@ -7680,7 +7851,8 @@ function setupEventListeners() {
       isNaN(fee) ? 15 : fee,
       isNaN(payout) ? 1.0 : payout,
       nequiInclude,
-      includeVat
+      includeVat,
+      readBankRouteInputs()
     );
     closeUpworkBudgetModal();
   });

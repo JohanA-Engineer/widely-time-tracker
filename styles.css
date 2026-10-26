@@ -1625,7 +1625,7 @@ body {
 .tile-label { font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-secondary); font-weight: 500; }
 .tile-value { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; color: var(--text-main); white-space: nowrap; }
 .tile-sub { font-size: 12px; color: var(--text-secondary); }
-.route-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.route-strip { display: grid; grid-template-columns: repeat(var(--route-steps, 5), minmax(0, 1fr)); gap: 6px; }
 .route-step {
   min-width: 0;
   padding: 8px 10px;
