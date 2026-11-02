@@ -495,6 +495,13 @@
         </div>
       </div>
 
+      <!-- Recordatorio diario que deja la administración (solo lectura) -->
+      <section id="workerReminderSection" class="content-card reminder-card hidden">
+        <div class="reminder-head"><i class="fa-regular fa-note-sticky"></i><span class="caption">Recordatorio diario</span></div>
+        <p id="workerReminderText" class="reminder-text"></p>
+        <span id="workerReminderMeta" class="text-xs text-mid"></span>
+      </section>
+
       <!-- Mis tareas por hacer (colaborador) -->
       <section id="workerTodosSection" class="section-anchor content-card">
         <div class="card-head">
@@ -1333,6 +1340,21 @@
             <div class="min-w-0 flex-1">
               <h1 id="collabName" class="page-title">Colaborador</h1>
               <div id="collabMeta" class="collab-meta"></div>
+            </div>
+          </section>
+
+          <!-- Recordatorio diario: nota fija que escriben las administradoras y el colaborador solo lee -->
+          <section class="content-card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Recordatorio diario</h3>
+                <p class="card-subtitle">Lo que debe tener presente cada día. El colaborador lo ve arriba de su panel; no se marca como hecho.</p>
+              </div>
+            </div>
+            <textarea id="collabReminderInput" maxlength="2000" rows="5" class="form-input w-full text-sm" placeholder="Ej. Todos los días: revisar el spend de DP antes de las 10 a. m., responder comentarios y mensajes, registrar las horas al terminar."></textarea>
+            <div class="flex items-center justify-between gap-2 flex-wrap mt-3">
+              <span id="collabReminderMeta" class="text-xs text-mid"></span>
+              <button type="button" id="btnSaveCollabReminder" class="btn-ds btn-ds-primary btn-ds-sm"><i class="fa-solid fa-floppy-disk"></i><span>Guardar recordatorio</span></button>
             </div>
           </section>
 

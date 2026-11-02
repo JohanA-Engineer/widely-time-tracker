@@ -389,6 +389,12 @@ const elements = {
   collabBalance: document.getElementById("collabBalance"),
   collabBalanceCop: document.getElementById("collabBalanceCop"),
   collabTodosList: document.getElementById("collabTodosList"),
+  collabReminderInput: document.getElementById("collabReminderInput"),
+  collabReminderMeta: document.getElementById("collabReminderMeta"),
+  btnSaveCollabReminder: document.getElementById("btnSaveCollabReminder"),
+  workerReminderSection: document.getElementById("workerReminderSection"),
+  workerReminderText: document.getElementById("workerReminderText"),
+  workerReminderMeta: document.getElementById("workerReminderMeta"),
   collabTodosCalendar: document.getElementById("collabTodosCalendar"),
   btnReleaseAllTodos: document.getElementById("btnReleaseAllTodos"),
   workerTodosList: document.getElementById("workerTodosList"),
@@ -2457,6 +2463,8 @@ async function handleSavePayment(e) {
    ============================================================================ */
 function updateWorkersUI() {
   renderWeeklyView();
+  renderWorkerReminder();
+  if (currentCollaboratorId) renderCollaboratorPage();
   const currentTimerVal = elements.timerWorkerSelect.value;
   const currentPayVal = elements.paymentWorkerSelect.value;
 
@@ -7806,6 +7814,54 @@ function renderTodos() {
   if (currentCollaboratorId) renderCollaboratorPage();
 }
 
+/* --- Recordatorio diario: nota fija por colaborador (campo "recordatorio" de su ficha) --- */
+function formatReminderMeta(worker) {
+  if (!worker?.recordatorio) return "";
+  const when = worker.recordatorioEn?.toDate ? worker.recordatorioEn.toDate()
+    : worker.recordatorioEn ? new Date(worker.recordatorioEn) : null;
+  const date = when && !isNaN(when) ? when.toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" }) : "";
+  return [worker.recordatorioPor ? `Escrito por ${worker.recordatorioPor}` : "", date ? `actualizado el ${date}` : ""]
+    .filter(Boolean).join(" · ");
+}
+
+function renderWorkerReminder() {
+  if (!elements.workerReminderSection) return;
+  const myId = state.userProfile?.trabajadorId;
+  const worker = !isAdminSession() && myId ? state.workers.find(w => w.id === myId) : null;
+  const text = (worker?.recordatorio || "").trim();
+  elements.workerReminderSection.classList.toggle("hidden", !text);
+  // textContent: el texto lo escribe una persona y nunca se interpreta como HTML
+  elements.workerReminderText.textContent = text;
+  elements.workerReminderMeta.textContent = formatReminderMeta(worker);
+}
+
+async function saveCollabReminder() {
+  if (!isAdminSession() || !currentCollaboratorId) return;
+  const text = (elements.collabReminderInput?.value || "").trim().slice(0, 2000);
+  const author = state.userProfile?.nombre || state.currentUser?.email || "Administración";
+  const btn = elements.btnSaveCollabReminder;
+  if (btn) btn.disabled = true;
+  try {
+    if (db) {
+      await updateDoc(doc(db, "trabajadores", currentCollaboratorId), {
+        recordatorio: text,
+        recordatorioPor: author,
+        recordatorioEn: serverTimestamp()
+      });
+    } else {
+      const worker = state.workers.find(w => w.id === currentCollaboratorId);
+      if (worker) Object.assign(worker, { recordatorio: text, recordatorioPor: author, recordatorioEn: new Date().toISOString() });
+      renderCollaboratorPage();
+    }
+    showToast(text ? "Recordatorio guardado. El colaborador ya lo ve en su panel." : "Recordatorio borrado.", "success");
+  } catch (err) {
+    console.error("[Recordatorio] Error al guardar:", err);
+    showToast("No se pudo guardar el recordatorio: " + err.message, "error");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
 function renderCollaboratorPage() {
   const worker = state.workers.find(w => w.id === currentCollaboratorId);
   if (!worker) return;
@@ -7826,6 +7882,14 @@ function renderCollaboratorPage() {
     worker.banco ? `${worker.banco}${worker.tipoCuenta ? " · " + worker.tipoCuenta : ""}` : null
   ].filter(Boolean);
   elements.collabMeta.innerHTML = metaParts.map(p => `<span>${escapeHtml(p)}</span>`).join("");
+
+  // No pisar lo que la administradora está escribiendo si llega una actualización en vivo
+  if (elements.collabReminderInput && document.activeElement !== elements.collabReminderInput) {
+    elements.collabReminderInput.value = worker.recordatorio || "";
+  }
+  if (elements.collabReminderMeta) {
+    elements.collabReminderMeta.textContent = formatReminderMeta(worker) || "Sin recordatorio todavía.";
+  }
 
   // Horas aprobadas de la semana actual frente a la meta
   const weekKeys = getWeekDays(0).map(toLocalDateKey);
@@ -8223,6 +8287,7 @@ function setupEventListeners() {
   elements.btnReleaseAllTodos?.addEventListener("click", releaseAllTodos);
   document.getElementById("btnCollaboratorBack")?.addEventListener("click", hideProfilePage);
   document.getElementById("btnCollaboratorStatement")?.addEventListener("click", () => currentCollaboratorId && window.openStatementModal(currentCollaboratorId, "bill"));
+  elements.btnSaveCollabReminder?.addEventListener("click", saveCollabReminder);
   document.getElementById("btnCollaboratorLogHours")?.addEventListener("click", () => currentCollaboratorId && openManualEntryModal(currentCollaboratorId));
   document.addEventListener("click", (e) => {
     const newBtn = e.target.closest("[data-todo-new]");

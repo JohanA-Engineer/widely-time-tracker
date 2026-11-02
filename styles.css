@@ -1778,6 +1778,11 @@ body {
 .btn-icon-only { width: 30px; padding: 0; }
 .todo-delete:hover { color: rgb(var(--c-ember)); }
 
+/* --- Recordatorio diario del colaborador --- */
+.reminder-card { border-left: 3px solid var(--text-main); }
+.reminder-head { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); margin-bottom: 8px; }
+.reminder-text { font-size: 14px; line-height: 1.5; color: var(--text-main); white-space: pre-wrap; overflow-wrap: anywhere; margin-bottom: 6px; }
+
 /* --- Tareas por hacer: vista calendario --- */
 .todo-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
 .todo-toolbar .todo-tabs { margin-bottom: 0; }

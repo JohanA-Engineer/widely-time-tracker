@@ -149,14 +149,19 @@ service cloud.firestore {
         isSafeId(workerId) &&
         request.resource.data.ownerUid == request.auth.uid &&
         request.resource.data.get('tarifaHora', 0) == 0 &&
-        request.resource.data.get('tarifaArte', 0) == 0
+        request.resource.data.get('tarifaArte', 0) == 0 &&
+        !request.resource.data.keys().hasAny(['recordatorio', 'recordatorioPor', 'recordatorioEn'])
       );
 
       // Administradores pueden modificar cualquier dato;
-      // Colaboradores vinculados pueden actualizar sus datos bancarios y personales (sin alterar tarifas ni dueño)
-      allow update: if isMasterAdmin() || (
+      // Colaboradores vinculados pueden actualizar sus datos bancarios y personales (sin alterar tarifas ni dueño).
+      // El recordatorio diario lo escriben solo las administradoras; el colaborador solo lo lee.
+      allow update: if (isMasterAdmin() &&
+        request.resource.data.get('recordatorio', '') is string &&
+        request.resource.data.get('recordatorio', '').size() <= 2000) || (
         isAuthenticated() && getUserWorkerId() == workerId &&
-        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['tarifaHora', 'tarifaArte', 'ownerUid']))
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['tarifaHora', 'tarifaArte', 'ownerUid',
+                                                                            'recordatorio', 'recordatorioPor', 'recordatorioEn']))
       );
 
       // ÚNICAMENTE Administradores pueden eliminar trabajadores
