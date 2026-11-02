@@ -504,11 +504,18 @@
           </div>
           <button type="button" class="btn-ds btn-ds-primary btn-ds-sm" data-todo-new><i class="fa-solid fa-plus"></i><span>Agregar tarea</span></button>
         </div>
-        <div class="todo-tabs" data-todo-tabs="worker">
-          <button type="button" class="active" data-todo-filter="pendiente">Por hacer</button>
-          <button type="button" data-todo-filter="hecha">Hechas</button>
+        <div class="todo-toolbar">
+          <div class="todo-tabs" data-todo-tabs="worker">
+            <button type="button" class="active" data-todo-filter="pendiente">Por hacer</button>
+            <button type="button" data-todo-filter="hecha">Hechas</button>
+          </div>
+          <div class="todo-tabs todo-view-toggle" data-todo-view="worker">
+            <button type="button" class="active" data-todo-view-mode="list"><i class="fa-solid fa-list"></i><span>Lista</span></button>
+            <button type="button" data-todo-view-mode="calendar"><i class="fa-regular fa-calendar"></i><span>Calendario</span></button>
+          </div>
         </div>
         <div id="workerTodosList" class="ds-list"></div>
+        <div id="workerTodosCalendar" class="todo-cal hidden"></div>
       </section>
 
       <!-- Vista semanal: horas y costo por día (lunes a domingo) -->
@@ -1346,12 +1353,19 @@
               </div>
               <button type="button" id="btnReleaseAllTodos" class="btn-ds btn-ds-outline btn-ds-sm hidden"><i class="fa-solid fa-paper-plane"></i><span>Liberar todas</span></button>
             </div>
-            <div class="todo-tabs" data-todo-tabs="admin">
-              <button type="button" class="active" data-todo-filter="pendiente">Por hacer</button>
-              <button type="button" data-todo-filter="cola">En cola</button>
-              <button type="button" data-todo-filter="hecha">Hechas</button>
+            <div class="todo-toolbar">
+              <div class="todo-tabs" data-todo-tabs="admin">
+                <button type="button" class="active" data-todo-filter="pendiente">Por hacer</button>
+                <button type="button" data-todo-filter="cola">En cola</button>
+                <button type="button" data-todo-filter="hecha">Hechas</button>
+              </div>
+              <div class="todo-tabs todo-view-toggle" data-todo-view="admin">
+                <button type="button" class="active" data-todo-view-mode="list"><i class="fa-solid fa-list"></i><span>Lista</span></button>
+                <button type="button" data-todo-view-mode="calendar"><i class="fa-regular fa-calendar"></i><span>Calendario</span></button>
+              </div>
             </div>
             <div id="collabTodosList" class="ds-list"></div>
+            <div id="collabTodosCalendar" class="todo-cal hidden"></div>
           </section>
         </div>
 

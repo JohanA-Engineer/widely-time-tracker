@@ -389,8 +389,10 @@ const elements = {
   collabBalance: document.getElementById("collabBalance"),
   collabBalanceCop: document.getElementById("collabBalanceCop"),
   collabTodosList: document.getElementById("collabTodosList"),
+  collabTodosCalendar: document.getElementById("collabTodosCalendar"),
   btnReleaseAllTodos: document.getElementById("btnReleaseAllTodos"),
   workerTodosList: document.getElementById("workerTodosList"),
+  workerTodosCalendar: document.getElementById("workerTodosCalendar"),
   workerTodosCount: document.getElementById("workerTodosCount"),
   todoModal: document.getElementById("todoModal"),
   formTodo: document.getElementById("formTodo"),
@@ -7595,6 +7597,26 @@ let currentCollaboratorId = null;
 const todoFilters = { admin: "pendiente", worker: "pendiente" };
 const TODO_PRIORITY_LABELS = { alta: "Alta", media: "Media", baja: "Baja" };
 const TODO_PRIORITY_ORDER = { alta: 0, media: 1, baja: 2 };
+// Vista Lista o Calendario por pantalla; se recuerda en este navegador
+const todoViews = { admin: readTodoView("admin"), worker: readTodoView("worker") };
+const todoCalendarOffsets = { admin: 0, worker: 0 };
+
+function readTodoView(scope) {
+  try {
+    return localStorage.getItem(`todoView_${scope}`) === "calendar" ? "calendar" : "list";
+  } catch {
+    return "list";
+  }
+}
+
+function saveTodoView(scope, view) {
+  todoViews[scope] = view;
+  try {
+    localStorage.setItem(`todoView_${scope}`, view);
+  } catch {
+    // Sin almacenamiento local: la vista vale solo para esta sesión
+  }
+}
 
 function isAdminSession() {
   return state.userProfile?.rol === "admin" || isMasterAdmin(state.currentUser?.email);
@@ -7669,6 +7691,102 @@ function renderTodoList(container, todos, mode, filter) {
   container.innerHTML = list.map(t => todoRowHtml(t, mode)).join("");
 }
 
+function todoCalendarItemHtml(todo, mode) {
+  const isAdmin = mode === "admin";
+  const done = todo.estado === "hecha";
+  const queued = todo.estado === "cola";
+  const canEdit = isAdmin || (todo.creadoPor === "worker" && todo.creadoPorUid === state.currentUser?.uid);
+  const late = !done && todo.fecha && todo.fecha < getTodayKey();
+  const hours = Number(todo.estimadoHoras) || 0;
+  const id = escapeHtml(todo.id);
+  const title = escapeHtml(todo.titulo || "Tarea");
+  const meta = [todo.cliente, hours > 0 ? `${hours} h` : null].filter(Boolean).map(escapeHtml).join(" · ");
+  // El alto del bloque crece con las horas estimadas
+  const size = hours > 2 ? "todo-cal-lg" : hours > 1 ? "todo-cal-md" : "";
+  const check = queued
+    ? `<span class="todo-check todo-check-disabled" title="Libérala para que el colaborador la vea"><i class="fa-solid fa-hourglass-half"></i></span>`
+    : `<button type="button" class="todo-check ${done ? "is-done" : ""}" data-todo-action="toggle" data-todo-id="${id}" aria-label="${done ? "Marcar como por hacer" : "Marcar como hecha"}">${done ? '<i class="fa-solid fa-check"></i>' : ""}</button>`;
+  const name = canEdit
+    ? `<button type="button" class="todo-cal-title" data-todo-action="edit" data-todo-id="${id}" title="Editar tarea">${title}</button>`
+    : `<span class="todo-cal-title">${title}</span>`;
+  const flags = [
+    queued ? "En cola" : "",
+    late ? `<span class="todo-cal-late">Atrasada</span>` : ""
+  ].filter(Boolean).join(" · ");
+  return `
+    <div class="todo-cal-item todo-cal-${escapeHtml(todo.prioridad || "media")} ${size} ${done ? "is-done" : ""} ${queued ? "is-queued" : ""}">
+      ${check}
+      <div class="todo-cal-body">
+        ${name}
+        ${meta ? `<span class="todo-cal-meta">${meta}</span>` : ""}
+        ${flags ? `<span class="todo-cal-meta">${flags}</span>` : ""}
+      </div>
+    </div>`;
+}
+
+function renderTodoCalendar(container, todos, mode, scope) {
+  if (!container) return;
+  const days = getWeekDays(todoCalendarOffsets[scope]);
+  const keys = days.map(toLocalDateKey);
+  const today = getTodayKey();
+  const pendingHours = (list) => list.filter(t => t.estado !== "hecha").reduce((acc, t) => acc + (Number(t.estimadoHoras) || 0), 0);
+
+  // En la semana actual se ven arriba las que quedaron atrás sin hacer y las que no tienen fecha
+  const carry = todoCalendarOffsets[scope] === 0
+    ? sortTodos(todos.filter(t => t.estado !== "hecha" && (!t.fecha || t.fecha < keys[0])))
+    : [];
+
+  const columns = days.map((day, i) => {
+    const key = keys[i];
+    const items = sortTodos(todos.filter(t => t.fecha === key));
+    const hours = pendingHours(items);
+    return `
+      <div class="todo-cal-day ${key === today ? "is-today" : ""}">
+        <div class="todo-cal-day-head">
+          <span>${WEEK_DAY_LABELS[i]}</span><b>${day.getDate()}</b>
+          ${hours > 0 ? `<em>${formatWeeklyHours(hours)}</em>` : ""}
+        </div>
+        <div class="todo-cal-items">
+          ${items.map(t => todoCalendarItemHtml(t, mode)).join("") || `<span class="todo-cal-empty">Sin tareas</span>`}
+        </div>
+        <button type="button" class="todo-cal-add" data-todo-new data-todo-date="${key}" aria-label="Agregar tarea el ${escapeHtml(formatTodoDate(key))}"><i class="fa-solid fa-plus"></i></button>
+      </div>`;
+  }).join("");
+
+  container.innerHTML = `
+    <div class="todo-cal-head">
+      <span class="todo-cal-range">${getWeekLabel({ start: days[0], end: days[6] })}${todoCalendarOffsets[scope] === 0 ? " · actual" : ""}</span>
+      <div class="weekly-nav">
+        <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-todo-cal-step="-1" aria-label="Semana anterior"><i class="fa-solid fa-chevron-left"></i></button>
+        <button type="button" class="btn-ds btn-ds-ghost btn-ds-sm" data-todo-cal-step="0">Esta semana</button>
+        <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-todo-cal-step="1" aria-label="Semana siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+    ${carry.length ? `
+      <div class="todo-cal-carry">
+        <span class="caption">Atrasadas o sin fecha</span>
+        <div class="todo-cal-carry-items">${carry.map(t => todoCalendarItemHtml(t, mode)).join("")}</div>
+      </div>` : ""}
+    <div class="todo-cal-grid">${columns}</div>`;
+}
+
+function renderTodoView(scope, listEl, calendarEl, todos, mode) {
+  const calendar = todoViews[scope] === "calendar";
+  listEl?.classList.toggle("hidden", calendar);
+  calendarEl?.classList.toggle("hidden", !calendar);
+  // Los filtros Por hacer / Hechas solo aplican a la lista; el calendario muestra todos los estados
+  document.querySelector(`[data-todo-tabs="${scope}"]`)?.classList.toggle("hidden", calendar);
+  document.querySelectorAll(`[data-todo-view="${scope}"] [data-todo-view-mode]`).forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.todoViewMode === todoViews[scope]);
+  });
+  if (calendar) {
+    renderTodoCalendar(calendarEl, todos, mode, scope);
+  } else {
+    renderTodoList(listEl, todos, mode, todoFilters[scope]);
+    syncTodoTabs(scope, todoFilters[scope]);
+  }
+}
+
 function syncTodoTabs(scope, filter) {
   document.querySelectorAll(`[data-todo-tabs="${scope}"] [data-todo-filter]`).forEach(btn => {
     btn.classList.toggle("active", btn.dataset.todoFilter === filter);
@@ -7682,8 +7800,7 @@ function renderTodos() {
   if (!isAdminSession() && elements.workerTodosList) {
     const mine = todos.filter(t => t.trabajadorId === myId);
     if (elements.workerTodosCount) elements.workerTodosCount.textContent = mine.filter(t => t.estado === "pendiente").length;
-    renderTodoList(elements.workerTodosList, mine, "worker", todoFilters.worker);
-    syncTodoTabs("worker", todoFilters.worker);
+    renderTodoView("worker", elements.workerTodosList, elements.workerTodosCalendar, mine, "worker");
   }
   // Administradora: perfil del colaborador abierto
   if (currentCollaboratorId) renderCollaboratorPage();
@@ -7734,8 +7851,7 @@ function renderCollaboratorPage() {
   elements.collabBalance.textContent = `$${balance.toFixed(2)}`;
   elements.collabBalanceCop.textContent = `≈ ${formatCop(balance * getActiveTrmRate())}`;
 
-  renderTodoList(elements.collabTodosList, todos, "admin", todoFilters.admin);
-  syncTodoTabs("admin", todoFilters.admin);
+  renderTodoView("admin", elements.collabTodosList, elements.collabTodosCalendar, todos, "admin");
 }
 
 window.openCollaboratorPage = function(workerId) {
@@ -7747,6 +7863,7 @@ window.openCollaboratorPage = function(workerId) {
   }
   currentCollaboratorId = worker.id;
   todoFilters.admin = "pendiente";
+  todoCalendarOffsets.admin = 0;
   elements.adminPortalView?.classList.add("hidden");
   elements.workerPortalView?.classList.add("hidden");
   elements.profilePageView?.classList.add("hidden");
@@ -7755,7 +7872,7 @@ window.openCollaboratorPage = function(workerId) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-function openTodoModal(todo = null) {
+function openTodoModal(todo = null, presetDate = "") {
   const isAdmin = isAdminSession();
   elements.formTodo?.reset();
   elements.todoId.value = todo?.id || "";
@@ -7774,7 +7891,7 @@ function openTodoModal(todo = null) {
   elements.todoDetail.value = todo?.detalle || "";
   elements.todoClient.value = todo?.cliente || "";
   elements.todoCategory.value = todo?.categoria || "general";
-  elements.todoDate.value = todo?.fecha || "";
+  elements.todoDate.value = todo?.fecha || presetDate || "";
   elements.todoEstimate.value = Number(todo?.estimadoHoras) > 0 ? todo.estimadoHoras : "";
   elements.todoPriority.value = todo?.prioridad || "media";
 
@@ -8108,8 +8225,26 @@ function setupEventListeners() {
   document.getElementById("btnCollaboratorStatement")?.addEventListener("click", () => currentCollaboratorId && window.openStatementModal(currentCollaboratorId, "bill"));
   document.getElementById("btnCollaboratorLogHours")?.addEventListener("click", () => currentCollaboratorId && openManualEntryModal(currentCollaboratorId));
   document.addEventListener("click", (e) => {
-    if (e.target.closest("[data-todo-new]")) {
-      openTodoModal();
+    const newBtn = e.target.closest("[data-todo-new]");
+    if (newBtn) {
+      openTodoModal(null, newBtn.dataset.todoDate || "");
+      return;
+    }
+    const viewBtn = e.target.closest("[data-todo-view-mode]");
+    if (viewBtn) {
+      const scope = viewBtn.closest("[data-todo-view]")?.dataset.todoView;
+      if (scope) {
+        saveTodoView(scope, viewBtn.dataset.todoViewMode);
+        renderTodos();
+      }
+      return;
+    }
+    const calStep = e.target.closest("[data-todo-cal-step]");
+    if (calStep) {
+      const scope = calStep.closest("#collabTodosCalendar") ? "admin" : "worker";
+      const step = Number(calStep.dataset.todoCalStep);
+      todoCalendarOffsets[scope] = step === 0 ? 0 : todoCalendarOffsets[scope] + step;
+      renderTodos();
       return;
     }
     const actionBtn = e.target.closest("[data-todo-action]");

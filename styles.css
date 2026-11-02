@@ -1777,6 +1777,47 @@ body {
 .todo-late { background: rgb(var(--c-ember) / 0.1); color: rgb(var(--c-ember)); }
 .btn-icon-only { width: 30px; padding: 0; }
 .todo-delete:hover { color: rgb(var(--c-ember)); }
+
+/* --- Tareas por hacer: vista calendario --- */
+.todo-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.todo-toolbar .todo-tabs { margin-bottom: 0; }
+.todo-view-toggle { margin-left: auto; }
+.todo-view-toggle button { display: inline-flex; align-items: center; gap: 6px; }
+.todo-cal-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.todo-cal-range { font-size: 13px; font-weight: 600; color: var(--text-main); }
+.todo-cal-carry { padding: 12px; border-radius: 10px; background: var(--bg-subtle); margin-bottom: 12px; }
+.todo-cal-carry-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-top: 8px; }
+.todo-cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.todo-cal-day { display: flex; flex-direction: column; gap: 8px; min-height: 180px; padding: 8px; border-radius: 10px; border: 1px solid var(--border-soft); }
+.todo-cal-day.is-today { background: var(--bg-subtle); border-color: var(--text-main); }
+.todo-cal-day-head { display: flex; align-items: baseline; gap: 6px; font-size: 12px; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-secondary); }
+.todo-cal-day-head b { font-size: 16px; letter-spacing: 0; color: var(--text-main); font-weight: 600; }
+.todo-cal-day-head em { margin-left: auto; font-style: normal; letter-spacing: 0; text-transform: none; }
+.todo-cal-items { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.todo-cal-empty { font-size: 12px; color: var(--text-secondary); }
+.todo-cal-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px; border-radius: 10px; background: var(--bg-card); border: 1px solid var(--border-soft); border-left-width: 3px; min-height: 52px; }
+.todo-cal-item.todo-cal-md { min-height: 76px; }
+.todo-cal-item.todo-cal-lg { min-height: 104px; }
+.todo-cal-alta { border-left-color: var(--text-main); }
+.todo-cal-media { border-left-color: var(--text-secondary); }
+.todo-cal-baja { border-left-color: var(--border-soft); }
+.todo-cal-item.is-queued { border-style: dashed; border-left-style: solid; }
+.todo-cal-item.is-done { opacity: 0.6; }
+.todo-cal-item.is-done .todo-cal-title { text-decoration: line-through; }
+.todo-cal-item .todo-check { width: 18px; height: 18px; font-size: 10px; flex-shrink: 0; }
+.todo-cal-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.todo-cal-title { background: none; border: 0; padding: 0; font: inherit; font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--text-main); text-align: left; overflow-wrap: anywhere; }
+button.todo-cal-title { cursor: pointer; }
+button.todo-cal-title:hover { text-decoration: underline; }
+.todo-cal-meta { font-size: 11px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.todo-cal-late { color: rgb(var(--c-ember)); }
+.todo-cal-add { align-self: flex-start; width: 28px; height: 28px; border-radius: 18px; border: 1px dashed var(--border-soft); background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 11px; }
+.todo-cal-add:hover { color: var(--text-main); border-color: var(--text-main); }
+@media (max-width: 900px) {
+  .todo-cal-grid { grid-template-columns: 1fr; }
+  .todo-cal-day { min-height: 0; }
+  .todo-cal-day .todo-cal-items { flex: none; }
+}
 .collab-head { display: flex; align-items: center; gap: 16px; }
 .collab-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: var(--on-primary); display: grid; place-items: center; font-size: 20px; font-weight: 600; flex-shrink: 0; }
 .collab-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; font-size: 13px; color: var(--text-secondary); }
