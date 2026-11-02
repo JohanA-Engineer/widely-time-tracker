@@ -1754,6 +1754,36 @@ body {
 #authScreen .content-card { padding: 28px; box-shadow: var(--shadow-card); }
 .task-card-note { display: block; font-size: 12px; color: rgb(var(--c-ember)); margin-top: 2px; }
 
+/* --- Tareas por hacer y perfil del colaborador --- */
+.todo-tabs { display: inline-flex; gap: 4px; padding: 3px; border-radius: var(--radius-control); background: var(--bg-subtle); margin-bottom: 12px; }
+.todo-tabs button { border: 0; background: transparent; padding: 5px 12px; border-radius: 15px; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; }
+.todo-tabs button.active { background: var(--bg-card); color: var(--text-main); box-shadow: var(--shadow-card); }
+.todo-row { align-items: flex-start; }
+.todo-row.is-done .ds-grow b { text-decoration: line-through; color: var(--text-secondary); }
+.todo-check {
+  width: 22px; height: 22px; flex-shrink: 0; margin-top: 1px;
+  border-radius: 7px; border: 1.5px solid rgb(var(--c-faint)); background: var(--bg-card);
+  display: grid; place-items: center; font-size: 11px; color: var(--on-primary); cursor: pointer;
+}
+.todo-check:hover { border-color: var(--text-main); }
+.todo-check.is-done { background: var(--primary); border-color: var(--primary); }
+.todo-check-disabled { cursor: default; color: var(--text-secondary); border-style: dashed; }
+.todo-detail { font-size: 13px; color: var(--text-secondary); margin-top: 4px; white-space: pre-wrap; }
+.todo-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.todo-badges:empty { display: none; }
+.todo-badge { display: inline-flex; align-items: center; padding: 1px 9px; border-radius: var(--radius-control); font-size: 11px; font-weight: 500; background: var(--bg-subtle); color: var(--text-main); }
+.todo-priority-alta { background: var(--primary); color: var(--on-primary); }
+.todo-priority-baja { background: transparent; border: 1px solid var(--border-soft); color: var(--text-secondary); }
+.todo-late { background: rgb(var(--c-ember) / 0.1); color: rgb(var(--c-ember)); }
+.btn-icon-only { width: 30px; padding: 0; }
+.todo-delete:hover { color: rgb(var(--c-ember)); }
+.collab-head { display: flex; align-items: center; gap: 16px; }
+.collab-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: var(--on-primary); display: grid; place-items: center; font-size: 20px; font-weight: 600; flex-shrink: 0; }
+.collab-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; font-size: 13px; color: var(--text-secondary); }
+.collab-stats { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+.collab-link { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: var(--text-main); cursor: pointer; text-align: left; }
+.collab-link:hover { text-decoration: underline; }
+
 /* --- Vista semanal --- */
 .weekly-nav { display: flex; gap: 6px; }
 .weekly-table-wrap { overflow-x: auto; }
@@ -1903,6 +1933,9 @@ body {
   .approval-row .ds-actions { flex-basis: 100%; }
   .approval-row .ds-actions .btn-ds { flex: 1; height: 36px; }
   .approval-row .btn-ds-outline { background: var(--bg-card); }
+  .collab-stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .collab-head { align-items: flex-start; }
+  .todo-row .ds-actions { flex-shrink: 0; }
   .liq-table-wrap, .desktop-table, .weekly-table-wrap { display: none; }
   .liq-tiles, .mobile-cards, .weekly-cards { display: block; }
   .task-card {

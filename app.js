@@ -177,6 +177,7 @@ let paymentsUnsubscribe = null;
 let upworkConfigUnsubscribe = null;
 let clientsUnsubscribe = null;
 let usersUnsubscribe = null;
+let todosUnsubscribe = null;
 let adminsConfigUnsubscribe = null;
 
 /* ============================================================================
@@ -376,6 +377,36 @@ const elements = {
   statementTitleBadgeText: document.getElementById("statementTitleBadgeText"),
   btnShareWhatsAppStatement: document.getElementById("btnShareWhatsAppStatement"),
   btnAgencyBill: document.getElementById("btnAgencyBill"),
+  collaboratorPageView: document.getElementById("collaboratorPageView"),
+  collabAvatar: document.getElementById("collabAvatar"),
+  collabName: document.getElementById("collabName"),
+  collabMeta: document.getElementById("collabMeta"),
+  collabWeekHours: document.getElementById("collabWeekHours"),
+  collabWeekGoal: document.getElementById("collabWeekGoal"),
+  collabTodoCount: document.getElementById("collabTodoCount"),
+  collabTodoSub: document.getElementById("collabTodoSub"),
+  collabQueueCount: document.getElementById("collabQueueCount"),
+  collabBalance: document.getElementById("collabBalance"),
+  collabBalanceCop: document.getElementById("collabBalanceCop"),
+  collabTodosList: document.getElementById("collabTodosList"),
+  btnReleaseAllTodos: document.getElementById("btnReleaseAllTodos"),
+  workerTodosList: document.getElementById("workerTodosList"),
+  workerTodosCount: document.getElementById("workerTodosCount"),
+  todoModal: document.getElementById("todoModal"),
+  formTodo: document.getElementById("formTodo"),
+  todoModalTitle: document.getElementById("todoModalTitle"),
+  todoId: document.getElementById("todoId"),
+  todoWorkerField: document.getElementById("todoWorkerField"),
+  todoWorker: document.getElementById("todoWorker"),
+  todoTitle: document.getElementById("todoTitle"),
+  todoDetail: document.getElementById("todoDetail"),
+  todoClient: document.getElementById("todoClient"),
+  todoCategory: document.getElementById("todoCategory"),
+  todoDate: document.getElementById("todoDate"),
+  todoEstimate: document.getElementById("todoEstimate"),
+  todoPriority: document.getElementById("todoPriority"),
+  todoQueueField: document.getElementById("todoQueueField"),
+  todoQueue: document.getElementById("todoQueue"),
   agencyWeekPicker: document.getElementById("agencyWeekPicker"),
   agencyPendingNote: document.getElementById("agencyPendingNote"),
   agencyConsecutive: document.getElementById("agencyConsecutive"),
@@ -1354,6 +1385,8 @@ function setupFirestoreListeners(profile) {
     if (clientsUnsubscribe) { clientsUnsubscribe(); clientsUnsubscribe = null; }
     if (usersUnsubscribe) { usersUnsubscribe(); usersUnsubscribe = null; }
     if (adminsConfigUnsubscribe) { adminsConfigUnsubscribe(); adminsConfigUnsubscribe = null; }
+    if (todosUnsubscribe) { todosUnsubscribe(); todosUnsubscribe = null; }
+    state.todos = [];
     state.tasks = [];
     state.payments = [];
     state.users = [];
@@ -1548,6 +1581,28 @@ function setupFirestoreListeners(profile) {
     }, (err) => {
       console.info("[Firestore] Configuración de admins inicial:", err.message);
     });
+  }
+
+  // 8. TAREAS POR HACER: la administradora ve todas; el colaborador solo las suyas ya liberadas
+  if (todosUnsubscribe) { todosUnsubscribe(); todosUnsubscribe = null; }
+  let todosQuery = null;
+  if (isAdmin) {
+    todosQuery = query(collection(db, "pendientes"));
+  } else if (profile.trabajadorId) {
+    todosQuery = query(collection(db, "pendientes"),
+      where("trabajadorId", "==", profile.trabajadorId),
+      where("estado", "in", ["pendiente", "hecha"]));
+  }
+  if (todosQuery) {
+    todosUnsubscribe = onSnapshot(todosQuery, (snapshot) => {
+      state.todos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderTodos();
+    }, (error) => {
+      console.warn("[Firestore] Aviso en sincronización de tareas por hacer:", error.message);
+    });
+  } else {
+    state.todos = [];
+    renderTodos();
   }
 
   // 7. USUARIOS REGISTRADOS: Acceso total para Administradores (Requisito 3)
@@ -2625,6 +2680,7 @@ function showProfilePage() {
   // 1. Ocultar vistas de dashboard/portales
   elements.adminPortalView?.classList.add("hidden");
   elements.workerPortalView?.classList.add("hidden");
+  elements.collaboratorPageView?.classList.add("hidden");
 
   // 2. Mostrar la vista de página de perfil
   elements.profilePageView?.classList.remove("hidden");
@@ -2647,6 +2703,8 @@ function showProfilePage() {
 
 function hideProfilePage() {
   elements.profilePageView?.classList.add("hidden");
+  elements.collaboratorPageView?.classList.add("hidden");
+  currentCollaboratorId = null;
 
   const isWorker = state.userProfile?.rol === "worker";
   if (isWorker) {
@@ -3950,7 +4008,7 @@ function updateFinancialDashboard() {
       <div class="liq-tile">
         <div class="liq-head">
           <div class="ds-avatar">${escapeHtml(initials || "C")}</div>
-          <div class="ds-grow"><b>${escapeHtml(worker.nombre)}</b><span>${tileSub}</span></div>
+          <div class="ds-grow">${isWorker ? `<b>${escapeHtml(worker.nombre)}</b>` : `<button type="button" class="collab-link" onclick="window.openCollaboratorPage(${jsArg(worker.id)})">${escapeHtml(worker.nombre)}</button>`}<span>${tileSub}</span></div>
           ${balanceLabel}
         </div>
         <div class="liq-kv">
@@ -3973,7 +4031,7 @@ function updateFinancialDashboard() {
               ${worker.nombre.charAt(0).toUpperCase()}
             </div>
             <div>
-              <span>${escapeHtml(worker.nombre)}</span>
+              ${isWorker ? `<span>${escapeHtml(worker.nombre)}</span>` : `<button type="button" class="collab-link" onclick="window.openCollaboratorPage(${jsArg(worker.id)})" title="Ver perfil y tareas">${escapeHtml(worker.nombre)}</button>`}
               ${worker.email ? `<span class="text-[10px] text-mid font-normal block">${escapeHtml(worker.email)}</span>` : ''}
             </div>
           </div>
@@ -7529,6 +7587,320 @@ function prepareDocumentForPrint() {
   });
 }
 
+/* ============================================================================
+   TAREAS POR HACER (colección "pendientes") Y PERFIL DEL COLABORADOR
+   Estados: "cola" (planeada por Lina, el colaborador aún no la ve) → "pendiente" → "hecha".
+   ============================================================================ */
+let currentCollaboratorId = null;
+const todoFilters = { admin: "pendiente", worker: "pendiente" };
+const TODO_PRIORITY_LABELS = { alta: "Alta", media: "Media", baja: "Baja" };
+const TODO_PRIORITY_ORDER = { alta: 0, media: 1, baja: 2 };
+
+function isAdminSession() {
+  return state.userProfile?.rol === "admin" || isMasterAdmin(state.currentUser?.email);
+}
+
+function sortTodos(list) {
+  return [...list].sort((a, b) =>
+    (a.fecha || "9999").localeCompare(b.fecha || "9999") ||
+    (TODO_PRIORITY_ORDER[a.prioridad] ?? 1) - (TODO_PRIORITY_ORDER[b.prioridad] ?? 1));
+}
+
+function formatTodoDate(key) {
+  if (!key) return "";
+  const today = getTodayKey();
+  if (key === today) return "Hoy";
+  const d = new Date(key + "T00:00:00");
+  return d.toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" });
+}
+
+function todoRowHtml(todo, mode) {
+  const isAdmin = mode === "admin";
+  const done = todo.estado === "hecha";
+  const queued = todo.estado === "cola";
+  const ownedByWorker = todo.creadoPor === "worker" && todo.creadoPorUid === state.currentUser?.uid;
+  const late = !done && todo.fecha && todo.fecha < getTodayKey();
+  const meta = [
+    todo.cliente,
+    todo.fecha ? formatTodoDate(todo.fecha) : null,
+    Number(todo.estimadoHoras) > 0 ? `${Number(todo.estimadoHoras)} h` : null
+  ].filter(Boolean).map(escapeHtml).join(" · ");
+  const badges = [
+    `<span class="todo-badge todo-priority-${escapeHtml(todo.prioridad || "media")}">${TODO_PRIORITY_LABELS[todo.prioridad] || "Media"}</span>`,
+    queued ? `<span class="status-badge status-pending">En cola</span>` : "",
+    late ? `<span class="todo-badge todo-late">Atrasada</span>` : "",
+    isAdmin && todo.creadoPor === "worker" ? `<span class="todo-badge">Agregada por el colaborador</span>` : "",
+    !isAdmin && todo.creadoPor !== "worker" ? `<span class="todo-badge">Asignada por Lina</span>` : ""
+  ].join("");
+
+  const canEdit = isAdmin || ownedByWorker;
+  const actions = [
+    isAdmin && queued ? `<button type="button" class="btn-ds btn-ds-primary btn-ds-sm" data-todo-action="release" data-todo-id="${escapeHtml(todo.id)}"><i class="fa-solid fa-paper-plane"></i><span>Liberar</span></button>` : "",
+    canEdit ? `<button type="button" class="btn-ds btn-ds-ghost btn-ds-sm btn-icon-only" data-todo-action="edit" data-todo-id="${escapeHtml(todo.id)}" aria-label="Editar tarea"><i class="fa-solid fa-pen"></i></button>` : "",
+    canEdit ? `<button type="button" class="btn-ds btn-ds-ghost btn-ds-sm btn-icon-only todo-delete" data-todo-action="delete" data-todo-id="${escapeHtml(todo.id)}" aria-label="Eliminar tarea"><i class="fa-regular fa-trash-can"></i></button>` : ""
+  ].join("");
+
+  const check = queued
+    ? `<span class="todo-check todo-check-disabled" title="Libérala para que el colaborador la vea"><i class="fa-solid fa-hourglass-half"></i></span>`
+    : `<button type="button" class="todo-check ${done ? "is-done" : ""}" data-todo-action="toggle" data-todo-id="${escapeHtml(todo.id)}" aria-label="${done ? "Marcar como por hacer" : "Marcar como hecha"}">${done ? '<i class="fa-solid fa-check"></i>' : ""}</button>`;
+
+  return `
+    <div class="ds-row todo-row ${done ? "is-done" : ""}">
+      ${check}
+      <div class="ds-grow">
+        <b>${escapeHtml(todo.titulo || "Tarea")}</b>
+        ${meta ? `<span>${meta}</span>` : ""}
+        ${todo.detalle ? `<p class="todo-detail">${escapeHtml(todo.detalle)}</p>` : ""}
+        <div class="todo-badges">${badges}</div>
+      </div>
+      <div class="ds-actions">${actions}</div>
+    </div>`;
+}
+
+function renderTodoList(container, todos, mode, filter) {
+  if (!container) return;
+  const list = sortTodos(todos.filter(t => (t.estado || "pendiente") === filter));
+  if (filter === "hecha") list.reverse();
+  if (list.length === 0) {
+    const empty = { pendiente: "No hay tareas por hacer.", cola: "No hay tareas en cola.", hecha: "Aún no hay tareas hechas." };
+    container.innerHTML = `<div class="empty-note">${empty[filter] || "Sin tareas."}</div>`;
+    return;
+  }
+  container.innerHTML = list.map(t => todoRowHtml(t, mode)).join("");
+}
+
+function syncTodoTabs(scope, filter) {
+  document.querySelectorAll(`[data-todo-tabs="${scope}"] [data-todo-filter]`).forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.todoFilter === filter);
+  });
+}
+
+function renderTodos() {
+  const todos = state.todos || [];
+  // Colaborador: su propia lista
+  const myId = state.userProfile?.trabajadorId;
+  if (!isAdminSession() && elements.workerTodosList) {
+    const mine = todos.filter(t => t.trabajadorId === myId);
+    if (elements.workerTodosCount) elements.workerTodosCount.textContent = mine.filter(t => t.estado === "pendiente").length;
+    renderTodoList(elements.workerTodosList, mine, "worker", todoFilters.worker);
+    syncTodoTabs("worker", todoFilters.worker);
+  }
+  // Administradora: perfil del colaborador abierto
+  if (currentCollaboratorId) renderCollaboratorPage();
+}
+
+function renderCollaboratorPage() {
+  const worker = state.workers.find(w => w.id === currentCollaboratorId);
+  if (!worker) return;
+  const todos = (state.todos || []).filter(t => t.trabajadorId === worker.id);
+
+  const initials = (worker.nombre || "C").split(/\s+/).filter(Boolean).slice(0, 2).map(p => p.charAt(0).toUpperCase()).join("");
+  elements.collabAvatar.textContent = initials || "C";
+  elements.collabName.textContent = worker.nombre || "Colaborador";
+  const rates = [
+    Number(worker.tarifaHora) > 0 ? `$${Number(worker.tarifaHora).toFixed(2)}/h` : null,
+    Number(worker.tarifaArte) > 0 ? `$${Number(worker.tarifaArte).toFixed(2)}/arte` : null
+  ].filter(Boolean).join(" · ") || "Sin tarifa asignada";
+  const metaParts = [
+    rates,
+    worker.email,
+    worker.telefono,
+    worker.llave ? `Llave ${worker.tipoLlave ? worker.tipoLlave.toLowerCase() + " " : ""}${worker.llave}` : null,
+    worker.banco ? `${worker.banco}${worker.tipoCuenta ? " · " + worker.tipoCuenta : ""}` : null
+  ].filter(Boolean);
+  elements.collabMeta.innerHTML = metaParts.map(p => `<span>${escapeHtml(p)}</span>`).join("");
+
+  // Horas aprobadas de la semana actual frente a la meta
+  const weekKeys = getWeekDays(0).map(toLocalDateKey);
+  const weekHours = state.tasks
+    .filter(t => t.trabajadorId === worker.id && weekKeys.includes(t.fecha) && isTaskApproved(t))
+    .reduce((acc, t) => acc + (Number(t.horas) || 0), 0);
+  elements.collabWeekHours.textContent = `${weekHours.toFixed(1)} h`;
+  const goal = Number(worker.metaSemanal) || 0;
+  elements.collabWeekGoal.textContent = goal > 0 ? `Meta semanal: ${goal} h` : "Semana en curso";
+
+  const pending = todos.filter(t => t.estado === "pendiente");
+  const queued = todos.filter(t => t.estado === "cola");
+  elements.collabTodoCount.textContent = pending.length;
+  const estimate = pending.reduce((acc, t) => acc + (Number(t.estimadoHoras) || 0), 0);
+  elements.collabTodoSub.textContent = estimate > 0 ? `≈ ${estimate.toFixed(1)} h estimadas` : "Tareas liberadas";
+  elements.collabQueueCount.textContent = queued.length;
+  elements.btnReleaseAllTodos?.classList.toggle("hidden", queued.length === 0);
+
+  // Saldo histórico: lo causado (aprobado) menos lo pagado
+  const earned = state.tasks.filter(t => t.trabajadorId === worker.id && isTaskApproved(t)).reduce((a, t) => a + (Number(t.costoTotal) || 0), 0);
+  const paid = state.payments.filter(p => p.trabajadorId === worker.id).reduce((a, p) => a + (Number(p.monto) || 0), 0);
+  const balance = earned - paid;
+  elements.collabBalance.textContent = `$${balance.toFixed(2)}`;
+  elements.collabBalanceCop.textContent = `≈ ${formatCop(balance * getActiveTrmRate())}`;
+
+  renderTodoList(elements.collabTodosList, todos, "admin", todoFilters.admin);
+  syncTodoTabs("admin", todoFilters.admin);
+}
+
+window.openCollaboratorPage = function(workerId) {
+  if (!isAdminSession()) return;
+  const worker = state.workers.find(w => w.id === workerId);
+  if (!worker) {
+    showToast("Colaborador no encontrado.", "error");
+    return;
+  }
+  currentCollaboratorId = worker.id;
+  todoFilters.admin = "pendiente";
+  elements.adminPortalView?.classList.add("hidden");
+  elements.workerPortalView?.classList.add("hidden");
+  elements.profilePageView?.classList.add("hidden");
+  elements.collaboratorPageView?.classList.remove("hidden");
+  renderCollaboratorPage();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+function openTodoModal(todo = null) {
+  const isAdmin = isAdminSession();
+  elements.formTodo?.reset();
+  elements.todoId.value = todo?.id || "";
+  elements.todoModalTitle.textContent = todo ? "Editar tarea" : "Nueva tarea";
+
+  // Colaborador destino: la administradora elige; el colaborador siempre es él mismo
+  elements.todoWorkerField.classList.toggle("hidden", !isAdmin);
+  elements.todoQueueField.classList.toggle("hidden", !isAdmin || (todo && todo.estado !== "cola"));
+  if (isAdmin) {
+    elements.todoWorker.innerHTML = state.workers.map(w => `<option value="${escapeHtml(w.id)}">${escapeHtml(w.nombre)}</option>`).join("");
+    elements.todoWorker.value = todo?.trabajadorId || currentCollaboratorId || state.workers[0]?.id || "";
+    elements.todoQueue.checked = todo ? todo.estado === "cola" : true;
+  }
+
+  elements.todoTitle.value = todo?.titulo || "";
+  elements.todoDetail.value = todo?.detalle || "";
+  elements.todoClient.value = todo?.cliente || "";
+  elements.todoCategory.value = todo?.categoria || "general";
+  elements.todoDate.value = todo?.fecha || "";
+  elements.todoEstimate.value = Number(todo?.estimadoHoras) > 0 ? todo.estimadoHoras : "";
+  elements.todoPriority.value = todo?.prioridad || "media";
+
+  elements.todoModal.classList.remove("hidden");
+  elements.todoModal.classList.add("flex");
+  setTimeout(() => elements.todoTitle.focus(), 50);
+}
+
+function closeTodoModal() {
+  elements.todoModal?.classList.add("hidden");
+  elements.todoModal?.classList.remove("flex");
+}
+
+async function handleSaveTodo(e) {
+  e.preventDefault();
+  const isAdmin = isAdminSession();
+  const id = elements.todoId.value;
+  const existing = id ? state.todos.find(t => t.id === id) : null;
+  const titulo = elements.todoTitle.value.trim();
+  const estimate = parseFloat(elements.todoEstimate.value);
+  if (!titulo) {
+    showToast("Escribe la tarea.", "warning");
+    return;
+  }
+  if (!isNaN(estimate) && (estimate < 0 || estimate > 24)) {
+    showToast("El tiempo estimado debe estar entre 0 y 24 horas.", "warning");
+    return;
+  }
+
+  const trabajadorId = isAdmin ? elements.todoWorker.value : state.userProfile?.trabajadorId;
+  if (!trabajadorId) {
+    showToast(isAdmin ? "Elige el colaborador." : "Tu cuenta aún no está vinculada a una ficha de colaborador.", "warning");
+    return;
+  }
+
+  const data = {
+    trabajadorId,
+    titulo: titulo.slice(0, 160),
+    detalle: elements.todoDetail.value.trim().slice(0, 1000),
+    cliente: elements.todoClient.value.trim().slice(0, 120),
+    categoria: elements.todoCategory.value || "general",
+    fecha: elements.todoDate.value || "",
+    estimadoHoras: isNaN(estimate) ? 0 : Number(estimate.toFixed(2)),
+    prioridad: elements.todoPriority.value || "media",
+    actualizadoEn: serverTimestamp()
+  };
+
+  try {
+    if (!db) throw new Error("Sin conexión con Firebase");
+    if (existing) {
+      if (isAdmin && existing.estado === "cola") data.estado = elements.todoQueue.checked ? "cola" : "pendiente";
+      await updateDoc(doc(db, "pendientes", existing.id), data);
+      showToast("Tarea actualizada.", "success");
+    } else {
+      Object.assign(data, {
+        estado: isAdmin && elements.todoQueue.checked ? "cola" : "pendiente",
+        creadoPor: isAdmin ? "admin" : "worker",
+        creadoPorUid: state.currentUser?.uid || "",
+        creadoEn: serverTimestamp()
+      });
+      await addDoc(collection(db, "pendientes"), data);
+      showToast(data.estado === "cola" ? "Tarea guardada en cola. Libérala cuando toque." : "Tarea agregada.", "success");
+    }
+    closeTodoModal();
+  } catch (err) {
+    console.error("[Tareas] Error al guardar:", err);
+    showToast("No se pudo guardar la tarea: " + err.message, "error");
+  }
+}
+
+// Al marcar hecha, el colaborador registra sus horas con los datos de la tarea ya puestos
+function openManualEntryFromTodo(todo) {
+  openManualEntryModal(todo.trabajadorId);
+  if (elements.manualClientProject) elements.manualClientProject.value = todo.cliente || "";
+  if (elements.manualCategory) elements.manualCategory.value = todo.categoria || "general";
+  if (elements.manualDescription) elements.manualDescription.value = todo.titulo || "";
+  if (elements.manualDate) elements.manualDate.value = getTodayKey();
+  if (elements.manualHours && Number(todo.estimadoHoras) > 0) elements.manualHours.value = todo.estimadoHoras;
+  updateManualCost?.();
+}
+
+async function handleTodoAction(action, todoId) {
+  const todo = (state.todos || []).find(t => t.id === todoId);
+  if (!todo || !db) return;
+  try {
+    if (action === "toggle") {
+      const nowDone = todo.estado !== "hecha";
+      await updateDoc(doc(db, "pendientes", todo.id), {
+        estado: nowDone ? "hecha" : "pendiente",
+        hechaEn: nowDone ? serverTimestamp() : null,
+        actualizadoEn: serverTimestamp()
+      });
+      if (nowDone && !isAdminSession()) {
+        showToast("¡Tarea hecha! Registra el tiempo que te tomó.", "success");
+        openManualEntryFromTodo(todo);
+      }
+    } else if (action === "release") {
+      await updateDoc(doc(db, "pendientes", todo.id), { estado: "pendiente", actualizadoEn: serverTimestamp() });
+      showToast("Tarea liberada: el colaborador ya la ve.", "success");
+    } else if (action === "edit") {
+      openTodoModal(todo);
+    } else if (action === "delete") {
+      if (!confirm(`¿Eliminar la tarea "${todo.titulo}"?`)) return;
+      await deleteDoc(doc(db, "pendientes", todo.id));
+      showToast("Tarea eliminada.", "success");
+    }
+  } catch (err) {
+    console.error("[Tareas] Error:", err);
+    showToast("No se pudo actualizar la tarea: " + err.message, "error");
+  }
+}
+
+async function releaseAllTodos() {
+  if (!db || !currentCollaboratorId) return;
+  const queued = (state.todos || []).filter(t => t.trabajadorId === currentCollaboratorId && t.estado === "cola");
+  if (queued.length === 0) return;
+  try {
+    await Promise.all(queued.map(t =>
+      updateDoc(doc(db, "pendientes", t.id), { estado: "pendiente", actualizadoEn: serverTimestamp() })));
+    showToast(`${queued.length} tarea${queued.length === 1 ? "" : "s"} liberada${queued.length === 1 ? "" : "s"}.`, "success");
+  } catch (err) {
+    console.error("[Tareas] Error al liberar:", err);
+    showToast("No se pudieron liberar: " + err.message, "error");
+  }
+}
+
 function closeStatementModal() {
   elements.statementModal?.classList.add("hidden");
   elements.statementModal?.classList.remove("flex");
@@ -7726,6 +8098,34 @@ function setupEventListeners() {
   });
 
   elements.btnAgencyBill?.addEventListener("click", () => window.openAgencyBillModal(weeklyOffset));
+
+  // Tareas por hacer
+  elements.formTodo?.addEventListener("submit", handleSaveTodo);
+  document.getElementById("btnCloseTodoModal")?.addEventListener("click", closeTodoModal);
+  document.getElementById("btnCancelTodo")?.addEventListener("click", closeTodoModal);
+  elements.btnReleaseAllTodos?.addEventListener("click", releaseAllTodos);
+  document.getElementById("btnCollaboratorBack")?.addEventListener("click", hideProfilePage);
+  document.getElementById("btnCollaboratorStatement")?.addEventListener("click", () => currentCollaboratorId && window.openStatementModal(currentCollaboratorId, "bill"));
+  document.getElementById("btnCollaboratorLogHours")?.addEventListener("click", () => currentCollaboratorId && openManualEntryModal(currentCollaboratorId));
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-todo-new]")) {
+      openTodoModal();
+      return;
+    }
+    const actionBtn = e.target.closest("[data-todo-action]");
+    if (actionBtn) {
+      handleTodoAction(actionBtn.dataset.todoAction, actionBtn.dataset.todoId);
+      return;
+    }
+    const tab = e.target.closest("[data-todo-filter]");
+    if (tab) {
+      const scope = tab.closest("[data-todo-tabs]")?.dataset.todoTabs;
+      if (scope) {
+        todoFilters[scope] = tab.dataset.todoFilter;
+        renderTodos();
+      }
+    }
+  });
   elements.agencyShowCoBank?.addEventListener("change", updateAgencyBankBlocks);
   elements.agencyShowUsBank?.addEventListener("change", updateAgencyBankBlocks);
   elements.btnSaveUsBank?.addEventListener("click", saveUsBankDetails);

@@ -495,6 +495,22 @@
         </div>
       </div>
 
+      <!-- Mis tareas por hacer (colaborador) -->
+      <section id="workerTodosSection" class="section-anchor content-card">
+        <div class="card-head">
+          <div>
+            <h3 class="card-title">Mis tareas por hacer <span id="workerTodosCount" class="badge-solid ml-1">0</span></h3>
+            <p class="card-subtitle">Lo que Lina te asigna y lo que tú agregues. Al marcar una como hecha, registras sus horas.</p>
+          </div>
+          <button type="button" class="btn-ds btn-ds-primary btn-ds-sm" data-todo-new><i class="fa-solid fa-plus"></i><span>Agregar tarea</span></button>
+        </div>
+        <div class="todo-tabs" data-todo-tabs="worker">
+          <button type="button" class="active" data-todo-filter="pendiente">Por hacer</button>
+          <button type="button" data-todo-filter="hecha">Hechas</button>
+        </div>
+        <div id="workerTodosList" class="ds-list"></div>
+      </section>
+
       <!-- Vista semanal: horas y costo por día (lunes a domingo) -->
       <section id="workerWeeklySection" class="section-anchor content-card" data-weekly>
         <div class="card-head">
@@ -1291,6 +1307,54 @@
         <!-- =========================================================================
              VISTA 3: MI PERFIL (PÁGINA COMPLETA INTEGRADA SAAS PRO)
              ========================================================================= -->
+        <!-- =========================================================================
+             PERFIL DEL COLABORADOR (administradora): datos, indicadores y tareas por hacer
+             ========================================================================= -->
+        <div id="collaboratorPageView" class="space-y-6 hidden">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <button type="button" id="btnCollaboratorBack" class="btn-ds btn-ds-ghost btn-ds-sm"><i class="fa-solid fa-arrow-left"></i><span>Volver al dashboard</span></button>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button type="button" id="btnCollaboratorStatement" class="btn-ds btn-ds-outline btn-ds-sm"><i class="fa-solid fa-file-invoice-dollar"></i><span>Cuenta de cobro</span></button>
+              <button type="button" id="btnCollaboratorLogHours" class="btn-ds btn-ds-outline btn-ds-sm"><i class="fa-solid fa-clock-rotate-left"></i><span>Registrar horas</span></button>
+              <button type="button" class="btn-ds btn-ds-primary btn-ds-sm" data-todo-new><i class="fa-solid fa-plus"></i><span>Nueva tarea</span></button>
+            </div>
+          </div>
+
+          <!-- Encabezado del colaborador -->
+          <section class="content-card collab-head">
+            <div id="collabAvatar" class="collab-avatar">C</div>
+            <div class="min-w-0 flex-1">
+              <h1 id="collabName" class="page-title">Colaborador</h1>
+              <div id="collabMeta" class="collab-meta"></div>
+            </div>
+          </section>
+
+          <!-- Indicadores -->
+          <section class="stat-grid collab-stats">
+            <div class="kpi-card"><span class="caption">Horas esta semana</span><span id="collabWeekHours" class="stat-value tabular-nums">0.0 h</span><span id="collabWeekGoal" class="stat-sub">Meta semanal</span></div>
+            <div class="kpi-card"><span class="caption">Por hacer</span><span id="collabTodoCount" class="stat-value tabular-nums">0</span><span id="collabTodoSub" class="stat-sub">Tareas liberadas</span></div>
+            <div class="kpi-card"><span class="caption">En cola</span><span id="collabQueueCount" class="stat-value tabular-nums">0</span><span class="stat-sub">Aún no las ve</span></div>
+            <div class="kpi-card"><span class="caption">Saldo por pagar</span><span id="collabBalance" class="stat-value tabular-nums">$0.00</span><span id="collabBalanceCop" class="stat-sub tabular-nums">≈ $0 COP</span></div>
+          </section>
+
+          <!-- Tareas por hacer -->
+          <section class="content-card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Tareas por hacer</h3>
+                <p class="card-subtitle">Las tareas en cola no las ve el colaborador hasta que las liberes.</p>
+              </div>
+              <button type="button" id="btnReleaseAllTodos" class="btn-ds btn-ds-outline btn-ds-sm hidden"><i class="fa-solid fa-paper-plane"></i><span>Liberar todas</span></button>
+            </div>
+            <div class="todo-tabs" data-todo-tabs="admin">
+              <button type="button" class="active" data-todo-filter="pendiente">Por hacer</button>
+              <button type="button" data-todo-filter="cola">En cola</button>
+              <button type="button" data-todo-filter="hecha">Hechas</button>
+            </div>
+            <div id="collabTodosList" class="ds-list"></div>
+          </section>
+        </div>
+
         <div id="profilePageView" class="space-y-6 hidden">
 
           <!-- 1. Barra de Navegación Superior / Breadcrumb -->
@@ -2303,6 +2367,70 @@
   </div>
 
   <!-- Modal Documentos: Cuenta de Cobro Formal & Recibo de Pago Imprimibles -->
+  <!-- Modal: nueva tarea / editar tarea por hacer -->
+  <div id="todoModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4">
+    <form id="formTodo" class="bg-paper border border-line rounded-2xl w-full max-w-lg p-5 sm:p-6 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <h3 id="todoModalTitle" class="card-title">Nueva tarea</h3>
+        <button type="button" id="btnCloseTodoModal" class="btn-ds btn-ds-ghost btn-ds-sm" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <input type="hidden" id="todoId">
+      <div id="todoWorkerField">
+        <label for="todoWorker" class="block text-xs font-semibold text-ink mb-1.5">Colaborador</label>
+        <select id="todoWorker" class="form-input w-full"></select>
+      </div>
+      <div>
+        <label for="todoTitle" class="block text-xs font-semibold text-ink mb-1.5">Tarea</label>
+        <input type="text" id="todoTitle" maxlength="160" required placeholder="Ej. Cotización para Tommie Hernández" class="form-input w-full">
+      </div>
+      <div>
+        <label for="todoDetail" class="block text-xs font-semibold text-ink mb-1.5">Detalle o mensaje <span class="text-mid font-normal">(opcional)</span></label>
+        <textarea id="todoDetail" maxlength="1000" rows="3" placeholder="Qué hay que hacer, enlaces o lo que necesite saber" class="form-input w-full"></textarea>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="todoClient" class="block text-xs font-semibold text-ink mb-1.5">Cliente</label>
+          <input type="text" id="todoClient" list="clientsDatalist" maxlength="120" placeholder="Ej. Widely Social" class="form-input w-full">
+        </div>
+        <div>
+          <label for="todoCategory" class="block text-xs font-semibold text-ink mb-1.5">Categoría</label>
+          <select id="todoCategory" class="form-input w-full">
+            <option value="general">General / Otros</option>
+            <option value="diseno">Diseño Gráfico</option>
+            <option value="video">Edición de Video</option>
+            <option value="copy">Redacción & Copy</option>
+            <option value="ads">Pauta & Ads</option>
+            <option value="reunion">Reunión & Sync</option>
+            <option value="estrategia">Estrategia</option>
+          </select>
+        </div>
+        <div>
+          <label for="todoDate" class="block text-xs font-semibold text-ink mb-1.5">Para el día</label>
+          <input type="date" id="todoDate" class="form-input w-full font-mono text-xs">
+        </div>
+        <div>
+          <label for="todoEstimate" class="block text-xs font-semibold text-ink mb-1.5">Tiempo estimado (h)</label>
+          <input type="number" id="todoEstimate" step="0.25" min="0" max="24" placeholder="Ej. 1.5" class="form-input w-full font-mono no-spinners">
+        </div>
+        <div>
+          <label for="todoPriority" class="block text-xs font-semibold text-ink mb-1.5">Prioridad</label>
+          <select id="todoPriority" class="form-input w-full">
+            <option value="alta">Alta</option>
+            <option value="media" selected>Media</option>
+            <option value="baja">Baja</option>
+          </select>
+        </div>
+        <div id="todoQueueField" class="flex items-end">
+          <label class="inline-flex items-center gap-2 text-xs text-ink cursor-pointer pb-2.5"><input type="checkbox" id="todoQueue" checked> Dejar en cola (no la ve aún)</label>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" id="btnCancelTodo" class="btn-ds btn-ds-ghost">Cancelar</button>
+        <button type="submit" class="btn-ds btn-ds-primary"><i class="fa-solid fa-check"></i><span>Guardar tarea</span></button>
+      </div>
+    </form>
+  </div>
+
   <div id="statementModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center z-50 p-2 sm:p-4 md:p-6 overflow-y-auto transition-opacity duration-200 print:p-0 print:bg-white print:overflow-visible">
     <div class="bg-white text-ink border border-line rounded-2xl max-w-3xl w-full p-4 sm:p-6 md:p-8 space-y-4 shadow-2xl mx-auto my-auto print:m-0 print:border-none print:shadow-none print:w-full print:bg-white">
       
