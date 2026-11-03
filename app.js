@@ -390,13 +390,6 @@ const elements = {
   collabBalanceCop: document.getElementById("collabBalanceCop"),
   collabTodosList: document.getElementById("collabTodosList"),
   collabReminderInput: document.getElementById("collabReminderInput"),
-  collabSummaryRange: document.getElementById("collabSummaryRange"),
-  collabSummaryStats: document.getElementById("collabSummaryStats"),
-  collabSummaryChart: document.getElementById("collabSummaryChart"),
-  collabSummaryChartTitle: document.getElementById("collabSummaryChartTitle"),
-  collabSummaryClients: document.getElementById("collabSummaryClients"),
-  collabSummaryList: document.getElementById("collabSummaryList"),
-  collabSummaryListTitle: document.getElementById("collabSummaryListTitle"),
   collabReminderMeta: document.getElementById("collabReminderMeta"),
   btnSaveCollabReminder: document.getElementById("btnSaveCollabReminder"),
   workerReminderSection: document.getElementById("workerReminderSection"),
@@ -3856,6 +3849,7 @@ function updatePaymentsUI() {
    10. CÁLCULO DINÁMICO: DASHBOARD FINANCIERO Y KPIS
    ============================================================================ */
 function updateFinancialDashboard() {
+  renderWorkerSummary();
   const isWorker = state.userProfile?.rol === "worker";
   const currentTrm = getActiveTrmRate();
 
@@ -7844,6 +7838,7 @@ function renderTodos() {
     if (elements.workerTodosCount) elements.workerTodosCount.textContent = mine.filter(t => t.estado === "pendiente").length;
     renderTodoView("worker", elements.workerTodosList, elements.workerTodosCalendar, mine, "worker");
   }
+  renderWorkerSummary();
   // Administradora: perfil del colaborador abierto
   if (currentCollaboratorId) renderCollaboratorPage();
 }
@@ -7896,9 +7891,19 @@ async function saveCollabReminder() {
   }
 }
 
-/* --- Resumen semanal / mensual del colaborador --- */
-const collabSummary = { mode: "week", week: 0, month: 0 };
-let collabSummaryChartInstance = null;
+/* --- Resumen semanal / mensual del colaborador (perfil para admins y panel del colaborador) --- */
+const summaryViews = { admin: { mode: "week", week: 0, month: 0 }, worker: { mode: "week", week: 0, month: 0 } };
+const summaryCharts = { admin: null, worker: null };
+const SUMMARY_PREFIX = { admin: "collabSummary", worker: "workerSummary" };
+
+function getSummaryElements(scope) {
+  const p = SUMMARY_PREFIX[scope];
+  const byId = (suffix) => document.getElementById(p + suffix);
+  return {
+    range: byId("Range"), stats: byId("Stats"), chart: byId("Chart"), chartTitle: byId("ChartTitle"),
+    clients: byId("Clients"), list: byId("List"), listTitle: byId("ListTitle")
+  };
+}
 const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
 // Mes en Colombia desplazado `offset` meses: { start, end } como claves AAAA-MM-DD y su nombre
@@ -7911,17 +7916,17 @@ function getMonthRange(offset) {
 }
 
 // Cortes del gráfico: días de la semana, o semanas (lunes a domingo) recortadas al mes
-function getSummaryBuckets() {
-  if (collabSummary.mode === "week") {
-    const days = getWeekDays(collabSummary.week);
+function getSummaryBuckets(view) {
+  if (view.mode === "week") {
+    const days = getWeekDays(view.week);
     const keys = days.map(toLocalDateKey);
     return {
       start: keys[0], end: keys[6],
-      label: getWeekLabel({ start: days[0], end: days[6] }) + (collabSummary.week === 0 ? " · actual" : ""),
+      label: getWeekLabel({ start: days[0], end: days[6] }) + (view.week === 0 ? " · actual" : ""),
       buckets: keys.map((k, i) => ({ label: `${WEEK_DAY_LABELS[i]} ${days[i].getDate()}`, start: k, end: k }))
     };
   }
-  const month = getMonthRange(collabSummary.month);
+  const month = getMonthRange(view.month);
   const buckets = [];
   const cursor = new Date(month.first);
   while (cursor <= month.last) {
@@ -7934,12 +7939,14 @@ function getSummaryBuckets() {
     cursor.setTime(to.getTime());
     cursor.setDate(cursor.getDate() + 1);
   }
-  return { start: month.start, end: month.end, label: month.label + (collabSummary.month === 0 ? " · en curso" : ""), buckets };
+  return { start: month.start, end: month.end, label: month.label + (view.month === 0 ? " · en curso" : ""), buckets };
 }
 
-function renderCollabSummary(worker) {
-  if (!elements.collabSummaryStats) return;
-  const period = getSummaryBuckets();
+function renderSummary(scope, worker) {
+  const els = getSummaryElements(scope);
+  const view = summaryViews[scope];
+  if (!els.stats || !worker) return;
+  const period = getSummaryBuckets(view);
   const inRange = (key) => key && key >= period.start && key <= period.end;
   const tasks = state.tasks
     .filter(t => t.trabajadorId === worker.id && inRange(t.fecha) && t.estado !== "rechazada")
@@ -7956,16 +7963,16 @@ function renderCollabSummary(worker) {
     .reduce((acc, p) => acc + (Number(p.monto) || 0), 0);
   const todosDone = (state.todos || []).filter(t => t.trabajadorId === worker.id && t.estado === "hecha" && inRange(t.fecha)).length;
   const trm = getActiveTrmRate();
-  const isWeek = collabSummary.mode === "week";
+  const isWeek = view.mode === "week";
 
-  document.querySelectorAll("[data-summary-tabs] [data-summary-mode]").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.summaryMode === collabSummary.mode);
+  document.querySelectorAll(`[data-summary-scope="${scope}"] [data-summary-mode]`).forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.summaryMode === view.mode);
   });
-  elements.collabSummaryRange.textContent = period.label;
+  els.range.textContent = period.label;
 
   const stat = (caption, main, sub) => `
     <div class="summary-stat"><span class="caption">${caption}</span><b class="tabular-nums">${main}</b><span>${sub}</span></div>`;
-  elements.collabSummaryStats.innerHTML = [
+  els.stats.innerHTML = [
     stat("Horas aprobadas", `${approvedHours.toFixed(1)} h`, pendingHours > 0 ? `+${pendingHours.toFixed(1)} h pendientes` : "Sin pendientes"),
     stat("Valor causado", `$${value.toFixed(2)}`, `≈ ${escapeHtml(formatCop(value * trm))}`),
     stat(isWeek ? "Pagado en la semana" : "Pagado en el mes", `$${paid.toFixed(2)}`, `≈ ${escapeHtml(formatCop(paid * trm))}`),
@@ -7973,20 +7980,20 @@ function renderCollabSummary(worker) {
   ].join("");
 
   // Gráfico: horas aprobadas y pendientes por día (semana) o por semana (mes)
-  elements.collabSummaryChartTitle.textContent = isWeek ? "Horas por día" : "Horas por semana del mes";
+  els.chartTitle.textContent = isWeek ? "Horas por día" : "Horas por semana del mes";
   const inBucket = (t, b) => t.fecha >= b.start && t.fecha <= b.end;
   const approvedSeries = period.buckets.map(b => Number(sumHours(approved.filter(t => inBucket(t, b))).toFixed(2)));
   const pendingSeries = period.buckets.map(b => Number(sumHours(pending.filter(t => inBucket(t, b))).toFixed(2)));
-  if (collabSummaryChartInstance) {
-    collabSummaryChartInstance.destroy();
-    collabSummaryChartInstance = null;
+  if (summaryCharts[scope]) {
+    summaryCharts[scope].destroy();
+    summaryCharts[scope] = null;
   }
-  if (typeof Chart !== "undefined" && elements.collabSummaryChart) {
+  if (typeof Chart !== "undefined" && els.chart) {
     const isDark = document.documentElement.classList.contains("dark");
     const ink = isDark ? "rgba(250, 250, 250, 0.9)" : "rgba(10, 10, 10, 0.9)";
     const soft = isDark ? "rgba(250, 250, 250, 0.25)" : "rgba(10, 10, 10, 0.18)";
     const axis = isDark ? "#A3A3A3" : "#737373";
-    collabSummaryChartInstance = new Chart(elements.collabSummaryChart.getContext("2d"), {
+    summaryCharts[scope] = new Chart(els.chart.getContext("2d"), {
       type: "bar",
       data: {
         labels: period.buckets.map(b => b.label),
@@ -8030,7 +8037,7 @@ function renderCollabSummary(worker) {
   });
   const clients = Object.entries(byClient).sort((x, y) => y[1].hours - x[1].hours);
   const maxClient = Math.max(...clients.map(([, c]) => c.hours), 0.01);
-  elements.collabSummaryClients.innerHTML = clients.length
+  els.clients.innerHTML = clients.length
     ? clients.map(([name, c]) => `
         <div class="summary-client">
           <div><b>${escapeHtml(name)}</b><span class="tabular-nums">${c.hours.toFixed(1)} h · $${c.value.toFixed(2)}</span></div>
@@ -8039,9 +8046,9 @@ function renderCollabSummary(worker) {
     : `<div class="empty-note">Sin horas aprobadas en este período.</div>`;
 
   // Detalle de actividades del período (cierre semanal o mensual)
-  elements.collabSummaryListTitle.textContent = isWeek ? "Actividades de la semana" : `Cierre del mes: ${period.label.replace(" · en curso", "")}`;
+  els.listTitle.textContent = isWeek ? "Actividades de la semana" : `Cierre del mes: ${period.label.replace(" · en curso", "")}`;
   if (tasks.length === 0) {
-    elements.collabSummaryList.innerHTML = `<div class="empty-note">No hay actividades registradas en este período.</div>`;
+    els.list.innerHTML = `<div class="empty-note">No hay actividades registradas en este período.</div>`;
     return;
   }
   const rows = tasks.map(t => {
@@ -8058,7 +8065,7 @@ function renderCollabSummary(worker) {
         <td class="weekly-total">${ok ? "Aprobada" : `<span class="summary-pending">Pendiente</span>`}</td>
       </tr>`;
   }).join("");
-  elements.collabSummaryList.innerHTML = `
+  els.list.innerHTML = `
     <table class="weekly-table summary-table">
       <thead><tr>
         <th class="weekly-name">Fecha</th><th class="summary-left">Cliente</th><th class="summary-left">Actividad</th>
@@ -8072,6 +8079,13 @@ function renderCollabSummary(worker) {
         <td class="weekly-total"><span>≈ ${escapeHtml(formatCop(value * trm))}</span></td>
       </tr></tfoot>
     </table>`;
+}
+
+function renderWorkerSummary() {
+  if (isAdminSession()) return;
+  const myId = state.userProfile?.trabajadorId;
+  const worker = myId ? state.workers.find(w => w.id === myId) : null;
+  if (worker) renderSummary("worker", worker);
 }
 
 function renderCollaboratorPage() {
@@ -8128,7 +8142,7 @@ function renderCollaboratorPage() {
   elements.collabBalanceCop.textContent = `≈ ${formatCop(balance * getActiveTrmRate())}`;
 
   renderTodoView("admin", elements.collabTodosList, elements.collabTodosCalendar, todos, "admin");
-  renderCollabSummary(worker);
+  renderSummary("admin", worker);
 }
 
 window.openCollaboratorPage = function(workerId) {
@@ -8141,7 +8155,7 @@ window.openCollaboratorPage = function(workerId) {
   currentCollaboratorId = worker.id;
   todoFilters.admin = "pendiente";
   todoCalendarOffsets.admin = 0;
-  Object.assign(collabSummary, { week: 0, month: 0 });
+  Object.assign(summaryViews.admin, { week: 0, month: 0 });
   elements.adminPortalView?.classList.add("hidden");
   elements.workerPortalView?.classList.add("hidden");
   elements.profilePageView?.classList.add("hidden");
@@ -8518,18 +8532,19 @@ function setupEventListeners() {
       }
       return;
     }
-    const summaryMode = e.target.closest("[data-summary-mode]");
-    if (summaryMode) {
-      collabSummary.mode = summaryMode.dataset.summaryMode === "month" ? "month" : "week";
-      renderCollaboratorPage();
-      return;
-    }
-    const summaryStep = e.target.closest("[data-summary-step]");
-    if (summaryStep) {
-      const key = collabSummary.mode === "month" ? "month" : "week";
-      const step = Number(summaryStep.dataset.summaryStep);
-      collabSummary[key] = step === 0 ? 0 : collabSummary[key] + step;
-      renderCollaboratorPage();
+    const summaryBtn = e.target.closest("[data-summary-mode], [data-summary-step]");
+    const summaryScope = summaryBtn?.closest("[data-summary-scope]")?.dataset.summaryScope;
+    if (summaryBtn && summaryViews[summaryScope]) {
+      const view = summaryViews[summaryScope];
+      if (summaryBtn.dataset.summaryMode) {
+        view.mode = summaryBtn.dataset.summaryMode === "month" ? "month" : "week";
+      } else {
+        const key = view.mode === "month" ? "month" : "week";
+        const step = Number(summaryBtn.dataset.summaryStep);
+        view[key] = step === 0 ? 0 : view[key] + step;
+      }
+      if (summaryScope === "admin") renderCollaboratorPage();
+      else renderWorkerSummary();
       return;
     }
     const calStep = e.target.closest("[data-todo-cal-step]");
