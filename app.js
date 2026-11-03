@@ -5026,8 +5026,8 @@ function normalizeBankRoute(data) {
   return { from, inPct: n(data?.inPct), inFixed: n(data?.inFixed), payFixed: n(data?.payFixed), payPct: n(data?.payPct) };
 }
 
-// Recaudo neto del mes: las semanas antes de `route.from` siguen la ruta Upwork → PayPal → Nequi;
-// desde esa semana, la ruta bancaria (comisión al recibir + costo fijo por cada semana cobrada).
+// Recaudo neto del mes por la ruta bancaria (comisión al recibir + costo fijo por cada semana cobrada).
+// Ya no se cobra por Upwork: todas las semanas entran al banco en EE. UU.; las variables de Upwork quedan en 0.
 function computeMonthlyRevenue(weeks, upworkOpts, route) {
   const monthWeeks = getUpworkWeeksForMonth();
   let upworkGross = 0;
@@ -5035,12 +5035,8 @@ function computeMonthlyRevenue(weeks, upworkOpts, route) {
   let bankWeeksPaid = 0;
   monthWeeks.forEach(w => {
     const amount = Number(weeks?.[w.key]) || 0;
-    if (w.mondayKey >= route.from) {
-      bankGross += amount;
-      if (amount > 0) bankWeeksPaid++;
-    } else {
-      upworkGross += amount;
-    }
+    bankGross += amount;
+    if (amount > 0) bankWeeksPaid++;
   });
 
   const upworkFeeAmount = upworkGross > 0 ? upworkGross * (upworkOpts.feePercent / 100) : 0;
@@ -5151,12 +5147,9 @@ function updateUpworkBudgetDashboard(currentTrm) {
   }
   if (elements.upworkRevenueSubtitle) {
     if (grossRevenue > 0) {
-      const parts = [];
-      if (rev.upworkGross > 0) parts.push(`Upwork $${rev.upworkGross.toFixed(2)}`);
-      if (rev.bankGross > 0) parts.push(`banco $${rev.bankGross.toFixed(2)}`);
-      elements.upworkRevenueSubtitle.textContent = `Neto recibido: $${netRealRevenue.toFixed(2)} (${parts.join(" + ")})`;
+      elements.upworkRevenueSubtitle.textContent = `Neto recibido en el banco: $${netRealRevenue.toFixed(2)}`;
     } else {
-      elements.upworkRevenueSubtitle.textContent = "Clic en 'Gestionar Semanas' para ingresar recaudo";
+      elements.upworkRevenueSubtitle.textContent = "Clic en 'Semanas' para ingresar el recaudo";
     }
   }
 
@@ -5169,9 +5162,8 @@ function updateUpworkBudgetDashboard(currentTrm) {
       const bgClass = isCurrent
         ? "bg-ink/15 text-mid font-bold border border-line shadow-xs"
         : "bg-muted text-mid border border-line";
-      const routeTag = w.mondayKey >= state.bankRoute.from ? "Banco" : "Upwork";
-      return `<span class="inline-flex items-center px-2 py-0.5 rounded-md ${bgClass} transition-colors" title="${w.fullLabel} · ${routeTag}">
-        ${currentDot}${w.pillLabel}: <strong class="ml-1 font-mono text-ink">$${val.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</strong><span class="ml-1 text-mid">· ${routeTag}</span>
+      return `<span class="inline-flex items-center px-2 py-0.5 rounded-md ${bgClass} transition-colors" title="${w.fullLabel}">
+        ${currentDot}${w.pillLabel}: <strong class="ml-1 font-mono text-ink">$${val.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</strong>
       </span>`;
     }).join("");
     elements.upworkWeeksPillsBar.innerHTML = pillsHtml;
@@ -5433,9 +5425,7 @@ function updateUpworkInputPreview() {
   const netMargin = netReal - monthlyPayroll;
 
   if (elements.upworkBreakdownGross) {
-    elements.upworkBreakdownGross.textContent = rev.bankGross > 0
-      ? `$${rev.upworkGross.toFixed(2)} USD (Upwork) + $${rev.bankGross.toFixed(2)} (banco)`
-      : `$${totalGross.toFixed(2)} USD`;
+    elements.upworkBreakdownGross.textContent = `$${totalGross.toFixed(2)} USD`;
   }
   if (elements.upworkBreakdownFeeLabel) {
     elements.upworkBreakdownFeeLabel.textContent = `2. Tarifa de Servicio Upwork (${feePercent}%):`;
@@ -5558,9 +5548,7 @@ async function saveUpworkBudget(weeksOrAmount, feePercent = 15, payoutCost = 1.0
         updatedAt: serverTimestamp(),
         updatedBy: state.currentUser?.email || "admin"
       }, { merge: true });
-      const vatText = upworkIncludeVat ? "+IVA CO" : "sin IVA";
-      const nequiText = nequiIncludeFee ? "Nequi activo" : "Cuenta Directa (0% com.)";
-      showToast(`Presupuesto actualizado: $${totalAmount.toFixed(2)} USD del mes (-${feePercent}% Upwork ${vatText}, -$${payoutCost} retiro, ${nequiText})`, "success");
+      showToast(`Presupuesto actualizado: $${totalAmount.toFixed(2)} USD recaudados en el mes.`, "success");
       return;
     } catch (err) {
       console.warn("[Upwork Budget] Guardado localmente, error en Firestore:", err);

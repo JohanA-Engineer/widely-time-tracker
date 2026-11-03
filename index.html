@@ -308,8 +308,8 @@
               <span>Clientes & Margen</span>
             </a>
             <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="upwork" id="sidebarUpworkLink">
-              <i class="fa-brands fa-upwork text-sm w-5 text-center text-ink"></i>
-              <span>Presupuesto Upwork</span>
+              <i class="fa-solid fa-wallet text-sm w-5 text-center text-ink"></i>
+              <span>Presupuesto</span>
             </a>
             <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="payments">
               <i class="fa-solid fa-money-bill-transfer text-sm w-5 text-center"></i>
@@ -879,9 +879,9 @@
           </p>
         </div>
         <div class="page-actions">
-          <button type="button" id="btnOpenUpworkBudgetModal" class="btn-ds btn-ds-outline" title="Configurar recaudación semanal en Upwork y ver presupuesto">
-            <i class="fa-brands fa-upwork"></i>
-            <span>Presupuesto Upwork</span>
+          <button type="button" id="btnOpenUpworkBudgetModal" class="btn-ds btn-ds-outline" title="Configurar el recaudo semanal y ver el presupuesto">
+            <i class="fa-solid fa-wallet"></i>
+            <span>Presupuesto</span>
           </button>
           <button type="button" id="btnAdminScrollToWorker" class="btn-ds btn-ds-outline">
             <i class="fa-solid fa-user-plus"></i>
@@ -950,7 +950,7 @@
             </div>
           </div>
 
-          <!-- Ruta bancaria: Upwork -> Retiro -> PayPal -> Nequi -->
+          <!-- Ruta del dinero: banco en EE. UU. -> pagos por llave -->
           <div id="upworkNequiRouteSummary" class="route-strip">
             <div class="route-step"><small>Comisión</small><b id="routeUpworkNetLabel">Upwork (-15% + IVA)</b></div>
             <div class="route-step"><small>Retiro</small><b>-$1 USD</b></div>
@@ -1949,7 +1949,7 @@
     </div>
   </div>
 
-  <!-- Modal para Configurar Recaudación Semanal en Upwork -->
+  <!-- Modal para configurar el recaudo semanal y la ruta bancaria -->
   <div id="upworkBudgetModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4 transition-opacity duration-200">
     <div class="bg-white dark:bg-paper border border-line rounded-2xl upwork-modal-container max-h-[92vh] flex flex-col shadow-2xl overflow-hidden mx-auto">
       
@@ -1957,11 +1957,11 @@
       <div class="px-5 py-3.5 border-b border-line flex items-center justify-between bg-muted/70 dark:bg-muted/60 shrink-0">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-ink/10 text-ink dark:bg-ink/20 flex items-center justify-center text-base border border-line">
-            <i class="fa-brands fa-upwork"></i>
+            <i class="fa-solid fa-wallet"></i>
           </div>
           <div>
-            <h3 class="text-sm font-bold text-ink">Control Presupuestal Upwork</h3>
-            <p class="text-[11px] text-mid">Semanas de facturación oficial Upwork (Lunes a Domingo)</p>
+            <h3 class="text-sm font-bold text-ink">Control presupuestal</h3>
+            <p class="text-[11px] text-mid">Recaudo de cada semana del mes (lunes a domingo)</p>
           </div>
         </div>
         <button type="button" id="btnCloseUpworkModal" class="w-8 h-8 rounded-lg flex items-center justify-center text-mid hover:text-ink dark:hover:text-white hover:bg-muted/60 dark:hover:bg-muted transition-colors cursor-pointer">
@@ -1991,12 +1991,12 @@
             </div>
           </div>
 
-          <!-- 2. Inputs de Recaudación por Semanas Upwork (Lunes a Domingo) -->
+          <!-- 2. Recaudo por semanas (lunes a domingo) -->
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <label class="text-xs font-semibold text-ink flex items-center gap-1.5">
                 <i class="fa-solid fa-calendar-week text-mid"></i>
-                <span>Semanas Upwork (USD):</span>
+                <span>Semanas (USD):</span>
               </label>
               <span class="text-[10px] text-mid">Ciclos de facturación Lunes a Domingo</span>
             </div>
@@ -2084,8 +2084,39 @@
             <input type="hidden" id="upworkRevenueInput" value="0">
           </div>
 
-          <!-- 3. Parámetros de Retiro & Deducciones (Grid 2 columnas limpio) -->
+          <!-- 3. Costos de la ruta bancaria (banco en EE. UU. y pagos por llave) -->
           <div class="p-3 rounded-xl bg-canvas dark:bg-muted border border-line space-y-2.5">
+              <!-- Ruta bancaria: banco en EE. UU. y pagos a colaboradores por llave (Bre-B) -->
+              <div class="p-2.5 rounded-lg bg-ink/[0.04] border border-line space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs font-semibold text-ink flex items-center gap-1.5"><i class="fa-solid fa-building-columns"></i> Ruta bancaria (EE. UU. → Colombia por llave)</span>
+                  <span id="bankRoutePreview" class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-ink/15 text-ink font-bold border border-line">—</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="hidden" id="bankRouteFromInput">
+                  <div>
+                    <label for="bankInPctInput" class="block text-[11px] font-semibold text-ink mb-1">Comisión al recibir (%)</label>
+                    <input type="number" id="bankInPctInput" step="0.01" min="0" max="100" placeholder="0" class="form-input w-full py-1 font-mono text-xs no-spinners">
+                  </div>
+                  <div>
+                    <label for="bankInFixedInput" class="block text-[11px] font-semibold text-ink mb-1">Costo fijo por recibo (USD)</label>
+                    <input type="number" id="bankInFixedInput" step="0.01" min="0" placeholder="0.00" class="form-input w-full py-1 font-mono text-xs no-spinners">
+                  </div>
+                  <div>
+                    <label for="bankPayFixedInput" class="block text-[11px] font-semibold text-ink mb-1">Costo por pago a colaborador (USD)</label>
+                    <input type="number" id="bankPayFixedInput" step="0.01" min="0" placeholder="0.00" class="form-input w-full py-1 font-mono text-xs no-spinners">
+                  </div>
+                  <div>
+                    <label for="bankPayPctInput" class="block text-[11px] font-semibold text-ink mb-1">Diferencia de cambio por pago (%)</label>
+                    <input type="number" id="bankPayPctInput" step="0.01" min="0" max="100" placeholder="0" class="form-input w-full py-1 font-mono text-xs no-spinners">
+                  </div>
+                </div>
+                <p class="text-[9px] text-mid">Si aún no conoces los costos, déjalos en 0. Cuando registres un pago con su costo real, se usa ese valor en lugar del estimado.</p>
+              </div>
+          </div>
+
+          <!-- Tarifas de Upwork, PayPal y Nequi: ya no se cobra por Upwork; se conservan ocultas para la configuración guardada -->
+          <div class="hidden">
             <span class="text-[10px] font-mono uppercase font-semibold text-mid block">
               Configuración de Tarifas & Retiro
             </span>
@@ -2149,37 +2180,6 @@
                     <strong class="text-ink">7,14%</strong>
                   </div>
 
-              <!-- Ruta bancaria: banco en EE. UU. y pagos a colaboradores por llave (Bre-B) -->
-              <div class="p-2.5 rounded-lg bg-ink/[0.04] border border-line space-y-2">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="text-xs font-semibold text-ink flex items-center gap-1.5"><i class="fa-solid fa-building-columns"></i> Ruta bancaria (EE. UU. → Colombia por llave)</span>
-                  <span id="bankRoutePreview" class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-ink/15 text-ink font-bold border border-line">—</span>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                  <div class="col-span-2">
-                    <label for="bankRouteFromInput" class="block text-[11px] font-semibold text-ink mb-1">Aplica desde la semana del</label>
-                    <input type="date" id="bankRouteFromInput" class="form-input w-full py-1 font-mono text-xs">
-                    <span class="text-[9px] text-mid block mt-0.5">Las semanas anteriores se calculan con Upwork.</span>
-                  </div>
-                  <div>
-                    <label for="bankInPctInput" class="block text-[11px] font-semibold text-ink mb-1">Comisión al recibir (%)</label>
-                    <input type="number" id="bankInPctInput" step="0.01" min="0" max="100" placeholder="0" class="form-input w-full py-1 font-mono text-xs no-spinners">
-                  </div>
-                  <div>
-                    <label for="bankInFixedInput" class="block text-[11px] font-semibold text-ink mb-1">Costo fijo por recibo (USD)</label>
-                    <input type="number" id="bankInFixedInput" step="0.01" min="0" placeholder="0.00" class="form-input w-full py-1 font-mono text-xs no-spinners">
-                  </div>
-                  <div>
-                    <label for="bankPayFixedInput" class="block text-[11px] font-semibold text-ink mb-1">Costo por pago a colaborador (USD)</label>
-                    <input type="number" id="bankPayFixedInput" step="0.01" min="0" placeholder="0.00" class="form-input w-full py-1 font-mono text-xs no-spinners">
-                  </div>
-                  <div>
-                    <label for="bankPayPctInput" class="block text-[11px] font-semibold text-ink mb-1">Diferencia de cambio por pago (%)</label>
-                    <input type="number" id="bankPayPctInput" step="0.01" min="0" max="100" placeholder="0" class="form-input w-full py-1 font-mono text-xs no-spinners">
-                  </div>
-                </div>
-                <p class="text-[9px] text-mid">Si aún no conoces los costos, déjalos en 0. Cuando registres un pago con su costo real, se usa ese valor en lugar del estimado.</p>
-              </div>
                   <div id="nequiTierBox2" class="p-1 rounded bg-white dark:bg-paper border border-line transition-all">
                     <span class="block text-mid text-[8px]">$151–300</span>
                     <strong class="text-ink">4,76%</strong>
@@ -2199,6 +2199,7 @@
               <span>1. Recaudo Bruto Total:</span>
               <span id="upworkBreakdownGross" class="font-bold text-ink dark:text-white">$0.00 USD</span>
             </div>
+            <div class="hidden">
             <div class="flex items-center justify-between text-ink">
               <span id="upworkBreakdownFeeLabel">2. Tarifa Upwork (15%):</span>
               <span id="upworkBreakdownFee">-$0.00 USD</span>
@@ -2223,8 +2224,9 @@
               <span>6. Comisión Nequi (con IVA):</span>
               <span id="upworkBreakdownNequi">-$0.00 USD</span>
             </div>
+            </div>
             <div class="pt-1.5 border-t border-line flex items-center justify-between font-bold text-mid text-xs">
-              <span>Neto Real en Colombia:</span>
+              <span>Neto recibido (después de costos bancarios):</span>
               <span id="upworkBreakdownNet">$0.00 USD</span>
             </div>
             <div class="flex items-center justify-between text-ink pt-1 border-t border-line text-xs">
