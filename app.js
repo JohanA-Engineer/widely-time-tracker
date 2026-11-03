@@ -3850,6 +3850,7 @@ function updatePaymentsUI() {
    ============================================================================ */
 function updateFinancialDashboard() {
   renderWorkerSummary();
+  renderSelfSummary();
   const isWorker = state.userProfile?.rol === "worker";
   const currentTrm = getActiveTrmRate();
 
@@ -7839,6 +7840,7 @@ function renderTodos() {
     renderTodoView("worker", elements.workerTodosList, elements.workerTodosCalendar, mine, "worker");
   }
   renderWorkerSummary();
+  renderSelfSummary();
   // Administradora: perfil del colaborador abierto
   if (currentCollaboratorId) renderCollaboratorPage();
 }
@@ -7892,9 +7894,14 @@ async function saveCollabReminder() {
 }
 
 /* --- Resumen semanal / mensual del colaborador (perfil para admins y panel del colaborador) --- */
-const summaryViews = { admin: { mode: "week", week: 0, month: 0 }, worker: { mode: "week", week: 0, month: 0 } };
-const summaryCharts = { admin: null, worker: null };
-const SUMMARY_PREFIX = { admin: "collabSummary", worker: "workerSummary" };
+const summaryViews = {
+  admin: { mode: "week", week: 0, month: 0 },
+  worker: { mode: "week", week: 0, month: 0 },
+  self: { mode: "week", week: 0, month: 0 }
+};
+const summaryCharts = { admin: null, worker: null, self: null };
+// admin = perfil de un colaborador · worker = panel del colaborador · self = admin que también es colaboradora
+const SUMMARY_PREFIX = { admin: "collabSummary", worker: "workerSummary", self: "selfSummary" };
 
 function getSummaryElements(scope) {
   const p = SUMMARY_PREFIX[scope];
@@ -8086,6 +8093,16 @@ function renderWorkerSummary() {
   const myId = state.userProfile?.trabajadorId;
   const worker = myId ? state.workers.find(w => w.id === myId) : null;
   if (worker) renderSummary("worker", worker);
+}
+
+// Administradora con ficha de trabajador propia: ve su resumen en su panel
+function renderSelfSummary() {
+  const section = document.getElementById("selfSummarySection");
+  if (!section) return;
+  const myId = state.userProfile?.trabajadorId;
+  const worker = isAdminSession() && myId ? state.workers.find(w => w.id === myId) : null;
+  section.classList.toggle("hidden", !worker);
+  if (worker) renderSummary("self", worker);
 }
 
 function renderCollaboratorPage() {
@@ -8544,6 +8561,7 @@ function setupEventListeners() {
         view[key] = step === 0 ? 0 : view[key] + step;
       }
       if (summaryScope === "admin") renderCollaboratorPage();
+      else if (summaryScope === "self") renderSelfSummary();
       else renderWorkerSummary();
       return;
     }
