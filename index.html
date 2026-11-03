@@ -1389,6 +1389,45 @@
             <div id="collabTodosList" class="ds-list"></div>
             <div id="collabTodosCalendar" class="todo-cal hidden"></div>
           </section>
+
+          <!-- Resumen semanal / mensual de actividades del colaborador -->
+          <section class="content-card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Resumen de actividades</h3>
+                <p class="card-subtitle">Horas, valor y actividades realizadas por semana o por mes. Solo lo aprobado suma al valor.</p>
+              </div>
+            </div>
+            <div class="todo-toolbar">
+              <div class="todo-tabs" data-summary-tabs>
+                <button type="button" class="active" data-summary-mode="week">Semanal</button>
+                <button type="button" data-summary-mode="month">Mensual</button>
+              </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span id="collabSummaryRange" class="todo-cal-range">--</span>
+                <div class="weekly-nav">
+                  <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-summary-step="-1" aria-label="Período anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                  <button type="button" class="btn-ds btn-ds-ghost btn-ds-sm" data-summary-step="0">Actual</button>
+                  <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-summary-step="1" aria-label="Período siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+              </div>
+            </div>
+            <div id="collabSummaryStats" class="summary-stats"></div>
+            <div class="summary-charts">
+              <div class="summary-panel">
+                <span id="collabSummaryChartTitle" class="caption">Horas por día</span>
+                <div class="summary-canvas"><canvas id="collabSummaryChart" aria-label="Horas del período"></canvas></div>
+              </div>
+              <div class="summary-panel">
+                <span class="caption">Horas por cliente</span>
+                <div id="collabSummaryClients" class="summary-clients"></div>
+              </div>
+            </div>
+            <div class="summary-activities">
+              <span id="collabSummaryListTitle" class="caption">Actividades de la semana</span>
+              <div id="collabSummaryList" class="weekly-table-wrap"></div>
+            </div>
+          </section>
         </div>
 
         <div id="profilePageView" class="space-y-6 hidden">

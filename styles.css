@@ -1783,6 +1783,30 @@ body {
 .reminder-head { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); margin-bottom: 8px; }
 .reminder-text { font-size: 14px; line-height: 1.5; color: var(--text-main); white-space: pre-wrap; overflow-wrap: anywhere; margin-bottom: 6px; }
 
+/* --- Resumen semanal / mensual del colaborador --- */
+.summary-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 16px; }
+.summary-stat { display: flex; flex-direction: column; gap: 4px; padding: 12px; border-radius: 10px; background: var(--bg-subtle); min-width: 0; }
+.summary-stat b { font-size: 22px; font-weight: 600; letter-spacing: -0.4px; color: var(--text-main); }
+.summary-stat span:last-child { font-size: 12px; color: var(--text-secondary); }
+.summary-charts { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; }
+.summary-panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 12px; border-radius: 10px; border: 1px solid var(--border-soft); }
+.summary-canvas { position: relative; height: 230px; }
+.summary-clients { display: flex; flex-direction: column; gap: 12px; }
+.summary-client > div:first-child { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.summary-client > div:first-child b { font-weight: 600; color: var(--text-main); overflow-wrap: anywhere; }
+.summary-client > div:first-child span { color: var(--text-secondary); white-space: nowrap; }
+.summary-client-track { height: 6px; border-radius: 6px; background: var(--bg-subtle); margin-top: 6px; overflow: hidden; }
+.summary-client-track span { display: block; height: 100%; border-radius: 6px; background: var(--text-main); }
+.summary-activities { display: flex; flex-direction: column; gap: 10px; }
+.summary-table .summary-left { text-align: left; }
+.summary-table .summary-desc { white-space: normal; min-width: 180px; }
+.summary-table tfoot td { border-top: 1px solid var(--text-main); }
+.summary-pending { color: var(--text-secondary); font-style: italic; }
+@media (max-width: 900px) {
+  .summary-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .summary-charts { grid-template-columns: 1fr; }
+}
+
 /* --- Tareas por hacer: vista calendario --- */
 .todo-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
 .todo-toolbar .todo-tabs { margin-bottom: 0; }
