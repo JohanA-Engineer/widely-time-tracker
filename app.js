@@ -2292,7 +2292,9 @@ async function handleRegisterTask() {
     }
 
     showToast(isWorkerRole
-      ? `¡Tarea registrada! Costo: $${totalCost.toFixed(2)} — pendiente de aprobación.`
+      ? (totalCost > 0
+        ? `¡Tarea registrada! Costo: $${totalCost.toFixed(2)} — pendiente de aprobación.`
+        : "¡Tiempo registrado! Aún no tienes tarifa: el valor se calcula cuando Lina la asigne y apruebe.")
       : `¡Tarea registrada con éxito! Costo: $${totalCost.toFixed(2)}`, "success");
     elements.timerTaskDescription.value = "";
     if (elements.timerClientProject) elements.timerClientProject.value = "";
@@ -3497,7 +3499,7 @@ function renderAdminApprovals() {
         </div>
         <div class="ds-amount">
           <b>${qty}</b>
-          <span>$${Number(t.costoTotal || 0).toFixed(2)}</span>
+          <span>${Number(t.costoTotal) > 0 ? `$${Number(t.costoTotal).toFixed(2)}` : "Sin tarifa"}</span>
         </div>
         <div class="ds-actions">
           <button type="button" class="btn-ds btn-ds-outline btn-ds-sm" onclick="window.openRejectModal(${jsArg(t.id)})" aria-label="Rechazar">
@@ -6833,7 +6835,9 @@ async function handleSaveManualEntry(e) {
       }
     } else {
       if (isWorkerRole) {
-        showToast(`Tarea manual de ${taskData.horas}h enviada a revisión por la administración.`, "info");
+        showToast(taskData.costoTotal > 0
+          ? `Tarea manual de ${taskData.horas}h enviada a revisión por la administración.`
+          : `Tarea manual de ${taskData.horas}h enviada a revisión. Aún no tienes tarifa: el valor se calcula al aprobarla.`, "info");
       } else {
         showToast(`Tarea manual de ${taskData.horas}h guardada y aprobada para ${workerName} ($${taskData.costoTotal.toFixed(2)}).`, "success");
       }
@@ -6852,6 +6856,22 @@ window.setManualEntryMode = setManualEntryMode;
 /* ============================================================================
    11.C. GESTIÓN DE APROBACIÓN Y RECHAZO DE HORAS MANUALES
    ============================================================================ */
+// Tarea registrada sin tarifa (costo 0): si el colaborador ya tiene tarifa, devuelve los campos
+// con el valor calculado para guardarlos al aprobar; si no, null y la tarea queda en $0.
+function getPricingForUnratedTask(task) {
+  if (Number(task.costoTotal) > 0) return null;
+  const worker = state.workers.find(w => w.id === task.trabajadorId);
+  if (!worker) return null;
+  if (Number(task.cantidadArtes) > 0) {
+    const artRate = Number(worker.tarifaArte) || 0;
+    if (artRate <= 0) return null;
+    return { tarifaArte: artRate, costoTotal: Number((Number(task.cantidadArtes) * artRate).toFixed(2)) };
+  }
+  const rate = Number(worker.tarifaHora) || 0;
+  if (rate <= 0 || !(Number(task.horas) > 0)) return null;
+  return { tarifaHora: rate, costoTotal: Number((Number(task.horas) * rate).toFixed(2)) };
+}
+
 window.approveTask = async function(taskId) {
   const isAdmin = state.userProfile?.rol === "admin" || isMasterAdmin(state.currentUser?.email);
   if (!isAdmin) {
@@ -6862,6 +6882,7 @@ window.approveTask = async function(taskId) {
   const task = state.tasks.find(t => t.id === taskId);
   const workerName = task?.trabajadorNombre || "el colaborador";
   const hours = Number(task?.horas || 0).toFixed(2);
+  const pricing = task ? getPricingForUnratedTask(task) : null;
 
   try {
     if (db) {
@@ -6869,17 +6890,23 @@ window.approveTask = async function(taskId) {
         estado: "aprobada",
         motivoRechazo: null,
         aprobadoPor: state.currentUser?.email || "admin",
-        aprobadoEn: serverTimestamp()
+        aprobadoEn: serverTimestamp(),
+        ...(pricing || {})
       });
     } else {
       if (task) {
-        task.estado = "aprobada";
-        task.motivoRechazo = null;
+        Object.assign(task, { estado: "aprobada", motivoRechazo: null }, pricing || {});
         updateTasksUI();
         updateFinancialDashboard();
       }
     }
-    showToast(`✓ Aprobadas ${hours}h de ${workerName}. Ya computan en su liquidación.`, "success");
+    if (pricing) {
+      showToast(`✓ Aprobadas ${hours}h de ${workerName}, valoradas con su tarifa actual: $${pricing.costoTotal.toFixed(2)}.`, "success");
+    } else if (task && !(Number(task.costoTotal) > 0)) {
+      showToast(`✓ Aprobadas ${hours}h de ${workerName} en $0.00: aún no tiene tarifa asignada.`, "warning");
+    } else {
+      showToast(`✓ Aprobadas ${hours}h de ${workerName}. Ya computan en su liquidación.`, "success");
+    }
   } catch (err) {
     console.error("Error al aprobar tarea:", err);
     showToast("Error al aprobar horas: " + err.message, "error");
