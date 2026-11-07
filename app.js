@@ -7376,40 +7376,51 @@ function getIsoWeekNumber(date) {
 function renderAgencyBill() {
   const days = getWeekDays(agencyWeekOffset);
   const keys = days.map(toLocalDateKey);
-  const weekTasks = state.tasks.filter(t => keys.includes(t.fecha) && getAgencyClient(t.cliente));
-  const approved = weekTasks.filter(t => isTaskApproved(t)).sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+  // Todas las actividades de la semana: Widely Social, Treat Your Friends y "Otros clientes".
+  // Las actividades sin tarifa (valor $0) no se cobran.
+  const weekTasks = state.tasks.filter(t => keys.includes(t.fecha));
+  const approvedAll = weekTasks.filter(t => isTaskApproved(t));
+  const approved = approvedAll.filter(t => Number(t.costoTotal) > 0).sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+  const unratedCount = approvedAll.length - approved.length;
   const pendingCount = weekTasks.filter(t => t.estado === "pendiente").length;
 
   const periodText = `del ${formatLongDate(days[0])} al ${formatLongDate(days[6])}`;
   const week = getIsoWeekNumber(days[0]);
   if (elements.agencyWeekPicker) elements.agencyWeekPicker.textContent = getWeekLabel({ start: days[0], end: days[6] });
   if (elements.agencyPendingNote) {
-    elements.agencyPendingNote.textContent = pendingCount > 0
-      ? `${pendingCount} actividad${pendingCount === 1 ? "" : "es"} pendiente${pendingCount === 1 ? "" : "s"} de aprobación no se incluye${pendingCount === 1 ? "" : "n"}.`
-      : "";
+    elements.agencyPendingNote.textContent = [
+      pendingCount > 0
+        ? `${pendingCount} actividad${pendingCount === 1 ? "" : "es"} pendiente${pendingCount === 1 ? "" : "s"} de aprobación no se incluye${pendingCount === 1 ? "" : "n"}.`
+        : "",
+      unratedCount > 0
+        ? `${unratedCount} actividad${unratedCount === 1 ? "" : "es"} sin tarifa no se incluye${unratedCount === 1 ? "" : "n"}.`
+        : ""
+    ].filter(Boolean).join(" ");
   }
   elements.agencyConsecutive.textContent = `No. AG-${days[0].getFullYear()}-S${String(week).padStart(2, "0")}`;
   elements.agencyDate.textContent = formatLongDate(new Date());
   elements.agencyPeriodTag.textContent = `Semana ${periodText}`;
   elements.agencyConceptPeriod.textContent = `la semana ${periodText}`;
 
-  // Agrupar por cliente de la agencia
-  const groups = AGENCY_CLIENTS.map(client => {
-    const tasks = approved.filter(t => getAgencyClient(t.cliente) === client);
+  // Agrupar por cliente de la agencia; lo demás va en "Otros clientes" con el nombre de cada cliente
+  const OTHER_CLIENTS = { label: "Otros clientes", other: true };
+  const groups = [...AGENCY_CLIENTS, OTHER_CLIENTS].map(client => {
+    const tasks = approved.filter(t => (client.other ? !getAgencyClient(t.cliente) : getAgencyClient(t.cliente) === client));
     const hours = tasks.reduce((acc, t) => acc + (Number(t.cantidadArtes) > 0 ? 0 : Number(t.horas) || 0), 0);
     const arts = tasks.reduce((acc, t) => acc + (Number(t.cantidadArtes) > 0 ? Number(t.cantidadArtes) : 0), 0);
     const total = tasks.reduce((acc, t) => acc + (Number(t.costoTotal) || 0), 0);
     return { client, tasks, hours, arts, total };
   }).filter(g => g.tasks.length > 0);
 
-  const recipients = groups.length > 0 ? groups.map(g => g.client.label) : AGENCY_CLIENTS.map(c => c.label);
+  const agencyGroups = groups.filter(g => !g.client.other);
+  const recipients = agencyGroups.length > 0 ? agencyGroups.map(g => g.client.label) : AGENCY_CLIENTS.map(c => c.label);
   elements.agencyRecipient.textContent = recipients.join(" · ");
 
   const volumeLabel = (hours, arts) => [hours > 0 ? `${hours.toFixed(2)} h` : null, arts > 0 ? `${arts} arte${arts === 1 ? "" : "s"}` : null]
     .filter(Boolean).join(" + ") || "0.00 h";
 
   if (groups.length === 0) {
-    elements.agencyClientsDetail.innerHTML = `<div class="p-4 rounded-xl border border-line text-center text-xs text-mid">No hay actividades aprobadas de Widely Social ni Treat Your Friends en esta semana.</div>`;
+    elements.agencyClientsDetail.innerHTML = `<div class="p-4 rounded-xl border border-line text-center text-xs text-mid">No hay actividades aprobadas con tarifa en esta semana.</div>`;
   } else {
     elements.agencyClientsDetail.innerHTML = groups.map(g => `
       <div>
@@ -7436,7 +7447,7 @@ function renderAgencyBill() {
                 <tr>
                   <td class="py-2 px-3 tabular-nums whitespace-nowrap">${escapeHtml(t.fecha || "-")}</td>
                   <td class="py-2 px-3 whitespace-nowrap">${escapeHtml(getWorkerDisplayName(t))}</td>
-                  <td class="py-2 px-3">${escapeHtml(t.descripcion || "Actividad")} <span class="text-mid">· ${escapeHtml(getCategoryMeta(t.categoria).label)}</span></td>
+                  <td class="py-2 px-3">${g.client.other ? `<strong>${escapeHtml(t.cliente || "Sin cliente")}</strong> · ` : ""}${escapeHtml(t.descripcion || "Actividad")} <span class="text-mid">· ${escapeHtml(getCategoryMeta(t.categoria).label)}</span></td>
                   <td class="py-2 px-2 text-right tabular-nums whitespace-nowrap">${qty}</td>
                   <td class="py-2 px-3 text-right tabular-nums whitespace-nowrap font-semibold">$${Number(t.costoTotal || 0).toFixed(2)}</td>
                 </tr>`;
