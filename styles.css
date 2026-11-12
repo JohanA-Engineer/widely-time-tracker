@@ -2873,9 +2873,16 @@ html.role-admin[data-aview="nomina"] #adminPortalView > .hero-grid > .stat-grid 
 
 @media (max-width: 767px) {
   .approval-board, .payroll-ledger, .client-board, .people-cards { grid-template-columns: minmax(0, 1fr); }
-  .rv-step { flex-direction: column !important; align-items: stretch !important; }
-  .rv-bar { width: max(40%, var(--rv-h)) !important; height: auto !important; min-height: 0 !important; }
-  .rv-foot { flex-direction: row; justify-content: space-between; gap: 8px; }
+  .river { height: auto !important; gap: 12px; }
+  .river-tile { padding: 20px 18px; }
+  .rv-step { flex-direction: column !important; align-items: stretch !important; gap: 6px; }
+  .rv-bar { width: max(58%, var(--rv-h)) !important; height: auto !important; min-height: 0 !important; }
+  .rv-label { white-space: nowrap; }
+  .rv-foot { flex-direction: column; gap: 1px; }
+  .rv-cop { white-space: nowrap; }
+  .rv-sub { font-size: 12px; }
+  #adminWeeklySection .weekly-nav { flex-wrap: wrap; max-width: 100%; }
+  #adminWeeklySection #btnAgencyBill { flex: 1 1 100%; justify-content: center; }
   .ws-row { grid-template-columns: 120px repeat(7, 44px) 90px; min-width: 0; }
   .ws-cell { height: 56px; }
   .bubble-field { min-height: 0; }
