@@ -1,384 +1,376 @@
-# Ui — Style Reference
-> clinical blueprint on frosted paper
+---
+name: Time Tracker
+description: El tiempo que corre se anuncia como el precio del día en la plaza, en cartulina fluorescente y marcador negro.
+colors:
+  ink: "#17131F"
+  ink-soft: "#2A2338"
+  ground: "#F4F1F8"
+  paper: "#FFFFFF"
+  paper-alt: "#FAF8FC"
+  muted: "#EEE9F5"
+  mid: "#5E5470"
+  faint: "#968BAA"
+  line: "#E2DAEE"
+  line-strong: "#CBBFDD"
+  magenta: "#D4136F"
+  magenta-hover: "#B80F5F"
+  magenta-soft: "#F9D3E5"
+  cartulina: "#F4EA2A"
+  cartulina-mid: "#54480E"
+  leaf: "#3FD86A"
+  tang: "#FF8A1F"
+  ember: "#C81E1E"
+  dark-ground: "#120E19"
+  dark-paper: "#1D1727"
+  dark-ink: "#F6F1FF"
+  dark-mid: "#B6A8CC"
+  dark-line: "#342A46"
+  dark-magenta: "#FF4FA3"
+  dark-sidebar: "#0C0912"
+  status-pending-bg: "#FFF7B0"
+  status-pending-rule: "#8A7A00"
+  status-pending-text: "#3D3500"
+  status-approved-bg: "#C9F7D5"
+  status-approved-rule: "#187A35"
+  status-approved-text: "#0F4D23"
+  status-rejected-bg: "#FFE0EA"
+  status-rejected-rule: "#B0124F"
+  status-rejected-text: "#8A0E3E"
+typography:
+  timer:
+    fontFamily: "Archivo, -apple-system, 'Segoe UI', sans-serif"
+    fontSize: "clamp(64px, 8.2vw, 128px)"
+    fontWeight: 900
+    lineHeight: 0.92
+    letterSpacing: "0"
+    fontVariation: "'wdth' 62"
+    fontFeature: "'tnum'"
+  display:
+    fontFamily: "Archivo, -apple-system, 'Segoe UI', sans-serif"
+    fontSize: "46px"
+    fontWeight: 900
+    lineHeight: 1
+    letterSpacing: "-0.015em"
+    fontVariation: "'wdth' 78"
+  hero-figure:
+    fontFamily: "Archivo, -apple-system, 'Segoe UI', sans-serif"
+    fontSize: "68px"
+    fontWeight: 900
+    lineHeight: 0.95
+    letterSpacing: "0"
+    fontVariation: "'wdth' 68"
+    fontFeature: "'tnum'"
+  figure:
+    fontFamily: "Archivo, -apple-system, 'Segoe UI', sans-serif"
+    fontSize: "36px"
+    fontWeight: 800
+    lineHeight: 1.05
+    letterSpacing: "-0.01em"
+    fontVariation: "'wdth' 82"
+    fontFeature: "'tnum'"
+  headline:
+    fontFamily: "Archivo, -apple-system, 'Segoe UI', sans-serif"
+    fontSize: "28px"
+    fontWeight: 900
+    lineHeight: 1.05
+    fontVariation: "'wdth' 78"
+  title:
+    fontFamily: "Archivo, -apple-system, 'Segoe UI', sans-serif"
+    fontSize: "22px"
+    fontWeight: 850
+    letterSpacing: "-0.005em"
+    fontVariation: "'wdth' 80"
+  body:
+    fontFamily: "Archivo, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    fontSize: "14px"
+    fontWeight: 400
+    lineHeight: 1.43
+  label:
+    fontFamily: "Archivo, -apple-system, 'Segoe UI', sans-serif"
+    fontSize: "11px"
+    fontWeight: 700
+rounded:
+  nested: "10px"
+  control-sm: "12px"
+  control: "14px"
+  tile: "16px"
+  control-pill: "18px"
+  module: "22px"
+  card: "24px"
+  cartulina: "26px"
+spacing:
+  hairline: "1px"
+  xs: "6px"
+  sm: "10px"
+  md: "14px"
+  lg: "18px"
+  xl: "22px"
+  gutter: "36px"
+components:
+  button-primary:
+    backgroundColor: "{colors.magenta}"
+    textColor: "{colors.paper}"
+    rounded: "{rounded.control-pill}"
+    padding: "0 14px"
+    height: "36px"
+  button-primary-hover:
+    backgroundColor: "{colors.magenta-hover}"
+  button-outline:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control-pill}"
+    padding: "0 14px"
+    height: "36px"
+  button-register:
+    backgroundColor: "{colors.magenta}"
+    textColor: "{colors.paper}"
+    rounded: "{rounded.control}"
+    height: "54px"
+  button-start:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.cartulina}"
+    rounded: "{rounded.control}"
+    height: "48px"
+  button-control:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    height: "48px"
+  tab-active:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.paper}"
+    rounded: "{rounded.control-pill}"
+  nav-link-active:
+    backgroundColor: "{colors.magenta}"
+    textColor: "{colors.paper}"
+    rounded: "{rounded.control-sm}"
+    padding: "10px 12px"
+  timer-card:
+    backgroundColor: "{colors.cartulina}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.cartulina}"
+    padding: "22px 26px 24px"
+  budget-hero:
+    backgroundColor: "{colors.cartulina}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.cartulina}"
+  balance-plate:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.dark-ink}"
+    rounded: "{rounded.tile}"
+  live-cost-tag:
+    backgroundColor: "{colors.magenta}"
+    textColor: "{colors.paper}"
+    rounded: "{rounded.nested}"
+    padding: "6px 14px"
+  input-cartulina:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control-sm}"
+  status-pending:
+    backgroundColor: "{colors.status-pending-bg}"
+    textColor: "{colors.status-pending-text}"
+    rounded: "{rounded.control-pill}"
+    padding: "2px 10px"
+  status-approved:
+    backgroundColor: "{colors.status-approved-bg}"
+    textColor: "{colors.status-approved-text}"
+    rounded: "{rounded.control-pill}"
+    padding: "2px 10px"
+  status-rejected:
+    backgroundColor: "{colors.status-rejected-bg}"
+    textColor: "{colors.status-rejected-text}"
+    rounded: "{rounded.control-pill}"
+    padding: "2px 10px"
+---
 
-**Theme:** light
+# Design System: Time Tracker
 
-Source measurements are normalized; roles and recommendations are interpreted. Font summary lists are independent, not paired by position. HTML examples are reconstructions, not source components.
+## Overview
 
-shadcn/ui is a monochromatic design-system workshop: pure white canvas, soft warm-gray surfaces, and large-radius cards floating on hairline borders. The interface is almost entirely achromatic — black text, white surfaces, gray secondary tones — with a single destructive red reserved for error states and nothing else. Typography leans on Geist's geometric neutrality with tight letter-spacing on display sizes, creating a quiet, code-adjacent feel that reads as developer infrastructure rather than consumer product.
+**Creative North Star: "Cartulina de plaza"**
 
-## Tokens — Colors
+El tiempo que corre se anuncia como el precio del día en la plaza de mercado: una cartulina amarilla fluorescente con la cifra escrita a marcador negro. El cronómetro es el protagonista de la pantalla del colaborador y el presupuesto semanal es el protagonista de la pantalla de administración; los dos son cartulinas. Todo lo demás vive en papel blanco sobre un fondo violeta pálido, con tinta violeta-negra para el texto y una sola voz de acción en magenta.
 
-| Name | Value | Token | Role |
-|------|-------|-------|------|
-| Canvas | `#f5f5f5` | `--color-canvas` | Page background, muted surface fills, secondary buttons |
-| Paper | `#ffffff` | `--color-paper` | Card surfaces, popover backgrounds, primary button fills |
-| Surface Alt | `#fafafa` | `--color-surface-alt` | Sidebar background, subtle card variant, input resting state |
-| Ink | `#0a0a0a` | `--color-ink` | Primary text, headings, button labels, icon strokes |
-| Ink Soft | `#171717` | `--color-ink-soft` | Filled button backgrounds, secondary text on light surfaces |
-| Mid Gray | `#737373` | `--color-mid-gray` | Muted body text, placeholder text, helper labels, icon fills at rest |
-| Hairline | `#e5e5e5` | `--color-hairline` | Borders, input outlines, card edges, badge outlines |
-| Ember | `#e7000b` | `--color-ember` | Red decorative accent for icons, marks, and small graphic details. Use as a supporting accent, not as a status color |
+El color hace trabajo real: el amarillo marca lo que está vivo o en juego, el magenta marca lo que se puede hacer, el verde marca lo aprobado y la TRM, el naranja marca la prioridad alta. El estado nunca depende solo del color: pendiente es punteado, aprobado es sólido, rechazado es tachado. La tipografía es una sola familia variable (Archivo) que cambia de voz con el eje de ancho: ancho normal para leer la interfaz, condensado y pesado para las cifras y los títulos, como un marcador sobre cartulina.
 
-## Tokens — Typography
+Se rechaza explícitamente el dashboard gris de tarjetas idénticas con un acento, y el sistema acromático anterior ("Clinical Blueprint on Frosted Paper"), retirado el 2026-11-11.
 
-### Geist — All interface text — body at 14px/400, headings ranging 24–48px/600, buttons at 13–14px/500. Geist's geometric letterforms and uniform stroke width create a developer-tool neutrality; weight 600 at 48px with -0.05em tracking produces tight, confident display headlines that feel engineered rather than editorial. · `--font-geist`
-- **Substitute:** Inter
-- **Weights:** 400, 500, 600
-- **Sizes:** 12, 13, 14, 16, 18, 24, 30, 36, 48
-- **Line height:** 1.10, 1.11, 1.20, 1.33, 1.43, 1.50, 1.56, 1.63, 2.00
-- **Letter spacing:** -0.0500em at display (48px), -0.0250em at subheading (24–30px), 0.0500em at caption (12px uppercase). Tracking tightens aggressively at large sizes and loosens slightly at small uppercase labels.
-- **OpenType features:** `"ss01" on, "cv11" on`
-- **Role:** All interface text — body at 14px/400, headings ranging 24–48px/600, buttons at 13–14px/500. Geist's geometric letterforms and uniform stroke width create a developer-tool neutrality; weight 600 at 48px with -0.05em tracking produces tight, confident display headlines that feel engineered rather than editorial.
+**Key Characteristics:**
+- Dos cartulinas amarillas como máximo por pantalla: el cronómetro (colaborador) y el héroe de presupuesto (administración).
+- Una sola placa invertida (tinta) por pantalla para el saldo que se le debe al colaborador.
+- Cifras en Archivo condensado (62–82 % de ancho, peso 800–900) con números tabulares.
+- Magenta como única voz de acción; nunca como texto sobre amarillo.
+- Estado por forma además de color.
+- Barra lateral en tinta en ambos temas, con ítem activo magenta.
 
-### Type Scale
+## Colors
 
-| Role | Family | Weight | Size | Line Height | Letter Spacing | Token |
-|------|--------|--------|------|-------------|----------------|-------|
-| caption | — | — | 12px | 1.33 | 0.6px | `--text-caption` |
-| body | — | — | 14px | 1.43 | — | `--text-body` |
-| body-lg | — | — | 16px | 1.5 | — | `--text-body-lg` |
-| subheading | — | — | 18px | 1.56 | — | `--text-subheading` |
-| heading-sm | — | — | 24px | 1.33 | -0.6px | `--text-heading-sm` |
-| heading | — | — | 30px | 1.2 | -0.75px | `--text-heading` |
-| heading-lg | — | — | 36px | 1.11 | -0.9px | `--text-heading-lg` |
-| display | — | — | 48px | 1.1 | -2.4px | `--text-display` |
+Tinta violeta-negra sobre fondo violeta pálido, con amarillo cartulina para lo vivo, magenta para la acción y verde y naranja como acentos de estado y datos. Todos los colores viven como canales RGB (`--c-*`) en `:root` y `.dark` de `styles.css` y Tailwind los consume con `rgb(var(--c-x) / <alpha-value>)`; nunca se define un color nuevo en Tailwind fuera de esos tokens.
 
-## Tokens — Spacing & Shapes
+### Primary
+- **Magenta de acción** (`--c-primary`, magenta / dark-magenta): botón primario, "Registrar tarea", ítem activo de la barra lateral, filtros seleccionados, barras de progreso, anillo de foco, cursor de texto y la etiqueta del costo en vivo. En claro lleva texto blanco (5.1:1); en oscuro se enciende a dark-magenta y lleva texto de tinta (6.0:1). Hover en magenta-hover; fondo suave en magenta-soft (`#4A1D38` en oscuro).
 
-**Base unit:** 4px
+### Secondary
+- **Amarillo cartulina** (`--c-sun`, cartulina): fondo de la cartulina del cronómetro y del héroe de presupuesto, color de selección de texto, fondo del avatar del saludo, ítem activo dentro de ámbitos de tinta (barra lateral, isla flotante) y texto de las etiquetas sobre la placa invertida. Tinta sobre amarillo da 14.5:1. El texto secundario sobre amarillo usa cartulina-mid (7.2:1).
 
-**Density:** compact
+### Tertiary
+- **Verde hoja** (`--c-leaf`, leaf): aprobado (relleno del punto del filtro, borde en oscuro), insignia de la TRM con texto de tinta (9.8:1), icono del segundo KPI de administración, fondo suave `#DDF8E5` del segundo KPI del colaborador.
+- **Naranja mandarina** (`--c-tang`, tang): prioridad alta en tareas, alerta de horas extra, icono del tercer KPI, fondo suave `#FFE8D2` del tercer KPI. Siempre con texto de tinta (7.8:1).
+- **Rojo brasa** (`--c-ember`, ember; `#FF6B6B` en oscuro): solo errores y acciones destructivas. Nunca como estado de una hora rechazada (eso es rosa tachado).
 
-### Spacing Scale
+### Neutral
+- **Tinta de marcador** (`--c-ink`, ink): texto principal, barra lateral, placa invertida, pestañas activas, botón Iniciar, filete superior de los módulos de administración. En oscuro el token se invierte a dark-ink.
+- **Fondo violeta pálido** (`--c-canvas`, ground): lienzo de la app; en oscuro dark-ground.
+- **Papel** (`--c-paper`, paper): tarjetas, campos dentro de la cartulina, botones de contorno; en oscuro dark-paper. paper-alt y muted son los dos escalones de superficie sutil.
+- **Gris violeta medio** (`--c-mid`, mid): texto secundario (6.3:1 sobre el fondo; dark-mid 7.9:1 sobre dark-paper).
+- **Gris violeta tenue** (`--c-faint`, faint): solo decoración, iconos inactivos y series de gráfica. Da 2.9:1 sobre el fondo: nunca para texto.
+- **Filete** (`--c-line`, line; line-strong para contornos de botón): bordes y divisores.
 
-| Name | Value | Token |
-|------|-------|-------|
-| 4 | 4px | `--spacing-4` |
-| 8 | 8px | `--spacing-8` |
-| 12 | 12px | `--spacing-12` |
-| 16 | 16px | `--spacing-16` |
-| 20 | 20px | `--spacing-20` |
-| 24 | 24px | `--spacing-24` |
-| 48 | 48px | `--spacing-48` |
+### Estados (colores fijos, no tokens de tema)
+- Pendiente: fondo status-pending-bg, borde punteado status-pending-rule, texto status-pending-text (11.2:1). Oscuro: amarillo al 12 %, borde `#F4EA2A`, texto `#F7F08A`.
+- Aprobado: fondo status-approved-bg, borde sólido status-approved-rule, texto status-approved-text (8.4:1). Oscuro: verde al 14 %, borde `#3FD86A`, texto `#8BF0A8`.
+- Rechazado: fondo status-rejected-bg, borde sólido status-rejected-rule, texto status-rejected-text tachado (7.7:1). Oscuro: magenta encendido al 14 %, borde `#FF4FA3`, texto `#FF9CCB`.
 
-### Border Radius
+### Serie de gráficas
+Las categorías en `app.js` usan general `#968BAA`, diseño `#D4136F`, video `#7B4DD8`, copy `#FF8A1F`, ads `#2FB85A`, reunión `#E8DD1E`, estrategia `#17131F` (se invierte a `#F6F1FF` en oscuro).
 
-| Element | Value |
-|---------|-------|
-| cards | 24px |
-| small | 6px |
-| badges | 18px |
-| inputs | 18px |
-| nested | 10px |
-| buttons | 18px |
+### Named Rules
+**The Two Cartulinas Rule.** El amarillo cartulina como superficie existe solo en el cronómetro (`#timerMainCard.cartulina`) y en el héroe de presupuesto (`#adminUpworkBudgetSection`). En otros lugares aparece como punto, icono, selección o tinte suave, nunca como otra tarjeta amarilla.
 
-### Shadows
+**The One Plate Rule.** Una sola placa invertida por pantalla: el cuarto KPI del colaborador (saldo). En claro es tinta con etiquetas amarillas; en oscuro se invierte a cartulina con texto de tinta.
 
-| Name | Value | Token |
-|------|-------|-------|
-| subtle | `oklab(0.145 -0.00000143796 0.00000340492 / 0.05) 0px 0px ...` | `--shadow-subtle` |
-| subtle-2 | `lab(2.75381 0 0) 0px 0px 0px 0px` | `--shadow-subtle-2` |
+**The No Magenta On Yellow Rule.** Magenta sobre amarillo da 4.0:1. Dentro de la cartulina el magenta solo aparece como relleno (botón Registrar, etiqueta de costo, punto en vivo) con texto blanco; el texto pequeño es tinta o cartulina-mid.
 
-### Layout
+## Typography
 
-- **Page max-width:** 1280px
-- **Section gap:** 48-80px
-- **Card padding:** 20px
-- **Element gap:** 8px
+**Display Font:** Archivo variable, ejes `wdth` 62–125 y `wght` 400–900 (con -apple-system, Segoe UI, sans-serif)
+**Body Font:** Archivo a ancho normal
+**Label/Mono Font:** ninguna aparte; las cifras usan Archivo con `font-feature-settings: 'tnum'`
+
+**Character:** Una sola familia con dos voces: la interfaz habla a ancho normal y peso 400–700; las cifras y los títulos gritan condensados y pesados, como letras de marcador sobre cartulina. El ancho se controla con `font-stretch` en porcentaje.
+
+### Hierarchy
+- **Timer** (900, `clamp(64px, 8.2vw, 128px)`, 0.92; 62 % de ancho; en celular `clamp(64px, 20vw, 96px)`): solo la cifra del cronómetro.
+- **Hero figure** (900, 68px, 0.95; 68 % de ancho; 52px en celular): el monto disponible del héroe de presupuesto.
+- **Display** (900, 46px, 1; 78 % de ancho; 34px en celular): título de página y saludo del colaborador (`clamp(32px, 3.6vw, 50px)`).
+- **Figure** (800, 34–36px, 1.05; 82 % de ancho): valores de KPI de colaborador y de administración.
+- **Headline** (900, 28px, 1.05; 78 % de ancho): encabezado del bloque de cobro.
+- **Title** (850, 22px; 80 % de ancho): títulos de tarjeta; los títulos de sección en mayúsculas van a 18px, 80 % de ancho. La tarea en curso sobre el cronómetro va a 24px, 850, 85 % de ancho.
+- **Body** (400, 14px, 1.43): todo el texto de interfaz a ancho normal.
+- **Label** (600–700, 11–13px): etiquetas de campos, subtítulos de KPI, insignias. 11px es el mínimo: las clases `text-[9px]` y `text-[10px]` se elevan a 11px en la app.
+
+### Named Rules
+**The Marker Width Rule.** Condensado (62–85 %) solo para cifras y títulos; nunca para párrafos, etiquetas de campo ni botones. Cuanto más importante la cifra, más condensada y pesada: cronómetro 62 %, héroe 68 %, títulos 78–80 %, KPIs 82 %.
+
+**The Tabular Figures Rule.** Toda cifra que cambia (cronómetro, costo en vivo, KPIs, celdas de tabla) usa números tabulares para que no baile.
+
+## Layout
+
+Una página por rol con barra lateral fija en escritorio y barra inferior en celular (por debajo de 1024px). El cronómetro ocupa todo el ancho del contenido.
+
+- **Cronómetro:** en celular apila la cifra primero y luego colaborador, cliente, descripción y controles (filas de 14px). Desde 1024px pasa a dos columnas (`1fr` / `1.15fr`, separación 36px): campos y controles a la izquierda, la cámara con la cifra a la derecha separada por un filete punteado de tinta al 35 %.
+- **KPIs del colaborador:** directamente sobre el fondo, sin tarjeta envolvente; cuatro baldosas en rejilla.
+- **KPIs de administración:** módulos pegados con separación de 1px (el filete), filete superior de tinta de 2px y filete inferior de tinta al 16 %; cada módulo con relleno 16px 18px 18px.
+- **Héroe de presupuesto:** subdivisiones con filete superior de tinta, separadas 20px; a una sola columna por debajo de 480px.
+- **Celular (≤767px):** el saludo se compacta para que el cronómetro suba; la cartulina usa relleno 18px 16px.
+- Puntos de quiebre observados: 480px, 767px, 1023/1024px.
+
+## Elevation & Depth
+
+Híbrido: superficies planas de papel con sombras suaves desplazadas hacia abajo y teñidas de violeta; las dos cartulinas se levantan más que todo lo demás. Dentro de los módulos de administración no hay sombra: la estructura la dan los filetes.
+
+### Shadow Vocabulary
+- **Card** (`--shadow-card`: `0 1px 2px rgba(40,20,70,.06), 0 12px 28px -18px rgba(60,25,100,.32)`): tarjetas de papel, meta semanal, placa invertida.
+- **Lift** (`--shadow-lift`: `0 2px 4px rgba(40,20,70,.08), 0 22px 44px -22px rgba(60,25,100,.45)`): cartulina del cronómetro y héroe de presupuesto.
+- **Live** (`0 2px 4px rgba(23,19,31,.12), 0 30px 60px -26px rgba(212,19,111,.55)`): la cartulina del cronómetro cuando corre; la sombra se tiñe de magenta.
+- **Action** (`0 8px 18px -12px rgb(var(--c-primary) / .9)`): bajo botones primarios y el ítem activo de la barra lateral.
+- En oscuro las sombras son negras más densas (definidas en `.dark`).
+
+### Named Rules
+**The Downward Shadow Rule.** Toda sombra tiene desplazamiento vertical y difuminado negativo; no hay resplandores de desplazamiento cero ni sombras duras desplazadas. Los anillos de 0 offset solo existen como contorno (isla flotante con anillo amarillo de 2px, punto en vivo).
+
+## Shapes
+
+Esquinas generosas y graduadas por jerarquía: cartulinas 26px (22px en celular), tarjetas 24px, módulos de KPI 22px, baldosas del colaborador 16px, controles en píldora 18px, controles dentro de la cartulina 12–14px, anidados 10px. Los módulos de administración pierden la esquina (0px) porque viven dentro de un filete.
+
+Los bordes de tinta tienen grosor de marcador: 2px en las cartulinas y en los botones de control, 1.5px en campos de la cartulina, botones de contorno e insignias de estado. Dos objetos se inclinan como papel pegado: el avatar del saludo y el logotipo (-4°) y la etiqueta del costo en vivo (-2°). Ningún otro elemento rota.
 
 ## Components
 
-### Primary Filled Button
-**Role:** High-emphasis action (Submit, Save, Create)
+### Buttons
+Táctiles y seguros, en peso 650.
+- **Shape:** píldora suave (18px), 36px de alto, 0 14px de relleno; pequeño 30px.
+- **Primary:** magenta con texto blanco (tinta en oscuro) y sombra de acción.
+- **Hover / Focus:** magenta-hover; `:active` escala a 0.98; foco con contorno magenta de 2px a 2px de distancia.
+- **Outline:** papel con borde de 1.5px line-strong; en hover el borde pasa a tinta.
+- **Ghost:** superficie muted con texto de tinta.
+- **Grises heredados:** cualquier `.bg-faint.text-white` se reasigna a magenta porque no alcanzaba AA.
 
-Background #0a0a0a, text #fafafa, border none, radius 18px, padding 0px 12px (compact) or 8px 16px (comfortable), font 14px Geist weight 500. Height ≈ 36–40px. The dark-on-light inversion is the only chromatic interaction in the system; the fully rounded radius (18px on a ~36px height) produces perfect pill geometry.
+### Filters and Tabs
+- **Filtro de periodo:** grupo segmentado en papel con contorno interno de 1px, relleno 3px, radio 14px; cada botón radio 11px, peso 600; el seleccionado es magenta.
+- **Filtros de estado:** el punto de cada filtro repite el estado: pendiente amarillo con contorno punteado, aprobado verde con anillo verde oscuro, rechazado rosa con anillo vino. Los contadores dentro de un filtro activo van a opacidad completa.
+- **Pestañas activas** (`.tab-btn`, tareas): tinta con texto de papel, sin sombra.
 
-### Secondary Ghost Button
-**Role:** Low-emphasis action (Cancel, Back)
+### Status Badges
+- **Forma por estado:** pendiente con borde punteado de 1.5px, aprobado con borde sólido de 1.5px, rechazado con borde sólido y texto tachado (1.5px). Peso 700, relleno 2px 10px, píldora.
+- El punto del pendiente no parpadea: la forma punteada ya dice "en espera".
+- Prioridad alta en tareas: naranja con texto de tinta.
 
-Background #f5f5f5, text #0a0a0a, no border, radius 18px, padding 0px 12px or 8px 16px, font 14px weight 500. Soft gray fill reads as a tonal sibling to the primary rather than a muted alternative — both buttons share shape and type, differing only in lightness.
+### Cards / Containers
+- **Corner Style:** 24px (tarjetas), 20px (meta semanal).
+- **Background:** papel sobre el fondo violeta pálido.
+- **Shadow Strategy:** Card (ver Elevation).
+- **Border:** filete de 1px line cuando existe.
+- **Recordatorios:** fondo amarillo muy pálido (`#FFFBD6`; amarillo al 8 % en oscuro) con icono magenta.
 
-### Outline Button
-**Role:** Tertiary action with visible boundary
+### Inputs / Fields
+- **Style general:** superficie muted sin borde, píldora de 18px, 14px de texto.
+- **Dentro de la cartulina:** papel blanco, borde de tinta al 85 % de 1.5px, radio 12px, placeholder `#6E6338`; las etiquetas son tinta en peso 700.
+- **Focus:** borde magenta con anillo magenta al 30 % de 3px (cartulina); en toda la app el contorno de foco magenta de 2px.
 
-Background transparent, text #0a0a0a, border 1px solid #e5e5e5, radius 18px, padding 0px 12px or 8px 10px. The hairline border defines the shape without weight — preferred when the button sits inside a card or alongside filled controls.
+### Navigation
+- **Barra lateral:** ámbito de tinta en ambos temas (fondo ink; dark-sidebar en oscuro). Enlaces de 14px peso 500 en gris violeta claro, relleno 10px 12px, radio 12px; hover en tinta clara; activo en magenta con texto blanco, peso 700 y sombra de acción.
+- **Barra superior:** fondo al 86 % con desenfoque y filete inferior.
+- **Celular:** barra inferior con pestaña activa en magenta peso 700 y botón flotante con sombra de acción.
 
-### Card
-**Role:** Content container for blocks, previews, dashboard panels
+### Cartulina del cronómetro (signature)
+`#timerMainCard.cartulina`: amarillo cartulina, borde de tinta de 2px, radio 26px, relleno 22px 26px 24px, sombra Lift (Live cuando corre). Encabezado en tinta, 13px peso 800. Sobre la cifra, cuando hay tarea en curso, su nombre en Title condensado y el cliente en 13px cartulina-mid. La cifra en Timer. Debajo, la etiqueta del costo en vivo (magenta, texto blanco 20px peso 800, radio 10px, inclinada -2°) y el equivalente en COP en 13px peso 700 cartulina-mid. Controles: blancos con borde de tinta de 2px, 48px de alto, radio 14px, peso 800; **Iniciar** en tinta con texto amarillo; **Registrar tarea** en magenta, 54px de alto. Deshabilitados: tinta al 7 % con texto al 45 %, sin sombra. La alerta de horas extra es papel con borde punteado ember e icono naranja.
 
-Background #ffffff, radius 24px, border 1px solid #e5e5e5, shadow oklab(0.145/.05) 0 0 0 1px + rgba(0,0,0,0.1) 0 1px 3px + rgba(0,0,0,0.1) 0 1px 2px -1px, padding 20px. The 1px hairline shadow stacks with a faint elevation layer — cards sit visually raised but remain flat and understated.
+### Héroe de presupuesto (signature)
+`#adminUpworkBudgetSection`: segunda cartulina, mismo borde, radio y sombra. El monto en Hero figure. Las subdivisiones son transparentes con filete superior de tinta al 80 %; el paso final de la ruta es una placa de tinta con texto amarillo. Dentro de este ámbito el "primario" es tinta con texto amarillo, no magenta.
 
-### Nested Card Header/Footer
-**Role:** Header or footer strip inside a card
+### KPI tiles
+- **Colaborador:** baldosas de 16px sin borde con tintes de cartulina (amarillo `#FFF9C4`, verde `#DDF8E5`, naranja `#FFE8D2`; al 12–13 % en oscuro) y la cuarta como placa invertida (ver The One Plate Rule). Cifras en Figure.
+- **Administración:** módulos con filete (ver Layout) sobre el fondo de la app, sin sombra ni radio; icono de 28px radio 8px en cartulina de color (amarillo, verde, naranja, magenta con icono blanco) y texto de tinta.
 
-Asymmetric radius — top corners 24px on header, bottom corners 24px on footer. Padding 20px horizontal, transparent fill. Provides a subtle tonal band within card boundaries without introducing a new color.
+### Isla flotante del tiempo activo
+`#dynamicIslandTimer`: píldora de tinta con anillo amarillo de 2px y sombra hacia abajo; dentro, el primario es amarillo.
 
-### Input Field
-**Role:** Text entry, search, form controls
+### Ámbitos de tokens
+Cuatro ámbitos reescriben los canales `--c-*` y recalculan las variables derivadas (`--bg-*`, `--primary`, `--text-*`, `--border-soft`): `#appSidebar` (tinta), `#timerMainCard.cartulina` (amarillo con magenta como primario), `#adminUpworkBudgetSection` (amarillo con tinta como primario) y `#dynamicIslandTimer` (tinta con amarillo como primario). `.scope-inverse` es el ámbito de tinta reutilizable. Un componente nuevo dentro de estos ámbitos debe usar tokens, no hex fijos, para heredar la inversión.
 
-Background #f5f5f5 (resting) or transparent (inline), text #0a0a0a, border none at rest with 1px #e5e5e5 on focus, radius 18px, padding 8px 10px, font 14px weight 400. The soft gray fill differentiates the input from the card surface beneath it; focus replaces the fill with a 1px ring.
-
-### Badge — Solid
-**Role:** Tag, status pill, counter
-
-Background #171717, text #fafafa, radius 18px, padding 2px 8px, font 12px weight 500. Pill-shaped at 18px radius — the minimum height creates a capsule tag.
-
-### Badge — Soft
-**Role:** Neutral label, category tag
-
-Background #f5f5f5, text #171717, radius 18px, padding 2px 8px, font 12px weight 500. Same capsule geometry as solid badge, tonal variant.
-
-### Badge — Outline
-**Role:** Subtle tag with no fill
-
-Transparent background, text #0a0a0a, radius 18px, padding 2px 8px. The lightest-weight tag — used when the label is informational rather than categorical.
-
-### Sidebar Surface
-**Role:** Left navigation panel
-
-Background #fafafa, full-height, contained width. Sits one tonal step off the canvas (#f5f5f5) so the navigation reads as a distinct layer without introducing a divider line.
-
-### Breadcrumb Trail
-**Role:** Hierarchical path indicator
-
-Inline text with chevron separators, font 14px weight 400, color #737373 for separators and #0a0a0a for the current segment. No background, no borders — purely typographic hierarchy.
-
-### Stat Block
-**Role:** Large numeric metric display
-
-Label in 12–14px uppercase #737373, value in 30–48px weight 600 #0a0a0a with tight tracking. Progress bar or comparison text in 14px #737373. The block relies on typographic scale alone — no card chrome — to establish the metric.
-
-### Search Trigger
-**Role:** Command palette / search input
-
-Background #f5f5f5, text #737373, radius 18px, padding 8px 10px, with a keyboard shortcut indicator (e.g., ⌘K) right-aligned. Functions as both a button and an input affordance.
-
-### Destructive Action
-**Role:** Delete, remove, revoke — error-adjacent interactions
-
-Text or icon in #e7000b against the monochromatic palette. The red is the only chromatic hue in the system and appears exclusively in destructive or error contexts — it never decorates.
+### Motion
+Solo hay un movimiento ambiental: el punto en vivo del cronómetro late (anillo magenta que se expande de 4px a 8px y se desvanece, 1.4s ease-in-out, infinito) mientras el tiempo corre, y se apaga con `prefers-reduced-motion: reduce`. El resto son transiciones de estado de 120–200ms (color, borde, sombra) y la escala 0.98 al presionar.
 
 ## Do's and Don'ts
 
-### Do
-- Use #0a0a0a on #ffffff for filled buttons — the dark inversion is the only primary action treatment.
-- Maintain 18px radius on all buttons, inputs, and badges for perfect pill geometry; use 24px radius only on cards.
-- Set display headlines at 48px/600 with -0.0500em tracking — Geist's geometric weight at this size with aggressive tightening produces the engineered headline voice.
-- Reserve #e7000b exclusively for destructive states; never use it for decoration, branding, or non-error emphasis.
-- Stack card shadows as 1px hairline + 1px + 2px offset — the combined effect is a barely-perceptible elevation that reads as 'card' without drama.
-- Use #f5f5f5 for secondary surfaces and inputs; use #fafafa for sidebar and subtle card variants — the three-tone surface stack (canvas → soft → paper) creates layering without borders.
+### Do:
+- **Do** tomar todo color de los canales `--c-*` de `styles.css` (o de las clases Tailwind que los consumen) y definir cualquier variante oscura en `.dark`.
+- **Do** mantener el amarillo cartulina como superficie solo en el cronómetro y en el héroe de presupuesto.
+- **Do** marcar el estado con forma además de color: pendiente punteado, aprobado sólido, rechazado tachado.
+- **Do** escribir cifras y títulos en Archivo condensado (62–85 % de ancho, peso 800–900) con números tabulares, y la interfaz a ancho normal.
+- **Do** usar magenta para la acción principal y para el foco (contorno de 2px, separación 2px).
+- **Do** mantener contraste AA en ambos temas; texto secundario en mid / dark-mid y, sobre amarillo, cartulina-mid.
+- **Do** respetar `prefers-reduced-motion` en cualquier animación nueva.
+- **Do** añadir clases solo de estilo cuando haga falta un gancho visual nuevo.
 
-### Don't
-- Do not introduce chromatic brand colors beyond #e7000b — the monochromatic palette is the system.
-- Do not use border-radius values other than 18px (interactive) or 24px (containers); avoid square corners on any element.
-- Do not skip the 1px hairline border on cards — the shadow alone does not define the card edge in this system.
-- Do not set body text below 14px or above #737373 lightness — the type scale is deliberately compact.
-- Do not apply gradients, colored shadows, or accent fills — every surface is a solid tone.
-- Do not use letter-spacing wider than 0.05em or tighter than -0.05em; tracking outside this range breaks the typographic system.
-- Do not mix filled and outline buttons of the same size in a single row without visual rhythm — alternate ghost or secondary variants.
-
-## Surfaces
-
-| Level | Name | Value | Purpose |
-|-------|------|-------|---------|
-| 0 | Canvas | `#f5f5f5` | Page background, broadest layer |
-| 1 | Sidebar | `#fafafa` | Navigation surface, one step lighter than canvas |
-| 2 | Card | `#ffffff` | Primary content container, brightest surface |
-| 3 | Input Fill | `#f5f5f5` | Resting input field, matches canvas tone for subtle differentiation |
-
-## Elevation
-
-- **Card:** `0 0 0 1px rgba(23,23,23,0.05), 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)`
-- **Button (filled):** `none — relies on tonal contrast, not shadow`
-- **Input (focus):** `1px solid #e5e5e5 ring, no offset shadow`
-
-## Imagery
-
-Minimal imagery — the system is almost entirely UI. No hero photography, no illustrations, no decorative graphics. Product showcases are rendered as component mockups (cards, inputs, buttons) in a grid, serving as both documentation and visual content. Icons are thin-stroke geometric marks (likely Lucide-derived) at 1.5–2px stroke weight in #0a0a0a or #737373, used sparingly as functional cues. The visual language IS the UI components themselves — the page functions as a living style guide where every visible element is a design token made visible.
-
-## Agent Prompt Guide
-
-**Quick Color Reference**
-- Canvas/background: #f5f5f5
-- Card/surface: #ffffff
-- Primary text: #0a0a0a
-- Muted text: #737373
-- Border: #e5e5e5
-- primary action: #171717 (filled action)
-- Destructive: #e7000b
-
-**Example Component Prompts**
-1. Create a dashboard stat card: white (#ffffff) background, 24px radius, 1px solid #e5e5e5 border, shadow 0 0 0 1px rgba(23,23,23,0.05) + 0 1px 3px rgba(0,0,0,0.1) + 0 1px 2px -1px rgba(0,0,0,0.1), 20px padding. Label in 12px uppercase #737373, value in 36px Geist weight 600 #0a0a0a with -0.025em tracking.
-
-2. Create a filled dark button: background #0a0a0a, text #fafafa, no border, 18px radius, padding 0px 12px, font 14px Geist weight 500. Height 36px. No shadow — tonal contrast only.
-
-3. Create a ghost secondary button: background #f5f5f5, text #0a0a0a, no border, 18px radius, padding 0px 12px, font 14px weight 500. Same dimensions as the filled button for visual parity.
-
-4. Create an input field: background #f5f5f5, text #0a0a0a, placeholder #737373, no border at rest, 18px radius, padding 8px 10px, font 14px weight 400. On focus: 1px solid #e5e5e5 ring with no offset.
-
-5. Create a badge tag: background #171717, text #fafafa, 18px radius (full pill), padding 2px 8px, font 12px Geist weight 500.
-
-## Design Philosophy
-
-shadcn/ui is built on three principles visible in every token: (1) achromatic by default — color is absence, not expression; (2) radius defines hierarchy — 18px for interactive elements, 24px for containers, never anything in between; (3) elevation is whisper-quiet — the card shadow is barely perceptible, relying on 1px hairlines and tonal contrast rather than dramatic drop shadows. The system is designed to be copied, modified, and owned — every value is explicit, every token is simple, and nothing is locked behind abstraction.
-
-## Similar Brands
-
-- **Vercel** — Same monochromatic palette, same Geist/geometric sans pairing, same pill-shaped buttons with tight letter-spacing on display text
-- **Linear** — Identical approach to monochromatic UI with single accent for destructive states, tight typographic tracking, and hairline-bordered cards
-- **Radix UI** — Same developer-tool visual language — neutral surfaces, geometric type, and component-first documentation layout
-- **Tailwind UI** — Matching restrained palette, identical border-radius scale (large radii on containers), and code-adjacent minimal chrome
-- **Cal.com** — Same compact density, same pill-badge system, and the same achromatic-first approach with red reserved for errors
-
-## Quick Start
-
-### CSS Custom Properties
-
-```css
-:root {
-  /* Colors */
-  --color-canvas: #f5f5f5;
-  --color-paper: #ffffff;
-  --color-surface-alt: #fafafa;
-  --color-ink: #0a0a0a;
-  --color-ink-soft: #171717;
-  --color-mid-gray: #737373;
-  --color-hairline: #e5e5e5;
-  --color-ember: #e7000b;
-
-  /* Typography — Font Families */
-  --font-geist: 'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-
-  /* Typography — Scale */
-  --text-caption: 12px;
-  --leading-caption: 1.33;
-  --tracking-caption: 0.6px;
-  --text-body: 14px;
-  --leading-body: 1.43;
-  --text-body-lg: 16px;
-  --leading-body-lg: 1.5;
-  --text-subheading: 18px;
-  --leading-subheading: 1.56;
-  --text-heading-sm: 24px;
-  --leading-heading-sm: 1.33;
-  --tracking-heading-sm: -0.6px;
-  --text-heading: 30px;
-  --leading-heading: 1.2;
-  --tracking-heading: -0.75px;
-  --text-heading-lg: 36px;
-  --leading-heading-lg: 1.11;
-  --tracking-heading-lg: -0.9px;
-  --text-display: 48px;
-  --leading-display: 1.1;
-  --tracking-display: -2.4px;
-
-  /* Typography — Weights */
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-
-  /* Spacing */
-  --spacing-unit: 4px;
-  --spacing-4: 4px;
-  --spacing-8: 8px;
-  --spacing-12: 12px;
-  --spacing-16: 16px;
-  --spacing-20: 20px;
-  --spacing-24: 24px;
-  --spacing-48: 48px;
-
-  /* Layout */
-  --page-max-width: 1280px;
-  --section-gap: 48-80px;
-  --card-padding: 20px;
-  --element-gap: 8px;
-
-  /* Border Radius */
-  --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
-  --radius-2xl: 18px;
-  --radius-3xl: 24px;
-
-  /* Named Radii */
-  --radius-cards: 24px;
-  --radius-small: 6px;
-  --radius-badges: 18px;
-  --radius-inputs: 18px;
-  --radius-nested: 10px;
-  --radius-buttons: 18px;
-
-  /* Shadows */
-  --shadow-subtle: oklab(0.145 -0.00000143796 0.00000340492 / 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px;
-  --shadow-subtle-2: lab(2.75381 0 0) 0px 0px 0px 0px;
-
-  /* Surfaces */
-  --surface-canvas: #f5f5f5;
-  --surface-sidebar: #fafafa;
-  --surface-card: #ffffff;
-  --surface-input-fill: #f5f5f5;
-}
-```
-
-### Tailwind v4
-
-```css
-@theme {
-  /* Colors */
-  --color-canvas: #f5f5f5;
-  --color-paper: #ffffff;
-  --color-surface-alt: #fafafa;
-  --color-ink: #0a0a0a;
-  --color-ink-soft: #171717;
-  --color-mid-gray: #737373;
-  --color-hairline: #e5e5e5;
-  --color-ember: #e7000b;
-
-  /* Typography */
-  --font-geist: 'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-
-  /* Typography — Scale */
-  --text-caption: 12px;
-  --leading-caption: 1.33;
-  --tracking-caption: 0.6px;
-  --text-body: 14px;
-  --leading-body: 1.43;
-  --text-body-lg: 16px;
-  --leading-body-lg: 1.5;
-  --text-subheading: 18px;
-  --leading-subheading: 1.56;
-  --text-heading-sm: 24px;
-  --leading-heading-sm: 1.33;
-  --tracking-heading-sm: -0.6px;
-  --text-heading: 30px;
-  --leading-heading: 1.2;
-  --tracking-heading: -0.75px;
-  --text-heading-lg: 36px;
-  --leading-heading-lg: 1.11;
-  --tracking-heading-lg: -0.9px;
-  --text-display: 48px;
-  --leading-display: 1.1;
-  --tracking-display: -2.4px;
-
-  /* Spacing */
-  --spacing-4: 4px;
-  --spacing-8: 8px;
-  --spacing-12: 12px;
-  --spacing-16: 16px;
-  --spacing-20: 20px;
-  --spacing-24: 24px;
-  --spacing-48: 48px;
-
-  /* Border Radius */
-  --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
-  --radius-2xl: 18px;
-  --radius-3xl: 24px;
-
-  /* Shadows */
-  --shadow-subtle: oklab(0.145 -0.00000143796 0.00000340492 / 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px;
-  --shadow-subtle-2: lab(2.75381 0 0) 0px 0px 0px 0px;
-}
-```
+### Don't:
+- **Don't** renombrar ni eliminar ids, clases ni atributos `data-*` que use `app.js` (por ejemplo `#timerMainCard`, `#timerDisplay`, `#btnStart`, `#btnRegisterTask`, `#liveCostBadge`, `#timerActiveTitle`, `#liveCostCop`, `.btn-status-filter[data-status]`, `.status-*`); la capa visual se engancha a ellos sin tocarlos.
+- **Don't** poner texto magenta sobre amarillo (4.0:1).
+- **Don't** usar faint para texto (2.9:1 sobre el fondo).
+- **Don't** usar ember (rojo) para "rechazado"; rechazado es rosa tachado y ember queda para errores y acciones destructivas.
+- **Don't** añadir una segunda placa invertida ni una tercera cartulina en la misma pantalla.
+- **Don't** usar resplandores de desplazamiento cero ni sombras duras desplazadas.
+- **Don't** bajar de 11px en la app.
+- **Don't** reintroducir el sistema acromático "Clinical Blueprint on Frosted Paper" ni la fuente Geist/Inter.

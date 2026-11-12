@@ -1,45 +1,20 @@
 # Widely Social — Agent & Development Guidelines
 
-## Official UI Design System: "Clinical Blueprint on Frosted Paper" (shadcn/ui style reference)
+## Official UI Design System: "Cartulina de plaza"
 
-All UI development, styling, and components in Widely Social must adhere strictly to the rules and design tokens outlined in `Design.md`.
+All UI development, styling, and components in Widely Social must follow `Design.md` and `PRODUCT.md`. The previous achromatic system ("Clinical Blueprint on Frosted Paper") was retired on 2026-11-11; do not reintroduce it.
 
 ### Core Design Principles
-1. **Achromatic by Default**:
-   - The palette is monochromatic. Color is absence, not expression.
-   - Canvas: `#f5f5f5`
-   - Paper / Card: `#ffffff`
-   - Surface Alt / Sidebar: `#fafafa`
-   - Primary Ink: `#0a0a0a`
-   - Soft Ink: `#171717`
-   - Mid Gray (Muted text / placeholders): `#737373`
-   - Hairline borders: `#e5e5e5`
-   - **Destructive Ember**: `#e7000b` (Strictly reserved for destructive actions, errors, and alerts. Never used for decoration or non-error emphasis).
+1. **Color does real jobs.** Tokens live as RGB channels in `styles.css` (`:root` and `.dark`) and feed Tailwind (`tailwind.config.js`).
+   - Ink `#17131F` (sidebar, inverted plates, marker text) · Ground `#F4F1F8` (pale violet) · Paper `#FFFFFF`
+   - Action magenta `#D4136F` (dark mode `#FF4FA3` with ink text): primary buttons, selection, active nav.
+   - Cartulina yellow `#F4EA2A`: the live timer card and the admin budget hero only.
+   - Accents: green `#3FD86A` (approved / TRM), orange `#FF8A1F` (high priority), red `#C81E1E` for errors and destructive actions.
+2. **The timer is the protagonist.** `#timerMainCard.cartulina` is a yellow card with a 2px ink rule; the elapsed time is set in Archivo at 900 weight, 62% width. One reversed (ink) plate per screen for the balance owed.
+3. **Status by shape and color.** Pending = yellow, dashed border. Approved = green, solid. Rejected = pink, struck through.
+4. **Typography: Archivo (variable width axis).** UI text at normal width; titles and figures condensed (78–82% width, 800–900 weight). Minimum 11px.
+5. **Depth:** soft offset shadows (`--shadow-card`, `--shadow-lift`), no zero-offset glows, no thick side-tab borders.
+6. **Never rename or remove ids, classes or `data-*` attributes used by `app.js`** when restyling; add style-only classes instead.
+7. **Accessibility:** WCAG AA contrast in both themes, visible focus (2px magenta outline).
 
-2. **Strict Border-Radius Hierarchy**:
-   - **Interactive Elements** (Buttons, Inputs, Badges): `18px` (`--radius-2xl` / perfect pill geometry).
-   - **Containers & Cards**: `24px` (`--radius-3xl`).
-   - **Nested elements**: `10px` (`--radius-lg`).
-   - **Small accents**: `6px` (`--radius-md`).
-   - *Never use arbitrary radius values or sharp square corners.*
-
-3. **Whisper-Quiet Elevation & Hairlines**:
-   - Cards always use a 1px hairline border (`#e5e5e5`) paired with subtle elevation:
-     `box-shadow: 0 0 0 1px rgba(23, 23, 23, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);`
-   - Filled primary buttons rely solely on tonal contrast (`#0a0a0a` on `#ffffff`), without drop shadows.
-   - Input fields: `#f5f5f5` fill resting with no border; on `:focus` display a 1px `#e5e5e5` ring without offset.
-
-4. **Typography (Geist / Inter)**:
-   - Body: `14px / 1.43` font-weight 400.
-   - Headings: `24px–36px / font-weight 600` with tight letter spacing (`-0.6px` to `-0.9px`).
-   - Display Headings: `48px / font-weight 600` with tight tracking (`-0.05em` / `-2.4px`).
-   - Caption / Uppercase tags: `12px / 1.33` with loose tracking (`+0.6px` / `+0.05em`).
-
-5. **Component Rules**:
-   - **Primary Action**: Pill radius 18px, bg `#0a0a0a`, text `#fafafa`, font 14px 500, height 36–40px.
-   - **Secondary / Ghost**: Pill radius 18px, bg `#f5f5f5`, text `#0a0a0a`, no border.
-   - **Outline**: Pill radius 18px, transparent bg, border 1px solid `#e5e5e5`, text `#0a0a0a`.
-   - **Stat Blocks**: Large numeric metric in 30–48px 600 `#0a0a0a` with tight tracking, label in 12px uppercase `#737373`.
-   - **No gradients, colored shadows, or chromatic brand fills on general UI surfaces.** (Virtual payment cards retain their specific banking finishes).
-
-Consult `Design.md` for complete token values and CSS custom properties.
+Consult `Design.md` for complete token values and component rules.

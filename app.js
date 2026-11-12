@@ -108,13 +108,13 @@ document.getElementById("btnConfigureKey")?.addEventListener("click", () => {
    CATEGORÍAS DE ACTIVIDAD & METADATA
    ============================================================================ */
 const CATEGORIES = {
-  general: { label: "General", icon: "fa-briefcase", color: "text-mid", bg: "bg-canvas dark:bg-muted border-line", chartColor: "#A3A3A3" },
-  diseno: { label: "Diseño Gráfico", icon: "fa-palette", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#0A0A0A" },
-  video: { label: "Edición Video", icon: "fa-film", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#404040" },
-  copy: { label: "Redacción & Copy", icon: "fa-pen-nib", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#737373" },
-  ads: { label: "Pauta & Ads", icon: "fa-chart-line", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#262626" },
-  reunion: { label: "Reunión", icon: "fa-users", color: "text-mid", bg: "bg-canvas dark:bg-muted border-line", chartColor: "#D4D4D4" },
-  estrategia: { label: "Estrategia", icon: "fa-lightbulb", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#525252" }
+  general: { label: "General", icon: "fa-briefcase", color: "text-mid", bg: "bg-canvas dark:bg-muted border-line", chartColor: "#968BAA" },
+  diseno: { label: "Diseño Gráfico", icon: "fa-palette", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#D4136F" },
+  video: { label: "Edición Video", icon: "fa-film", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#7B4DD8" },
+  copy: { label: "Redacción & Copy", icon: "fa-pen-nib", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#FF8A1F" },
+  ads: { label: "Pauta & Ads", icon: "fa-chart-line", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#2FB85A" },
+  reunion: { label: "Reunión", icon: "fa-users", color: "text-mid", bg: "bg-canvas dark:bg-muted border-line", chartColor: "#E8DD1E" },
+  estrategia: { label: "Estrategia", icon: "fa-lightbulb", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#17131F" }
 };
 
 // En modo oscuro la escala de grises se invierte para mantener el contraste sobre fondo negro
@@ -244,6 +244,8 @@ const elements = {
   timerOvertimeAlert: document.getElementById("timerOvertimeAlert"),
   btnDismissOvertimeAlert: document.getElementById("btnDismissOvertimeAlert"),
   liveCostBadge: document.getElementById("liveCostBadge"),
+  liveCostCop: document.getElementById("liveCostCop"),
+  timerActiveTitle: document.getElementById("timerActiveTitle"),
   timerStatusBadge: document.getElementById("timerStatusBadge"),
   btnStart: document.getElementById("btnStart"),
   btnPause: document.getElementById("btnPause"),
@@ -1005,7 +1007,7 @@ function applyRoleView() {
         elements.timerWorkerSelectContainer.classList.add("hidden");
       }
       if (elements.workerHeroName) {
-        elements.workerHeroName.textContent = `¡Hola, ${profile.nombre || "Colaborador"}! 👋`;
+        elements.workerHeroName.textContent = `¡Hola, ${profile.nombre || "Colaborador"}!`;
       }
       if (elements.workerHeroAvatar) {
         if (profile.fotoUrl) {
@@ -1801,9 +1803,25 @@ function resetTimer() {
 
 function renderTimerDisplay() {
   elements.timerDisplay.textContent = formatSecondsToTime(state.timer.elapsedSeconds);
+  updateTimerActiveTitle();
   updateDynamicIslandUI();
   updatePipDisplay();
   updateBackgroundTabTitle();
+}
+
+// Título de la cartulina: la tarea en curso se lee como encabezado mientras el cronómetro tiene tiempo
+function updateTimerActiveTitle() {
+  const box = elements.timerActiveTitle;
+  if (!box) return;
+  const desc = (elements.timerTaskDescription?.value || "").trim();
+  const show = desc !== "" && state.timer.elapsedSeconds > 0;
+  box.classList.toggle("hidden", !show);
+  if (!show) return;
+  const client = (elements.timerClientProject?.value || "").trim();
+  const catSel = elements.timerCategory;
+  const catLabel = catSel && catSel.selectedIndex >= 0 ? catSel.options[catSel.selectedIndex].text.replace(/^[^\p{L}]+/u, "") : "";
+  box.querySelector("b").textContent = desc;
+  box.querySelector("span").textContent = [client, catLabel].filter(Boolean).join(" · ");
 }
 
 function updateLiveCost() {
@@ -1814,6 +1832,7 @@ function updateLiveCost() {
   const cost = hours * rate;
 
   elements.liveCostBadge.textContent = `$${cost.toFixed(2)}`;
+  if (elements.liveCostCop) elements.liveCostCop.textContent = `≈ ${formatCop(cost * getActiveTrmRate())}`;
   if (elements.islandCostBadge) elements.islandCostBadge.textContent = `$${cost.toFixed(2)}`;
   updatePipDisplay();
 }
@@ -4505,8 +4524,8 @@ function renderProductivityCharts() {
         datasets: [{
           label: "Horas trabajadas",
           data: chartData,
-          backgroundColor: isDark ? "rgba(250, 250, 250, 0.9)" : "rgba(10, 10, 10, 0.9)",
-          hoverBackgroundColor: isDark ? "#FFFFFF" : "#262626",
+          backgroundColor: isDark ? "#FF4FA3" : "#D4136F",
+          hoverBackgroundColor: isDark ? "#FF73B6" : "#B80F5F",
           borderRadius: 6,
           borderSkipped: false,
           maxBarThickness: 32
@@ -4518,10 +4537,10 @@ function renderProductivityCharts() {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: isDark ? "#171717" : "#FFFFFF",
+            backgroundColor: isDark ? "#1D1727" : "#FFFFFF",
             titleColor: isDark ? "#FAFAFA" : "#0A0A0A",
-            bodyColor: isDark ? "#A3A3A3" : "#737373",
-            borderColor: isDark ? "#262626" : "#E5E5E5",
+            bodyColor: isDark ? "#B6A8CC" : "#5E5470",
+            borderColor: isDark ? "#342A46" : "#E2DAEE",
             borderWidth: 1,
             padding: 10,
             cornerRadius: 8,
@@ -4534,8 +4553,8 @@ function renderProductivityCharts() {
           x: {
             grid: { display: false },
             ticks: {
-              color: isDark ? "#A3A3A3" : "#737373",
-              font: { family: "'Inter', sans-serif", size: 10 }
+              color: isDark ? "#B6A8CC" : "#5E5470",
+              font: { family: "'Archivo', sans-serif", size: 10 }
             }
           },
           y: {
@@ -4544,8 +4563,8 @@ function renderProductivityCharts() {
               color: isDark ? "rgba(255, 255, 255, 0.05)" : "#E5E5E5"
             },
             ticks: {
-              color: isDark ? "#A3A3A3" : "#737373",
-              font: { family: "'Inter', sans-serif", size: 10 },
+              color: isDark ? "#B6A8CC" : "#5E5470",
+              font: { family: "'Archivo', sans-serif", size: 10 },
               callback: (v) => `${v}h`
             }
           }
@@ -4577,7 +4596,7 @@ function renderProductivityCharts() {
         const meta = getCategoryMeta(k);
         catLabels.push(meta.label);
         catData.push(Number(categoryMap[k].toFixed(2)));
-        catColors.push(isDark ? invertGray(meta.chartColor) : meta.chartColor);
+        catColors.push(isDark && meta.chartColor === "#17131F" ? "#F6F1FF" : meta.chartColor);
       });
     } else {
       catLabels = ["Sin registros"];
@@ -4594,7 +4613,7 @@ function renderProductivityCharts() {
           data: catData,
           backgroundColor: catColors,
           borderWidth: 2,
-          borderColor: isDark ? "#171717" : "#FFFFFF",
+          borderColor: isDark ? "#1D1727" : "#FFFFFF",
           hoverOffset: 4
         }]
       },
@@ -4606,18 +4625,18 @@ function renderProductivityCharts() {
           legend: {
             position: "bottom",
             labels: {
-              color: isDark ? "#A3A3A3" : "#737373",
+              color: isDark ? "#B6A8CC" : "#5E5470",
               boxWidth: 8,
               boxHeight: 8,
               padding: 10,
-              font: { family: "'Inter', sans-serif", size: 10 }
+              font: { family: "'Archivo', sans-serif", size: 10 }
             }
           },
           tooltip: {
-            backgroundColor: isDark ? "#171717" : "#FFFFFF",
+            backgroundColor: isDark ? "#1D1727" : "#FFFFFF",
             titleColor: isDark ? "#FAFAFA" : "#0A0A0A",
-            bodyColor: isDark ? "#A3A3A3" : "#737373",
-            borderColor: isDark ? "#262626" : "#E5E5E5",
+            bodyColor: isDark ? "#B6A8CC" : "#5E5470",
+            borderColor: isDark ? "#342A46" : "#E2DAEE",
             borderWidth: 1,
             padding: 10,
             cornerRadius: 8,
@@ -5969,7 +5988,7 @@ function handleExportTasksCsv() {
     const isArt = (Number(t.cantidadArtes) || 0) > 0;
     const usd = Number(t.costoTotal || 0);
     const cop = usd * currentTrm;
-    const cat = getCategoryInfo(t.categoria);
+    const cat = getCategoryMeta(t.categoria);
     const status = t.aprobada === false ? "Rechazada" : (t.aprobada === true ? "Aprobada" : "Pendiente");
 
     return [
@@ -7996,9 +8015,9 @@ function renderSummary(scope, worker) {
   }
   if (typeof Chart !== "undefined" && els.chart) {
     const isDark = document.documentElement.classList.contains("dark");
-    const ink = isDark ? "rgba(250, 250, 250, 0.9)" : "rgba(10, 10, 10, 0.9)";
-    const soft = isDark ? "rgba(250, 250, 250, 0.25)" : "rgba(10, 10, 10, 0.18)";
-    const axis = isDark ? "#A3A3A3" : "#737373";
+    const ink = isDark ? "#FF4FA3" : "#D4136F";
+    const soft = isDark ? "rgba(244, 234, 42, 0.55)" : "rgba(212, 196, 20, 0.55)";
+    const axis = isDark ? "#B6A8CC" : "#5E5470";
     summaryCharts[scope] = new Chart(els.chart.getContext("2d"), {
       type: "bar",
       data: {
@@ -8012,12 +8031,12 @@ function renderSummary(scope, worker) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: "bottom", labels: { color: axis, boxWidth: 10, boxHeight: 10, font: { family: "'Inter', sans-serif", size: 11 } } },
+          legend: { position: "bottom", labels: { color: axis, boxWidth: 10, boxHeight: 10, font: { family: "'Archivo', sans-serif", size: 11 } } },
           tooltip: {
-            backgroundColor: isDark ? "#171717" : "#FFFFFF",
+            backgroundColor: isDark ? "#1D1727" : "#FFFFFF",
             titleColor: isDark ? "#FAFAFA" : "#0A0A0A",
             bodyColor: axis,
-            borderColor: isDark ? "#262626" : "#E5E5E5",
+            borderColor: isDark ? "#342A46" : "#E2DAEE",
             borderWidth: 1,
             padding: 10,
             cornerRadius: 8,
@@ -8025,9 +8044,9 @@ function renderSummary(scope, worker) {
           }
         },
         scales: {
-          x: { stacked: true, grid: { display: false }, ticks: { color: axis, font: { family: "'Inter', sans-serif", size: 10 } } },
+          x: { stacked: true, grid: { display: false }, ticks: { color: axis, font: { family: "'Archivo', sans-serif", size: 10 } } },
           y: { stacked: true, beginAtZero: true, grid: { color: isDark ? "rgba(255, 255, 255, 0.05)" : "#E5E5E5" },
-            ticks: { color: axis, maxTicksLimit: 6, font: { family: "'Inter', sans-serif", size: 10 }, callback: (v) => `${v}h` } }
+            ticks: { color: axis, maxTicksLimit: 6, font: { family: "'Archivo', sans-serif", size: 10 }, callback: (v) => `${v}h` } }
         }
       }
     });
