@@ -1,10 +1,11 @@
-const CACHE_NAME = "widely-tracker-v2";
+const CACHE_NAME = "widely-tracker-v3";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./styles.css",
   "./tailwind.min.css",
   "./app.js",
+  "./ui-shell.js",
   "./manifest.json",
   "./icon-192.svg",
   "./icon-512.svg"

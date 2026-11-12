@@ -108,13 +108,13 @@ document.getElementById("btnConfigureKey")?.addEventListener("click", () => {
    CATEGORÍAS DE ACTIVIDAD & METADATA
    ============================================================================ */
 const CATEGORIES = {
-  general: { label: "General", icon: "fa-briefcase", color: "text-mid", bg: "bg-canvas dark:bg-muted border-line", chartColor: "#968BAA" },
-  diseno: { label: "Diseño Gráfico", icon: "fa-palette", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#D4136F" },
-  video: { label: "Edición Video", icon: "fa-film", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#7B4DD8" },
-  copy: { label: "Redacción & Copy", icon: "fa-pen-nib", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#FF8A1F" },
-  ads: { label: "Pauta & Ads", icon: "fa-chart-line", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#2FB85A" },
-  reunion: { label: "Reunión", icon: "fa-users", color: "text-mid", bg: "bg-canvas dark:bg-muted border-line", chartColor: "#E8DD1E" },
-  estrategia: { label: "Estrategia", icon: "fa-lightbulb", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#17131F" }
+  general: { label: "General", icon: "fa-briefcase", color: "text-mid", bg: "bg-canvas dark:bg-muted border-line", chartColor: "#9497B3" },
+  diseno: { label: "Diseño Gráfico", icon: "fa-palette", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#6D4BFF" },
+  video: { label: "Edición Video", icon: "fa-film", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#C94BD8" },
+  copy: { label: "Redacción & Copy", icon: "fa-pen-nib", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#FF9F1C" },
+  ads: { label: "Pauta & Ads", icon: "fa-chart-line", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#FF5A5F" },
+  reunion: { label: "Reunión", icon: "fa-users", color: "text-mid", bg: "bg-canvas dark:bg-muted border-line", chartColor: "#FFC83A" },
+  estrategia: { label: "Estrategia", icon: "fa-lightbulb", color: "text-ink", bg: "bg-ink/10 border-line", chartColor: "#12B5A6" }
 };
 
 // En modo oscuro la escala de grises se invierte para mantener el contraste sobre fondo negro
@@ -183,6 +183,9 @@ let adminsConfigUnsubscribe = null;
 /* ============================================================================
    2. ESTADO GLOBAL DE LA APLICACIÓN
    ============================================================================ */
+// Acceso de solo lectura para la capa de interfaz (ui-shell.js dibuja la rueda del día)
+window.__tt = { get state() { return state; } };
+
 let state = {
   workers: [],      // Colección 'trabajadores'
   users: [],        // Colección 'usuarios' (solo administradores)
@@ -4524,8 +4527,8 @@ function renderProductivityCharts() {
         datasets: [{
           label: "Horas trabajadas",
           data: chartData,
-          backgroundColor: isDark ? "#FF4FA3" : "#D4136F",
-          hoverBackgroundColor: isDark ? "#FF73B6" : "#B80F5F",
+          backgroundColor: "#6D4BFF",
+          hoverBackgroundColor: "#8A70FF",
           borderRadius: 6,
           borderSkipped: false,
           maxBarThickness: 32
@@ -4537,10 +4540,10 @@ function renderProductivityCharts() {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: isDark ? "#1D1727" : "#FFFFFF",
+            backgroundColor: isDark ? "#171933" : "#FFFFFF",
             titleColor: isDark ? "#FAFAFA" : "#0A0A0A",
-            bodyColor: isDark ? "#B6A8CC" : "#5E5470",
-            borderColor: isDark ? "#342A46" : "#E2DAEE",
+            bodyColor: isDark ? "#A3A6C4" : "#5B5E78",
+            borderColor: isDark ? "#2A2D4D" : "#DFE2EE",
             borderWidth: 1,
             padding: 10,
             cornerRadius: 8,
@@ -4553,8 +4556,8 @@ function renderProductivityCharts() {
           x: {
             grid: { display: false },
             ticks: {
-              color: isDark ? "#B6A8CC" : "#5E5470",
-              font: { family: "'Archivo', sans-serif", size: 10 }
+              color: isDark ? "#A3A6C4" : "#5B5E78",
+              font: { family: "'Onest', sans-serif", size: 10 }
             }
           },
           y: {
@@ -4563,8 +4566,8 @@ function renderProductivityCharts() {
               color: isDark ? "rgba(255, 255, 255, 0.05)" : "#E5E5E5"
             },
             ticks: {
-              color: isDark ? "#B6A8CC" : "#5E5470",
-              font: { family: "'Archivo', sans-serif", size: 10 },
+              color: isDark ? "#A3A6C4" : "#5B5E78",
+              font: { family: "'Onest', sans-serif", size: 10 },
               callback: (v) => `${v}h`
             }
           }
@@ -4596,7 +4599,7 @@ function renderProductivityCharts() {
         const meta = getCategoryMeta(k);
         catLabels.push(meta.label);
         catData.push(Number(categoryMap[k].toFixed(2)));
-        catColors.push(isDark && meta.chartColor === "#17131F" ? "#F6F1FF" : meta.chartColor);
+        catColors.push(meta.chartColor);
       });
     } else {
       catLabels = ["Sin registros"];
@@ -4613,7 +4616,7 @@ function renderProductivityCharts() {
           data: catData,
           backgroundColor: catColors,
           borderWidth: 2,
-          borderColor: isDark ? "#1D1727" : "#FFFFFF",
+          borderColor: isDark ? "#171933" : "#FFFFFF",
           hoverOffset: 4
         }]
       },
@@ -4625,18 +4628,18 @@ function renderProductivityCharts() {
           legend: {
             position: "bottom",
             labels: {
-              color: isDark ? "#B6A8CC" : "#5E5470",
+              color: isDark ? "#A3A6C4" : "#5B5E78",
               boxWidth: 8,
               boxHeight: 8,
               padding: 10,
-              font: { family: "'Archivo', sans-serif", size: 10 }
+              font: { family: "'Onest', sans-serif", size: 10 }
             }
           },
           tooltip: {
-            backgroundColor: isDark ? "#1D1727" : "#FFFFFF",
+            backgroundColor: isDark ? "#171933" : "#FFFFFF",
             titleColor: isDark ? "#FAFAFA" : "#0A0A0A",
-            bodyColor: isDark ? "#B6A8CC" : "#5E5470",
-            borderColor: isDark ? "#342A46" : "#E2DAEE",
+            bodyColor: isDark ? "#A3A6C4" : "#5B5E78",
+            borderColor: isDark ? "#2A2D4D" : "#DFE2EE",
             borderWidth: 1,
             padding: 10,
             cornerRadius: 8,
@@ -8015,9 +8018,9 @@ function renderSummary(scope, worker) {
   }
   if (typeof Chart !== "undefined" && els.chart) {
     const isDark = document.documentElement.classList.contains("dark");
-    const ink = isDark ? "#FF4FA3" : "#D4136F";
-    const soft = isDark ? "rgba(244, 234, 42, 0.55)" : "rgba(212, 196, 20, 0.55)";
-    const axis = isDark ? "#B6A8CC" : "#5E5470";
+    const ink = "#6D4BFF";
+    const soft = "rgba(255, 200, 58, 0.7)";
+    const axis = isDark ? "#A3A6C4" : "#5B5E78";
     summaryCharts[scope] = new Chart(els.chart.getContext("2d"), {
       type: "bar",
       data: {
@@ -8031,12 +8034,12 @@ function renderSummary(scope, worker) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: "bottom", labels: { color: axis, boxWidth: 10, boxHeight: 10, font: { family: "'Archivo', sans-serif", size: 11 } } },
+          legend: { position: "bottom", labels: { color: axis, boxWidth: 10, boxHeight: 10, font: { family: "'Onest', sans-serif", size: 11 } } },
           tooltip: {
-            backgroundColor: isDark ? "#1D1727" : "#FFFFFF",
+            backgroundColor: isDark ? "#171933" : "#FFFFFF",
             titleColor: isDark ? "#FAFAFA" : "#0A0A0A",
             bodyColor: axis,
-            borderColor: isDark ? "#342A46" : "#E2DAEE",
+            borderColor: isDark ? "#2A2D4D" : "#DFE2EE",
             borderWidth: 1,
             padding: 10,
             cornerRadius: 8,
@@ -8044,9 +8047,9 @@ function renderSummary(scope, worker) {
           }
         },
         scales: {
-          x: { stacked: true, grid: { display: false }, ticks: { color: axis, font: { family: "'Archivo', sans-serif", size: 10 } } },
+          x: { stacked: true, grid: { display: false }, ticks: { color: axis, font: { family: "'Onest', sans-serif", size: 10 } } },
           y: { stacked: true, beginAtZero: true, grid: { color: isDark ? "rgba(255, 255, 255, 0.05)" : "#E5E5E5" },
-            ticks: { color: axis, maxTicksLimit: 6, font: { family: "'Archivo', sans-serif", size: 10 }, callback: (v) => `${v}h` } }
+            ticks: { color: axis, maxTicksLimit: 6, font: { family: "'Onest', sans-serif", size: 10 }, callback: (v) => `${v}h` } }
         }
       }
     });

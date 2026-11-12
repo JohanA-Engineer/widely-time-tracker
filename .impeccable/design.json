@@ -1,63 +1,29 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-12T04:57:48.424Z",
+  "generatedAt": "2026-11-12T05:47:09.508Z",
   "title": "Design System: Time Tracker",
   "extensions": {
     "colorMeta": {
-      "ink": {
+      "lavanda": {
         "role": "neutral",
-        "displayName": "Tinta de marcador",
-        "canonical": "#17131F",
-        "oklch": "oklch(19.8% 0.024 299.5)",
+        "displayName": "Lavanda frío",
+        "canonical": "#ECEEF6",
+        "oklch": "oklch(95.0% 0.011 274.9)",
         "tonalRamp": [
-          "#0D0914",
-          "#26222E",
-          "#413D4A",
-          "#5F5B67",
-          "#817E89",
-          "#A5A3AC",
-          "#CBC9CF",
-          "#EFEEF1"
+          "#0A0B0E",
+          "#232428",
+          "#3E3F45",
+          "#5C5D64",
+          "#7E8087",
+          "#A2A4AB",
+          "#C8CAD1",
+          "#EDEEF4"
         ],
-        "purpose": "Texto, barra lateral, placa invertida. Canal --c-ink."
+        "purpose": "Fondo de la app (--c-canvas)."
       },
-      "ink-soft": {
+      "tile": {
         "role": "neutral",
-        "displayName": "Tinta suave",
-        "canonical": "#2A2338",
-        "oklch": "oklch(27.4% 0.039 299.1)",
-        "tonalRamp": [
-          "#0D0718",
-          "#272034",
-          "#423B51",
-          "#605A6F",
-          "#827D90",
-          "#A6A2B2",
-          "#CCC8D5",
-          "#EFEDF5"
-        ],
-        "purpose": "Hover del botón Iniciar y de acentos de tinta."
-      },
-      "ground": {
-        "role": "neutral",
-        "displayName": "Fondo violeta pálido",
-        "canonical": "#F4F1F8",
-        "oklch": "oklch(96.2% 0.010 305.4)",
-        "tonalRamp": [
-          "#0B0B0C",
-          "#242425",
-          "#403F41",
-          "#5E5D60",
-          "#817F84",
-          "#A6A3A9",
-          "#CCC9CF",
-          "#F0EDF4"
-        ],
-        "purpose": "Lienzo de la app. Canal --c-canvas."
-      },
-      "paper": {
-        "role": "neutral",
-        "displayName": "Papel",
+        "displayName": "Tile blanco",
         "canonical": "#FFFFFF",
         "oklch": "oklch(100.0% 0.000 89.9)",
         "tonalRamp": [
@@ -70,773 +36,941 @@
           "#CACACA",
           "#EEEEEE"
         ],
-        "purpose": "Tarjetas y campos. Canal --c-paper."
+        "purpose": "Tiles, cajón, grupos de filtros (--c-paper)."
       },
-      "paper-alt": {
+      "tile-alt": {
         "role": "neutral",
-        "displayName": "Papel alterno",
-        "canonical": "#FAF8FC",
-        "oklch": "oklch(98.2% 0.006 308.4)",
+        "displayName": "Tile alterno",
+        "canonical": "#F5F6FB",
+        "oklch": "oklch(97.4% 0.007 277.2)",
         "tonalRamp": [
-          "#0B0B0B",
-          "#242424",
-          "#403F41",
-          "#5E5D5F",
-          "#817F82",
-          "#A5A4A7",
-          "#CBCACD",
-          "#EFEDF1"
+          "#0B0B0D",
+          "#232426",
+          "#3F3F43",
+          "#5C5D61",
+          "#7F8084",
+          "#A3A4A9",
+          "#C9CACE",
+          "#EDEEF2"
         ],
-        "purpose": "Superficie alterna. Canal --c-alt."
+        "purpose": "Superficies secundarias (--c-alt)."
       },
-      "muted": {
+      "hundido": {
         "role": "neutral",
-        "displayName": "Superficie sutil",
-        "canonical": "#EEE9F5",
-        "oklch": "oklch(94.1% 0.017 304.8)",
+        "displayName": "Hundido",
+        "canonical": "#E4E7F2",
+        "oklch": "oklch(92.9% 0.015 273.8)",
         "tonalRamp": [
-          "#0B0B0C",
-          "#242326",
-          "#413F43",
-          "#5F5C62",
-          "#827E86",
-          "#A6A2AC",
-          "#CDC8D3",
-          "#F1ECF8"
+          "#0A0B0F",
+          "#22242A",
+          "#3D3F47",
+          "#5B5D66",
+          "#7D808A",
+          "#A1A4AE",
+          "#C8CAD3",
+          "#ECEEF6"
         ],
-        "purpose": "Campos y botones fantasma. Canal --c-muted."
+        "purpose": "Campos, controles, pistas (--c-muted)."
       },
-      "mid": {
+      "linea": {
         "role": "neutral",
-        "displayName": "Gris violeta medio",
-        "canonical": "#5E5470",
-        "oklch": "oklch(46.6% 0.046 301.0)",
+        "displayName": "Línea",
+        "canonical": "#DFE2EE",
+        "oklch": "oklch(91.4% 0.017 274.8)",
         "tonalRamp": [
-          "#0E0718",
-          "#271F35",
-          "#443A54",
-          "#625874",
-          "#847B97",
-          "#A89FBA",
-          "#CEC6DD",
-          "#F1EBFE"
+          "#0A0B0F",
+          "#22242A",
+          "#3D3F48",
+          "#5B5D67",
+          "#7D808A",
+          "#A1A4AF",
+          "#C7CAD4",
+          "#ECEEF7"
         ],
-        "purpose": "Texto secundario, 6.3:1 sobre el fondo. Canal --c-mid."
+        "purpose": "Divisiones internas (--c-line)."
       },
-      "faint": {
+      "borde-fuerte": {
         "role": "neutral",
-        "displayName": "Gris violeta tenue",
-        "canonical": "#968BAA",
-        "oklch": "oklch(65.7% 0.047 301.3)",
+        "displayName": "Borde fuerte",
+        "canonical": "#C6CADD",
+        "oklch": "oklch(84.2% 0.027 276.3)",
         "tonalRamp": [
-          "#0D0914",
-          "#272031",
-          "#433B51",
-          "#625872",
-          "#857A98",
-          "#A99EBD",
-          "#CFC5E2",
-          "#F3E9FF"
+          "#090B11",
+          "#21232E",
+          "#3C3F4C",
+          "#595D6D",
+          "#7C7F91",
+          "#A0A4B5",
+          "#C6CADA",
+          "#EBEEFC"
         ],
-        "purpose": "Solo decoración; 2.9:1, nunca texto. Canal --c-faint."
+        "purpose": "Contorno del botón secundario (--border-strong)."
       },
-      "line": {
-        "role": "neutral",
-        "displayName": "Filete",
-        "canonical": "#E2DAEE",
-        "oklch": "oklch(90.1% 0.028 303.9)",
-        "tonalRamp": [
-          "#0C0B0D",
-          "#252328",
-          "#413E46",
-          "#605B66",
-          "#837D8B",
-          "#A8A1B2",
-          "#CEC6DA",
-          "#F2EAFE"
-        ],
-        "purpose": "Bordes y divisores. Canal --c-line."
-      },
-      "line-strong": {
-        "role": "neutral",
-        "displayName": "Filete fuerte",
-        "canonical": "#CBBFDD",
-        "oklch": "oklch(82.4% 0.043 303.6)",
-        "tonalRamp": [
-          "#0C0A10",
-          "#26222C",
-          "#433C4B",
-          "#61596D",
-          "#857B93",
-          "#AA9FBA",
-          "#D0C4E2",
-          "#F4E8FF"
-        ],
-        "purpose": "Contorno de botones outline. --border-strong."
-      },
-      "magenta": {
+      "tinta": {
         "role": "primary",
-        "displayName": "Magenta de acción",
-        "canonical": "#D4136F",
-        "oklch": "oklch(56.8% 0.222 1.0)",
+        "displayName": "Tinta azul noche",
+        "canonical": "#12122A",
+        "oklch": "oklch(19.7% 0.047 281.1)",
         "tonalRamp": [
-          "#300008",
-          "#5A001F",
-          "#86003A",
-          "#B20056",
-          "#DF2878",
-          "#FF609D",
-          "#FF92C3",
-          "#FFC1E8"
+          "#090A15",
+          "#212234",
+          "#3C3D55",
+          "#595B77",
+          "#7B7D9C",
+          "#9FA2C1",
+          "#C5C8E5",
+          "#EAECFF"
         ],
-        "purpose": "Acción principal, foco, selección activa. Canal --c-primary."
+        "purpose": "Texto y acciones principales (--c-ink, --c-primary)."
       },
-      "magenta-hover": {
+      "tinta-suave": {
         "role": "primary",
-        "displayName": "Magenta presionado",
-        "canonical": "#B80F5F",
-        "oklch": "oklch(51.1% 0.200 1.2)",
+        "displayName": "Tinta suave",
+        "canonical": "#2A2B48",
+        "oklch": "oklch(30.3% 0.052 281.3)",
         "tonalRamp": [
-          "#300008",
-          "#59001F",
-          "#83003A",
-          "#AD0057",
-          "#D53E79",
-          "#F96E9E",
-          "#FF9EC4",
-          "#FFCBE9"
+          "#090A16",
+          "#212236",
+          "#3B3D58",
+          "#585A7A",
+          "#7A7D9F",
+          "#9FA1C4",
+          "#C5C8E8",
+          "#EAECFF"
         ],
-        "purpose": "Hover del primario. --primary-hover."
+        "purpose": "Hover de la acción principal (--primary-hover)."
       },
-      "magenta-soft": {
-        "role": "primary",
-        "displayName": "Magenta suave",
-        "canonical": "#F9D3E5",
-        "oklch": "oklch(90.4% 0.048 347.9)",
+      "tinta-media": {
+        "role": "neutral",
+        "displayName": "Tinta media",
+        "canonical": "#5B5E78",
+        "oklch": "oklch(48.9% 0.042 279.6)",
         "tonalRamp": [
-          "#0E0A0C",
-          "#2A2125",
-          "#4A3B42",
-          "#6C5761",
-          "#927784",
-          "#BA9AA9",
-          "#E3BFD0",
-          "#FFE2F4"
+          "#090A14",
+          "#212233",
+          "#3C3E53",
+          "#595B74",
+          "#7B7E99",
+          "#9FA2BE",
+          "#C5C9E2",
+          "#EAEDFF"
         ],
-        "purpose": "Fondo suave de acción. --primary-soft."
+        "purpose": "Etiquetas y texto secundario (--c-mid)."
       },
-      "cartulina": {
-        "role": "secondary",
-        "displayName": "Amarillo cartulina",
-        "canonical": "#F4EA2A",
-        "oklch": "oklch(91.6% 0.188 106.3)",
+      "tinta-tenue": {
+        "role": "neutral",
+        "displayName": "Tinta tenue",
+        "canonical": "#9497B3",
+        "oklch": "oklch(68.3% 0.041 280.4)",
         "tonalRamp": [
-          "#0D0C01",
-          "#282500",
-          "#464200",
-          "#676100",
-          "#8C8400",
-          "#B3AA00",
-          "#DBD100",
-          "#FFF541"
+          "#090A14",
+          "#212232",
+          "#3C3E53",
+          "#595B74",
+          "#7B7E99",
+          "#9FA2BE",
+          "#C6C8E2",
+          "#EAEDFF"
         ],
-        "purpose": "Cronómetro y héroe de presupuesto. Canal --c-sun."
-      },
-      "cartulina-mid": {
-        "role": "secondary",
-        "displayName": "Ocre de cartulina",
-        "canonical": "#54480E",
-        "oklch": "oklch(40.3% 0.075 96.8)",
-        "tonalRamp": [
-          "#130A00",
-          "#2E2300",
-          "#4B3F02",
-          "#695E29",
-          "#8B8151",
-          "#AFA57B",
-          "#D3CBA8",
-          "#F5EFD4"
-        ],
-        "purpose": "Texto secundario sobre amarillo, 7.2:1."
-      },
-      "leaf": {
-        "role": "tertiary",
-        "displayName": "Verde hoja",
-        "canonical": "#3FD86A",
-        "oklch": "oklch(77.9% 0.198 148.5)",
-        "tonalRamp": [
-          "#001200",
-          "#003000",
-          "#00510E",
-          "#007422",
-          "#009B3C",
-          "#26C459",
-          "#5CEC7F",
-          "#8FFFA9"
-        ],
-        "purpose": "Aprobado, TRM. Canal --c-leaf."
-      },
-      "tang": {
-        "role": "tertiary",
-        "displayName": "Naranja mandarina",
-        "canonical": "#FF8A1F",
-        "oklch": "oklch(74.8% 0.176 55.4)",
-        "tonalRamp": [
-          "#1F0000",
-          "#450F00",
-          "#6E2600",
-          "#984000",
-          "#C75F00",
-          "#F5810D",
-          "#FFA950",
-          "#FFD183"
-        ],
-        "purpose": "Prioridad alta, horas extra. Canal --c-tang."
+        "purpose": "Marcas del dial, deshabilitados (--c-faint)."
       },
       "ember": {
-        "role": "tertiary",
-        "displayName": "Rojo brasa",
-        "canonical": "#C81E1E",
-        "oklch": "oklch(53.5% 0.203 27.6)",
+        "role": "error",
+        "displayName": "Ember",
+        "canonical": "#C82030",
+        "oklch": "oklch(53.8% 0.200 23.3)",
         "tonalRamp": [
-          "#320000",
-          "#5C0000",
-          "#880000",
-          "#B30009",
-          "#DE3E36",
-          "#FF6F62",
-          "#FF9F90",
-          "#FFCBBD"
+          "#2A0000",
+          "#570000",
+          "#840007",
+          "#B10222",
+          "#DE3B42",
+          "#FF6868",
+          "#FF9894",
+          "#FFC7C1"
         ],
-        "purpose": "Errores y acciones destructivas. Canal --c-ember."
+        "purpose": "Error y destructivo (--c-ember)."
       },
-      "dark-ground": {
-        "role": "neutral",
-        "displayName": "Fondo nocturno",
-        "canonical": "#120E19",
-        "oklch": "oklch(17.4% 0.023 300.7)",
-        "tonalRamp": [
-          "#0D0913",
-          "#26222D",
-          "#413D49",
-          "#5F5B67",
-          "#817E88",
-          "#A5A3AB",
-          "#CBC9CE",
-          "#EFEEF0"
-        ],
-        "purpose": "--c-canvas en .dark."
-      },
-      "dark-paper": {
-        "role": "neutral",
-        "displayName": "Papel nocturno",
-        "canonical": "#1D1727",
-        "oklch": "oklch(22.0% 0.032 301.1)",
-        "tonalRamp": [
-          "#0D0816",
-          "#272031",
-          "#423C4D",
-          "#605A6A",
-          "#827D8C",
-          "#A6A2AE",
-          "#CCC9D1",
-          "#EFEDF2"
-        ],
-        "purpose": "--c-paper en .dark."
-      },
-      "dark-ink": {
-        "role": "neutral",
-        "displayName": "Tinta clara",
-        "canonical": "#F6F1FF",
-        "oklch": "oklch(96.6% 0.019 302.2)",
-        "tonalRamp": [
-          "#0B0B0C",
-          "#242326",
-          "#403F43",
-          "#5F5C63",
-          "#827E87",
-          "#A6A2AD",
-          "#CCC8D5",
-          "#F1ECFA"
-        ],
-        "purpose": "--c-ink en .dark y en ámbitos de tinta."
-      },
-      "dark-mid": {
-        "role": "neutral",
-        "displayName": "Gris violeta claro",
-        "canonical": "#B6A8CC",
-        "oklch": "oklch(75.5% 0.053 302.8)",
-        "tonalRamp": [
-          "#0D0913",
-          "#272130",
-          "#433B50",
-          "#625872",
-          "#867A99",
-          "#AB9DC0",
-          "#D1C3E7",
-          "#F4E8FF"
-        ],
-        "purpose": "--c-mid en .dark, 7.9:1 sobre papel nocturno."
-      },
-      "dark-line": {
-        "role": "neutral",
-        "displayName": "Filete nocturno",
-        "canonical": "#342A46",
-        "oklch": "oklch(30.9% 0.051 299.9)",
-        "tonalRamp": [
-          "#0E061C",
-          "#281E39",
-          "#443A56",
-          "#615874",
-          "#847B95",
-          "#A7A0B7",
-          "#CDC7D9",
-          "#F0ECF9"
-        ],
-        "purpose": "--c-line en .dark."
-      },
-      "dark-magenta": {
-        "role": "primary",
-        "displayName": "Magenta encendido",
-        "canonical": "#FF4FA3",
-        "oklch": "oklch(69.5% 0.223 355.3)",
-        "tonalRamp": [
-          "#27000D",
-          "#500027",
-          "#7C0044",
-          "#A80562",
-          "#DA3086",
-          "#FF59AB",
-          "#FF89D1",
-          "#FFB6F4"
-        ],
-        "purpose": "--c-primary en .dark, con texto de tinta (6.0:1)."
-      },
-      "dark-sidebar": {
-        "role": "neutral",
-        "displayName": "Tinta profunda",
-        "canonical": "#0C0912",
-        "oklch": "oklch(14.9% 0.020 299.4)",
-        "tonalRamp": [
-          "#0C0912",
-          "#25222C",
-          "#413E48",
-          "#5F5C65",
-          "#817F87",
-          "#A5A3A9",
-          "#CBCACD",
-          "#EFEEF0"
-        ],
-        "purpose": "--c-sidebar en .dark."
-      },
-      "status-pending-bg": {
+      "sol": {
         "role": "secondary",
-        "displayName": "Pendiente fondo",
-        "canonical": "#FFF7B0",
-        "oklch": "oklch(96.6% 0.090 102.5)",
+        "displayName": "Amarillo sol",
+        "canonical": "#FFC83A",
+        "oklch": "oklch(85.9% 0.160 86.1)",
         "tonalRamp": [
-          "#0C0B06",
-          "#262518",
-          "#434129",
-          "#635F3D",
-          "#878254",
-          "#ADA76F",
-          "#D5CD8C",
-          "#FAF2AB"
+          "#1A0500",
+          "#3C1B00",
+          "#603500",
+          "#835300",
+          "#AA7600",
+          "#CF9C00",
+          "#F2C454",
+          "#FFEA93"
         ],
-        "purpose": "Insignia pendiente."
+        "purpose": "Solo dinero (--c-sun)."
       },
-      "status-pending-rule": {
+      "sol-texto": {
         "role": "secondary",
-        "displayName": "Pendiente filete",
-        "canonical": "#8A7A00",
-        "oklch": "oklch(57.6% 0.120 100.1)",
+        "displayName": "Ocre sobre sol",
+        "canonical": "#5A4500",
+        "oklch": "oklch(40.2% 0.082 88.8)",
         "tonalRamp": [
-          "#130900",
-          "#2F2300",
-          "#4D3F00",
-          "#6D5E00",
-          "#918114",
-          "#B5A64D",
-          "#D9CD7F",
-          "#FBF1AE"
+          "#120900",
+          "#302200",
+          "#4F3D06",
+          "#705B22",
+          "#947E43",
+          "#B9A26A",
+          "#DDC996",
+          "#FEEDC3"
         ],
-        "purpose": "Borde punteado del pendiente."
+        "purpose": "Texto secundario sobre tiles de dinero."
       },
-      "status-pending-text": {
+      "coral": {
         "role": "secondary",
-        "displayName": "Pendiente texto",
-        "canonical": "#3D3500",
-        "oklch": "oklch(32.7% 0.068 100.0)",
+        "displayName": "Coral en vivo",
+        "canonical": "#FF5A5F",
+        "oklch": "oklch(68.9% 0.200 22.4)",
         "tonalRamp": [
-          "#120A00",
-          "#2C2400",
-          "#48400F",
-          "#665F33",
-          "#88815A",
-          "#ABA684",
-          "#D0CCB1",
-          "#F2EFDC"
+          "#2A0000",
+          "#570000",
+          "#84000A",
+          "#B10024",
+          "#DF3A45",
+          "#FF686A",
+          "#FF9896",
+          "#FFC7C2"
         ],
-        "purpose": "Texto del pendiente, 11.2:1."
+        "purpose": "Solo lo que está corriendo (--c-coral)."
       },
-      "status-approved-bg": {
-        "role": "tertiary",
-        "displayName": "Aprobado fondo",
-        "canonical": "#C9F7D5",
-        "oklch": "oklch(93.5% 0.066 153.0)",
+      "coral-hover": {
+        "role": "secondary",
+        "displayName": "Coral hover",
+        "canonical": "#FF7A7E",
+        "oklch": "oklch(73.5% 0.162 20.1)",
         "tonalRamp": [
-          "#080C09",
-          "#1D2720",
-          "#344538",
-          "#4D6453",
-          "#6A8972",
-          "#8AB094",
-          "#ACD7B7",
-          "#CEFCDA"
+          "#250000",
+          "#4F0009",
+          "#79081E",
+          "#A32A36",
+          "#CF4F56",
+          "#F7777B",
+          "#FFA4A4",
+          "#FFCFCE"
         ],
-        "purpose": "Insignia aprobada."
+        "purpose": "Hover de Iniciar."
       },
-      "status-approved-rule": {
+      "violeta": {
         "role": "tertiary",
-        "displayName": "Aprobado filete",
-        "canonical": "#187A35",
-        "oklch": "oklch(50.9% 0.136 148.2)",
+        "displayName": "Violeta foco",
+        "canonical": "#6D4BFF",
+        "oklch": "oklch(56.3% 0.250 283.5)",
         "tonalRamp": [
-          "#001400",
-          "#003100",
-          "#005010",
-          "#08712D",
-          "#3F9551",
-          "#6DB97A",
-          "#9CDDA5",
-          "#C8FFCF"
+          "#0F003E",
+          "#250076",
+          "#3E00AC",
+          "#582EDD",
+          "#7758FF",
+          "#9784FF",
+          "#BCB2FF",
+          "#E0DDFF"
         ],
-        "purpose": "Borde sólido del aprobado."
+        "purpose": "Foco, selección, progreso; cliente 1 (--c-violet)."
       },
-      "status-approved-text": {
+      "teal": {
         "role": "tertiary",
-        "displayName": "Aprobado texto",
-        "canonical": "#0F4D23",
-        "oklch": "oklch(37.1% 0.093 149.5)",
+        "displayName": "Teal",
+        "canonical": "#12B5A6",
+        "oklch": "oklch(69.6% 0.121 184.3)",
+        "tonalRamp": [
+          "#00120E",
+          "#003029",
+          "#005046",
+          "#007265",
+          "#009789",
+          "#30BCAD",
+          "#72E1D2",
+          "#ABFFF5"
+        ],
+        "purpose": "Aprobada, TRM; cliente 3 (--c-teal)."
+      },
+      "naranja": {
+        "role": "tertiary",
+        "displayName": "Naranja",
+        "canonical": "#FF9F1C",
+        "oklch": "oklch(78.3% 0.168 66.2)",
+        "tonalRamp": [
+          "#210000",
+          "#480C00",
+          "#702500",
+          "#974200",
+          "#C16500",
+          "#E78C00",
+          "#FFB659",
+          "#FFDF96"
+        ],
+        "purpose": "Cliente 4 (--c-tang)."
+      },
+      "azul": {
+        "role": "tertiary",
+        "displayName": "Azul",
+        "canonical": "#2E86FF",
+        "oklch": "oklch(63.4% 0.198 257.8)",
+        "tonalRamp": [
+          "#000235",
+          "#001967",
+          "#003698",
+          "#0056C6",
+          "#217BF3",
+          "#4FA3FF",
+          "#80CBFF",
+          "#B2F1FF"
+        ],
+        "purpose": "Cliente 5."
+      },
+      "magenta": {
+        "role": "tertiary",
+        "displayName": "Magenta",
+        "canonical": "#C94BD8",
+        "oklch": "oklch(63.7% 0.227 323.3)",
+        "tonalRamp": [
+          "#1F0026",
+          "#45004F",
+          "#6C0079",
+          "#930DA2",
+          "#BD3ECC",
+          "#E36AF2",
+          "#FF9AFF",
+          "#FFC8FF"
+        ],
+        "purpose": "Cliente 6."
+      },
+      "verde": {
+        "role": "tertiary",
+        "displayName": "Verde",
+        "canonical": "#3FAE4F",
+        "oklch": "oklch(66.6% 0.168 145.9)",
         "tonalRamp": [
           "#001300",
-          "#002F08",
-          "#0F4D23",
-          "#356B42",
-          "#5D8E66",
-          "#86B18E",
-          "#B2D5B8",
-          "#DCF7E0"
+          "#003100",
+          "#005200",
+          "#007415",
+          "#24993A",
+          "#57BF63",
+          "#89E490",
+          "#BAFFBE"
         ],
-        "purpose": "Texto del aprobado, 8.4:1."
+        "purpose": "Cliente 7."
       },
-      "status-rejected-bg": {
-        "role": "primary",
-        "displayName": "Rechazado fondo",
-        "canonical": "#FFE0EA",
-        "oklch": "oklch(93.5% 0.036 356.3)",
+      "oro": {
+        "role": "tertiary",
+        "displayName": "Oro",
+        "canonical": "#E8A400",
+        "oklch": "oklch(76.4% 0.159 78.8)",
         "tonalRamp": [
-          "#0D0A0B",
-          "#292224",
-          "#473C40",
-          "#69595E",
-          "#8F7A81",
-          "#B69DA5",
-          "#DFC2CB",
-          "#FFE5EF"
+          "#1C0300",
+          "#401700",
+          "#653100",
+          "#8A4E00",
+          "#B27100",
+          "#D89700",
+          "#FBBF57",
+          "#FFE695"
         ],
-        "purpose": "Insignia rechazada."
+        "purpose": "Cliente 8."
       },
-      "status-rejected-rule": {
-        "role": "primary",
-        "displayName": "Rechazado filete",
-        "canonical": "#B0124F",
-        "oklch": "oklch(49.2% 0.188 6.7)",
+      "dock-texto": {
+        "role": "neutral",
+        "displayName": "Texto del dock",
+        "canonical": "#C9CCE6",
+        "oklch": "oklch(85.1% 0.036 280.4)",
         "tonalRamp": [
-          "#300003",
-          "#590017",
-          "#820030",
-          "#AC094C",
-          "#D3456E",
-          "#F67494",
-          "#FFA2BB",
-          "#FFCFE2"
+          "#0A0A13",
+          "#212331",
+          "#3C3E50",
+          "#595C71",
+          "#7C7E96",
+          "#A0A3BB",
+          "#C6C9DF",
+          "#EBEDFF"
         ],
-        "purpose": "Borde sólido del rechazado."
+        "purpose": "Ítems inactivos del dock."
       },
-      "status-rejected-text": {
-        "role": "primary",
-        "displayName": "Rechazado texto",
-        "canonical": "#8A0E3E",
-        "oklch": "oklch(41.3% 0.157 6.1)",
+      "pendiente-fondo": {
+        "role": "status",
+        "displayName": "Estado: pendiente-fondo",
+        "canonical": "#FFF4CC",
+        "oklch": "oklch(96.6% 0.053 94.4)",
         "tonalRamp": [
-          "#2E0004",
-          "#540019",
-          "#7B0033",
-          "#9F2C50",
-          "#C35773",
-          "#E58299",
-          "#FFAFC0",
-          "#FFD9E6"
+          "#0F0B01",
+          "#2A240C",
+          "#483F22",
+          "#675D3C",
+          "#8A805C",
+          "#AFA580",
+          "#D4CBA9",
+          "#F6EFD3"
         ],
-        "purpose": "Texto tachado del rechazado, 7.7:1."
+        "purpose": "Insignias de estado."
+      },
+      "pendiente-borde": {
+        "role": "status",
+        "displayName": "Estado: pendiente-borde",
+        "canonical": "#B38600",
+        "oklch": "oklch(64.6% 0.132 84.7)",
+        "tonalRamp": [
+          "#180600",
+          "#391D00",
+          "#5B3800",
+          "#7E5500",
+          "#A47800",
+          "#C99D36",
+          "#EDC56F",
+          "#FFEAA5"
+        ],
+        "purpose": "Insignias de estado."
+      },
+      "aprobada-fondo": {
+        "role": "status",
+        "displayName": "Estado: aprobada-fondo",
+        "canonical": "#D7F5EE",
+        "oklch": "oklch(94.7% 0.033 180.0)",
+        "tonalRamp": [
+          "#040E0B",
+          "#172824",
+          "#2F4540",
+          "#4A645E",
+          "#6C8781",
+          "#90ABA5",
+          "#B8D1CB",
+          "#DFF4EF"
+        ],
+        "purpose": "Insignias de estado."
+      },
+      "aprobada-borde": {
+        "role": "status",
+        "displayName": "Estado: aprobada-borde",
+        "canonical": "#0B8A7C",
+        "oklch": "oklch(56.9% 0.100 182.4)",
+        "tonalRamp": [
+          "#00110D",
+          "#002E27",
+          "#004E43",
+          "#006F62",
+          "#209385",
+          "#54B8A9",
+          "#87DDCF",
+          "#B9FFF2"
+        ],
+        "purpose": "Insignias de estado."
+      },
+      "aprobada-texto": {
+        "role": "status",
+        "displayName": "Estado: aprobada-texto",
+        "canonical": "#0B5C53",
+        "oklch": "oklch(42.8% 0.073 183.1)",
+        "tonalRamp": [
+          "#00100D",
+          "#002C26",
+          "#054A43",
+          "#256A61",
+          "#498F84",
+          "#70B3A9",
+          "#9DD8CE",
+          "#C9FBF2"
+        ],
+        "purpose": "Insignias de estado."
+      },
+      "rechazada-fondo": {
+        "role": "status",
+        "displayName": "Estado: rechazada-fondo",
+        "canonical": "#FFE3E4",
+        "oklch": "oklch(93.9% 0.031 15.3)",
+        "tonalRamp": [
+          "#110809",
+          "#2E2020",
+          "#4D3A3B",
+          "#6E5758",
+          "#92797A",
+          "#B79D9E",
+          "#DBC4C5",
+          "#FDE9EA"
+        ],
+        "purpose": "Insignias de estado."
+      },
+      "rechazada-borde": {
+        "role": "status",
+        "displayName": "Estado: rechazada-borde",
+        "canonical": "#D63A40",
+        "oklch": "oklch(58.5% 0.192 23.6)",
+        "tonalRamp": [
+          "#290000",
+          "#550000",
+          "#82000A",
+          "#AE1024",
+          "#DB4044",
+          "#FF6C6A",
+          "#FF9B96",
+          "#FFC9C2"
+        ],
+        "purpose": "Insignias de estado."
+      },
+      "rechazada-texto": {
+        "role": "status",
+        "displayName": "Estado: rechazada-texto",
+        "canonical": "#A1222A",
+        "oklch": "oklch(46.6% 0.162 23.3)",
+        "tonalRamp": [
+          "#250000",
+          "#4F0004",
+          "#7A0A17",
+          "#A42B30",
+          "#CF5050",
+          "#F77875",
+          "#FFA49F",
+          "#FFD0CA"
+        ],
+        "purpose": "Insignias de estado."
+      },
+      "noche-fondo": {
+        "role": "neutral",
+        "displayName": "Modo oscuro: fondo",
+        "canonical": "#0D0E1A",
+        "oklch": "oklch(16.9% 0.025 279.7)",
+        "tonalRamp": [
+          "#0A0B11",
+          "#22232D",
+          "#3D3F4B",
+          "#5A5C6B",
+          "#7D7F8F",
+          "#A1A3B4",
+          "#C7C9D9",
+          "#ECEDFB"
+        ],
+        "purpose": "Valor de .dark."
+      },
+      "noche-tile": {
+        "role": "neutral",
+        "displayName": "Modo oscuro: tile",
+        "canonical": "#171933",
+        "oklch": "oklch(22.6% 0.050 278.3)",
+        "tonalRamp": [
+          "#090A16",
+          "#202236",
+          "#3A3E57",
+          "#575B79",
+          "#797E9E",
+          "#9DA2C3",
+          "#C3C8E7",
+          "#E8EDFF"
+        ],
+        "purpose": "Valor de .dark."
+      },
+      "noche-tile-alt": {
+        "role": "neutral",
+        "displayName": "Modo oscuro: tile-alt",
+        "canonical": "#13152A",
+        "oklch": "oklch(20.6% 0.042 277.9)",
+        "tonalRamp": [
+          "#090A14",
+          "#202333",
+          "#3B3E53",
+          "#585C75",
+          "#7A7E99",
+          "#9EA3BE",
+          "#C4C9E2",
+          "#E9EDFF"
+        ],
+        "purpose": "Valor de .dark."
+      },
+      "noche-hundido": {
+        "role": "neutral",
+        "displayName": "Modo oscuro: hundido",
+        "canonical": "#232646",
+        "oklch": "oklch(28.3% 0.059 277.9)",
+        "tonalRamp": [
+          "#080A18",
+          "#1F2238",
+          "#393D5B",
+          "#565B7E",
+          "#787DA3",
+          "#9CA2C8",
+          "#C2C8EC",
+          "#E7EDFF"
+        ],
+        "purpose": "Valor de .dark."
+      },
+      "noche-linea": {
+        "role": "neutral",
+        "displayName": "Modo oscuro: linea",
+        "canonical": "#2A2D4D",
+        "oklch": "oklch(31.1% 0.057 278.4)",
+        "tonalRamp": [
+          "#080A18",
+          "#1F2238",
+          "#3A3D5A",
+          "#565B7D",
+          "#787DA3",
+          "#9CA2C8",
+          "#C3C8EB",
+          "#E8ECFF"
+        ],
+        "purpose": "Valor de .dark."
+      },
+      "noche-borde-fuerte": {
+        "role": "neutral",
+        "displayName": "Modo oscuro: borde-fuerte",
+        "canonical": "#3A3E66",
+        "oklch": "oklch(37.9% 0.068 278.3)",
+        "tonalRamp": [
+          "#08091A",
+          "#1F213C",
+          "#383C5F",
+          "#555A83",
+          "#767CA9",
+          "#9BA1CE",
+          "#C1C7F1",
+          "#E6ECFF"
+        ],
+        "purpose": "Valor de .dark."
+      },
+      "noche-tinta": {
+        "role": "neutral",
+        "displayName": "Modo oscuro: tinta",
+        "canonical": "#F1F1FA",
+        "oklch": "oklch(96.1% 0.012 286.2)",
+        "tonalRamp": [
+          "#0B0B0E",
+          "#232328",
+          "#3F3F45",
+          "#5D5D64",
+          "#7F7F87",
+          "#A4A4AC",
+          "#CACAD1",
+          "#EEEEF4"
+        ],
+        "purpose": "Valor de .dark."
+      },
+      "noche-tinta-media": {
+        "role": "neutral",
+        "displayName": "Modo oscuro: tinta-media",
+        "canonical": "#A3A6C4",
+        "oklch": "oklch(73.3% 0.043 280.8)",
+        "tonalRamp": [
+          "#090A15",
+          "#212233",
+          "#3C3E54",
+          "#595B75",
+          "#7B7E9A",
+          "#9FA2BF",
+          "#C5C8E3",
+          "#EAEDFF"
+        ],
+        "purpose": "Valor de .dark."
+      },
+      "noche-tinta-tenue": {
+        "role": "neutral",
+        "displayName": "Modo oscuro: tinta-tenue",
+        "canonical": "#6E7191",
+        "oklch": "oklch(55.8% 0.050 280.5)",
+        "tonalRamp": [
+          "#090A16",
+          "#212235",
+          "#3B3D57",
+          "#585B79",
+          "#7A7D9E",
+          "#9EA2C3",
+          "#C5C8E7",
+          "#E9ECFF"
+        ],
+        "purpose": "Valor de .dark."
+      },
+      "noche-ember": {
+        "role": "neutral",
+        "displayName": "Modo oscuro: ember",
+        "canonical": "#FF6B73",
+        "oklch": "oklch(71.3% 0.181 19.7)",
+        "tonalRamp": [
+          "#270000",
+          "#520006",
+          "#7F001A",
+          "#AA1D32",
+          "#D64552",
+          "#FF7077",
+          "#FF9EA1",
+          "#FFCBCB"
+        ],
+        "purpose": "Valor de .dark."
+      },
+      "noche-dock": {
+        "role": "neutral",
+        "displayName": "Modo oscuro: dock",
+        "canonical": "#262948",
+        "oklch": "oklch(29.4% 0.056 278.1)",
+        "tonalRamp": [
+          "#080A17",
+          "#1F2238",
+          "#3A3D5A",
+          "#565B7C",
+          "#787DA2",
+          "#9CA2C7",
+          "#C3C8EB",
+          "#E8EDFF"
+        ],
+        "purpose": "Valor de .dark."
       }
     },
     "typographyMeta": {
-      "timer": {
-        "displayName": "Cronómetro",
-        "purpose": "Solo la cifra del cronómetro; 62 % de ancho."
-      },
-      "hero-figure": {
-        "displayName": "Cifra del héroe",
-        "purpose": "Monto disponible del héroe de presupuesto; 68 % de ancho."
-      },
       "display": {
-        "displayName": "Título de página",
-        "purpose": "Título de página y saludo; 78 % de ancho."
+        "displayName": "Display",
+        "purpose": "Títulos de página."
       },
-      "figure": {
-        "displayName": "Cifra KPI",
-        "purpose": "Valores de KPI; 82 % de ancho."
+      "cifra-dinero": {
+        "displayName": "Cifra de dinero",
+        "purpose": "Saldo y presupuesto (56px en el presupuesto de administración)."
+      },
+      "cifra-reloj": {
+        "displayName": "Cifra de reloj",
+        "purpose": "Tiempo en el centro de la rueda."
+      },
+      "cifra-indicador": {
+        "displayName": "Cifra de indicador",
+        "purpose": "Franja de indicadores y total de la rueda del equipo."
       },
       "headline": {
-        "displayName": "Encabezado",
-        "purpose": "Encabezado del bloque de cobro; 78 % de ancho."
+        "displayName": "Headline",
+        "purpose": "Actividad en curso junto a la rueda."
       },
       "title": {
-        "displayName": "Título de tarjeta",
-        "purpose": "Títulos de tarjeta y sección; 80 % de ancho."
+        "displayName": "Title",
+        "purpose": "Títulos de tile y sección (16px en saldo y semana)."
       },
       "body": {
-        "displayName": "Texto",
-        "purpose": "Toda la interfaz a ancho normal."
+        "displayName": "Body",
+        "purpose": "Interfaz general."
       },
       "label": {
-        "displayName": "Etiqueta",
-        "purpose": "Etiquetas, subtítulos, insignias; mínimo 11px."
+        "displayName": "Label",
+        "purpose": "Etiquetas de campo, horas del dial."
+      },
+      "leyenda-cabeza": {
+        "displayName": "Cabeza de leyenda",
+        "purpose": "Cabecera de la leyenda de la rueda, en mayúsculas, siempre con dato."
+      },
+      "minimo": {
+        "displayName": "Mínimo",
+        "purpose": "Piso de 11px (total de barras, dock en celular)."
       }
     },
     "shadows": [
       {
-        "name": "shadow-card",
-        "value": "0 1px 2px rgba(40, 20, 70, 0.06), 0 12px 28px -18px rgba(60, 25, 100, 0.32)",
-        "dark": "0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 30px -18px rgba(0, 0, 0, 0.7)",
-        "purpose": "Tarjetas de papel, meta semanal, placa invertida."
+        "name": "tile",
+        "value": "0 1px 2px rgba(18, 18, 42, 0.04), 0 16px 32px -24px rgba(18, 18, 42, 0.35)",
+        "dark": "0 1px 2px rgba(0, 0, 0, 0.4), 0 16px 32px -22px rgba(0, 0, 0, 0.75)",
+        "purpose": "Todos los tiles (--shadow-card)."
       },
       {
-        "name": "shadow-lift",
-        "value": "0 2px 4px rgba(40, 20, 70, 0.08), 0 22px 44px -22px rgba(60, 25, 100, 0.45)",
-        "dark": "0 2px 4px rgba(0, 0, 0, 0.45), 0 24px 48px -22px rgba(0, 0, 0, 0.8)",
-        "purpose": "Las dos cartulinas."
+        "name": "elevado",
+        "value": "0 2px 4px rgba(18, 18, 42, 0.06), 0 24px 48px -24px rgba(18, 18, 42, 0.5)",
+        "dark": "0 2px 4px rgba(0, 0, 0, 0.45), 0 26px 50px -24px rgba(0, 0, 0, 0.85)",
+        "purpose": "Cronómetro, presupuesto, alerta de sobretiempo (--shadow-lift)."
       },
       {
-        "name": "shadow-live",
-        "value": "0 2px 4px rgba(23, 19, 31, 0.12), 0 30px 60px -26px rgba(212, 19, 111, 0.55)",
-        "purpose": "Cartulina del cronómetro mientras corre."
+        "name": "dock",
+        "value": "0 18px 40px -16px rgba(18, 18, 42, 0.6)",
+        "purpose": "Dock flotante."
       },
       {
-        "name": "shadow-action",
-        "value": "0 8px 18px -12px rgb(var(--c-primary) / 0.9)",
-        "purpose": "Bajo botones primarios e ítem activo de la barra lateral."
+        "name": "cajon",
+        "value": "0 24px 60px -20px rgba(18, 18, 42, 0.5)",
+        "purpose": "Cajón del menú en escritorio."
       },
       {
-        "name": "island-ring",
-        "value": "0 0 0 2px rgb(var(--c-sun)), 0 18px 36px -14px rgba(23, 19, 31, 0.75)",
-        "purpose": "Isla flotante del tiempo activo: anillo amarillo como contorno, no resplandor."
+        "name": "foco",
+        "value": "outline: 2px solid #6D4BFF; outline-offset: 2px",
+        "purpose": "Foco visible en todos los controles; en campos del cronómetro, box-shadow 0 0 0 2px violeta."
       }
     ],
     "motion": [
       {
-        "name": "live-pulse",
-        "value": "cartulina-live 1.4s ease-in-out infinite",
-        "purpose": "Único movimiento ambiental: el punto en vivo del cronómetro mientras corre; se apaga con prefers-reduced-motion."
+        "name": "pulso-en-vivo",
+        "value": "rueda-live 1.4s ease-in-out infinite",
+        "purpose": "Halo coral del punto en vivo mientras el cronómetro corre; se apaga con prefers-reduced-motion."
       },
       {
-        "name": "state-transition",
-        "value": "120ms ease",
-        "purpose": "Color, borde y sombra de controles."
+        "name": "cajon",
+        "value": "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Deslizamiento del cajón; sin transición con prefers-reduced-motion."
       },
       {
-        "name": "card-shadow-transition",
-        "value": "box-shadow 200ms ease-out",
-        "purpose": "Cambio de sombra de la cartulina al arrancar el cronómetro."
-      },
-      {
-        "name": "press",
-        "value": "transform: scale(0.98)",
-        "purpose": "Respuesta al presionar botones."
-      }
-    ],
-    "focus": {
-      "value": "outline: 2px solid rgb(var(--c-primary)); outline-offset: 2px",
-      "purpose": "Foco visible en todos los controles."
-    },
-    "scopes": [
-      {
-        "selector": "#appSidebar",
-        "purpose": "Ámbito de tinta: primario amarillo, activo magenta."
-      },
-      {
-        "selector": "#timerMainCard.cartulina",
-        "purpose": "Cartulina amarilla: primario magenta, texto secundario ocre."
-      },
-      {
-        "selector": "#adminUpworkBudgetSection",
-        "purpose": "Cartulina amarilla: primario tinta con texto amarillo."
-      },
-      {
-        "selector": "#dynamicIslandTimer",
-        "purpose": "Píldora de tinta: primario amarillo."
-      },
-      {
-        "selector": ".scope-inverse",
-        "purpose": "Ámbito de tinta reutilizable."
+        "name": "estado",
+        "value": "150ms ease-out",
+        "purpose": "Color y fondo de los ítems del dock."
       }
     ],
     "breakpoints": [
       {
-        "name": "xs",
-        "value": "480px"
+        "name": "celular",
+        "value": "767px",
+        "note": "max-width"
       },
       {
-        "name": "mobile",
-        "value": "767px"
+        "name": "tablet",
+        "value": "1023px",
+        "note": "max-width; mosaico a una columna, dock a todo el ancho"
       },
       {
-        "name": "desktop",
-        "value": "1024px"
+        "name": "escritorio",
+        "value": "1024px",
+        "note": "min-width; dock centrado, cajón de 300px"
+      },
+      {
+        "name": "rueda-lado",
+        "value": "1100px",
+        "note": "min-width; rueda de 400px a la izquierda del tile"
       }
+    ],
+    "clientPalette": [
+      "#6D4BFF",
+      "#FF5A5F",
+      "#12B5A6",
+      "#FF9F1C",
+      "#2E86FF",
+      "#C94BD8",
+      "#3FAE4F",
+      "#E8A400"
     ]
   },
   "components": [
     {
-      "name": "Botón primario",
+      "name": "Botón Registrar",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Acción principal en magenta, píldora de 18px.",
-      "html": "<button class=\"ds-btn-primary\">Guardar registro</button>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 18px; border: 1px solid transparent; background: #D4136F; color: #fff; font-family: 'Archivo', sans-serif; font-size: 14px; font-weight: 650; box-shadow: 0 8px 18px -12px rgba(212, 19, 111, 0.9); cursor: pointer; transition: background-color 120ms ease, transform 120ms ease; } .ds-btn-primary:hover { background: #B80F5F; } .ds-btn-primary:active { transform: scale(0.98); } .ds-btn-primary:focus-visible { outline: 2px solid #D4136F; outline-offset: 2px; }"
+      "description": "Acción principal en tinta.",
+      "html": "<button class=\"ds-btn-primary\">Registrar</button>",
+      "css": ".ds-btn-primary{font:700 16px 'Onest',sans-serif;min-height:54px;padding:0 28px;border:0;border-radius:14px;background:#12122A;color:#fff;cursor:pointer;transition:background-color 150ms ease-out}.ds-btn-primary:hover{background:#2A2B48}.ds-btn-primary:focus-visible{outline:2px solid #6D4BFF;outline-offset:2px}"
     },
     {
-      "name": "Botón de contorno",
+      "name": "Botón Iniciar (en vivo)",
       "kind": "button",
-      "refersTo": "button-outline",
-      "description": "Acción secundaria en papel con borde de 1.5px.",
-      "html": "<button class=\"ds-btn-outline\">Exportar CSV</button>",
-      "css": ".ds-btn-outline { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 18px; border: 1.5px solid #CBBFDD; background: #fff; color: #17131F; font-family: 'Archivo', sans-serif; font-size: 14px; font-weight: 650; cursor: pointer; transition: border-color 120ms ease, transform 120ms ease; } .ds-btn-outline:hover { border-color: #17131F; } .ds-btn-outline:active { transform: scale(0.98); } .ds-btn-outline:focus-visible { outline: 2px solid #D4136F; outline-offset: 2px; }"
+      "refersTo": "button-vivo",
+      "description": "Solo para arrancar el cronómetro.",
+      "html": "<button class=\"ds-btn-vivo\">Iniciar</button>",
+      "css": ".ds-btn-vivo{font:700 15px 'Onest',sans-serif;min-height:48px;padding:0 24px;border:0;border-radius:14px;background:#FF5A5F;color:#12122A;cursor:pointer}.ds-btn-vivo:hover{background:#FF7A7E}.ds-btn-vivo:focus-visible{outline:2px solid #6D4BFF;outline-offset:2px}"
     },
     {
-      "name": "Cartulina del cronómetro",
-      "kind": "card",
-      "refersTo": "timer-card",
-      "description": "El cronómetro como cartel amarillo: tarea en curso, cifra condensada, costo en vivo y controles.",
-      "html": "<section class=\"ds-cartulina\"><h2 class=\"ds-cart-title\"><span class=\"ds-live-dot\"></span>Tracker de tareas en vivo</h2><div class=\"ds-task\"><b>Piezas para pauta de noviembre</b><span>Cliente ficticio</span></div><div class=\"ds-timer\">01:24:07</div><div class=\"ds-cost-row\"><span class=\"ds-cost\">$18.40 USD</span><span class=\"ds-cop\">≈ $73.600 COP</span></div><div class=\"ds-ctrls\"><button class=\"ds-start\">Iniciar</button><button class=\"ds-ctrl\">Pausar</button></div><button class=\"ds-register\">Registrar tarea</button></section>",
-      "css": ".ds-cartulina { background: #F4EA2A; color: #17131F; border: 2px solid #17131F; border-radius: 26px; padding: 22px 26px 24px; box-shadow: 0 2px 4px rgba(23,19,31,.12), 0 30px 60px -26px rgba(212,19,111,.55); font-family: 'Archivo', sans-serif; max-width: 460px; } .ds-cart-title { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 13px; font-weight: 800; text-transform: uppercase; } .ds-live-dot { width: 8px; height: 8px; border-radius: 50%; background: #D4136F; box-shadow: 0 0 0 4px rgba(212,19,111,.22); animation: ds-live 1.4s ease-in-out infinite; } @keyframes ds-live { 50% { box-shadow: 0 0 0 8px rgba(212,19,111,0); } } @media (prefers-reduced-motion: reduce) { .ds-live-dot { animation: none; } } .ds-task { display: flex; flex-direction: column; gap: 2px; } .ds-task b { font-size: 24px; line-height: 1.1; font-weight: 850; font-stretch: 85%; } .ds-task span { font-size: 13px; font-weight: 600; color: #54480E; } .ds-timer { font-size: 96px; line-height: .92; font-weight: 900; font-stretch: 62%; font-variant-numeric: tabular-nums; } .ds-cost-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 12px 0 16px; } .ds-cost { background: #D4136F; color: #fff; border-radius: 10px; padding: 6px 14px; font-size: 20px; font-weight: 800; transform: rotate(-2deg); box-shadow: 0 8px 16px -10px rgba(23,19,31,.7); } .ds-cop { flex-basis: 100%; font-size: 13px; font-weight: 700; color: #54480E; } .ds-ctrls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; } .ds-ctrl, .ds-start, .ds-register { min-height: 48px; border-radius: 14px; border: 2px solid #17131F; font: 800 15px 'Archivo', sans-serif; cursor: pointer; } .ds-ctrl { background: #fff; color: #17131F; } .ds-ctrl:hover { background: #FFFDE6; } .ds-start { background: #17131F; color: #F4EA2A; } .ds-start:hover { background: #2A2338; } .ds-register { width: 100%; min-height: 54px; background: #D4136F; border-color: #D4136F; color: #fff; font-size: 16px; box-shadow: 0 10px 22px -12px rgba(212,19,111,.9); } .ds-register:hover { background: #B80F5F; border-color: #B80F5F; } .ds-ctrl:focus-visible, .ds-start:focus-visible, .ds-register:focus-visible { outline: 2px solid #D4136F; outline-offset: 2px; }"
+      "name": "Botón de control",
+      "kind": "button",
+      "refersTo": "button-control",
+      "description": "Pausar, Detener, + Horas / Artes.",
+      "html": "<button class=\"ds-btn-control\">Pausar</button>",
+      "css": ".ds-btn-control{font:700 15px 'Onest',sans-serif;min-height:48px;padding:0 24px;border:0;border-radius:14px;background:#E4E7F2;color:#12122A;cursor:pointer}.ds-btn-control:hover{background:#DFE2EE}.ds-btn-control:focus-visible{outline:2px solid #6D4BFF;outline-offset:2px}.ds-btn-control:disabled{background:rgb(228 231 242 / .6);color:#9497B3}"
     },
     {
-      "name": "Campo en cartulina",
+      "name": "Campo",
       "kind": "input",
-      "refersTo": "input-cartulina",
-      "description": "Campo blanco con borde de tinta dentro de la cartulina.",
-      "html": "<label class=\"ds-field\"><span>Cliente</span><input class=\"ds-input\" placeholder=\"Elige un cliente\"></label>",
-      "css": ".ds-field { display: grid; gap: 6px; padding: 16px; background: #F4EA2A; font-family: 'Archivo', sans-serif; } .ds-field span { color: #17131F; font-size: 13px; font-weight: 700; } .ds-input { background: #fff; border: 1.5px solid rgba(23,19,31,.85); border-radius: 12px; color: #17131F; padding: 9px 13px; font: 14px 'Archivo', sans-serif; caret-color: #D4136F; outline: none; transition: border-color 120ms ease, box-shadow 120ms ease; } .ds-input::placeholder { color: #6E6338; } .ds-input:focus { border-color: #D4136F; box-shadow: 0 0 0 3px rgba(212,19,111,.3); }"
+      "refersTo": "input",
+      "description": "Campo hundido sin borde; foco con anillo violeta.",
+      "html": "<label class=\"ds-field\"><span>Cliente</span><input class=\"ds-input\" placeholder=\"Nombre del cliente\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:6px;font:600 12px 'Onest',sans-serif;color:#5B5E78}.ds-input{font:400 14px 'Onest',sans-serif;padding:11px 14px;border:0;border-radius:12px;background:#E4E7F2;color:#12122A;caret-color:#6D4BFF;outline:none}.ds-input:focus{background:#fff;box-shadow:0 0 0 2px #6D4BFF}"
+    },
+    {
+      "name": "Dock flotante",
+      "kind": "nav",
+      "refersTo": "dock",
+      "description": "Navegación principal en todos los anchos.",
+      "html": "<nav class=\"ds-dock\"><button class=\"ds-dock-item is-active\">Tracker</button><button class=\"ds-dock-item\">Actividad</button><button class=\"ds-dock-fab\" aria-label=\"Agregar\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"><path d=\"M12 5v14M5 12h14\"/></svg></button><button class=\"ds-dock-item\">Cobro</button><button class=\"ds-dock-item\">Más</button></nav>",
+      "css": ".ds-dock{display:inline-flex;align-items:center;gap:4px;padding:8px;border-radius:22px;background:#12122A;box-shadow:0 18px 40px -16px rgba(18,18,42,.6)}.ds-dock-item{font:600 14px 'Onest',sans-serif;padding:11px 16px;border:0;border-radius:14px;background:transparent;color:#C9CCE6;cursor:pointer;transition:background-color 150ms ease-out,color 150ms ease-out}.ds-dock-item:hover{background:rgb(255 255 255 / .08);color:#fff}.ds-dock-item.is-active{background:#ECEEF6;color:#12122A}.ds-dock-fab{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border:0;border-radius:14px;background:#ECEEF6;color:#12122A;cursor:pointer}.ds-dock-fab:hover{background:#fff}.ds-dock-item:focus-visible,.ds-dock-fab:focus-visible{outline:2px solid #6D4BFF;outline-offset:2px}"
     },
     {
       "name": "Insignias de estado",
       "kind": "chip",
-      "refersTo": "status-pending",
-      "description": "Estado por forma y color: pendiente punteado, aprobado sólido, rechazado tachado.",
-      "html": "<div class=\"ds-status-row\"><span class=\"ds-status ds-pending\">Pendiente</span><span class=\"ds-status ds-approved\">Aprobada</span><span class=\"ds-status ds-rejected\">Rechazada</span></div>",
-      "css": ".ds-status-row { display: flex; gap: 8px; font-family: 'Archivo', sans-serif; } .ds-status { display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: 18px; font-size: 11px; font-weight: 700; } .ds-pending { background: #FFF7B0; border: 1.5px dashed #8A7A00; color: #3D3500; } .ds-pending::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #8A7A00; } .ds-approved { background: #C9F7D5; border: 1.5px solid #187A35; color: #0F4D23; } .ds-rejected { background: #FFE0EA; border: 1.5px solid #B0124F; color: #8A0E3E; text-decoration: line-through; text-decoration-thickness: 1.5px; }"
+      "refersTo": "estado-pendiente",
+      "description": "Estado por forma y color.",
+      "html": "<span class=\"ds-st ds-st-p\">Pendiente</span> <span class=\"ds-st ds-st-a\">Aprobada</span> <span class=\"ds-st ds-st-r\">Rechazada</span>",
+      "css": ".ds-st{display:inline-block;font:700 12px 'Onest',sans-serif;padding:2px 10px;border-radius:999px}.ds-st-p{background:#FFF4CC;border:1.5px dashed #B38600;color:#5A4500}.ds-st-a{background:#D7F5EE;border:1.5px solid #0B8A7C;color:#0B5C53}.ds-st-r{background:#FFE3E4;border:1.5px solid #D63A40;color:#A1222A;text-decoration:line-through}"
     },
     {
-      "name": "Navegación lateral",
-      "kind": "nav",
-      "refersTo": "nav-link-active",
-      "description": "Barra lateral en tinta con ítem activo magenta.",
-      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link is-active\" href=\"#\">Cronómetro</a><a class=\"ds-nav-link\" href=\"#\">Mis registros</a><a class=\"ds-nav-link\" href=\"#\">Cobros</a></nav>",
-      "css": ".ds-nav { display: grid; gap: 4px; width: 220px; padding: 12px; background: #17131F; font-family: 'Archivo', sans-serif; } .ds-nav-link { padding: 10px 12px; border-radius: 12px; color: #BEB2D2; font-size: 14px; font-weight: 500; text-decoration: none; transition: background-color 120ms ease, color 120ms ease; } .ds-nav-link:hover { background: #2C243C; color: #F6F1FF; } .ds-nav-link.is-active { background: #D4136F; color: #fff; font-weight: 700; box-shadow: 0 8px 18px -10px rgba(212,19,111,.9); } .ds-nav-link:focus-visible { outline: 2px solid #F4EA2A; outline-offset: 2px; }"
+      "name": "Tile de saldo",
+      "kind": "card",
+      "refersTo": "tile-dinero",
+      "description": "Dinero en amarillo sol, con filas rayadas.",
+      "html": "<section class=\"ds-sun\"><h3>Tu balance</h3><div class=\"ds-sun-big\">$1.240,00</div><div class=\"ds-sun-row\"><div><small>Generado</small><b>$1.600</b></div><div><small>Pagado</small><b>$360</b></div><div><small>Horas</small><b>64,0</b></div></div><button>Cuenta de cobro</button></section>",
+      "css": ".ds-sun{background:#FFC83A;color:#12122A;border-radius:28px;padding:22px 24px;box-shadow:0 1px 2px rgba(18,18,42,.04),0 16px 32px -24px rgba(18,18,42,.35);font-family:'Onest',sans-serif;display:flex;flex-direction:column;gap:12px}.ds-sun h3{margin:0;font:600 16px 'Unbounded',sans-serif;letter-spacing:-.02em}.ds-sun-big{font:800 44px/1.05 'Unbounded',sans-serif;letter-spacing:-.04em;padding-bottom:10px;border-bottom:1.5px solid rgb(18 18 42 / .15)}.ds-sun-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.ds-sun-row small{display:block;font-size:12px;color:#5A4500}.ds-sun-row b{font:700 18px 'Unbounded',sans-serif;letter-spacing:-.02em}.ds-sun button{font:700 14px 'Onest',sans-serif;padding:12px;border:0;border-radius:14px;background:#12122A;color:#fff;cursor:pointer}.ds-sun button:focus-visible{outline:2px solid #6D4BFF;outline-offset:2px}"
     },
     {
-      "name": "KPIs del colaborador",
+      "name": "Rueda del día",
       "kind": "custom",
-      "refersTo": "balance-plate",
-      "description": "Baldosas con tinte de cartulina y una placa invertida para el saldo.",
-      "html": "<div class=\"ds-kpis\"><div class=\"ds-kpi ds-k1\"><span>Horas</span><b>32.5</b></div><div class=\"ds-kpi ds-k2\"><span>Generado</span><b>$410</b></div><div class=\"ds-kpi ds-k3\"><span>Pagado</span><b>$250</b></div><div class=\"ds-kpi ds-plate\"><span>Saldo</span><b>$160</b></div></div>",
-      "css": ".ds-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-family: 'Archivo', sans-serif; } .ds-kpi { border-radius: 16px; padding: 14px 16px; color: #17131F; display: grid; gap: 4px; } .ds-kpi span { font-size: 12px; font-weight: 600; color: #5E5470; } .ds-kpi b { font-size: 34px; line-height: 1.05; font-weight: 800; font-stretch: 82%; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; } .ds-k1 { background: #FFF9C4; } .ds-k2 { background: #DDF8E5; } .ds-k3 { background: #FFE8D2; } .ds-plate { background: #17131F; color: #F6F1FF; box-shadow: 0 1px 2px rgba(40,20,70,.06), 0 12px 28px -18px rgba(60,25,100,.32); } .ds-plate span { color: #F4EA2A; }"
-    },
-    {
-      "name": "Módulos KPI de administración",
-      "kind": "custom",
-      "refersTo": "figure",
-      "description": "Módulos pegados por un filete, con filete superior de tinta e icono en cartulina de color.",
-      "html": "<section class=\"ds-stats\"><div class=\"ds-stat\"><i class=\"ds-ic ds-ic1\"></i><small>Horas por aprobar</small><b>14.0</b></div><div class=\"ds-stat\"><i class=\"ds-ic ds-ic2\"></i><small>Aprobado</small><b>$1,240</b></div><div class=\"ds-stat\"><i class=\"ds-ic ds-ic3\"></i><small>Margen</small><b>38%</b></div></section>",
-      "css": ".ds-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(23,19,31,.16); border-top: 2px solid #17131F; border-bottom: 1px solid rgba(23,19,31,.16); font-family: 'Archivo', sans-serif; } .ds-stat { background: #F4F1F8; padding: 16px 18px 18px; display: grid; gap: 4px; color: #17131F; } .ds-stat small { font-size: 12px; color: #5E5470; } .ds-stat b { font-size: 36px; font-weight: 800; font-stretch: 82%; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; } .ds-ic { display: block; width: 28px; height: 28px; border-radius: 8px; margin-bottom: 8px; } .ds-ic1 { background: #F4EA2A; } .ds-ic2 { background: #3FD86A; } .ds-ic3 { background: #FF8A1F; }"
+      "refersTo": "tile",
+      "description": "Un arco por actividad en orden de registro; arco coral con punto solo mientras corre.",
+      "html": "<div class=\"ds-wheel\"><svg viewBox=\"0 0 400 400\"><circle cx=\"200\" cy=\"200\" r=\"160\" fill=\"none\" stroke=\"#E4E7F2\" stroke-width=\"30\"/><g transform=\"rotate(-90 200 200)\" fill=\"none\" stroke-width=\"30\"><circle cx=\"200\" cy=\"200\" r=\"160\" stroke=\"#6D4BFF\" stroke-dasharray=\"248 1006\"/><circle cx=\"200\" cy=\"200\" r=\"160\" stroke=\"#12B5A6\" stroke-dasharray=\"185 1006\" stroke-dashoffset=\"-251\"/><circle cx=\"200\" cy=\"200\" r=\"160\" stroke=\"#FF5A5F\" stroke-dasharray=\"122 1006\" stroke-dashoffset=\"-439\"/></g></svg><div class=\"ds-wheel-c\"><b>01:12:40</b><span>$18,20</span></div></div>",
+      "css": ".ds-wheel{position:relative;width:300px;aspect-ratio:1}.ds-wheel svg{position:absolute;inset:0;width:100%;height:100%}.ds-wheel-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}.ds-wheel-c b{font:800 36px/1 'Unbounded',sans-serif;letter-spacing:-.04em;color:#12122A}.ds-wheel-c span{font:700 17px 'Onest',sans-serif;color:#12122A;margin-top:6px}"
     }
   ],
   "narrative": {
-    "northStar": "Cartulina de plaza",
-    "overview": "El tiempo que corre se anuncia como el precio del día en la plaza de mercado: una cartulina amarilla fluorescente con la cifra escrita a marcador negro. El cronómetro es el protagonista de la pantalla del colaborador y el presupuesto semanal es el protagonista de la pantalla de administración; los dos son cartulinas. Todo lo demás vive en papel blanco sobre un fondo violeta pálido, con tinta violeta-negra para el texto y una sola voz de acción en magenta.\n\nEl color hace trabajo real: el amarillo marca lo que está vivo o en juego, el magenta marca lo que se puede hacer, el verde marca lo aprobado y la TRM, el naranja marca la prioridad alta. El estado nunca depende solo del color: pendiente es punteado, aprobado es sólido, rechazado es tachado. La tipografía es una sola familia variable (Archivo) que cambia de voz con el eje de ancho: ancho normal para leer la interfaz, condensado y pesado para las cifras y los títulos, como un marcador sobre cartulina.\n\nSe rechaza explícitamente el dashboard gris de tarjetas idénticas con un acento, y el sistema acromático anterior (\"Clinical Blueprint on Frosted Paper\"), retirado el 2026-11-11.",
+    "northStar": "La rueda del día",
+    "overview": "El día de trabajo es una rueda. Cada actividad registrada hoy es un arco del color de su cliente, en el orden en que se registró, y el cronómetro vive en el centro. Todo lo demás se organiza alrededor de esa imagen: un mosaico de tiles blancos muy redondeados sobre un fondo lavanda frío, una tinta azul noche que hace el trabajo de las acciones y la selección, y tres acentos con un solo oficio cada uno: el amarillo sol es dinero, el coral es lo que está en vivo, el violeta es el foco. Los colores de cliente son los únicos que pueden aparecer en cantidad, porque son datos.\n\nLa densidad es de tablero, no de formulario: pocos tiles grandes en la primera vista, cifras en Unbounded con peso alto y tracking cerrado, interfaz en Onest. La navegación flota en un dock oscuro abajo, en todos los anchos, y el menú completo vive en un cajón; no hay barra lateral fija ni columna larga de tarjetas. Los títulos van solos, sin rótulos encima.\n\nEl sistema reemplaza por completo a \"Cartulina de plaza\" y al anterior \"Clinical Blueprint on Frosted Paper\"; nada de esos mundos se hereda.",
     "keyCharacteristics": [
-      "Dos cartulinas amarillas como máximo por pantalla: el cronómetro (colaborador) y el héroe de presupuesto (administración).",
-      "Una sola placa invertida (tinta) por pantalla para el saldo que se le debe al colaborador.",
-      "Cifras en Archivo condensado (62–82 % de ancho, peso 800–900) con números tabulares.",
-      "Magenta como única voz de acción; nunca como texto sobre amarillo.",
-      "Estado por forma además de color.",
-      "Barra lateral en tinta en ambos temas, con ítem activo magenta."
+      "La rueda del día (400px en escritorio) es la protagonista del colaborador; la rueda del equipo, del Centro de mando.",
+      "Tiles de 28px de radio con sombra suave difusa sobre lavanda; en oscuro, tiles azul noche sobre casi negro.",
+      "Color con oficio: tinta = acción, sol = dinero, coral = en vivo, violeta = foco, paleta de clientes = datos.",
+      "Unbounded para cifras y títulos, Onest para todo lo demás; nada por debajo de 11px.",
+      "Dock flotante + cajón; el estado se lee por forma y color a la vez."
     ],
     "rules": [
       {
-        "name": "The Two Cartulinas Rule",
-        "body": "El amarillo cartulina como superficie existe solo en el cronómetro (`#timerMainCard.cartulina`) y en el héroe de presupuesto (`#adminUpworkBudgetSection`). En otros lugares aparece como punto, icono, selección o tinte suave, nunca como otra tarjeta amarilla.",
+        "name": "The One Job Rule",
+        "body": "Cada acento tiene un solo oficio: sol es dinero, coral es en vivo, violeta es foco. Si algo no es dinero, no es amarillo; si no está corriendo, no es coral.",
         "section": "colors"
       },
       {
-        "name": "The One Plate Rule",
-        "body": "Una sola placa invertida por pantalla: el cuarto KPI del colaborador (saldo). En claro es tinta con etiquetas amarillas; en oscuro se invierte a cartulina con texto de tinta.",
+        "name": "The Live Only While Running Rule",
+        "body": "El arco coral y su punto existen solo mientras hay tiempo en el cronómetro. Corriendo: arco pleno con punto al final. En pausa: el arco queda al 40% de opacidad y sin punto. Detenido o registrado: desaparece y la actividad pasa a ser un arco del color de su cliente.",
         "section": "colors"
       },
       {
-        "name": "The No Magenta On Yellow Rule",
-        "body": "Magenta sobre amarillo da 4.0:1. Dentro de la cartulina el magenta solo aparece como relleno (botón Registrar, etiqueta de costo, punto en vivo) con texto blanco; el texto pequeño es tinta o cartulina-mid.",
+        "name": "The Sun Is Fixed Rule",
+        "body": "Los tiles de dinero son amarillo sol con texto tinta en claro y en oscuro; no se oscurecen con el tema.",
         "section": "colors"
       },
       {
-        "name": "The Marker Width Rule",
-        "body": "Condensado (62–85 %) solo para cifras y títulos; nunca para párrafos, etiquetas de campo ni botones. Cuanto más importante la cifra, más condensada y pesada: cronómetro 62 %, héroe 68 %, títulos 78–80 %, KPIs 82 %.",
+        "name": "The 11px Floor Rule",
+        "body": "Ningún texto baja de 11px; los `text-[9px]` y `text-[10px]` heredados se elevan a 11px dentro del tablero.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tracking Floor Rule",
+        "body": "El tracking negativo nunca pasa de -0.04em, ni siquiera en las cifras más grandes.",
         "section": "typography"
       },
       {
         "name": "The Tabular Figures Rule",
-        "body": "Toda cifra que cambia (cronómetro, costo en vivo, KPIs, celdas de tabla) usa números tabulares para que no baile.",
+        "body": "Toda cifra que cambia (cronómetro, tablas, totales de leyenda) usa `font-variant-numeric: tabular-nums`.",
         "section": "typography"
       },
       {
-        "name": "The Downward Shadow Rule",
-        "body": "Toda sombra tiene desplazamiento vertical y difuminado negativo; no hay resplandores de desplazamiento cero ni sombras duras desplazadas. Los anillos de 0 offset solo existen como contorno (isla flotante con anillo amarillo de 2px, punto en vivo).",
+        "name": "The No Tile In Tile Rule",
+        "body": "Un tile no contiene otro tile: dentro del saldo y del presupuesto las cifras se separan con filas rayadas, no con recuadros, y el cronómetro de administración se queda sin tarjeta.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "**Do** tomar todo color de los canales `--c-*` de `styles.css` (o de las clases Tailwind que los consumen) y definir cualquier variante oscura en `.dark`.",
-      "**Do** mantener el amarillo cartulina como superficie solo en el cronómetro y en el héroe de presupuesto.",
-      "**Do** marcar el estado con forma además de color: pendiente punteado, aprobado sólido, rechazado tachado.",
-      "**Do** escribir cifras y títulos en Archivo condensado (62–85 % de ancho, peso 800–900) con números tabulares, y la interfaz a ancho normal.",
-      "**Do** usar magenta para la acción principal y para el foco (contorno de 2px, separación 2px).",
-      "**Do** mantener contraste AA en ambos temas; texto secundario en mid / dark-mid y, sobre amarillo, cartulina-mid.",
-      "**Do** respetar `prefers-reduced-motion` en cualquier animación nueva.",
-      "**Do** añadir clases solo de estilo cuando haga falta un gancho visual nuevo."
+      "**Do** mantener cada acento en su oficio: tinta para acciones, sol (#FFC83A) solo para dinero, coral (#FF5A5F) solo para lo que corre, violeta (#6D4BFF) para foco.",
+      "**Do** dibujar el tiempo del día como arcos del color de su cliente, en orden de registro, con el arco coral solo mientras el cronómetro tiene tiempo (al 40% en pausa).",
+      "**Do** usar un foco visible de 2px violeta con 2px de separación en todos los controles.",
+      "**Do** comunicar el estado por forma y color a la vez: pendiente discontinuo, aprobada continua, rechazada tachada.",
+      "**Do** respetar `prefers-reduced-motion`: el pulso del punto en vivo (1.4s) y el deslizamiento del cajón (220ms, cubic-bezier(0.22, 1, 0.36, 1)) se apagan.",
+      "**Do** añadir clases solo de estilo cuando haga falta; los ids, clases y atributos `data-*` que usa `app.js` nunca se renombran ni se quitan. `ui-shell.js` lee el estado solo por `window.__tt` (solo lectura) y nunca escribe datos.",
+      "**Do** registrar todo archivo nuevo del front en `.github/workflows/deploy.yml` (copia y parámetro de versión) y en `ASSETS_TO_CACHE` de `sw.js`.",
+      "**Do** mantener AA en claro y en oscuro; la tinta media está calibrada para eso (5.6:1 y 7:1)."
     ],
     "donts": [
-      "**Don't** renombrar ni eliminar ids, clases ni atributos `data-*` que use `app.js` (por ejemplo `#timerMainCard`, `#timerDisplay`, `#btnStart`, `#btnRegisterTask`, `#liveCostBadge`, `#timerActiveTitle`, `#liveCostCop`, `.btn-status-filter[data-status]`, `.status-*`); la capa visual se engancha a ellos sin tocarlos.",
-      "**Don't** poner texto magenta sobre amarillo (4.0:1).",
-      "**Don't** usar faint para texto (2.9:1 sobre el fondo).",
-      "**Don't** usar ember (rojo) para \"rechazado\"; rechazado es rosa tachado y ember queda para errores y acciones destructivas.",
-      "**Don't** añadir una segunda placa invertida ni una tercera cartulina en la misma pantalla.",
-      "**Don't** usar resplandores de desplazamiento cero ni sombras duras desplazadas.",
-      "**Don't** bajar de 11px en la app.",
-      "**Don't** reintroducir el sistema acromático \"Clinical Blueprint on Frosted Paper\" ni la fuente Geist/Inter."
+      "**Don't** volver a una barra lateral fija ni a la columna larga de tarjetas; la navegación es dock + cajón.",
+      "**Don't** poner rótulos ni etiquetas en mayúsculas encima de los títulos; el título va solo.",
+      "**Don't** usar amarillo para algo que no sea dinero ni coral para algo que no esté en vivo (el \"+\" del colaborador es lavanda, no coral).",
+      "**Don't** meter tiles dentro de tiles ni recuadros dentro de los tiles amarillos.",
+      "**Don't** bajar de 11px ni cerrar el tracking más allá de -0.04em.",
+      "**Don't** poner texto blanco sobre coral o sol; sobre ellos el texto es tinta.",
+      "**Don't** reintroducir \"Cartulina de plaza\" ni \"Clinical Blueprint on Frosted Paper\"."
     ]
   }
 }

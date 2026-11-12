@@ -1,78 +1,81 @@
 /* ==============================================================================
    Time Tracker — Lina De La Espriella
-   Sistema de diseño: Design.md ("Cartulina de plaza")
-   Tinta #17131F, fondo violeta pálido #F4F1F8, magenta #D4136F para acciones,
-   amarillo cartulina #F4EA2A para el cronómetro y el héroe, verde y naranja de acento.
-   Estados con forma además de color. Tipografía: Archivo con eje de ancho.
+   Sistema de diseño: Design.md ("La rueda del día")
+   El día se dibuja como una rueda: cada actividad es un arco del color de su cliente
+   y el cronómetro vive en el centro. Tiles redondeados sobre fondo lavanda frío,
+   tinta azul noche, dinero en amarillo sol, en vivo en coral. Unbounded + Onest.
    ============================================================================== */
 
 :root {
-  /* Canales RGB que consume Tailwind (ver tailwind.config.js) — "Cartulina de plaza" */
-  --c-canvas: 244 241 248;   /* violeta pálido */
+  /* Canales RGB que consume Tailwind (ver tailwind.config.js) — "La rueda del día" */
+  --c-canvas: 236 238 246;   /* lavanda frío #ECEEF6 */
   --c-paper: 255 255 255;
-  --c-alt: 250 248 252;
-  --c-muted: 238 233 245;
-  --c-ink: 23 19 31;         /* tinta de marcador #17131F */
-  --c-soft: 42 35 56;
-  --c-mid: 94 84 112;        /* #5E5470 — 6.3:1 sobre el fondo */
-  --c-faint: 150 139 170;
-  --c-line: 226 218 238;
-  --c-ember: 200 30 30;      /* error / destructivo */
-  --c-primary: 212 19 111;   /* magenta #D4136F — 4.7:1 con blanco */
+  --c-alt: 245 246 251;
+  --c-muted: 228 231 242;
+  --c-ink: 18 18 42;         /* azul noche #12122A */
+  --c-soft: 42 43 72;
+  --c-mid: 91 94 120;        /* #5B5E78 — 5.6:1 sobre el fondo */
+  --c-faint: 148 151 179;
+  --c-line: 223 226 238;
+  --c-ember: 200 32 48;      /* error / destructivo #C82030 */
+  --c-primary: 18 18 42;     /* acción principal en tinta */
   --c-on-primary: 255 255 255;
 
-  /* Cartulinas (acentos del mundo) */
-  --c-sun: 244 234 42;       /* amarillo cartulina #F4EA2A */
-  --c-leaf: 63 216 106;      /* verde #3FD86A */
-  --c-tang: 255 138 31;      /* naranja #FF8A1F */
-  --c-sidebar: 23 19 31;
+  /* Acentos del mundo */
+  --c-sun: 255 200 58;       /* dinero #FFC83A */
+  --c-coral: 255 90 95;      /* en vivo #FF5A5F */
+  --c-violet: 109 75 255;    /* #6D4BFF */
+  --c-teal: 18 181 166;      /* #12B5A6 */
+  --c-leaf: 18 181 166;
+  --c-tang: 255 159 28;
+  --c-sidebar: 18 18 42;
 
   --bg-app: rgb(var(--c-canvas));
   --bg-sidebar: rgb(var(--c-alt));
   --bg-card: rgb(var(--c-paper));
   --bg-subtle: rgb(var(--c-muted));
   --primary: rgb(var(--c-primary));
-  --primary-hover: #B80F5F;
-  --primary-soft: #F9D3E5;
+  --primary-hover: #2A2B48;
+  --primary-soft: #E4E7F2;
   --on-primary: rgb(var(--c-on-primary));
   --accent-warm: rgb(var(--c-ink));
-  --accent-warm-hover: #2A2338;
+  --accent-warm-hover: #2A2B48;
   --text-main: rgb(var(--c-ink));
   --text-secondary: rgb(var(--c-mid));
   --border-soft: rgb(var(--c-line));
-  --border-strong: #CBBFDD;
+  --border-strong: #C6CADD;
   --positive: rgb(var(--c-ink));
   --warning: rgb(var(--c-mid));
   --danger: rgb(var(--c-ember));
 
-  --shadow-card: 0 1px 2px rgba(40, 20, 70, 0.06), 0 12px 28px -18px rgba(60, 25, 100, 0.32);
-  --shadow-lift: 0 2px 4px rgba(40, 20, 70, 0.08), 0 22px 44px -22px rgba(60, 25, 100, 0.45);
-  --radius-card: 24px;
-  --radius-control: 18px;
-  --radius-nested: 10px;
+  --shadow-card: 0 1px 2px rgba(18, 18, 42, 0.04), 0 16px 32px -24px rgba(18, 18, 42, 0.35);
+  --shadow-lift: 0 2px 4px rgba(18, 18, 42, 0.06), 0 24px 48px -24px rgba(18, 18, 42, 0.5);
+  --radius-card: 28px;
+  --radius-control: 14px;
+  --radius-nested: 12px;
 }
 
 .dark {
-  --c-canvas: 18 14 25;      /* #120E19 */
-  --c-paper: 29 23 39;       /* #1D1727 */
-  --c-alt: 23 18 31;
-  --c-muted: 40 32 54;
-  --c-ink: 246 241 255;
-  --c-soft: 225 216 240;
-  --c-mid: 182 168 204;      /* #B6A8CC — 8:1 sobre papel */
-  --c-faint: 120 106 144;
-  --c-line: 52 42 70;
-  --c-ember: 255 107 107;
-  --c-primary: 255 79 163;   /* magenta encendido #FF4FA3 — 5.9:1 con tinta */
-  --c-on-primary: 23 19 31;
-  --c-sidebar: 12 9 18;
+  --c-canvas: 13 14 26;      /* #0D0E1A */
+  --c-paper: 23 25 51;       /* #171933 */
+  --c-alt: 19 21 42;
+  --c-muted: 35 38 70;
+  --c-ink: 241 241 250;
+  --c-soft: 210 211 230;
+  --c-mid: 163 166 196;      /* #A3A6C4 — 7:1 sobre los tiles */
+  --c-faint: 110 113 145;
+  --c-line: 42 45 77;
+  --c-ember: 255 107 115;
+  --c-primary: 241 241 250;
+  --c-on-primary: 13 14 26;
+  --c-sidebar: 23 25 51;
 
-  --primary-hover: #FF73B6;
-  --primary-soft: #4A1D38;
-  --accent-warm-hover: #E1D8F0;
-  --border-strong: #4A3D63;
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 30px -18px rgba(0, 0, 0, 0.7);
-  --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.45), 0 24px 48px -22px rgba(0, 0, 0, 0.8);
+  --primary-hover: #FFFFFF;
+  --primary-soft: #23264A;
+  --accent-warm-hover: #FFFFFF;
+  --border-strong: #3A3E66;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 16px 32px -22px rgba(0, 0, 0, 0.75);
+  --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.45), 0 26px 50px -24px rgba(0, 0, 0, 0.85);
 }
 
 /* ==============================================================================
@@ -132,7 +135,7 @@ svg {
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-secondary);
-  font-family: 'Archivo', -apple-system, 'Segoe UI', sans-serif;
+  font-family: 'Onest', -apple-system, 'Segoe UI', sans-serif;
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1;
@@ -210,12 +213,12 @@ input[type="number"]:hover::-webkit-outer-spin-button {
 }
 
 body, button, input, select, textarea, .font-sans, .font-mono {
-  font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* Números y cronómetro tabulares legibles */
 .tabular-nums, #timerDisplay, #kpiTotalHoras, #kpiTotalGenerado, #kpiTotalPagado, #kpiSaldoPendiente, #liveCostBadge, table td {
-  font-family: 'Archivo', -apple-system, 'Segoe UI', sans-serif;
+  font-family: 'Onest', -apple-system, 'Segoe UI', sans-serif;
   font-feature-settings: 'tnum';
   font-variant-numeric: tabular-nums;
 }
@@ -638,7 +641,7 @@ html.has-user-session #authTopNavbar {
     min-height: 0 !important;
     overflow: visible !important;
     font-size: 10pt !important;
-    font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
     text-rendering: optimizeLegibility !important;
@@ -707,7 +710,7 @@ html.has-user-session #authTopNavbar {
     background: #ffffff !important;
     color: #0f172a !important;
     overflow: visible !important;
-    font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
     text-rendering: optimizeLegibility !important;
@@ -759,7 +762,7 @@ html.has-user-session #authTopNavbar {
   #statementModal th,
   #statementModal strong,
   #statementModal em {
-    font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
     text-rendering: optimizeLegibility !important;
@@ -769,7 +772,7 @@ html.has-user-session #authTopNavbar {
   #statementModal .tabular-nums,
   #statementModal .font-mono,
   #statementModal td.font-mono {
-    font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     font-feature-settings: 'tnum' 1, 'cv05' 1 !important;
     font-variant-numeric: tabular-nums !important;
     letter-spacing: 0.01em !important;
@@ -1424,32 +1427,14 @@ body {
 
 /* --- Ámbito invertido: todo lo que use tokens dentro se dibuja en negativo --- */
 .scope-inverse {
-  --c-canvas: 23 19 31;
-  --c-paper: 23 19 31;
-  --c-alt: 30 25 41;
-  --c-muted: 44 36 60;
-  --c-ink: 246 241 255;
-  --c-soft: 225 216 240;
-  --c-mid: 190 178 210;
-  --c-faint: 130 116 154;
-  --c-line: 56 46 76;
-  --c-ember: 255 107 107;
-  --c-primary: 244 234 42;
-  --c-on-primary: 23 19 31;
+  --c-canvas: 18 18 42; --c-paper: 18 18 42; --c-alt: 30 31 58; --c-muted: 42 43 72;
+  --c-ink: 241 241 250; --c-soft: 210 211 230; --c-mid: 190 192 220; --c-faint: 130 133 165;
+  --c-line: 52 54 88; --c-ember: 255 107 115; --c-primary: 255 200 58; --c-on-primary: 18 18 42;
 }
 .dark .scope-inverse {
-  --c-canvas: 246 241 255;
-  --c-paper: 246 241 255;
-  --c-alt: 238 233 245;
-  --c-muted: 226 218 238;
-  --c-ink: 23 19 31;
-  --c-soft: 42 35 56;
-  --c-mid: 94 84 112;
-  --c-faint: 150 139 170;
-  --c-line: 210 200 228;
-  --c-ember: 200 30 30;
-  --c-primary: 212 19 111;
-  --c-on-primary: 255 255 255;
+  --c-canvas: 241 241 250; --c-paper: 241 241 250; --c-alt: 228 231 242; --c-muted: 223 226 238;
+  --c-ink: 18 18 42; --c-soft: 42 43 72; --c-mid: 91 94 120; --c-faint: 148 151 179;
+  --c-line: 210 214 230; --c-ember: 200 32 48; --c-primary: 18 18 42; --c-on-primary: 255 255 255;
 }
 
 /* Las variables derivadas se recalculan dentro del ámbito para tomar los tokens invertidos */
@@ -2036,455 +2021,513 @@ button.todo-cal-title:hover { text-decoration: underline; }
 }
 
 /* ==============================================================================
-   CARTULINA DE PLAZA — capa visual (Design.md)
-   El tiempo que corre se anuncia como el precio del día: cartulina fluorescente
-   y marcador negro. Solo estilos: ningún id, clase o data-* de app.js cambia.
+   LA RUEDA DEL DÍA — capa visual (Design.md)
+   Navegación en un dock flotante (el menú lateral pasa a cajón en "Más"),
+   mosaico de tiles, la rueda del día como protagonista del colaborador y la
+   rueda del equipo en el Centro de mando. Solo estilos: ningún id, clase o
+   data-* que use app.js cambia de nombre.
    ============================================================================== */
 @media screen {
 
-::selection { background: rgb(var(--c-sun)); color: #17131F; }
-input, textarea { caret-color: rgb(var(--c-primary)); }
-:focus-visible { outline: 2px solid rgb(var(--c-primary)) !important; outline-offset: 2px !important; }
-
-/* Ámbitos que reescriben tokens: recalculan las variables derivadas */
-#appSidebar, #timerMainCard.cartulina, #adminUpworkBudgetSection, #dynamicIslandTimer {
-  --bg-app: rgb(var(--c-canvas));
-  --bg-sidebar: rgb(var(--c-paper));
-  --bg-card: rgb(var(--c-paper));
-  --bg-subtle: rgb(var(--c-muted));
-  --primary: rgb(var(--c-primary));
-  --on-primary: rgb(var(--c-on-primary));
-  --text-main: rgb(var(--c-ink));
-  --text-secondary: rgb(var(--c-mid));
-  --border-soft: rgb(var(--c-line));
+/* --- Base --- */
+body, button, input, select, textarea, .font-sans, .font-mono {
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
-
-/* --- Barra lateral en tinta (ambos temas) --- */
-#appSidebar {
-  --c-paper: var(--c-sidebar);
-  --c-canvas: 33 27 45;
-  --c-alt: 33 27 45;
-  --c-muted: 44 36 60;
-  --c-ink: 246 241 255;
-  --c-soft: 225 216 240;
-  --c-mid: 190 178 210;
-  --c-faint: 130 116 154;
-  --c-line: 48 40 64;
-  --c-primary: 244 234 42;
-  --c-on-primary: 23 19 31;
-  --primary-hover: #FFF36B;
-  background-color: rgb(var(--c-sidebar));
-  border-color: rgb(var(--c-sidebar));
-  color: rgb(var(--c-mid));
-}
-#appSidebar > div:last-child { background-color: rgb(var(--c-canvas)); border-color: rgb(var(--c-line)); }
-#appSidebar .sidebar-nav-link { font-size: 14px; font-weight: 500; color: rgb(var(--c-mid)); padding: 10px 12px; border-radius: 12px; }
-#appSidebar .sidebar-nav-link i { color: inherit !important; }
-#appSidebar .sidebar-nav-link:hover { background-color: rgb(var(--c-muted)); color: rgb(var(--c-ink)); }
-#appSidebar .sidebar-nav-link.active {
-  background-color: #D4136F;
-  color: #fff;
-  font-weight: 700;
-  box-shadow: 0 8px 18px -10px rgba(212, 19, 111, 0.9);
-}
-#appSidebar .w-9.h-9.rounded-lg.bg-primary { transform: rotate(-4deg); border-radius: 10px; }
-#userAvatar { border-radius: 10px; }
-
-/* --- Barra superior --- */
-#appSidebar + div > header {
-  background-color: rgb(var(--c-canvas) / 0.86) !important;
-  border-color: rgb(var(--c-line));
-}
-#periodFilterButtonGroup {
-  background: rgb(var(--c-paper));
-  padding: 3px;
-  border-radius: 14px;
-  box-shadow: inset 0 0 0 1px var(--border-soft);
-}
-#periodFilterButtonGroup .btn-period-filter { font-weight: 600; border-radius: 11px !important; }
-/* Botones seleccionados (filtros) siempre con el color de texto sobre primario */
+.tabular-nums, #timerDisplay, table td { font-family: 'Onest', -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+::selection { background: rgb(var(--c-violet) / 0.28); }
+input, textarea { caret-color: rgb(var(--c-violet)); }
+:focus-visible { outline: 2px solid rgb(var(--c-violet)) !important; outline-offset: 2px !important; }
 .bg-primary.text-on-primary { color: rgb(var(--c-on-primary)); }
-/* Botones grises con texto blanco no alcanzaban AA: pasan a la acción magenta */
 .bg-faint.text-white { background-color: rgb(var(--c-primary)); color: rgb(var(--c-on-primary)); }
-/* Tamaños mínimos cómodos en la app (no afecta impresión ni PDF) */
-#mainAppDashboard .text-\[9px\], #mainAppDashboard .text-\[10px\] { font-size: 11px; }
-/* Estado pendiente: lo dice la forma punteada; sin parpadeo */
-.status-pending::before { animation: none; }
-/* Contadores dentro de un filtro activo, sin transparencia */
 .bg-primary .opacity-80, .bg-primary.opacity-80 { opacity: 1; }
-#trmBadgeContainer {
-  background-color: rgb(var(--c-leaf)) !important;
-  border-color: transparent !important;
-  color: #17131F !important;
-}
-#trmBadgeContainer span { color: #17131F !important; }
-#trmBadgeContainer .rounded-full { background-color: #17131F !important; }
-#trmBadgeContainer:hover { background-color: #5BE582 !important; }
+#mainAppDashboard .text-\[9px\], #mainAppDashboard .text-\[10px\] { font-size: 11px; }
 
-/* --- Tipografía con contraste de tamaño y peso --- */
-.page-title {
-  font-size: 46px;
-  line-height: 1;
-  font-weight: 900;
-  font-stretch: 78%;
-  letter-spacing: -0.015em;
+/* --- Tipografía de display --- */
+.page-title, .worker-hero-name, .card-title, .stat-value, .hero-amount, #timerDisplay,
+.billing-hub .text-2xl, .timer-active-title b, .wheel-total b, .team-wheel-tile h3 {
+  font-family: 'Unbounded', 'Onest', sans-serif;
 }
-.card-title { font-size: 17px; font-weight: 750; letter-spacing: -0.01em; }
-.worker-hero {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  padding: 6px 0 0 !important;
+.page-title { font-size: 40px; line-height: 1.05; font-weight: 700; letter-spacing: -0.03em; }
+.card-title { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+#mainAppDashboard section h2.uppercase {
+  text-transform: none; font-family: 'Unbounded', 'Onest', sans-serif;
+  font-size: 18px; font-weight: 600; letter-spacing: -0.02em;
 }
-.worker-hero-name {
-  font-size: clamp(32px, 3.6vw, 50px) !important;
-  line-height: 1 !important;
-  font-weight: 900 !important;
-  font-stretch: 78%;
-  letter-spacing: -0.015em !important;
-}
-#workerHeroAvatar {
-  width: 56px;
-  height: 56px;
-  background: rgb(var(--c-sun));
-  color: #17131F;
-  border: 2px solid #17131F;
-  border-radius: 14px;
-  font-size: 24px;
-  font-weight: 900;
-  transform: rotate(-4deg);
-}
-#btnWorkerOpenManualEntry {
+.stat-value { font-size: 30px; font-weight: 700; letter-spacing: -0.04em; }
+
+/* --- Tiles --- */
+.content-card, .kpi-card, .hero-card, .profile-section-card, .profile-hero-card {
   background: rgb(var(--c-paper));
-  border: 1.5px solid rgb(var(--c-ink));
-  font-weight: 700;
-  height: 40px;
-  border-radius: 12px;
-}
-
-/* --- Cartulina del cronómetro: protagonista --- */
-#timerMainCard.cartulina {
-  --c-paper: 255 255 255;
-  --c-canvas: 255 251 210;
-  --c-alt: 255 251 210;
-  --c-muted: 250 243 150;
-  --c-ink: 23 19 31;
-  --c-soft: 42 35 56;
-  --c-mid: 84 72 14;
-  --c-faint: 132 120 38;
-  --c-line: 205 194 40;
-  --c-ember: 180 20 20;
-  --c-primary: 212 19 111;
-  --c-on-primary: 255 255 255;
-  --primary-hover: #B80F5F;
-  background: rgb(var(--c-sun));
-  color: #17131F;
-  border: 2px solid #17131F;
-  border-radius: 26px;
-  padding: 22px 26px 24px;
-  box-shadow: var(--shadow-lift);
-  transition: box-shadow 200ms ease-out;
-}
-#timerMainCard.cartulina > div:first-child > div:first-child { border-color: rgb(23 19 31 / 0.18); }
-.cartulina .timer-title { font-size: 13px; font-weight: 800; letter-spacing: 0.08em; }
-.cartulina .timer-live-dot { background: #D4136F; box-shadow: 0 0 0 4px rgba(212, 19, 111, 0.22); }
-#timerMainCard:has(#timerDisplay.timer-active) { box-shadow: 0 2px 4px rgba(23, 19, 31, 0.12), 0 30px 60px -26px rgba(212, 19, 111, 0.55); }
-#timerMainCard:has(#timerDisplay.timer-active) .timer-live-dot { animation: cartulina-live 1.4s ease-in-out infinite; }
-@keyframes cartulina-live { 50% { box-shadow: 0 0 0 8px rgba(212, 19, 111, 0); } }
-
-.cartulina label { color: #17131F; font-weight: 700; }
-.cartulina .form-input {
-  background: #fff;
-  border: 1.5px solid rgb(23 19 31 / 0.85);
-  border-radius: 12px;
-  color: #17131F;
-}
-.cartulina .form-input::placeholder { color: #6E6338; }
-.cartulina .form-input:focus { border-color: #D4136F; box-shadow: 0 0 0 3px rgba(212, 19, 111, 0.3); }
-
-/* Composición: campos a la izquierda, la cifra a la derecha */
-.cartulina .timer-body { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "c" "w" "f" "d" "k"; row-gap: 14px; }
-.cartulina .timer-body > * { margin-top: 0 !important; margin-bottom: 0 !important; }
-.cartulina #timerWorkerSelectContainer { grid-area: w; }
-.cartulina .timer-row-client { grid-area: f; }
-.cartulina .timer-row-desc { grid-area: d; }
-.cartulina .timer-controls { grid-area: k; }
-.cartulina .timer-chamber {
-  grid-area: c;
-  background: transparent;
   border: 0;
-  border-radius: 0;
-  padding: 4px 0 !important;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-@media (min-width: 1024px) {
-  .cartulina .timer-body {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-    grid-template-areas: "w c" "f c" "d c" "k c";
-    column-gap: 36px;
-    align-items: start;
-  }
-  .cartulina .timer-chamber { align-self: stretch; padding-left: 30px !important; border-left: 1.5px dashed rgb(23 19 31 / 0.35); }
-}
-.cartulina .timer-chamber > .uppercase { color: #54480E; font-weight: 700; }
-#timerDisplay {
-  font-size: clamp(64px, 8.2vw, 128px);
-  line-height: 0.92;
-  font-weight: 900;
-  font-stretch: 62%;
-  letter-spacing: 0;
-  color: #17131F;
-  text-align: left;
-  padding: 2px 0 6px;
-}
-.cartulina .timer-chamber > div:last-child { border: 0; justify-content: flex-start; padding-top: 4px; margin-top: 8px; }
-.cartulina .timer-chamber > div:last-child > span:first-child { color: #54480E; font-weight: 600; }
-#liveCostBadge {
-  background: #D4136F;
-  color: #fff;
-  border: 0;
-  border-radius: 10px;
-  font-size: 20px;
-  font-weight: 800;
-  padding: 6px 14px;
-  transform: rotate(-2deg);
-  box-shadow: 0 8px 16px -10px rgba(23, 19, 31, 0.7);
-}
-#timerOvertimeAlert { background: #fff; border: 1.5px dashed rgb(var(--c-ember)); color: #17131F; }
-#timerOvertimeAlert > div > div:first-child { background: rgb(var(--c-tang)); color: #17131F; }
-
-.cartulina .btn-ctrl {
-  min-height: 48px;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 800;
-  background: #fff;
-  color: #17131F;
-  border: 2px solid #17131F;
-}
-.cartulina .btn-ctrl:not(:disabled):hover { background: #FFFDE6; color: #17131F; border-color: #17131F; }
-.cartulina #btnStart { background: #17131F; color: rgb(var(--c-sun)); }
-.cartulina #btnStart:not(:disabled):hover { background: #2A2338; color: rgb(var(--c-sun)); }
-.cartulina .btn-ctrl:disabled,
-.cartulina #btnStart:disabled { opacity: 1; background: rgb(23 19 31 / 0.07); color: rgb(23 19 31 / 0.45); border-color: rgb(23 19 31 / 0.22); box-shadow: none; }
-.cartulina #btnRegisterTask {
-  min-height: 54px;
-  background: #D4136F;
-  border-color: #D4136F;
-  color: #fff;
-  font-size: 16px;
-  box-shadow: 0 10px 22px -12px rgba(212, 19, 111, 0.9);
-}
-.cartulina #btnRegisterTask:not(:disabled):hover { background: #B80F5F; border-color: #B80F5F; color: #fff; }
-
-/* --- KPIs del colaborador: cartulinas suaves y una placa invertida --- */
-.billing-hub .grid > div { border-radius: 16px; border-color: transparent; }
-.billing-hub .grid > div:nth-child(1) { background: #FFF9C4; }
-.billing-hub .grid > div:nth-child(2) { background: #DDF8E5; }
-.billing-hub .grid > div:nth-child(3) { background: #FFE8D2; }
-.dark .billing-hub .grid > div:nth-child(1) { background: rgb(244 234 42 / 0.12); }
-.dark .billing-hub .grid > div:nth-child(2) { background: rgb(63 216 106 / 0.12); }
-.dark .billing-hub .grid > div:nth-child(3) { background: rgb(255 138 31 / 0.13); }
-.billing-hub .grid > div:nth-child(4) {
-  --c-ink: 246 241 255;
-  --c-mid: 210 200 228;
-  background: #17131F;
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
 }
-.billing-hub .grid > div:nth-child(4) > span:first-child,
-.billing-hub .grid > div:nth-child(4) .text-xs { color: rgb(var(--c-sun)); }
-.dark .billing-hub .grid > div:nth-child(4) { background: rgb(var(--c-sun)); --c-ink: 23 19 31; --c-mid: 84 72 14; }
-.dark .billing-hub .grid > div:nth-child(4) > span:first-child,
-.dark .billing-hub .grid > div:nth-child(4) .text-xs { color: #54480E; }
-.billing-hub .grid .text-2xl { font-size: 34px; line-height: 1.05; font-weight: 800; font-stretch: 82%; letter-spacing: -0.01em; }
+.content-card { padding: 22px 24px; }
 
-/* Meta semanal y recordatorio */
-#workerGoalCard { background: rgb(var(--c-paper)); box-shadow: var(--shadow-card); border-radius: 20px; }
-#workerGoalCard > div:first-child > div:first-child { background: rgb(var(--c-sun)); color: #17131F; border-color: transparent; }
-#workerGoalProgressBar { background: rgb(var(--c-primary)); }
-.reminder-card { border-left: 1px solid var(--border-soft); background: #FFFBD6; }
-.dark .reminder-card { background: rgb(244 234 42 / 0.08); }
-.reminder-head i { color: rgb(var(--c-primary)); }
-
-/* --- Héroe de administración en cartulina amarilla --- */
-#adminUpworkBudgetSection {
-  --c-canvas: 244 234 42;
-  --c-paper: 244 234 42;
-  --c-alt: 250 244 140;
-  --c-muted: 255 251 205;
-  --c-ink: 23 19 31;
-  --c-soft: 42 35 56;
-  --c-mid: 84 72 14;
-  --c-faint: 120 108 30;
-  --c-line: 210 199 44;
-  --c-ember: 180 20 20;
-  --c-primary: 23 19 31;
-  --c-on-primary: 244 234 42;
-  background: rgb(var(--c-sun));
-  border: 2px solid #17131F;
-  border-radius: 26px;
-  box-shadow: var(--shadow-lift);
+/* --- Navegación: dock flotante + cajón --- */
+#mainAppDashboard main { padding-bottom: 130px !important; max-width: 1480px; }
+.mobile-tabbar {
+  display: flex !important;
+  position: fixed;
+  left: 50%;
+  right: auto;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 45;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  border: 0 !important;
+  border-radius: 22px;
+  background: rgb(18 18 42) !important;
+  backdrop-filter: none !important;
+  box-shadow: 0 18px 40px -16px rgba(18, 18, 42, 0.6);
 }
-#adminUpworkBudgetSection .hero-amount { font-size: 68px; line-height: 0.95; font-weight: 900; font-stretch: 68%; letter-spacing: 0; }
-#adminUpworkBudgetSection .hero-tile,
-#adminUpworkBudgetSection .route-step { background: rgb(255 255 255 / 0.55); border-color: rgb(23 19 31 / 0.12); }
-#adminUpworkBudgetSection .route-step-final { background: #17131F; border-color: #17131F; color: rgb(var(--c-sun)); }
-#adminUpworkBudgetSection .route-step-final small,
-#adminUpworkBudgetSection .route-step-final .tile-sub { color: rgb(244 234 42 / 0.8); }
+.dark .mobile-tabbar { background: rgb(38 41 72) !important; }
+.mobile-tabbar button {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+  padding: 11px 16px !important;
+  border-radius: 14px;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #C9CCE6 !important;
+  background: transparent;
+  border: 0;
+  flex: 0 0 auto !important;
+  cursor: pointer;
+  transition: background-color 150ms ease-out, color 150ms ease-out;
+}
+.mobile-tabbar button i { font-size: 15px !important; }
+.mobile-tabbar button:hover { background: rgb(255 255 255 / 0.08); color: #fff !important; }
+.mobile-tabbar button.active { background: rgb(236 238 246); color: rgb(18 18 42) !important; }
+.mobile-tabbar .tabbar-fab {
+  width: 46px !important; height: 46px !important; margin: 0 !important; padding: 0 !important;
+  justify-content: center; border-radius: 14px !important;
+  background: rgb(var(--c-coral)) !important; color: rgb(18 18 42) !important;
+  box-shadow: none !important;
+}
+.mobile-tabbar .tabbar-fab:hover { background: #FF7A7E !important; }
+#dynamicIslandTimer { bottom: 96px !important; }
 
-/* KPIs de administración: icono en cartulina de color */
-.stat-grid .kpi-card { border-radius: 22px; }
-.stat-value { font-size: 36px; font-weight: 800; font-stretch: 82%; letter-spacing: -0.01em; }
-.stat-icon { width: 36px; height: 36px; border-radius: 11px; font-size: 15px; color: #17131F; }
-.stat-grid > .kpi-card:nth-child(1) .stat-icon { background: rgb(var(--c-sun)); }
-.stat-grid > .kpi-card:nth-child(2) .stat-icon { background: rgb(var(--c-leaf)); }
-.stat-grid > .kpi-card:nth-child(3) .stat-icon { background: rgb(var(--c-tang)); }
-.stat-grid > .kpi-card:nth-child(4) .stat-icon { background: #D4136F; color: #fff; }
-.hero-tile .tile-value, .liq-balance b { font-weight: 800; }
+@media (min-width: 1024px) {
+  #appSidebar {
+    position: fixed !important;
+    top: 0; bottom: 0; left: 0;
+    height: 100vh !important;
+    width: 300px;
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 24px 60px -20px rgba(18, 18, 42, 0.5) !important;
+  }
+  #appSidebar.-translate-x-full { transform: translateX(-105%) !important; }
+  #sidebarBackdrop:not(.hidden) { display: block !important; }
+  #btnToggleMobileSidebar { display: inline-flex !important; }
+  #btnCloseSidebarMobile { display: inline-flex !important; }
+}
+@media (max-width: 1023px) {
+  .mobile-tabbar { left: 12px; right: 12px; transform: none; justify-content: space-between; bottom: calc(12px + env(safe-area-inset-bottom)); }
+  .mobile-tabbar button { flex-direction: column !important; gap: 3px !important; padding: 8px 6px !important; font-size: 11px !important; flex: 1 1 0 !important; min-width: 0; }
+  .mobile-tabbar button i { font-size: 17px !important; }
+  .mobile-tabbar .tabbar-fab { flex: 0 0 48px !important; width: 48px !important; height: 48px !important; }
+}
 
-/* --- Botones --- */
-.btn-ds { font-weight: 650; }
-.btn-ds-primary { box-shadow: 0 8px 18px -12px rgb(var(--c-primary) / 0.9); }
-.btn-ds-outline { border: 1.5px solid var(--border-strong); background: rgb(var(--c-paper)); }
+/* Cajón del menú */
+#appSidebar { background: rgb(var(--c-paper)); border-color: rgb(var(--c-line)); }
+#appSidebar .sidebar-nav-link { font-size: 14px; padding: 11px 14px; border-radius: 14px; color: rgb(var(--c-mid)); }
+#appSidebar .sidebar-nav-link i { color: inherit !important; }
+#appSidebar .sidebar-nav-link:hover { background: rgb(var(--c-muted)); color: rgb(var(--c-ink)); }
+#appSidebar .sidebar-nav-link.active { background: rgb(var(--c-ink)); color: rgb(var(--c-paper)); box-shadow: none; font-weight: 600; }
+
+/* Barra superior */
+#appSidebar + div > header {
+  background-color: rgb(var(--c-canvas) / 0.82) !important;
+  border-color: transparent !important;
+  backdrop-filter: blur(12px);
+}
+#periodFilterButtonGroup { background: rgb(var(--c-paper)); padding: 4px; border-radius: 14px; box-shadow: var(--shadow-card); }
+#periodFilterButtonGroup .btn-period-filter { font-weight: 600; border-radius: 10px !important; }
+#trmBadgeContainer { background: rgb(var(--c-paper)) !important; border-color: transparent !important; color: rgb(var(--c-ink)) !important; box-shadow: var(--shadow-card); }
+#trmBadgeContainer span { color: rgb(var(--c-ink)) !important; }
+#trmBadgeContainer .rounded-full { background: rgb(var(--c-teal)) !important; }
+
+/* --- Botones, pestañas, insignias --- */
+.btn-ds { border-radius: var(--radius-control); font-weight: 600; }
+.btn-ds-primary { background: rgb(var(--c-primary)); color: rgb(var(--c-on-primary)); }
+.btn-ds-outline { background: rgb(var(--c-paper)); border: 1.5px solid var(--border-strong); }
 .btn-ds-outline:hover { border-color: rgb(var(--c-ink)); background: rgb(var(--c-paper)); }
-.tab-btn.active { background: rgb(var(--c-ink)); color: rgb(var(--c-paper)); border-color: transparent; box-shadow: none; }
-.todo-tabs button.active { background: rgb(var(--c-ink)); color: rgb(var(--c-paper)); box-shadow: none; }
-
-/* --- Estados: forma además de color --- */
+.btn-ds-ghost { background: rgb(var(--c-muted)); }
+.tab-btn { border-radius: 12px; }
+.tab-btn.active, .todo-tabs button.active { background: rgb(var(--c-ink)); color: rgb(var(--c-paper)); border-color: transparent; box-shadow: none; }
+.todo-tabs { background: rgb(var(--c-muted)); border-radius: 14px; }
+.badge-solid { background: rgb(var(--c-coral)); color: rgb(18 18 42); }
 .status-badge { font-weight: 700; padding: 2px 10px; }
-.status-pending { background: #FFF7B0; border: 1.5px dashed #8A7A00; color: #3D3500; }
-.status-pending::before { background: #8A7A00; }
-.status-approved { background: #C9F7D5; border: 1.5px solid #187A35; color: #0F4D23; }
-.status-rejected { background: #FFE0EA; border: 1.5px solid #B0124F; color: #8A0E3E; text-decoration: line-through; text-decoration-thickness: 1.5px; }
-.dark .status-pending { background: rgb(244 234 42 / 0.12); border-color: #F4EA2A; color: #F7F08A; }
-.dark .status-pending::before { background: #F4EA2A; }
-.dark .status-approved { background: rgb(63 216 106 / 0.14); border-color: #3FD86A; color: #8BF0A8; }
-.dark .status-rejected { background: rgb(255 79 163 / 0.14); border-color: #FF4FA3; color: #FF9CCB; }
-.todo-priority-alta { background: rgb(var(--c-tang)); color: #17131F; }
+.status-pending { background: #FFF4CC; border: 1.5px dashed #B38600; color: #5A4500; }
+.status-pending::before { background: #B38600; animation: none; }
+.status-approved { background: #D7F5EE; border: 1.5px solid #0B8A7C; color: #0B5C53; }
+.status-rejected { background: #FFE3E4; border: 1.5px solid #D63A40; color: #A1222A; text-decoration: line-through; }
+.dark .status-pending { background: rgb(255 200 58 / 0.14); border-color: #FFC83A; color: #FFE08A; }
+.dark .status-pending::before { background: #FFC83A; }
+.dark .status-approved { background: rgb(18 181 166 / 0.16); border-color: #12B5A6; color: #7FE6DA; }
+.dark .status-rejected { background: rgb(255 90 95 / 0.16); border-color: #FF5A5F; color: #FFA3A6; }
+.btn-status-filter > span.rounded-full { width: 9px; height: 9px; }
+.btn-status-filter[data-status="pendiente"] > span.rounded-full { background: #FFC83A; outline: 1.5px dashed #B38600; outline-offset: 1px; }
+.btn-status-filter[data-status="aprobada"] > span.rounded-full { background: #12B5A6; }
+.btn-status-filter[data-status="rechazada"] > span.rounded-full { background: #FF5A5F; }
+.todo-priority-alta { background: rgb(var(--c-coral)); color: rgb(18 18 42); }
+.ds-avatar { background: rgb(var(--c-violet) / 0.14); color: rgb(var(--c-ink)); font-weight: 700; }
+.reminder-card { border-left: 0; }
+.reminder-head i { color: rgb(var(--c-coral)); }
+.liq-bar > span, .summary-client-track span, .weekly-bar-fill { background: rgb(var(--c-violet)); }
+.weekly-table .weekly-today { background: rgb(var(--c-violet) / 0.08); }
+.todo-cal-day.is-today { border-color: rgb(var(--c-violet)); background: rgb(var(--c-violet) / 0.05); }
+.todo-cal-alta { background: rgb(var(--c-coral) / 0.12); border-color: rgb(var(--c-coral) / 0.6); }
+.todo-cal-media { background: rgb(var(--c-sun) / 0.16); }
 
-/* --- Datos y gráficas --- */
-.summary-client-track span { background: rgb(var(--c-primary)); }
-.liq-bar > span { background: rgb(var(--c-primary)); }
-.ds-avatar { background: rgb(var(--c-sun) / 0.55); color: #17131F; font-weight: 700; }
-.dark .ds-avatar { background: rgb(var(--c-sun) / 0.85); }
-.todo-cal-day.is-today { border-color: rgb(var(--c-primary)); background: rgb(var(--c-primary) / 0.06); }
-.weekly-table .weekly-today { background: rgb(var(--c-sun) / 0.22); }
+/* ==============================================================================
+   COLABORADOR — mosaico
+   ============================================================================== */
+#workerPortalView:not(.hidden) {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+#workerPortalView > * { margin: 0 !important; min-width: 0; }
+#workerDashboardSection { grid-column: 1 / -1; grid-row: 1; }
+#workerTimerSlot { grid-column: 1; grid-row: 2 / span 2; }
+#workerBillingHub { grid-column: 2; grid-row: 2; }
+#workerGoalCard { grid-column: 2; grid-row: 3; }
+#workerReminderSection, #workerTodosSection, #workerTasksSlot, #workerWeeklySection, #workerPortalView > [data-summary-scope="worker"] { grid-column: 1 / -1; }
+#workerReminderSection { order: 1; }
+#workerTodosSection { order: 2; }
+#workerTasksSlot { order: 3; }
+#workerPortalView > [data-summary-scope="worker"] { order: 4; }
+#workerWeeklySection { order: 5; }
+
+/* Saludo */
+.worker-hero { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 4px 0 0 !important; }
+.worker-hero-name { font-size: clamp(26px, 2.6vw, 36px) !important; line-height: 1.1 !important; font-weight: 700 !important; letter-spacing: -0.03em !important; }
+#workerHeroAvatar { width: 52px; height: 52px; border-radius: 16px; background: rgb(var(--c-ink)); color: rgb(var(--c-paper)); font-family: 'Unbounded', sans-serif; font-size: 20px; }
+#btnWorkerOpenManualEntry { background: rgb(var(--c-paper)); border: 0; height: 42px; border-radius: 14px; font-weight: 600; box-shadow: var(--shadow-card); }
+
+/* Tile de la rueda (cronómetro) */
+#timerMainCard.rueda-card { padding: 22px 26px 24px; box-shadow: var(--shadow-lift); }
+#timerMainCard.rueda-card > div:first-child > div:first-child { border-color: rgb(var(--c-line)); }
+#timerMainCard.rueda-card > div:first-child > div:first-child { flex-wrap: wrap; gap: 10px; }
+.rueda-card .timer-title { white-space: nowrap; }
+.rueda-card .timer-title { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: rgb(var(--c-mid)); }
+.rueda-card .timer-live-dot { background: rgb(var(--c-coral)); box-shadow: 0 0 0 4px rgb(var(--c-coral) / 0.22); }
+#timerMainCard:has(#timerDisplay.timer-active) .timer-live-dot { animation: rueda-live 1.4s ease-in-out infinite; }
+@keyframes rueda-live { 50% { box-shadow: 0 0 0 8px rgb(var(--c-coral) / 0); } }
+
+.rueda-card .timer-body { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "c" "a" "w" "f" "d" "l" "k"; row-gap: 14px; }
+.rueda-card .timer-body > * { margin-top: 0 !important; margin-bottom: 0 !important; }
+.rueda-card #timerActiveTitle { grid-area: a; }
+.rueda-card #timerWorkerSelectContainer { grid-area: w; }
+.rueda-card .timer-row-client { grid-area: f; }
+.rueda-card .timer-row-desc { grid-area: d; }
+.rueda-card .wheel-legend { grid-area: l; }
+.rueda-card .timer-controls { grid-area: k; }
+@media (min-width: 1100px) {
+  .rueda-card .timer-body {
+    grid-template-columns: 400px minmax(0, 1fr);
+    grid-template-areas: "c a" "c w" "c f" "c d" "c l" "c k";
+    column-gap: 30px;
+    align-items: start;
+  }
+}
+.rueda-card label { color: rgb(var(--c-mid)); font-weight: 600; font-size: 12px; }
+.rueda-card .form-input { background: rgb(var(--c-muted)); border: 0; border-radius: 12px; }
+.rueda-card .form-input:focus { background: rgb(var(--c-paper)); box-shadow: 0 0 0 2px rgb(var(--c-violet)); }
+
+/* La rueda */
+.rueda-card .timer-chamber {
+  grid-area: c;
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: visible;
+}
+.day-wheel { position: absolute; inset: 0; pointer-events: none; }
+.day-wheel svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.rueda-card .timer-chamber > *:not(.day-wheel) { position: relative; z-index: 1; }
+.rueda-card .timer-chamber > .uppercase { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#timerDisplay {
+  font-size: clamp(30px, 3.4vw, 44px);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: rgb(var(--c-ink));
+  padding: 4px 0;
+}
+.rueda-card .timer-chamber > div:last-child { border: 0; flex-direction: column; gap: 2px; margin-top: 6px; padding-top: 0; }
+.rueda-card .timer-chamber > div:last-child > span:first-child { font-size: 12px; color: rgb(var(--c-mid)); }
+#liveCostBadge { background: transparent; border: 0; padding: 0; font-size: 17px; font-weight: 700; color: rgb(var(--c-ink)); }
+.live-cost-cop { font-size: 12px; color: rgb(var(--c-mid)); font-weight: 500; }
+#pomodoroBanner { margin-bottom: 6px; }
+#timerOvertimeAlert { position: absolute !important; left: -8px; right: -8px; bottom: -6px; z-index: 3 !important; background: rgb(var(--c-paper)); border: 1.5px solid rgb(var(--c-coral)); color: rgb(var(--c-ink)); box-shadow: var(--shadow-lift); }
+.wheel-tick { stroke: rgb(var(--c-faint)); stroke-width: 2; }
+.wheel-track { stroke: rgb(var(--c-muted)); }
+.wheel-live-dot { fill: rgb(var(--c-coral)); stroke: rgb(var(--c-paper)); stroke-width: 4; }
+
+/* Encabezado "Ahora" y leyenda */
+.timer-active-title { display: flex; flex-direction: column; gap: 4px; }
+.timer-active-title.hidden { display: none !important; }
+.timer-active-title::before { content: "Ahora"; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: rgb(var(--c-coral)); }
+.timer-active-title b { font-size: 24px; line-height: 1.15; font-weight: 700; letter-spacing: -0.03em; color: rgb(var(--c-ink)); overflow-wrap: anywhere; }
+.timer-active-title span { font-size: 14px; color: rgb(var(--c-mid)); }
+.wheel-legend { display: flex; flex-direction: column; gap: 8px; }
+.wheel-legend:empty { display: none; }
+.wheel-legend .wl-row { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
+.wheel-legend .wl-row i { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
+.wheel-legend .wl-row b { margin-left: auto; font-variant-numeric: tabular-nums; }
+.wheel-legend .wl-head { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: rgb(var(--c-mid)); }
+
+/* Controles */
+.rueda-card .btn-ctrl { min-height: 48px; border-radius: 14px; font-size: 15px; font-weight: 700; background: rgb(var(--c-muted)); color: rgb(var(--c-ink)); border: 0; }
+.rueda-card .btn-ctrl:not(:disabled):hover { background: rgb(var(--c-line)); color: rgb(var(--c-ink)); }
+.rueda-card #btnStart { background: rgb(var(--c-coral)); color: rgb(18 18 42); }
+.rueda-card #btnStart:not(:disabled):hover { background: #FF7A7E; color: rgb(18 18 42); }
+.rueda-card .btn-ctrl:disabled, .rueda-card #btnStart:disabled { opacity: 1; background: rgb(var(--c-muted) / 0.6); color: rgb(var(--c-faint)); }
+.rueda-card #btnRegisterTask { min-height: 54px; background: rgb(var(--c-ink)); color: rgb(var(--c-paper)); border: 0; font-size: 16px; }
+.rueda-card #btnRegisterTask:not(:disabled):hover { background: var(--primary-hover); color: rgb(var(--c-paper)); }
+
+/* Tile del saldo (amarillo sol, igual en ambos temas) */
+#workerBillingHub {
+  --c-ink: 18 18 42; --c-mid: 90 69 0; --c-line: 18 18 42; --c-paper: 255 200 58; --c-muted: 255 214 110;
+  --text-main: rgb(18 18 42); --text-secondary: rgb(90 69 0); --border-soft: rgb(18 18 42 / 0.15);
+  background: rgb(var(--c-sun)) !important;
+  color: rgb(18 18 42);
+  border: 0 !important;
+  border-radius: var(--radius-card) !important;
+  box-shadow: var(--shadow-card) !important;
+  padding: 22px 24px !important;
+}
+#workerBillingHub > div:first-child { flex-direction: column !important; align-items: stretch !important; border-color: rgb(18 18 42 / 0.15) !important; }
+#workerBillingHub > div:first-child > div > span:first-child { color: rgb(90 69 0); }
+#workerBillingHub h2 { font-size: 15px; font-weight: 700; }
+#btnWorkerOpenBill { order: 9; background: rgb(18 18 42); color: #fff; border-radius: 14px; justify-content: center; }
+#workerBillingHub .grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 12px !important; }
+#workerBillingHub .grid > div { background: transparent; border: 0; padding: 0; border-radius: 0; }
+#workerBillingHub .grid > div:nth-child(4) { order: -1; grid-column: 1 / -1; padding-bottom: 10px; border-bottom: 1.5px solid rgb(18 18 42 / 0.15); }
+#workerBillingHub .grid > div:nth-child(4) .text-2xl { font-size: 44px; font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; }
+#workerBillingHub .grid .text-2xl { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+#workerBillingHub .grid span, #workerBillingHub .grid .text-xs { color: rgb(18 18 42); }
+#workerBillingHub .grid > div > span:first-child { color: rgb(90 69 0); }
+
+/* Tile de la semana */
+#workerGoalCard { background: rgb(var(--c-paper)); border: 0; border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 22px 24px !important; flex-direction: column !important; align-items: stretch !important; gap: 14px !important; }
+#workerGoalCard > div { width: 100% !important; }
+#workerGoalCard > div:first-child > div:first-child { background: rgb(var(--c-violet) / 0.14); color: rgb(var(--c-violet)); border: 0; }
+#workerGoalProgressBar { background: rgb(var(--c-violet)); }
+.week-bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; }
+.week-bars .wb-day { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: rgb(var(--c-mid)); }
+.week-bars .wb-stack { width: 100%; min-height: 6px; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column-reverse; background: rgb(var(--c-muted)); }
+.week-bars .wb-stack em { display: block; }
+.week-bars .wb-day.is-today { color: rgb(var(--c-ink)); }
+
+/* ==============================================================================
+   ADMINISTRACIÓN — Centro de mando
+   ============================================================================== */
+.hero-grid { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 18px; align-items: stretch; }
+.hero-grid > .stat-grid { grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+#adminUpworkBudgetSection {
+  --c-canvas: 255 200 58; --c-paper: 255 200 58; --c-alt: 255 214 110; --c-muted: 255 221 128;
+  --c-ink: 18 18 42; --c-soft: 42 43 72; --c-mid: 90 69 0; --c-faint: 140 110 20; --c-line: 18 18 42;
+  --c-ember: 170 20 30; --c-primary: 18 18 42; --c-on-primary: 255 255 255;
+  --bg-card: rgb(255 200 58); --bg-subtle: rgb(255 221 128); --primary: rgb(18 18 42); --on-primary: #fff;
+  --text-main: rgb(18 18 42); --text-secondary: rgb(90 69 0); --border-soft: rgb(18 18 42 / 0.15);
+  background: rgb(var(--c-sun)); color: rgb(18 18 42); border: 0; box-shadow: var(--shadow-lift);
+}
+#adminUpworkBudgetSection .hero-amount { font-size: 56px; font-weight: 800; letter-spacing: -0.05em; }
+#adminUpworkBudgetSection .hero-tile,
+#adminUpworkBudgetSection .route-step:not(.route-step-final) { background: rgb(255 255 255 / 0.45); border: 0; }
+#adminUpworkBudgetSection .route-step-final { background: rgb(18 18 42); border-color: rgb(18 18 42); color: #fff; }
+#adminUpworkBudgetSection .route-step-final small, #adminUpworkBudgetSection .route-step-final .tile-sub { color: rgb(255 200 58); }
+#upworkWeeksPillsBar > * { white-space: nowrap; }
+
+.team-wheel-tile { background: rgb(var(--c-paper)); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 22px 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.team-wheel-tile h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+.team-wheel-tile p { font-size: 13px; color: rgb(var(--c-mid)); }
+.team-wheel-body { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; align-items: center; }
+.team-wheel-ring { position: relative; width: 220px; aspect-ratio: 1; }
+.team-wheel-ring svg { width: 100%; height: 100%; }
+.team-wheel-ring .wheel-total { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.wheel-total b { font-size: 30px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.wheel-total span { font-size: 12px; color: rgb(var(--c-mid)); margin-top: 4px; }
+
+.stat-grid > .kpi-card { padding: 20px 22px; }
+.stat-icon { width: 36px; height: 36px; border-radius: 12px; font-size: 14px; color: rgb(18 18 42); }
+.stat-grid > .kpi-card:nth-child(1) .stat-icon { background: rgb(var(--c-violet) / 0.18); color: rgb(var(--c-violet)); }
+.stat-grid > .kpi-card:nth-child(2) .stat-icon { background: rgb(var(--c-sun)); }
+.stat-grid > .kpi-card:nth-child(3) .stat-icon { background: rgb(var(--c-teal) / 0.2); color: rgb(var(--c-teal)); }
+.stat-grid > .kpi-card:nth-child(4) .stat-icon { background: rgb(var(--c-coral)); }
+.stat-grid .stat-sub { white-space: normal; overflow: visible; text-overflow: clip; }
 
 /* --- Isla flotante del tiempo activo --- */
-#dynamicIslandTimer {
-  --c-ink: 246 241 255;
-  --c-mid: 190 178 210;
-  --c-faint: 244 234 42;
-  --c-line: 56 46 76;
-  --c-primary: 244 234 42;
-  --c-ember: 255 107 107;
-}
-.island-pill-wrapper {
-  background: #17131F !important;
-  box-shadow: 0 0 0 2px rgb(var(--c-sun)), 0 18px 36px -14px rgba(23, 19, 31, 0.75);
-}
+#dynamicIslandTimer { --c-ink: 241 241 250; --c-mid: 190 192 220; --c-faint: 255 200 58; --c-primary: 255 90 95; }
+.island-pill-wrapper { background: rgb(18 18 42) !important; box-shadow: 0 18px 36px -14px rgba(18, 18, 42, 0.7); }
 .island-pill-wrapper::before { display: none; }
-#islandStatusDot { color: #17131F; border-color: transparent; }
+#islandStatusDot { color: rgb(18 18 42); border-color: transparent; }
 
-/* --- Celular --- */
+/* --- Celular y tablet --- */
 @media (max-width: 1023px) {
-  .mobile-tabbar button.active { color: rgb(var(--c-primary)); font-weight: 700; }
-  .mobile-tabbar .tabbar-fab { box-shadow: 0 10px 20px -8px rgb(var(--c-primary) / 0.8); }
+  #workerPortalView:not(.hidden) { grid-template-columns: minmax(0, 1fr); }
+  #workerPortalView > * { grid-column: 1 / -1 !important; grid-row: auto !important; }
+  #workerDashboardSection { order: -5; }
+  #workerTimerSlot { order: -4; }
+  #workerBillingHub { order: -3; }
+  #workerGoalCard { order: -2; }
+  .hero-grid { grid-template-columns: minmax(0, 1fr); }
+  .hero-grid > .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 767px) {
-  .page-title { font-size: 34px; }
-  #timerMainCard.cartulina { padding: 18px 16px; border-radius: 22px; }
-  #timerDisplay { font-size: clamp(64px, 20vw, 96px); }
-  .cartulina .btn-ctrl { min-height: 46px; font-size: 14px; }
-  .cartulina .timer-title { font-size: 12px; letter-spacing: 0.04em; }
-  #timerMainCard.cartulina > div:first-child > div:first-child { flex-wrap: wrap; gap: 8px; }
-  #adminUpworkBudgetSection .hero-amount { font-size: 52px; }
-  .billing-hub .grid .text-2xl { font-size: 28px; }
+  .page-title { font-size: 30px; }
+  .worker-hero > div:first-child { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .worker-hero > div:last-child { align-self: stretch !important; justify-content: flex-start; }
+  #timerMainCard.rueda-card { padding: 18px 16px; }
+  .rueda-card .timer-chamber { max-width: 320px; }
+  #adminUpworkBudgetSection .hero-amount { font-size: 44px; }
+  #adminUpworkBudgetSection .hero-tiles { grid-template-columns: 1fr; }
+  .team-wheel-body { grid-template-columns: 1fr; justify-items: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   #timerMainCard:has(#timerDisplay.timer-active) .timer-live-dot { animation: none; }
+  #appSidebar { transition: none; }
 }
 
 }
 
-/* --- Ajustes de la revisión final (Cartulina de plaza) --- */
+/* --- Ajustes de la revisión final (La rueda del día) --- */
 @media screen {
-/* Títulos de sección en voz de marcador */
-.card-title { font-size: 22px; font-weight: 850; font-stretch: 80%; letter-spacing: -0.005em; }
-#mainAppDashboard section h2.uppercase { font-size: 18px; font-weight: 850; font-stretch: 80%; letter-spacing: 0.01em; }
-.billing-hub h2 { font-size: 28px; line-height: 1.05; font-weight: 900; font-stretch: 78%; }
-.billing-hub > div:first-child > div > span:first-child { display: none; }
-/* El cronómetro no necesita etiqueta visible (se conserva para lectores de pantalla) */
-.cartulina .timer-chamber > .uppercase {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+
+/* Vistas del colaborador: "Hoy" y "Actividad" (las cambia ui-shell.js) */
+html.role-worker[data-wview="hoy"] #workerTasksSlot,
+html.role-worker[data-wview="hoy"] #workerWeeklySection,
+html.role-worker[data-wview="hoy"] #workerPortalView > [data-summary-scope="worker"] { display: none !important; }
+html.role-worker[data-wview="actividad"] #workerTimerSlot,
+html.role-worker[data-wview="actividad"] #workerBillingHub,
+html.role-worker[data-wview="actividad"] #workerGoalCard,
+html.role-worker[data-wview="actividad"] #workerReminderSection,
+html.role-worker[data-wview="actividad"] #workerTodosSection { display: none !important; }
+
+/* Mosaico "Hoy": cronómetro + saldo + semana, y debajo tareas + recordatorio */
+#workerTodosSection { grid-column: 1 !important; grid-row: 4; order: 0; }
+#workerReminderSection { grid-column: 2 !important; grid-row: 4; order: 0; }
+#workerPortalView:has(#workerReminderSection.hidden) #workerTodosSection { grid-column: 1 / -1 !important; }
+
+/* Saludo compacto (sin la fila de encabezado de antes) */
+#workerDashboardSection { flex-direction: row !important; align-items: center !important; gap: 14px !important; }
+#workerDashboardSection > div:first-child { gap: 12px !important; }
+#workerDashboardSection p, #workerDashboardSection .font-mono.uppercase { display: none !important; }
+#workerHeroAvatar { width: 40px; height: 40px; border-radius: 12px; font-size: 16px; }
+.worker-hero-name { font-size: clamp(22px, 2vw, 28px) !important; }
+#workerDashboardSection > div:last-child > div { background: rgb(var(--c-paper)); border: 0; border-radius: 14px; box-shadow: var(--shadow-card); }
+
+/* "+ Horas / Artes" dentro de los controles del cronómetro */
+.rueda-card .timer-controls { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.25fr) !important; }
+.rueda-card #btnWorkerOpenManualEntry, .rueda-card #btnWorkerOpenManualEntry span { white-space: nowrap; }
+.rueda-card #btnWorkerOpenManualEntry { min-height: 48px; height: auto; box-shadow: none; background: rgb(var(--c-muted)); border-radius: 14px; font-size: 14px; justify-content: center; }
+.rueda-card #btnWorkerOpenManualEntry:hover { background: rgb(var(--c-line)); }
+html.role-admin #btnWorkerOpenManualEntry.manual-in-timer { display: none !important; }
+html.role-admin .rueda-card .timer-controls { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+
+/* Sin rótulos sobre los títulos */
+.timer-active-title::before { content: none; }
+#workerBillingHub > div:first-child > div > span:first-child { display: none; }
+.rueda-card .timer-title, .rueda-card .timer-live-dot { display: none; }
+#timerMainCard.rueda-card > div:first-child > div:first-child { justify-content: flex-end; border: 0; padding-bottom: 0; }
+
+/* Títulos de tile en Unbounded */
+#workerBillingHub h2, #workerGoalCard .text-xs.font-bold {
+  font-family: 'Unbounded', 'Onest', sans-serif; font-size: 16px !important; font-weight: 600; letter-spacing: -0.02em;
 }
 
-/* KPIs del colaborador directamente sobre el fondo, sin tarjeta envolvente */
-.billing-hub { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+/* Semana: una sola lectura (barras por día con su total) */
+#workerGoalCard > div:first-child > div:first-child { display: none; }
+#workerGoalCard > div:nth-child(2) > div:first-child { display: none; }
+.week-bars { height: 150px; }
+.week-bars .wb-day b { font-size: 11px; font-weight: 700; color: rgb(var(--c-ink)); min-height: 14px; }
 
-/* KPIs de administración: módulos con filete, sin tarjeta */
-.hero-grid { align-items: start; }
-.stat-grid {
-  gap: 1px;
-  background: rgb(var(--c-ink) / 0.16);
-  border-top: 2px solid rgb(var(--c-ink));
-  border-bottom: 1px solid rgb(var(--c-ink) / 0.16);
-}
-.stat-grid > .kpi-card,
-.stat-grid > .kpi-card:hover {
-  background: var(--bg-app);
-  border: 0;
-  border-radius: 0 !important;
-  box-shadow: none;
-  padding: 16px 18px 18px;
-}
-.stat-grid .stat-sub { white-space: normal; overflow: visible; text-overflow: clip; }
-.stat-icon { width: 28px; height: 28px; border-radius: 8px; font-size: 13px; margin-bottom: 8px; }
+/* Horas del dial */
+.wheel-hour { fill: rgb(var(--c-mid)); font: 600 12px 'Onest', sans-serif; }
 
-/* Héroe de admin: divisiones con filete de tinta en lugar de recuadros */
-#adminUpworkBudgetSection .hero-tiles { gap: 20px; }
+/* Dock: coral solo para lo que está en vivo; el dinero en amarillo */
+.mobile-tabbar .tabbar-fab { background: rgb(236 238 246) !important; color: rgb(18 18 42) !important; }
+.mobile-tabbar .tabbar-fab:hover { background: #fff !important; }
+.mobile-tabbar .admin-only-feature.tabbar-fab { background: rgb(var(--c-sun)) !important; }
+
+/* Tracking mínimo -0.04em en cifras grandes */
+#workerBillingHub .grid > div:nth-child(4) .text-2xl, #adminUpworkBudgetSection .hero-amount { letter-spacing: -0.04em; }
+
+/* Admin: presupuesto con filas rayadas sobre el amarillo, sin recuadros internos */
+#adminUpworkBudgetSection .hero-tiles { gap: 0 24px; }
 #adminUpworkBudgetSection .hero-tile,
 #adminUpworkBudgetSection .route-step:not(.route-step-final) {
-  background: transparent;
-  border: 0;
-  border-top: 1.5px solid rgb(23 19 31 / 0.8);
-  border-radius: 0;
-  padding: 10px 0 0;
+  background: transparent; border: 0; border-top: 1.5px solid rgb(18 18 42 / 0.22); border-radius: 0; padding: 12px 0 0;
 }
-#adminUpworkBudgetSection .tile-sub.truncate { white-space: normal; overflow: visible; }
-#upworkWeeksPillsBar > * { white-space: nowrap; }
+#adminUpworkBudgetSection .route-strip { gap: 0 16px; }
 
-/* Filtros de estado: el punto repite la forma y el color del estado */
-.btn-status-filter > span.rounded-full { width: 9px; height: 9px; }
-.btn-status-filter[data-status="pendiente"] > span.rounded-full { background: rgb(var(--c-sun)); box-shadow: 0 0 0 1.5px #17131F; outline: 1.5px dashed #8A7A00; outline-offset: 1px; }
-.btn-status-filter[data-status="aprobada"] > span.rounded-full { background: #3FD86A; box-shadow: 0 0 0 1.5px #187A35; }
-.btn-status-filter[data-status="rechazada"] > span.rounded-full { background: #FF4FA3; box-shadow: 0 0 0 1.5px #8A0E3E; }
+/* Admin: los cuatro indicadores en una sola franja-libro, sin insignias */
+.hero-grid > .stat-grid {
+  gap: 0; background: rgb(var(--c-paper)); border-radius: var(--radius-card); box-shadow: var(--shadow-card); overflow: hidden;
+}
+.hero-grid > .stat-grid > .kpi-card { background: transparent; border-radius: 0; box-shadow: none; border-left: 1px solid rgb(var(--c-line)); padding: 20px 24px; }
+.hero-grid > .stat-grid > .kpi-card:first-child { border-left: 0; }
+.hero-grid > .stat-grid .stat-icon { display: none; }
 
-/* Celular: saludo compacto para que el cronómetro suba */
+/* Admin: el cronómetro no va dentro de otra tarjeta */
+#adminTimerSlot #timerMainCard.rueda-card { box-shadow: none; padding: 8px 0 0; background: transparent; }
+
+@media (max-width: 1023px) {
+  #workerTodosSection, #workerReminderSection { grid-column: 1 / -1 !important; grid-row: auto !important; }
+  #workerReminderSection { order: -1; }
+  .hero-grid > .stat-grid > .kpi-card:nth-child(3) { border-left: 0; }
+  .hero-grid > .stat-grid > .kpi-card:nth-child(n+3) { border-top: 1px solid rgb(var(--c-line)); }
+}
 @media (max-width: 767px) {
-  .worker-hero { gap: 12px !important; }
-  .worker-hero > div:first-child { flex-direction: column; align-items: flex-start; gap: 10px; }
-  #workerHeroAvatar { width: 44px; height: 44px; font-size: 19px; border-radius: 12px; }
-  .worker-hero > div:last-child { align-self: stretch !important; justify-content: flex-start; }
-}
-@media (max-width: 480px) {
-  #adminUpworkBudgetSection .hero-tiles { grid-template-columns: 1fr; }
-  #adminUpworkBudgetSection .mx-1 { display: none; }
-  #adminUpworkBudgetSection .text-sm.text-mid > span:last-child { display: block; }
+  #workerDashboardSection { flex-direction: row !important; flex-wrap: wrap; }
+  #workerDashboardSection > div:first-child { flex-direction: row !important; align-items: center !important; }
+  #workerDashboardSection > div:last-child { align-self: auto !important; margin-left: auto; }
+  .rueda-card .timer-controls { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }
 }
 
-/* --- Tarea en curso como encabezado y COP del costo en vivo --- */
+/* Cifras del Centro de mando en Unbounded (las reglas por id de la base ganaban) */
 @media screen {
-.timer-active-title { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
-.timer-active-title.hidden { display: none !important; }
-.timer-active-title b { font-size: 24px; line-height: 1.1; font-weight: 850; font-stretch: 85%; color: #17131F; overflow-wrap: anywhere; }
-.timer-active-title span { font-size: 13px; font-weight: 600; color: #54480E; }
-.cartulina .timer-chamber > div:last-child { flex-wrap: wrap; align-items: center; column-gap: 10px; row-gap: 6px; }
-.live-cost-cop { flex-basis: 100%; font-size: 13px; font-weight: 700; color: #54480E; }
-@media (max-width: 767px) { .timer-active-title b { font-size: 20px; } }
+#kpiTotalHoras, #kpiTotalGenerado, #kpiTotalPagado, #kpiSaldoPendiente { font-family: 'Unbounded', 'Onest', sans-serif; }
+}
+
+/* --- Segunda ronda de la revisión --- */
+@media screen {
+/* "+ Horas / Artes" en su propia fila bajo los controles */
+.rueda-card .timer-controls { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+.rueda-card #btnWorkerOpenManualEntry { grid-column: 1 / -1; }
+/* Saludo dentro de la barra superior en escritorio */
+#workerDashboardSection.hero-in-topbar { padding: 0 !important; gap: 12px !important; flex-wrap: nowrap; }
+#workerDashboardSection.hero-in-topbar .worker-hero-name { font-size: 18px !important; white-space: nowrap; }
+#workerDashboardSection.hero-in-topbar #workerHeroAvatar { width: 34px; height: 34px; font-size: 14px; border-radius: 10px; }
+#workerDashboardSection.hero-in-topbar > div:last-child > div { padding: 4px 10px; box-shadow: none; background: rgb(var(--c-paper)); }
+#appSidebar + div > header > div:first-child { gap: 14px; }
+html:not(.role-worker) #workerDashboardSection.hero-in-topbar { display: none !important; }
+/* La barra del tiempo activo va arriba a la derecha en escritorio, lejos del dock */
+@media (min-width: 1024px) {
+  html #dynamicIslandTimer { left: auto !important; right: 24px; bottom: auto !important; top: 78px; transform: translate(0, -1rem) !important; }
+  html #dynamicIslandTimer.island-visible { transform: none !important; }
+  html #dynamicIslandTimer.island-visible:hover { transform: translateY(1px) !important; }
+}
 }

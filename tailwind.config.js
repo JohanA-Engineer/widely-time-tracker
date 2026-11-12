@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-// Sistema de diseño: Design.md ("Cartulina de plaza").
+// Sistema de diseño: Design.md ("La rueda del día").
 // Los colores son tokens semánticos definidos como variables CSS en styles.css (:root y .dark),
 // así cada clase funciona en modo claro y oscuro sin necesidad de variantes dark:.
 // Para regenerar tailwind.min.css: npx tailwindcss@3.4.17 -i src-tailwind.css -o tailwind.min.css --minify
@@ -29,8 +29,8 @@ module.exports = {
         'on-primary': token('on-primary'),
       },
       fontFamily: {
-        sans: ['"Archivo"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        mono: ['"Archivo"', 'ui-sans-serif', 'sans-serif'],
+        sans: ['"Onest"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        mono: ['"Onest"', 'ui-sans-serif', 'sans-serif'],
       },
       borderRadius: {
         md: '10px',

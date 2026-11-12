@@ -14,17 +14,17 @@
 
   <!-- PWA & Mobile Web App Meta Tags -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#17131F">
+  <meta name="theme-color" content="#12122A">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Time Tracker">
   <link rel="apple-touch-icon" href="icon-192.svg">
   <link rel="icon" type="image/svg+xml" href="icon-192.svg">
 
-  <!-- Google Fonts: Archivo con eje de ancho (Design.md "Cartulina de plaza") -->
+  <!-- Google Fonts: Unbounded (cifras y títulos) + Onest (interfaz) — Design.md "La rueda del día" -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous" referrerpolicy="no-referrer">
 
   <!-- Chart.js CDN para Dashboard Ejecutivo (versión fija + verificación de integridad SRI) -->
@@ -450,7 +450,7 @@
       <!-- Slot para el Cronómetro en Vivo -->
       <div id="workerTimerSlot" class="w-full">
         <!-- Tracker de Tareas (Cronómetro en Vivo) -->
-        <div id="timerMainCard" class="cartulina content-card flex flex-col justify-between">
+        <div id="timerMainCard" class="rueda-card content-card flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between pb-3 sm:pb-4 border-b border-line">
               <div class="flex items-center gap-2">
@@ -467,7 +467,7 @@
                 <!-- Selector Modo: Cronómetro Libre vs Pomodoro -->
                 <div class="inline-flex p-0.5 rounded-lg bg-muted text-[10px] font-semibold">
                   <button type="button" id="btnModeStandard" class="px-2 py-0.5 rounded-md bg-white dark:bg-paper text-ink shadow-xs transition-all cursor-pointer">Libre</button>
-                  <button type="button" id="btnModePomodoro" class="px-2 py-0.5 rounded-md text-mid hover:text-ink dark:hover:text-white transition-all cursor-pointer flex items-center gap-1">🍅 Pomodoro</button>
+                  <button type="button" id="btnModePomodoro" class="px-2 py-0.5 rounded-md text-mid hover:text-ink dark:hover:text-white transition-all cursor-pointer flex items-center gap-1"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> Pomodoro</button>
                 </div>
                 <span id="timerStatusBadge" class="text-[11px] sm:text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-muted text-mid border border-line">
                   Detenido
@@ -476,6 +476,7 @@
             </div>
 
             <div class="timer-body mt-3 sm:mt-4 space-y-3 sm:space-y-4">
+              <div id="timerActiveTitle" class="timer-active-title hidden"><b></b><span></span></div>
               <!-- Selector de Trabajador (Solo visible en modo Admin) -->
               <div id="timerWorkerSelectContainer">
                 <label for="timerWorkerSelect" class="block text-xs font-semibold text-ink mb-1.5">
@@ -499,13 +500,13 @@
                     Categoría
                   </label>
                   <select id="timerCategory" class="form-input w-full text-xs">
-                    <option value="general">💼 General / Otros</option>
-                    <option value="diseno">🎨 Diseño Gráfico</option>
-                    <option value="video">🎬 Edición de Video</option>
-                    <option value="copy">✍️ Redacción & Copy</option>
-                    <option value="ads">📈 Pauta & Ads</option>
-                    <option value="reunion">🤝 Reunión & Sync</option>
-                    <option value="estrategia">💡 Estrategia</option>
+                    <option value="general">General / Otros</option>
+                    <option value="diseno">Diseño Gráfico</option>
+                    <option value="video">Edición de Video</option>
+                    <option value="copy">Redacción & Copy</option>
+                    <option value="ads">Pauta & Ads</option>
+                    <option value="reunion">Reunión & Sync</option>
+                    <option value="estrategia">Estrategia</option>
                   </select>
                 </div>
               </div>
@@ -520,6 +521,7 @@
 
               <!-- Display Digital del Reloj (Limpio, sobrio y natural) -->
               <div class="timer-chamber my-3 sm:my-4 p-4 sm:p-6 rounded-xl text-center relative overflow-hidden bg-muted border border-line">
+                <div id="dayWheel" class="day-wheel"></div>
                 <div id="timerGlowAura" class="hidden"></div>
 
                 <!-- Alerta de Cronómetro Olvidado (> 4 horas) -->
@@ -546,8 +548,6 @@
 
                 <div class="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-mid mb-1">Tiempo Transcurrido</div>
                 
-                <div id="timerActiveTitle" class="timer-active-title hidden"><b></b><span></span></div>
-
                 <div id="timerDisplay" class="font-mono text-4xl xs:text-5xl sm:text-6xl 3xl:text-7xl font-bold tracking-wider text-ink tabular-nums py-1 sm:py-2 select-none">
                   00:00:00
                 </div>
@@ -561,6 +561,8 @@
                 </div>
               </div>
 
+              <!-- Rueda del día: horas de hoy por cliente (la dibuja ui-shell.js) -->
+              <div id="dayWheelLegend" class="wheel-legend"></div>
               <!-- Controles del Cronómetro -->
               <div class="timer-controls grid grid-cols-3 gap-1.5 sm:gap-2">
                 <button id="btnStart" class="btn-ctrl btn-green flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 text-xs sm:text-sm">
@@ -747,6 +749,7 @@
             <button type="button" id="btnEditWorkerGoal" class="hover:underline text-ink font-medium cursor-pointer">Ajustar meta</button>
           </div>
         </div>
+        <div id="weekBars" class="week-bars" aria-hidden="true"></div>
       </div>
 
       <!-- Slot para Mis Actividades -->
@@ -2460,13 +2463,13 @@
           <div>
             <label for="manualCategory" class="block text-xs font-semibold text-ink mb-1">Categoría</label>
             <select id="manualCategory" class="form-input w-full text-xs">
-              <option value="general">💼 General / Otros</option>
-              <option value="diseno" selected>🎨 Diseño Gráfico</option>
-              <option value="video">🎬 Edición de Video</option>
-              <option value="copy">✍️ Redacción & Copy</option>
-              <option value="ads">📈 Pauta & Ads</option>
-              <option value="reunion">🤝 Reunión & Sync</option>
-              <option value="estrategia">💡 Estrategia</option>
+              <option value="general">General / Otros</option>
+              <option value="diseno" selected>Diseño Gráfico</option>
+              <option value="video">Edición de Video</option>
+              <option value="copy">Redacción & Copy</option>
+              <option value="ads">Pauta & Ads</option>
+              <option value="reunion">Reunión & Sync</option>
+              <option value="estrategia">Estrategia</option>
             </select>
           </div>
         </div>
@@ -3451,5 +3454,6 @@
   <!-- Script de entorno local o inyectado por GitHub Actions -->
   <script src="env.js" onerror="console.info('[Time Tracker Env] env.js no encontrado, usando configuración inyectada o almacenada.')"></script>
   <script type="module" src="app.js"></script>
+  <script src="ui-shell.js" defer></script>
 </body>
 </html>

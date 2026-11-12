@@ -1,20 +1,17 @@
 # Widely Social — Agent & Development Guidelines
 
-## Official UI Design System: "Cartulina de plaza"
+## Official UI Design System: "La rueda del día"
 
-All UI development, styling, and components in Widely Social must follow `Design.md` and `PRODUCT.md`. The previous achromatic system ("Clinical Blueprint on Frosted Paper") was retired on 2026-11-11; do not reintroduce it.
+All UI development, styling, and components in Widely Social must follow `Design.md` and `PRODUCT.md`. Retired systems: "Clinical Blueprint on Frosted Paper" (achromatic) and "Cartulina de plaza" (2026-11-11). Do not reintroduce them.
 
 ### Core Design Principles
-1. **Color does real jobs.** Tokens live as RGB channels in `styles.css` (`:root` and `.dark`) and feed Tailwind (`tailwind.config.js`).
-   - Ink `#17131F` (sidebar, inverted plates, marker text) · Ground `#F4F1F8` (pale violet) · Paper `#FFFFFF`
-   - Action magenta `#D4136F` (dark mode `#FF4FA3` with ink text): primary buttons, selection, active nav.
-   - Cartulina yellow `#F4EA2A`: the live timer card and the admin budget hero only.
-   - Accents: green `#3FD86A` (approved / TRM), orange `#FF8A1F` (high priority), red `#C81E1E` for errors and destructive actions.
-2. **The timer is the protagonist.** `#timerMainCard.cartulina` is a yellow card with a 2px ink rule; the elapsed time is set in Archivo at 900 weight, 62% width. One reversed (ink) plate per screen for the balance owed.
-3. **Status by shape and color.** Pending = yellow, dashed border. Approved = green, solid. Rejected = pink, struck through.
-4. **Typography: Archivo (variable width axis).** UI text at normal width; titles and figures condensed (78–82% width, 800–900 weight). Minimum 11px.
-5. **Depth:** soft offset shadows (`--shadow-card`, `--shadow-lift`), no zero-offset glows, no thick side-tab borders.
-6. **Never rename or remove ids, classes or `data-*` attributes used by `app.js`** when restyling; add style-only classes instead.
-7. **Accessibility:** WCAG AA contrast in both themes, visible focus (2px magenta outline).
+1. **The day is a wheel.** The collaborator's timer tile draws today's registered hours as arcs colored by client, with the live timer in the center (`#dayWheel`, drawn by `ui-shell.js`). The admin "Centro de mando" shows the team's week as a wheel by client (`#teamWheelTile`).
+2. **Navigation:** a floating dock at the bottom (`#mobileTabbar`, all widths) plus the full menu as a drawer (`#appSidebar`, opened from "Más" or the top-left button). No fixed sidebar.
+3. **Layout:** a mosaic of rounded tiles (28px radius, soft offset shadow) on a cool lavender ground `#ECEEF6` (dark `#0D0E1A`, tiles `#171933`).
+4. **Color does jobs:** ink `#12122A` for actions and selection; sun `#FFC83A` only for money (balance, budget); coral `#FF5A5F` only for what is live (running timer, start, "+"); client colors from the palette in `ui-shell.js` (violet `#6D4BFF`, coral, teal `#12B5A6`, orange, blue, magenta, green, gold). Status: pending = yellow + dashed border, approved = teal + solid, rejected = coral + struck through.
+5. **Type:** Unbounded for figures and titles, Onest for interface text. Minimum 11px.
+6. **Never rename or remove ids, classes or `data-*` attributes used by `app.js`.** Add style-only classes. `ui-shell.js` only reads state through the read-only `window.__tt` accessor; it never writes data.
+7. **Accessibility:** WCAG AA in both themes, visible 2px violet focus ring, `prefers-reduced-motion` respected.
+8. **Deploy:** every new front-end file must be added to `.github/workflows/deploy.yml` (copy + version query) and to `sw.js`.
 
 Consult `Design.md` for complete token values and component rules.
