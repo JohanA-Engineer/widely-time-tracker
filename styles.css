@@ -3,7 +3,7 @@
    Sistema de diseño: Design.md ("La rueda del día")
    El día se dibuja como una rueda: cada actividad es un arco del color de su cliente
    y el cronómetro vive en el centro. Tiles redondeados sobre fondo lavanda frío,
-   tinta azul noche, dinero en amarillo sol, en vivo en coral. Unbounded + Onest.
+   tinta azul noche, dinero en amarillo sol, en vivo en coral. Brygada 1918 + Onest.
    ============================================================================== */
 
 :root {
@@ -2045,12 +2045,12 @@ input, textarea { caret-color: rgb(var(--c-violet)); }
 /* --- Tipografía de display --- */
 .page-title, .worker-hero-name, .card-title, .stat-value, .hero-amount, #timerDisplay,
 .billing-hub .text-2xl, .timer-active-title b, .wheel-total b, .team-wheel-tile h3 {
-  font-family: 'Unbounded', 'Onest', sans-serif;
+  font-family: 'Brygada 1918', 'Onest', sans-serif;
 }
 .page-title { font-size: 40px; line-height: 1.05; font-weight: 700; letter-spacing: -0.03em; }
 .card-title { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
 #mainAppDashboard section h2.uppercase {
-  text-transform: none; font-family: 'Unbounded', 'Onest', sans-serif;
+  text-transform: none; font-family: 'Brygada 1918', 'Onest', sans-serif;
   font-size: 18px; font-weight: 600; letter-spacing: -0.02em;
 }
 .stat-value { font-size: 30px; font-weight: 700; letter-spacing: -0.04em; }
@@ -2209,7 +2209,7 @@ input, textarea { caret-color: rgb(var(--c-violet)); }
 /* Saludo */
 .worker-hero { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 4px 0 0 !important; }
 .worker-hero-name { font-size: clamp(26px, 2.6vw, 36px) !important; line-height: 1.1 !important; font-weight: 700 !important; letter-spacing: -0.03em !important; }
-#workerHeroAvatar { width: 52px; height: 52px; border-radius: 16px; background: rgb(var(--c-ink)); color: rgb(var(--c-paper)); font-family: 'Unbounded', sans-serif; font-size: 20px; }
+#workerHeroAvatar { width: 52px; height: 52px; border-radius: 16px; background: rgb(var(--c-ink)); color: rgb(var(--c-paper)); font-family: 'Brygada 1918', sans-serif; font-size: 20px; }
 #btnWorkerOpenManualEntry { background: rgb(var(--c-paper)); border: 0; height: 42px; border-radius: 14px; font-weight: 600; box-shadow: var(--shadow-card); }
 
 /* Tile de la rueda (cronómetro) */
@@ -2454,7 +2454,7 @@ html.role-admin .rueda-card .timer-controls { grid-template-columns: repeat(3, m
 
 /* Títulos de tile en Unbounded */
 #workerBillingHub h2, #workerGoalCard .text-xs.font-bold {
-  font-family: 'Unbounded', 'Onest', sans-serif; font-size: 16px !important; font-weight: 600; letter-spacing: -0.02em;
+  font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 16px !important; font-weight: 600; letter-spacing: -0.02em;
 }
 
 /* Semana: una sola lectura (barras por día con su total) */
@@ -2509,7 +2509,7 @@ html.role-admin .rueda-card .timer-controls { grid-template-columns: repeat(3, m
 
 /* Cifras del Centro de mando en Unbounded (las reglas por id de la base ganaban) */
 @media screen {
-#kpiTotalHoras, #kpiTotalGenerado, #kpiTotalPagado, #kpiSaldoPendiente { font-family: 'Unbounded', 'Onest', sans-serif; }
+#kpiTotalHoras, #kpiTotalGenerado, #kpiTotalPagado, #kpiSaldoPendiente { font-family: 'Brygada 1918', 'Onest', sans-serif; }
 }
 
 /* --- Segunda ronda de la revisión --- */
@@ -2569,7 +2569,7 @@ html.role-admin[data-aview="equipo"]   #adminPortalView > [data-aview]:not([data
 /* Inicio */
 .admin-home { display: flex; flex-direction: column; gap: 18px; }
 .tile-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
-.tile-head h3 { font-family: 'Unbounded', 'Onest', sans-serif; font-size: 20px; font-weight: 600; letter-spacing: -0.03em; }
+.tile-head h3 { font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 20px; font-weight: 600; letter-spacing: -0.03em; }
 .tile-head p { font-size: 13px; color: rgb(var(--c-mid)); margin-top: 4px; }
 .river-tile, .constellation-tile { background: rgb(var(--c-paper)); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 24px 26px; min-width: 0; }
 
@@ -2587,7 +2587,7 @@ html.role-admin[data-aview="equipo"]   #adminPortalView > [data-aview]:not([data
 }
 .rv-step:hover .rv-bar { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
 .rv-label { font-size: 13px; font-weight: 600; }
-.rv-amount { font-family: 'Unbounded', 'Onest', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.04em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.rv-amount { font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.04em; line-height: 1.05; font-variant-numeric: tabular-nums; }
 .rv-big .rv-amount { font-size: 34px; }
 .rv-foot { display: flex; flex-direction: column; gap: 2px; min-height: 40px; padding: 0 4px; }
 .rv-cop { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -2624,19 +2624,19 @@ html.role-admin[data-aview="equipo"]   #adminPortalView > [data-aview]:not([data
   transition: background-color 160ms ease-out;
 }
 .lane-who:hover { background: color-mix(in srgb, var(--person) 18%, transparent); }
-.lane-av { width: 42px; height: 42px; flex-shrink: 0; border-radius: 14px; background: var(--person); color: #fff; display: grid; place-items: center; font-family: 'Unbounded', 'Onest', sans-serif; font-size: 15px; font-weight: 700; }
+.lane-av { width: 42px; height: 42px; flex-shrink: 0; border-radius: 14px; background: var(--person); color: #fff; display: grid; place-items: center; font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 15px; font-weight: 700; }
 .lane-name { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.lane-name b { font-family: 'Unbounded', 'Onest', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lane-name b { font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lane-name small { font-size: 12px; color: rgb(var(--c-mid)); }
 .lane-go { font-size: 12px; color: rgb(var(--c-mid)); }
 .lane-week { display: flex; align-items: center; gap: 14px; }
-.lane-week b { display: block; font-family: 'Unbounded', 'Onest', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.04em; line-height: 1.1; }
+.lane-week b { display: block; font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.04em; line-height: 1.1; }
 .lane-week small { font-size: 12px; color: rgb(var(--c-mid)); }
 .ring-track { stroke: rgb(var(--c-muted)); }
 .lane-owe { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 18px; background: rgb(var(--c-muted) / 0.7); }
 .lane-owe.has-debt { background: rgb(var(--c-sun)); color: rgb(18 18 42); }
 .lane-owe small { display: block; font-size: 12px; font-weight: 600; opacity: 0.8; }
-.lane-owe b { font-family: 'Unbounded', 'Onest', sans-serif; font-size: 19px; font-weight: 700; letter-spacing: -0.03em; }
+.lane-owe b { font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 19px; font-weight: 700; letter-spacing: -0.03em; }
 .lane-pay { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border: 0; border-radius: 12px; background: rgb(18 18 42); color: #fff; font-weight: 600; font-size: 13px; cursor: pointer; }
 .lane-pay:disabled { background: rgb(var(--c-ink) / 0.08); color: rgb(var(--c-faint)); cursor: default; }
 .lane-queue { display: flex; flex-direction: column; gap: 8px; }
@@ -2660,7 +2660,7 @@ html.role-admin[data-aview="equipo"]   #adminPortalView > [data-aview]:not([data
 /* Constelación */
 .constellation { width: 100%; max-width: 360px; aspect-ratio: 1; margin: 0 auto; }
 .constellation svg { width: 100%; height: 100%; display: block; }
-.const-total { font-family: 'Unbounded', 'Onest', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.04em; fill: rgb(var(--c-ink)); }
+.const-total { font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.04em; fill: rgb(var(--c-ink)); }
 .const-sub { font: 600 13px 'Onest', sans-serif; fill: rgb(var(--c-mid)); }
 .const-person { stroke: rgb(var(--c-paper)); stroke-width: 3; }
 .const-legend { display: flex; flex-direction: column; gap: 4px; margin-top: 14px; }
@@ -2712,7 +2712,7 @@ html.role-admin[data-aview="equipo"]   #adminPortalView > [data-aview]:not([data
 .person-badge, .lane-av {
   width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center;
   background: rgb(var(--c-ink)); color: rgb(var(--c-paper));
-  font-family: 'Unbounded', 'Onest', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: -0.02em;
+  font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: -0.02em;
 }
 .lane-av { width: 42px; height: 42px; font-size: 15px; }
 .cl-row .person-badge { width: 26px; height: 26px; border-radius: 9px; font-size: 10px; }
@@ -2746,11 +2746,11 @@ html.role-admin[data-aview="equipo"]   #adminPortalView > [data-aview]:not([data
 .board-col { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 22px; background: rgb(var(--c-muted) / 0.55); min-width: 0; }
 .board-head { display: flex; align-items: center; gap: 12px; border: 0; background: none; padding: 2px 2px 4px; text-align: left; cursor: pointer; color: rgb(var(--c-ink)); }
 .board-name { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.board-name b { font-family: 'Unbounded', 'Onest', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.board-name b { font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .board-name small { font-size: 12px; color: rgb(var(--c-mid)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .board-clear { display: flex; align-items: center; gap: 14px; padding: 22px; border-radius: 22px; background: rgb(var(--c-teal) / 0.12); }
 .board-clear i { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; background: rgb(var(--c-teal)); color: rgb(18 18 42); }
-.board-clear b { display: block; font-family: 'Unbounded', 'Onest', sans-serif; font-size: 16px; font-weight: 600; }
+.board-clear b { display: block; font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 16px; font-weight: 600; }
 .board-clear span { font-size: 13px; color: rgb(var(--c-mid)); }
 
 /* Franja semanal */
@@ -2769,7 +2769,7 @@ html.role-admin[data-aview="equipo"]   #adminPortalView > [data-aview]:not([data
 .ws-stack em.is-pending { background: repeating-linear-gradient(-45deg, #FFC83A 0 4px, #FFF4CC 4px 8px); box-shadow: inset 0 0 0 1.5px #B38600; }
 .ws-cell small { position: absolute; top: 4px; right: 6px; font-size: 11px; font-weight: 700; color: rgb(var(--c-ink)); }
 .ws-total { display: flex; flex-direction: column; justify-content: center; padding-left: 6px; }
-.ws-total b { font-family: 'Unbounded', 'Onest', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: -0.03em; }
+.ws-total b { font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: -0.03em; }
 .ws-total small { font-size: 11px; color: #8A6A00; }
 .dark .ws-total small { color: #FFE08A; }
 
@@ -2796,7 +2796,7 @@ html.role-admin[data-aview="equipo"]   #adminPortalView > [data-aview]:not([data
 .pl-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 16px; background: rgb(var(--c-paper)); }
 .pl-foot.has-debt { background: rgb(var(--c-sun)); color: rgb(18 18 42); }
 .pl-foot small { display: block; font-size: 12px; font-weight: 600; opacity: 0.8; }
-.pl-foot b { font-family: 'Unbounded', 'Onest', sans-serif; font-size: 19px; font-weight: 700; letter-spacing: -0.03em; }
+.pl-foot b { font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 19px; font-weight: 700; letter-spacing: -0.03em; }
 .pl-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 .pl-ghost { display: inline-flex; align-items: center; gap: 6px; padding: 9px 12px; border: 0; border-radius: 12px; background: rgb(var(--c-ink) / 0.07); color: rgb(var(--c-ink)); font-weight: 600; font-size: 13px; cursor: pointer; }
 .pl-ghost:hover { background: rgb(var(--c-ink) / 0.13); }
@@ -2811,7 +2811,7 @@ html.role-admin[data-aview="nomina"] #adminPortalView > .hero-grid > .stat-grid 
 .cb-head { display: flex; align-items: center; gap: 12px; }
 .cb-chip { width: 14px; height: 40px; border-radius: 8px; background: var(--client); flex-shrink: 0; }
 .cb-name { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.cb-name b { font-family: 'Unbounded', 'Onest', sans-serif; font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+.cb-name b { font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
 .cb-name small { font-size: 12px; color: rgb(var(--c-mid)); }
 .cb-acts { display: flex; gap: 6px; }
 .cb-acts .pl-ghost { padding: 9px 11px; }
@@ -2847,7 +2847,7 @@ html.role-admin[data-aview="nomina"] #adminPortalView > .hero-grid > .stat-grid 
 }
 .bubble:hover { transform: translateY(-3px) scale(1.03); }
 .bubble b { font-size: 13px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
-.bubble span { font-family: 'Unbounded', 'Onest', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: -0.03em; }
+.bubble span { font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: -0.03em; }
 .bubble small { font-size: 11px; font-weight: 600; opacity: 0.85; }
 .bubble.is-loss { background: repeating-linear-gradient(-45deg, rgb(var(--c-ember) / 0.25) 0 8px, rgb(var(--c-paper)) 8px 16px); box-shadow: inset 0 0 0 2px rgb(var(--c-ember)); color: rgb(var(--c-ink)); }
 @keyframes bubble-in { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -2860,7 +2860,7 @@ html.role-admin[data-aview="nomina"] #adminPortalView > .hero-grid > .stat-grid 
 .pc-status.has-account { border-style: solid; border-color: #0B8A7C; color: #0B5C53; background: #D7F5EE; }
 .dark .pc-status.has-account { background: rgb(18 181 166 / 0.16); color: #7FE6DA; border-color: #12B5A6; }
 .pc-acts { display: flex; gap: 6px; justify-content: space-between; }
-#paymentAmount { font-family: 'Unbounded', 'Onest', sans-serif; font-size: 24px !important; font-weight: 700; letter-spacing: -0.03em; height: 58px; background: rgb(var(--c-sun) / 0.35); border-radius: 14px; }
+#paymentAmount { font-family: 'Brygada 1918', 'Onest', sans-serif; font-size: 24px !important; font-weight: 700; letter-spacing: -0.03em; height: 58px; background: rgb(var(--c-sun) / 0.35); border-radius: 14px; }
 #adminPaymentCard #btnSavePayment { min-height: 52px; font-size: 15px; }
 
 /* Limpieza de encabezados heredados */
@@ -2934,8 +2934,8 @@ html.nav-wheel-open { overflow: hidden; }
 }
 .nav-wheel.is-open .nw-center { transform: none; opacity: 1; }
 .nw-center:hover { box-shadow: var(--shadow-lift), 0 0 0 3px rgb(var(--c-violet) / 0.5); }
-.nw-avatar { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: rgb(var(--c-ink)); color: rgb(var(--c-paper)); font: 700 20px 'Unbounded', 'Onest', sans-serif; }
-.nw-center b { font: 600 14px 'Unbounded', 'Onest', sans-serif; letter-spacing: -0.02em; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nw-avatar { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: rgb(var(--c-ink)); color: rgb(var(--c-paper)); font: 700 20px 'Brygada 1918', 'Onest', sans-serif; }
+.nw-center b { font: 600 14px 'Brygada 1918', 'Onest', sans-serif; letter-spacing: -0.02em; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nw-center small { font-size: 11px; font-weight: 700; color: rgb(var(--c-mid)); text-transform: capitalize; }
 
 .nw-item {
@@ -2977,4 +2977,19 @@ html.nav-wheel-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .nw-scrim, .nw-search, .nw-wheel::before, .nw-center, .nw-item, .nw-foot { transition: none; }
 }
+}
+
+/* --- Brygada 1918 para títulos y cifras: espaciado de serif y cifras alineadas --- */
+@media screen {
+.page-title, .worker-hero-name, .card-title, .stat-value, .hero-amount, #timerDisplay,
+.billing-hub .text-2xl, .timer-active-title b, .wheel-total b, .tile-head h3, .rv-amount,
+.lane-name b, .lane-week b, .lane-owe b, .board-name b, .ws-total b, .pl-foot b, .cb-name b,
+.bubble span, .nw-center b, #mainAppDashboard section h2.uppercase, #workerBillingHub h2,
+#workerGoalCard .text-xs.font-bold, #paymentAmount, #kpiTotalHoras, #kpiTotalGenerado,
+#kpiTotalPagado, #kpiSaldoPendiente, .team-wheel-tile h3 {
+  letter-spacing: -0.005em !important;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+#timerDisplay { font-weight: 700; letter-spacing: 0 !important; }
+.const-total { letter-spacing: 0; }
 }

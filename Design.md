@@ -46,36 +46,36 @@ colors:
   noche-dock: "#262948"
 typography:
   display:
-    fontFamily: "Unbounded, Onest, sans-serif"
+    fontFamily: "Brygada 1918, Onest, sans-serif"
     fontSize: "40px"
     fontWeight: 700
     lineHeight: 1.05
     letterSpacing: "-0.03em"
   cifra-dinero:
-    fontFamily: "Unbounded, Onest, sans-serif"
+    fontFamily: "Brygada 1918, Onest, sans-serif"
     fontSize: "44px"
     fontWeight: 800
     lineHeight: 1.05
     letterSpacing: "-0.04em"
   cifra-reloj:
-    fontFamily: "Unbounded, Onest, sans-serif"
+    fontFamily: "Brygada 1918, Onest, sans-serif"
     fontSize: "clamp(30px, 3.4vw, 44px)"
     fontWeight: 800
     lineHeight: 1
     letterSpacing: "-0.04em"
   cifra-indicador:
-    fontFamily: "Unbounded, Onest, sans-serif"
+    fontFamily: "Brygada 1918, Onest, sans-serif"
     fontSize: "30px"
     fontWeight: 700
     letterSpacing: "-0.04em"
   headline:
-    fontFamily: "Unbounded, Onest, sans-serif"
+    fontFamily: "Brygada 1918, Onest, sans-serif"
     fontSize: "24px"
     fontWeight: 700
     lineHeight: 1.15
     letterSpacing: "-0.03em"
   title:
-    fontFamily: "Unbounded, Onest, sans-serif"
+    fontFamily: "Brygada 1918, Onest, sans-serif"
     fontSize: "18px"
     fontWeight: 600
     letterSpacing: "-0.02em"
@@ -209,7 +209,7 @@ components:
 
 El día de trabajo es una rueda. Cada actividad registrada hoy es un arco del color de su cliente, en el orden en que se registró, y el cronómetro vive en el centro. Todo lo demás se organiza alrededor de esa imagen: un mosaico de tiles blancos muy redondeados sobre un fondo lavanda frío, una tinta azul noche que hace el trabajo de las acciones y la selección, y tres acentos con un solo oficio cada uno: el amarillo sol es dinero, el coral es lo que está en vivo, el violeta es el foco. Los colores de cliente son los únicos que pueden aparecer en cantidad, porque son datos.
 
-La densidad es de tablero, no de formulario: pocos tiles grandes en la primera vista, cifras en Unbounded con peso alto y tracking cerrado, interfaz en Onest. La navegación flota en un dock oscuro abajo, en todos los anchos, y el menú completo vive en un cajón; no hay barra lateral fija ni columna larga de tarjetas. Los títulos van solos, sin rótulos encima.
+La densidad es de tablero, no de formulario: pocos tiles grandes en la primera vista, cifras en Brygada 1918 con peso alto y tracking cerrado, interfaz en Onest. La navegación flota en un dock oscuro abajo, en todos los anchos, y el menú completo vive en un cajón; no hay barra lateral fija ni columna larga de tarjetas. Los títulos van solos, sin rótulos encima.
 
 El sistema reemplaza por completo a "Cartulina de plaza" y al anterior "Clinical Blueprint on Frosted Paper"; nada de esos mundos se hereda.
 
@@ -217,7 +217,7 @@ El sistema reemplaza por completo a "Cartulina de plaza" y al anterior "Clinical
 - La rueda del día (400px en escritorio) es la protagonista del colaborador; la rueda del equipo, del Centro de mando.
 - Tiles de 28px de radio con sombra suave difusa sobre lavanda; en oscuro, tiles azul noche sobre casi negro.
 - Color con oficio: tinta = acción, sol = dinero, coral = en vivo, violeta = foco, paleta de clientes = datos.
-- Unbounded para cifras y títulos, Onest para todo lo demás; nada por debajo de 11px.
+- Brygada 1918 para cifras y títulos, Onest para todo lo demás; nada por debajo de 11px.
 - Dock flotante + cajón; el estado se lee por forma y color a la vez.
 
 ## Colors
@@ -255,18 +255,18 @@ Fondo frío y neutro, tinta casi negra con matiz azul, y acentos saturados que s
 
 ## Typography
 
-**Display Font:** Unbounded (con Onest, sans-serif)
+**Display Font:** Brygada 1918 (con Onest, sans-serif)
 **Body Font:** Onest (con -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif)
 
-**Character:** Unbounded es ancha y geométrica; carga las cifras (tiempo, dinero, horas) y los títulos con presencia de tablero. Onest es una sans humanista tranquila que sostiene la interfaz sin competir. Ambas se cargan de Google Fonts (Unbounded 500–800, Onest 400–700).
+**Character:** Brygada 1918 es ancha y geométrica; carga las cifras (tiempo, dinero, horas) y los títulos con presencia de tablero. Onest es una sans humanista tranquila que sostiene la interfaz sin competir. Ambas se cargan de Google Fonts (Brygada 1918 500–800, Onest 400–700).
 
 ### Hierarchy
-- **Display** (Unbounded 700, 40px, 1.05, -0.03em; 30px en celular): títulos de página.
-- **Cifra de dinero** (Unbounded 800, 44px, -0.04em; 56px en el presupuesto de administración, 44px en celular): el saldo y el presupuesto.
-- **Cifra de reloj** (Unbounded 800, clamp(30px, 3.4vw, 44px), 1, -0.04em): el tiempo en el centro de la rueda.
-- **Cifra de indicador** (Unbounded 700, 30px, -0.04em; total de la rueda del equipo 800): indicadores de la franja de administración.
-- **Headline** (Unbounded 700, 24px, 1.15, -0.03em): la actividad en curso ("Ahora") junto a la rueda.
-- **Title** (Unbounded 600, 18px, -0.02em; 16px en títulos de tile de saldo y semana): títulos de tile y de sección. El saludo del colaborador va en Unbounded 700 clamp(22px, 2vw, 28px).
+- **Display** (Brygada 1918 700, 40px, 1.05, -0.03em; 30px en celular): títulos de página.
+- **Cifra de dinero** (Brygada 1918 800, 44px, -0.04em; 56px en el presupuesto de administración, 44px en celular): el saldo y el presupuesto.
+- **Cifra de reloj** (Brygada 1918 800, clamp(30px, 3.4vw, 44px), 1, -0.04em): el tiempo en el centro de la rueda.
+- **Cifra de indicador** (Brygada 1918 700, 30px, -0.04em; total de la rueda del equipo 800): indicadores de la franja de administración.
+- **Headline** (Brygada 1918 700, 24px, 1.15, -0.03em): la actividad en curso ("Ahora") junto a la rueda.
+- **Title** (Brygada 1918 600, 18px, -0.02em; 16px en títulos de tile de saldo y semana): títulos de tile y de sección. El saludo del colaborador va en Brygada 1918 700 clamp(22px, 2vw, 28px).
 - **Body** (Onest 400, 14px, 1.43): interfaz general; filas de leyenda en 600.
 - **Label** (Onest 600, 12px, tinta media): etiquetas de campo, horas del dial, subtextos.
 - **Cabeza de leyenda** (Onest 700, 12px, 0.06em, mayúsculas): solo la cabecera de la leyenda de la rueda, que siempre lleva un dato ("Hoy · 3,0 h").
@@ -362,20 +362,20 @@ Lo arma `admin-shell.js` sobre las secciones originales, que siguen en la págin
 - **Aprobar:** tablero de tiquetes agrupado por persona (`#approvalBoard`) y franja semanal (`#weekStrip`): siete celdas por persona con bloques apilados por cliente, lo pendiente rayado en amarillo y hoy en violeta; sigue las flechas de semana de la sección.
 - **Nómina:** libro por persona (`#payrollLedger`) con barras Causado (violeta) y Pagado (teal), saldo y acciones Cuenta de cobro y Pagar.
 - **Clientes:** tarjetas por cliente (`#clientBoard`) teñidas con su color: barra del paquete de horas (rayada en rojo si se pasa) y barra partida costo (violeta) / margen (teal) con las cifras; y el campo de burbujas por margen (`#marginBubbles`).
-- **Equipo:** tarjetas de personas (`#peopleCards`) con estado de cuenta (sólido "Con cuenta", punteado "Solo datos"), anillo de la semana, tarifa editable y Perfil; el monto del registro de pago va en Unbounded 24px sobre sol.
+- **Equipo:** tarjetas de personas (`#peopleCards`) con estado de cuenta (sólido "Con cuenta", punteado "Solo datos"), anillo de la semana, tarifa editable y Perfil; el monto del registro de pago va en Brygada 1918 24px sobre sol.
 - **Formato de cifras:** en todo el Centro de mando, el mismo de la app: $1,000.00 y 7.0 h.
 
 ### Barras de la semana
 Siete columnas de 150px de alto, una por día (Lu–Do), apiladas por cliente con esquinas de 8px sobre pista hundida; el total del día en Onest 700 11px encima y el día de hoy en tinta.
 
 ### Tile de saldo
-Tile amarillo sol (mismo en ambos temas): título en Unbounded 16px, saldo en cifra de dinero a todo el ancho con una fila rayada debajo, tres cifras secundarias en Unbounded 700 18px en tres columnas, y el botón de cuenta de cobro en tinta al final.
+Tile amarillo sol (mismo en ambos temas): título en Brygada 1918 16px, saldo en cifra de dinero a todo el ancho con una fila rayada debajo, tres cifras secundarias en Brygada 1918 700 18px en tres columnas, y el botón de cuenta de cobro en tinta al final.
 
 ### Tile de presupuesto (administración)
 Amarillo sol con sombra elevada. Cifra principal de 56px; los subtotales y los pasos del recorrido son filas rayadas (borde superior 1.5px tinta al 22%, sin fondo ni radio), y el paso final es una placa tinta con su subtexto en sol.
 
 ### Franja-libro de indicadores (administración)
-Los cuatro indicadores viven en un solo tile de 28px dividido por líneas verticales de 1px (2 × 2 en tablet y celular, con línea horizontal), sin íconos ni insignias, con la cifra en Unbounded 30px.
+Los cuatro indicadores viven en un solo tile de 28px dividido por líneas verticales de 1px (2 × 2 en tablet y celular, con línea horizontal), sin íconos ni insignias, con la cifra en Brygada 1918 30px.
 
 ### Isla del tiempo activo
 Cápsula tinta flotante (96px sobre el borde, por encima del dock) que muestra el tiempo en curso fuera del tile, con acentos coral y sol sobre la tinta.
