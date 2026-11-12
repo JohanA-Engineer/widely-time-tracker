@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "font awesome 6 free",
+        "createdAt": "2026-11-12T06:32:59.318Z",
+        "reason": "builder: icon font already used across the app (Font Awesome), not a text face"
+      }
+    ]
+  }
+}

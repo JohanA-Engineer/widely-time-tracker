@@ -49,7 +49,7 @@
   const clientOf = (t) => (String(t.cliente || "").trim() || "General");
   const fmtH = (h) => (h > 0 && h < 1)
     ? `${Math.max(1, Math.round(h * 60))} min`
-    : `${(Math.round(h * 10) / 10).toLocaleString("es-CO", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} h`;
+    : `${(Math.round(h * 10) / 10).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} h`;
   const createdMs = (t) => {
     const c = t.createdAt;
     if (!c) return 0;
@@ -199,7 +199,7 @@
       day.className = "wb-day" + (keys[i] === today ? " is-today" : "");
       day.title = `${DAY_LABELS[i]}: ${fmtH(totals[i])}`;
       const val = document.createElement("b");
-      val.textContent = totals[i] > 0 ? (Math.round(totals[i] * 10) / 10).toLocaleString("es-CO") : "";
+      val.textContent = totals[i] > 0 ? (Math.round(totals[i] * 10) / 10).toLocaleString("en-US") : "";
       const stack = document.createElement("span");
       stack.className = "wb-stack";
       stack.style.height = `${Math.max(4, (totals[i] / max) * 100)}%`;
@@ -331,7 +331,6 @@
     if (!state) return;
     try { renderDayWheel(state); } catch (e) { console.warn("[rueda]", e); }
     try { renderWeekBars(state); } catch (e) { console.warn("[semana]", e); }
-    try { if (state.userProfile?.rol !== "worker") renderTeamWheel(state); } catch (e) { console.warn("[equipo]", e); }
   }
 
   function start() {

@@ -350,8 +350,20 @@ Un SVG que dibuja `ui-shell.js` dentro del centro del cronómetro (`#dayWheel`),
 - La pista es hundida; el tiempo en el centro en cifra de reloj, con el costo en vivo (Onest 700 17px) y su COP debajo.
 - Leyenda a la derecha: cabeza con el total del día y una fila por cliente (muestra de 12px con esquinas de 4px, nombre, horas tabulares), más la fila "En curso" o "En pausa" cuando aplica.
 
-### La rueda del equipo
-Tile del Centro de mando (`#teamWheelTile`): "La semana del equipo", anillo de 220px con pista de 44px que reparte las horas de lunes a domingo por cliente, total en el centro (Unbounded 800 30px) y leyenda "Por cliente". En celular la rueda se centra sobre la leyenda.
+### Centro de mando (administración)
+Lo arma `admin-shell.js` sobre las secciones originales, que siguen en la página (con sus ids y botones) dentro de desplegables "Ver la tabla…". El antiguo `#teamWheelTile` queda oculto.
+
+- **Vistas:** pestañas Inicio, Aprobar, Nómina, Clientes y Equipo en el encabezado (`#adminViewTabs`, `data-aview` en `<html>` y en cada sección). Cualquier `scrollIntoView` hacia una sección cambia primero a su vista, así el menú, el dock y los accesos existentes siguen llegando a su destino.
+- **Personas en tinta, clientes en color:** las personas se marcan siempre con una placa tinta con iniciales (`.person-badge`); la paleta de color queda solo para clientes.
+- **El río del dinero (`#moneyRiver`):** cinco columnas — Recaudo (sol), Nómina causada (violeta), Pagado (teal), Por pagar (rayado con borde tinta) y Disponible (tinta con cifra en sol; en oscuro, tile elevado #262948) — con alturas proporcionales al monto (64px + proporción de 150px), conectores entre columnas y subida escalonada de 720ms al entrar a Inicio. Lee los valores que app.js ya pintó en la página.
+- **Los carriles del equipo (`#teamLanes`):** una columna por colaborador con anillo de su semana hacia la meta (por cliente), saldo por pagar (sol si hay deuda) con Pagar, sus tiquetes por aprobar y "Asignar tarea".
+- **La constelación (`#teamConstellation`):** un anillo concéntrico por persona (hasta 6), segmentado por cliente hacia su meta semanal, con la persona marcada por un punto tinta con iniciales y el total del equipo al centro; entra con un giro breve.
+- **Tiquetes:** pendientes en amarillo punteado con un arco de horas en el color del cliente; al aprobar pasan a teal sólido 420ms antes de salir.
+- **Aprobar:** tablero de tiquetes agrupado por persona (`#approvalBoard`) y franja semanal (`#weekStrip`): siete celdas por persona con bloques apilados por cliente, lo pendiente rayado en amarillo y hoy en violeta; sigue las flechas de semana de la sección.
+- **Nómina:** libro por persona (`#payrollLedger`) con barras Causado (violeta) y Pagado (teal), saldo y acciones Cuenta de cobro y Pagar.
+- **Clientes:** tarjetas por cliente (`#clientBoard`) teñidas con su color: barra del paquete de horas (rayada en rojo si se pasa) y barra partida costo (violeta) / margen (teal) con las cifras; y el campo de burbujas por margen (`#marginBubbles`).
+- **Equipo:** tarjetas de personas (`#peopleCards`) con estado de cuenta (sólido "Con cuenta", punteado "Solo datos"), anillo de la semana, tarifa editable y Perfil; el monto del registro de pago va en Unbounded 24px sobre sol.
+- **Formato de cifras:** en todo el Centro de mando, el mismo de la app: $1,000.00 y 7.0 h.
 
 ### Barras de la semana
 Siete columnas de 150px de alto, una por día (Lu–Do), apiladas por cliente con esquinas de 8px sobre pista hundida; el total del día en Onest 700 11px encima y el día de hoy en tinta.
