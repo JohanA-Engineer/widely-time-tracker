@@ -120,13 +120,12 @@
       home.id = "adminHome";
       home.dataset.aview = "inicio";
       home.innerHTML =
-        '<section class="river-tile"><header class="tile-head"><div><h3>El río del dinero</h3><p id="riverCaption">Lo que entra, lo que se va al equipo y lo que queda.</p></div></header>' +
+        '<section class="river-tile" aria-label="Dinero del mes"><p id="riverCaption" class="river-meta"></p>' +
         '<div id="moneyRiver" class="river"></div></section>' +
         '<div class="home-row">' +
-        '<section class="lanes-tile"><header class="tile-head"><div><h3>El equipo</h3><p>Semana de cada persona, su saldo y lo que espera tu aprobación.</p></div>' +
-        '<button type="button" class="btn-ds btn-ds-outline btn-ds-sm" data-proxy="btnAdminScrollToWorker"><i class="fa-solid fa-user-plus"></i><span>Nuevo</span></button></header>' +
+        '<section class="lanes-tile" aria-label="Colaboradores">' +
         '<div id="teamLanes" class="lanes"></div></section>' +
-        '<section class="constellation-tile"><header class="tile-head"><div><h3>La constelación</h3><p>Un anillo por persona: su semana hacia la meta, por cliente.</p></div></header>' +
+        '<section class="constellation-tile" aria-label="Semana del equipo por persona y cliente">' +
         '<div class="constellation-body"><div id="teamConstellation" class="constellation"></div><div id="constellationLegend" class="const-legend"></div></div></section>' +
         "</div>";
       head.insertAdjacentElement("afterend", home);
@@ -222,7 +221,7 @@
     host.replaceChildren();
     const pct = textOf("upworkBudgetPercentLabel");
     const cap = $("riverCaption");
-    if (cap) cap.textContent = `${textOf("upworkWeekCycleBadge") || "Este mes"} · ${pct ? pct + " del presupuesto ejecutado" : "lo que entra, lo que se va al equipo y lo que queda"}.`;
+    if (cap) cap.textContent = `${textOf("upworkWeekCycleBadge") || "Este mes"}${pct ? ` · presupuesto ${pct}` : ""}`;
     steps.forEach((s, i) => {
       const col = h("button", `rv-step ${s.cls}${s.big ? " rv-big" : ""}`);
       col.type = "button";
@@ -808,7 +807,7 @@
     let field = $("marginBubbles");
     if (!field) {
       const wrap = h("div", "bubbles-tile");
-      wrap.innerHTML = '<div class="tile-head"><div><h3>Clientes por margen</h3><p>El tamaño es el margen del cliente; el anillo, las horas aprobadas.</p></div></div>';
+      wrap.setAttribute("aria-label", "Clientes según su margen");
       field = h("div", "bubble-field");
       field.id = "marginBubbles";
       wrap.appendChild(field);

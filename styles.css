@@ -2885,3 +2885,10 @@ html.role-admin[data-aview="nomina"] #adminPortalView > .hero-grid > .stat-grid 
   .lane-item { transition: none; }
 }
 }
+
+/* --- Centro de mando sin títulos genéricos --- */
+@media screen {
+.river-meta { font-size: 13px; font-weight: 600; color: rgb(var(--c-mid)); margin: 0 0 14px; }
+.river-meta:empty { display: none; }
+.constellation-tile { padding-top: 22px; }
+}
