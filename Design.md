@@ -341,7 +341,7 @@ Sólidos y táctiles, sin bordes salvo el secundario.
 
 ### Navigation
 - **Dock:** cápsula tinta de 22px, 8px de relleno y 4px entre ítems. Ítems Onest 600 14px en #C9CCE6, esquinas de 14px; hover blanco al 8% con texto blanco; activo en lavanda con texto tinta. El botón "+" es un cuadrado lavanda de 46px (48px en celular), hover blanco; en administración es amarillo sol porque registra un pago. Hasta 1023px las etiquetas bajan a 11px.
-- **Cajón:** fondo tile, enlaces Onest 14px en tinta media con 11px × 14px de relleno y esquinas de 14px; hover hundido, activo en tinta con texto tile. Desliza desde la izquierda en 220ms.
+- **Rueda de navegación (sin barra lateral):** "Más" en el dock o Ctrl/⌘+K abre un velo azul noche con desenfoque y, encima, un buscador "Ir a…" (tile de 18px, foco violeta), la rueda y una fila de píldoras (Modo claro/oscuro, Cerrar sesión en rojo, Cerrar). La rueda (hasta 560px, 94vw en celular) tiene un aro translúcido, el disco central blanco de 168px con el avatar tinta, el nombre y el rol (abre Mi perfil), y los destinos repartidos en círculo: íconos en cuadros blancos de 56px (46px en celular) con su nombre debajo; el destino actual va en tinta, el hover en sol, los de administración con círculo. Los destinos salen del centro escalonados (460ms, 28ms entre cada uno) y se respetan las preferencias de movimiento reducido. El buscador atenúa lo que no coincide y Enter abre el primero; flechas y Tab recorren la rueda y Esc la cierra. Cada destino hace clic en el enlace original del menú (oculto), así que la navegación no cambia.
 
 ### La rueda del día (signature)
 Un SVG que dibuja `ui-shell.js` dentro del centro del cronómetro (`#dayWheel`), hasta 400px.
