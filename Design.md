@@ -365,6 +365,14 @@ Lo arma `admin-shell.js` sobre las secciones originales, que siguen en la págin
 - **Equipo:** tarjetas de personas (`#peopleCards`) con estado de cuenta (sólido "Con cuenta", punteado "Solo datos"), anillo de la semana, tarifa editable y Perfil; el monto del registro de pago va en Brygada 1918 24px sobre sol.
 - **Formato de cifras:** en todo el Centro de mando, el mismo de la app: $1,000.00 y 7.0 h.
 
+### Registrar horas (página propia)
+`registro.js` arma `#registroHorasView`: formulario a la izquierda y "Así quedará" a la derecha (sticky). Se abre desde la rueda de navegación (`data-nav="registro"`), `#btnOpenManualEntry`, `#btnWorkerOpenManualEntry` y `window.openManualEntryModal(id)`.
+- **Personas** como fichas con iniciales en tinta y tarifa (nunca un `<select>`: en iOS no se podía elegir); buscador cuando hay más de 6. El colaborador solo se ve a sí mismo.
+- **Día** en siete fichas de la semana + "Otra fecha" (date input invisible encima). **Horas** con − / + de 0.25, cifra en Brygada 52px (46px en celular) que acepta "2,5", y valores rápidos 0.5–8.
+- **Cliente** y **Categoría** en fichas; los clientes llevan su color. **Dinero** en Brygada 48px con una regla de sol de 4px debajo (no una tarjeta amarilla dentro de otra).
+- **Estado**: admin → "Quedará aprobada" (teal sólido); colaborador → "Quedará pendiente" (amarillo punteado). La barra del día suma lo ya registrado por cliente más el tramo nuevo con ese estado.
+- **Guardar** no escribe datos: llena `#formManualEntry` y lo envía, así validaciones, estado y avisos siguen siendo los de app.js. En celular una barra fija sobre el dock muestra valor y "Guardar".
+
 ### Barras de la semana
 Siete columnas de 150px de alto, una por día (Lu–Do), apiladas por cliente con esquinas de 8px sobre pista hundida; el total del día en Onest 700 11px encima y el día de hoy en tinta.
 

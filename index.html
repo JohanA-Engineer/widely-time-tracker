@@ -279,6 +279,10 @@
             <i class="fa-solid fa-stopwatch text-sm w-5 text-center"></i>
             <span>Tracker de Horas</span>
           </a>
+          <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="registro" id="sidebarRegistroLink">
+            <i class="fa-solid fa-clock-rotate-left text-sm w-5 text-center"></i>
+            <span>Registrar horas</span>
+          </a>
           <a href="javascript:void(0)" class="sidebar-nav-link" data-nav="billing">
             <i class="fa-solid fa-file-invoice-dollar text-sm w-5 text-center"></i>
             <span id="navBillingLabel">Cuentas & Liquidación</span>
@@ -1513,6 +1517,9 @@
             </div>
           </section>
         </div>
+
+        <!-- Registrar horas: página propia (la arma registro.js y guarda con el formulario #formManualEntry) -->
+        <div id="registroHorasView" class="rh-page hidden" aria-labelledby="rhTitle"></div>
 
         <div id="profilePageView" class="space-y-6 hidden">
 
@@ -3457,5 +3464,6 @@
   <script src="ui-shell.js" defer></script>
   <script src="admin-shell.js" defer></script>
   <script src="nav-wheel.js" defer></script>
+  <script src="registro.js" defer></script>
 </body>
 </html>

@@ -39,7 +39,7 @@ jobs:
       - name: Preparar sitio
         run: |
           mkdir _site
-          cp index.html app.js ui-shell.js admin-shell.js nav-wheel.js env.js styles.css tailwind.min.css sw.js manifest.json icon-192.svg icon-512.svg _site/
+          cp index.html app.js ui-shell.js admin-shell.js nav-wheel.js registro.js env.js styles.css tailwind.min.css sw.js manifest.json icon-192.svg icon-512.svg _site/
           # Versión por despliegue en los archivos de la página: el navegador no puede mezclar
           # un index.html nuevo con un app.js o styles.css viejo guardado en caché
           V="${GITHUB_SHA::8}"
@@ -51,6 +51,7 @@ jobs:
             -e "s#src=\"ui-shell.js\"#src=\"ui-shell.js?v=$V\"#" \
             -e "s#src=\"admin-shell.js\"#src=\"admin-shell.js?v=$V\"#" \
             -e "s#src=\"nav-wheel.js\"#src=\"nav-wheel.js?v=$V\"#" \
+            -e "s#src=\"registro.js\"#src=\"registro.js?v=$V\"#" \
             _site/index.html
           grep -q "app.js?v=$V" _site/index.html
 

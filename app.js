@@ -184,7 +184,7 @@ let adminsConfigUnsubscribe = null;
    2. ESTADO GLOBAL DE LA APLICACIÓN
    ============================================================================ */
 // Acceso de solo lectura para la capa de interfaz (ui-shell.js dibuja la rueda del día)
-window.__tt = { get state() { return state; } };
+window.__tt = { get state() { return state; }, get trm() { return getActiveTrmRate(); } };
 
 let state = {
   workers: [],      // Colección 'trabajadores'
@@ -2486,6 +2486,8 @@ async function handleSavePayment(e) {
    9. ACTUALIZACIÓN VISUAL (UI) Y COMPONENTES
    ============================================================================ */
 function updateWorkersUI() {
+  // Si el registro manual está abierto cuando llega el equipo, su lista se completa sola
+  if (elements.manualWorkerSelect && !elements.manualWorkerSelect.disabled) fillManualWorkerOptions();
   renderWeeklyView();
   renderWorkerReminder();
   if (currentCollaboratorId) renderCollaboratorPage();
@@ -6574,9 +6576,9 @@ async function handleForgotPassword() {
   }
 }
 
-function openManualEntryModal(preselectedWorkerId = null) {
-  if (!elements.manualEntryModal) return;
-
+function fillManualWorkerOptions() {
+  if (!elements.manualWorkerSelect) return;
+  const keep = elements.manualWorkerSelect.value;
   elements.manualWorkerSelect.innerHTML = `<option value="">-- Selecciona colaborador --</option>` +
     state.workers.map(w => {
       const hRate = Number(w.tarifaHora || 0);
@@ -6587,6 +6589,13 @@ function openManualEntryModal(preselectedWorkerId = null) {
       const label = parts.length > 0 ? parts.join(" · ") : "Sin tarifas fijadas";
       return `<option value="${escapeHtml(w.id)}" data-rate="${hRate}" data-art-rate="${aRate}">${escapeHtml(w.nombre)} (${label})</option>`;
     }).join("");
+  if (keep && state.workers.some(w => w.id === keep)) elements.manualWorkerSelect.value = keep;
+}
+
+function openManualEntryModal(preselectedWorkerId = null) {
+  if (!elements.manualEntryModal) return;
+
+  fillManualWorkerOptions();
 
   const isWorkerRole = state.userProfile?.rol === "worker";
   const userWorkerId = state.userProfile?.trabajadorId;
